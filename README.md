@@ -1,2 +1,3 @@
 # Dissertation_NILM
-Code from my dissertation
+Repo of the code from my dissertation.
+1. Dataset analysis
