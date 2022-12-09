@@ -1,5 +1,5 @@
 # ignore OriginalDataset folder
-OriginalDataset/
+OriginalDataset/*
 
 # ignore all asv files
 *.asv
