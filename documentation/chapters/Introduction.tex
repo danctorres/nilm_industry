@@ -1,0 +1,137 @@
+
+\section{Context}
+In an industrial facility, it is essential to know how much energy each equipment is consuming, considering that some equipment may present a high energy consumption and to subsequently act upon them, through actions like peak shaving or job scheduling. The reduction of the facility equipment energy demand will save money for the facility and decrease overall greenhouse gas emissions.
+It is possible to find the energy consumption of each equipment from the aggregate power consumption of the facility through a NILM algorithm.
+The dissertation aims to develop a novel NILM algorithm to assist the industrial sector in the reduction of its energy demand.
+
+% TODO: add a general description about the methodology
+
+\section{Motivation}
+Currently, there is a great concern about the tremendous impact that climate change has on natural and human systems.
+Warming of earth's climate system amplifies existing and creates new risks with negative impacts for biodiversity, ecosystems, economic development, livelihoods, food and human security \cite{AR5} by causing rising temperature, drought, floods, famine and economic chaos \cite{EnergySavingStrategiesIndustry}.
+The consequences of climate change are exacerbated by the high amount of pollutant gas emissions caused by the excessive combustion of natural resources. CO\textsubscript{2} values are significant and influential considering that this gas is the major heat-trapping greenhouse gas, and cumulative emissions of CO\textsubscript{2} largely determine mean surface warming \cite{AR5}. Studies by the PCC’s Fifth Assessment Report AR5 \cite{AR5} shows that, since the beginning of the industrial revolution, human influence on the climate system has grown, a repercussion of the increase of greenhouse gases emissions induced by the growth of global and per capita energy consumption \cite{ReducingEnergyDemand}.
+
+% energy generation sector
+In 2021, to meet the growth of electricity demand, the use of all fossil fuels increased and CO\textsubscript{2} emissions from the electricity and heat production sectors jumped by more than 900 Mt, which accounted for 46\% of the global increase in CO\textsubscript{2} emissions. Greenhouse gas emissions from the energy sector reached the highest level ever in 2021 \cite{IEA_GlobalEnergyReview_2021}.
+
+
+Figure \ref{fig: CO2ElectricityConsumptionWorld} shows a near-simultaneous increase in CO\textsubscript{2} emissions and electricity generation factors, over the years, from 1990 to 2018 and figure \ref{fig: CO2EnergyCombustionIndustrial} shows an increase in worldwide CO\textsubscript{2} emissions from energy combustion and industrial processes, from 1900 to 2021.
+
+
+% Figure CO2 emissions and electricity production
+\begin{figure}[H]
+    \centering
+    \includegraphics[width= 1\linewidth]{images/Introduction_Im/CO2 from electricty generation.png}
+    \caption{CO\textsubscript{2} emissions from electricity generation factors, World 1990-2019, by the IEA Energy and Carbon Tracker 2020 \cite{IEA_EnergyTracker} }
+    \label{fig: CO2ElectricityConsumptionWorld}
+\end{figure}
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width= 1\linewidth]{images/Introduction_Im/CO2 emissions from energy combustion and industrial processes, 1900-2021.png}
+    \caption{CO\textsubscript{2} emissions from energy combustion and industrial processes, World 1900-2021 \cite{IEA_GlobalEnergyReview_2021} }
+    \label{fig: CO2EnergyCombustionIndustrial}
+\end{figure}
+
+
+
+In 2019, the industrial sector represented the primary electricity consumption sector in the world, with an electricity consumption of 41.9\% of the 82EJ, shown in figure \ref{fig: FinalEnergySectorWorld}, from the statistics report by the IEA (International Energy Agency) \cite{IEA_StatisticsReport_2021}.
+
+% Figure energy consumption world 2019
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/Introduction_Im/share-of-electricity-final-consumption-by-sector-2019.png}
+    \caption{Final worldwide electricity consumption by sector, in 2019 \cite{IEA_StatisticsReport_2021} }
+    \label{fig: FinalEnergySectorWorld}
+\end{figure}
+
+
+Is imperative to define global-scale strategic actions to manage and limit climate change. Cost-effective measures, need to be taken, towards reducing the energy use and the net emissions intensity of the end-use sectors \cite{AR5}.
+The expected solutions for the reduction of global carbon emissions, described in the Sustainable Development Scenario (SDS) \cite{IEA_Sustainable_Development_Scenario_2021} and in the Global Energy Review 2021 report by the IEA \cite{IEA_GlobalEnergyReview_2021}, are the spread of renewable energy sources, the reduction of energy demand and the improvement of energy efficiency. The Climate Change 2014 Synthesis Report \cite{IPCC2014} suggests, in addition, the enhancement of carbon sinks in land-based sectors.
+The improvement of energy efficiency is especially important in face of the current energy crisis, where a global energy shortage emerged in high-priced oil, gas and electricity markets \cite{IEA_WorldEnergyOutlook_2022}.
+In the industrial sector, energy efficiency can be improved by three different approaches, by management, technologies and by policies/regulations. Energy management is the strategy of meeting energy demand when and where it is needed, adjusting and optimizing energy usage \cite{EnergySavingStrategiesIndustry}.
+
+Energy efficiency improvements can lead to more than 224 different "non-energy" industrial productivity benefits, including increased profit, safer working conditions, consistency and improvement in quality and output, reduced capital and operating costs and reductions in scrap and energy use \cite{IEA_Benefits_Energy_Efficiency_Improvement, Productivity_Benefits_Energy_Efficiency}.
+
+In short, in 2021, the industrial sector had the largest share of worldwide energy consumption and the energy production sector was responsible for the highest worldwide percentage of CO\textsubscript{2} emissions, which has consequences on earth's climate system by increasing the effects of global warming. Greenhouse emission reduction and energy-saving measures must be taken, to assure the mitigation of climate change.
+Energy effiency improvements in the industrial sector leads to the reduction of negative impacts on the environment and benefits the industrial facilities by reducing operational costs and therefore increasing profit.
+
+To adopt behaviours that lead to improvements in the energy efficiency by energy management strategies is essential to have detailed knowledge about the electrical consumption of each equipment present in the facility.
+In an industrial facility, only the total electrical load is available and the equipment energy consumption signatures are unknown , unless specialized hardware, with high costs, has been installed. Nonetheless, the facility's total electrical load can be partition by the electrical loads of the facility equipment, by an estimation computational technique in a process called energy disaggregation.
+NILM allows for the dissagregation of energy and provides active energy feedback that indicates sources of high consumption. NILM allows for subsequent action uppon high consumption sources, examples of such actions are peak shaving or job scheduling \cite{EnergySavingStrategiesIndustry}.
+
+The paper \cite{Energy_Feedback} showed that active energy feedback to residential consumers' can reduce electricity consumption in homes by 5 to 20 percent. The energy saving potential from active energy feedback in industrial facilities has not been studied. Overall, due to the aforementioned reasons, a novel NILM algorithm for the industrial sector must be develop and its application in real world scenarios must be study.
+
+
+
+\section{Objectives}
+
+The dissertation aims to develop a novel NILM algorithm that meets the following set of requirements/constraints:
+\begin{itemize}
+    \item Learning must be unsupervised;
+    \item The algorithm must work with low-frequency samples;
+    \item The algorithm must be able to disaggregate multiple equipment;
+    \item The algorithm must operate in industrial environments;
+    \item Must be an online algorithm;
+    \item The algorithm must create different equipment models;
+    \item The algorithm should create historical trending models;
+    \item The algorithm should detect usage patterns;
+    \item The algorithm should allowed for the construction of performance goals and evaluate performance;
+    \item The algorithm must correspond to a real-time system;
+    \item User must be able to choose an optimization algorithm;
+    \item User must be able to visualize results.
+\end{itemize}
+
+
+The NILM algorithm had the following set of non-functional requirements:
+\begin{itemize}
+    \item Modular;
+    \item Performance (concurrency).
+\end{itemize}
+
+
+To achieve this goal, the following objectives must be completed:
+\begin{itemize}
+    \item Analyze the State of the Art in the field of NILM;
+    \item Define the algorithm architecture;
+    \item Define unsupervised probabilistic models for the industrial facility equipment;
+    \item Develop and compare different optimization algorithms for the disaggregation of the power consumption;
+    \item Establish a complete real-time NILM algorithm;
+    \item Measure success by using a public dataset;
+    \item Draw conclusion by applying the NILM algorithm to real world scenarios.
+\end{itemize}
+
+The algorithm must output the energy consumption of each equipment of the industrial facility after receiving the value of the aggregate power and the SCADA information.
+The ultimate purpose of the NILM algorithm is to be applied to a real factory, by being part of an intelligent platform for the management of micro-algae production, in the scope of the scientific research project InGestAlgae (reference: CENTRO-01-0247-FEDER-046983).
+
+
+\section{Original contributions}
+The application of an unsupervised low-frequency NILM algorithm to the industrial sector with the integration of data from the SCADA system is an unexplored topic.
+State-of-the-art work is limited. The great majority of NILM algorithms are supervised, which require disaggregate training data, and are only applied to domestic environments.
+
+The work development is significant since there is a clear gap in the state of the art and the main contributions from the dissertation are as follows:
+
+\begin{itemize}
+    \item Survey of public NILM databases;
+    \item Development of a new penalty function;
+    \item Implementation of PSO;
+    \item Global optimization Newton;
+    \item Comparison between different optimization algorithms;
+    \item Definition of an online NILM architecture.
+\end{itemize}
+
+% TODO: acabar esta parte, colocar todas contribuiçoes as de forma precisa
+
+\section{Dissertation Organization}
+The dissertation is organized in five chapters:
+
+\begin{itemize}
+  \item Chapter 1 - Introduction: the present chapter;
+  \item Chapter 2 - Background / State of the Art: basic and technical concepts are explained and is done a literature review about NILM;
+  \item Chapter 3 - Methodology: detailed description of the develop algorithms;
+  \item Chapter 4 - Results and Discussion: presentation and evaluation of the obtained results;
+  \item Chapter 5 - Conclusions and Future Work: final conclusion and study of the future work to improve the algorithm.
+
+\end{itemize}
