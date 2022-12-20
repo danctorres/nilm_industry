@@ -1,5 +1,5 @@
 # ignore OriginalDataset folder
-OriginalDataset/*
+imdeld_dataset/*
 
 # ignore all asv files
 *.asv
