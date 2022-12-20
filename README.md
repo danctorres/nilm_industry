@@ -4,7 +4,7 @@ Repo of the code and documentation related to my dissertation, title "Low-Freque
 
  Structure:
 - documentation: documentation of my dissertation.
-- imdeld_dataset: the original csv files from the IMDELD dataset.
+- imdeld_dataset (in .gitignore): the original csv files from the IMDELD dataset.
 - imdeld_analysis: code for the analysis of the IMDELD dataset, writen in MATLAB and result for the code.
 - optimization_algorithms: code that implements the the algorithm for global non-convex constraint optimization.
 
