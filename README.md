@@ -1,4 +1,4 @@
-# Dissertation_NILM
+# dissertation_nilm
 Repo of the code and documentation related to my dissertation, title "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads", to complete a master's degree in Electrical and Computer Engineering at the University of Coimbra.
 
 
