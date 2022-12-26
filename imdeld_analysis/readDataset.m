@@ -3,10 +3,10 @@
 % 09/12/2022
 
 % Dataset is in ./OriginalDataset
-cd \\wsl.localhost\ubuntu\home\dtorres\Dissertation_NILM;
+cd \\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\;
 clear, close all, clc;
 
-cd OriginalDataset/Equipment;
+cd imdeld_dataset/Equipment;
 file_list = dir;
 file_list = {file_list.name};
 file_list = file_list(3:end);   % remove . and ..
@@ -35,14 +35,33 @@ end
 % 6 - voltage
 
 
-%% Total number of samples
+%% Histogram samples equipment
 clearvars -except eq_data
+
+figure
 for i = 1 : size(eq_data,2)
-    aux = eq_data{i};
-    numbers_samples(i,:) = size(aux,1);
+    subplot(size(eq_data,2) / 2, 2, i);
+    eq_table = eq_data{i};
+    aux = table2array(eq_table(:,2));
+    histogram(aux);
+    title(sprintf("Equipment %i", i));
+    xlabel('Power [W]')
+    ylabel('Number of samples')
 end
 
-%% Not unique samples, Nan samples
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.fig');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.png');
+
+
+%% Check number of samples per equipment in the dataset
+clearvars -except eq_data
+
+for i = 1 : size(eq_data,2)
+    aux = eq_data{i};
+    number_samples(i,:) = size(aux,1);
+end
+
+%% Check number of Not unique samples and Nan samples
 clearvars -except eq_data
 number_samples = [];
 unique_samples = [];
@@ -89,20 +108,37 @@ d = a(b == size(eq_data,2));
 %b=cellfun(@(x) sum(ismember(AppendedCellTimestamps,x)),edges,'un',0);
 
 %% Missing non consecutive timestamps
-% Run previous code block
-clearvars -except eq_data
+% Run previous code block to get the variable d
+clearvars -except eq_data d
 
 aux = cell2mat(d);
 date_samples = datetime(aux(:,1:end-3));
 posix_date = posixtime(date_samples);
-observations = find(diff(posix_date) ~= 1) + 1;
+observations = find(diff(posix_date) ~= 1) + 1; 
 
-aux_date = d;
-aux_date(observations) = [];
 
-observations_datetime = find(diff(dateSamples) ~= seconds(1)) + seconds(1);
 % date = today("datetime")
 
+% the minlength is the minimal size that a sequence of samples must have to
+% be considered, this is, where a missing value can appear.
+minlength = 3600;
+isconsecutive = diff(posix_date') == 1;
+seqedges = find(diff([false, isconsecutive, false]));
+seqstarts = seqedges(1:2:end);
+seqstops = seqedges(2:2:end);
+seqlengths = seqstops - seqstarts + 1;
+tokeep = seqlengths >=  minlength;
+indicestokeep = cell2mat(arrayfun(@(s, e) s:e, seqstarts(tokeep), seqstops(tokeep), 'UniformOutput', false));
+filtered_posix = posix_date(indicestokeep);
+filtered_date_samples = date_samples(indicestokeep);
+
+index_not_consecutive = find(diff(filtered_posix) ~= 1);
+for i = 1 : size(index_not_consecutive,1)
+    dif_consecutive(i, 1) = filtered_date_samples(index_not_consecutive(i) + 1) - filtered_date_samples(index_not_consecutive(i));
+end
+
+filtered_date_samples(index_not_consecutive(find(dif_consecutive == max(dif_consecutive))))
+filtered_date_samples(index_not_consecutive(find(dif_consecutive == max(dif_consecutive)))+1)
 
 %%
 
