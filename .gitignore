@@ -1,5 +1,8 @@
 # ignore OriginalDataset folder
 imdeld_dataset/*
 
+# ignore imdeld_analysis/images folder
+imdeld_analysis/images/*
+
 # ignore all asv files
 *.asv
