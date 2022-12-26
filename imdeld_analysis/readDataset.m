@@ -94,34 +94,30 @@ end
 clearvars -except eq_data
 table_eq = eq_data{1};
 
-appended_tst = [];
-for i = 1 : size(eq_data,2)
-    table_eq = eq_data{i};
-    appended_tst = [appended_tst; categorical((table_eq(:,1).timestamp))];
-end
+AllC = {cat(1, eq_data{:})};
+appended_categorical = categorical(AllC{1}.timestamp);
+appended_categorical = sort(appended_categorical);
 
-a = categories(appended_tst);
-b = countcats(appended_tst);
-d = a(b == size(eq_data,2));
+a = categories(appended_categorical);
+b = countcats(appended_categorical);
+commun_timestamps = a(b == size(eq_data,2));
 
 %edges = unique(AppendedCellTimestamps,'stable');
 %b=cellfun(@(x) sum(ismember(AppendedCellTimestamps,x)),edges,'un',0);
 
 %% Missing non consecutive timestamps
 % Run previous code block to get the variable d
-clearvars -except eq_data d
+clearvars -except eq_data commun_timestamps
 
-aux = cell2mat(d);
+aux = cell2mat(commun_timestamps);
 date_samples = datetime(aux(:,1:end-3));
 posix_date = posixtime(date_samples);
-observations = find(diff(posix_date) ~= 1) + 1; 
+%observations = find(diff(posix_date) ~= 1) + 1; 
 
-
-% date = today("datetime")
 
 % the minlength is the minimal size that a sequence of samples must have to
 % be considered, this is, where a missing value can appear.
-minlength = 3600;
+minlength = 1;
 isconsecutive = diff(posix_date') == 1;
 seqedges = find(diff([false, isconsecutive, false]));
 seqstarts = seqedges(1:2:end);
@@ -129,19 +125,32 @@ seqstops = seqedges(2:2:end);
 seqlengths = seqstops - seqstarts + 1;
 tokeep = seqlengths >=  minlength;
 indicestokeep = cell2mat(arrayfun(@(s, e) s:e, seqstarts(tokeep), seqstops(tokeep), 'UniformOutput', false));
-filtered_posix = posix_date(indicestokeep);
 filtered_date_samples = date_samples(indicestokeep);
+filtered_posix = posix_date(indicestokeep);
+
+filtered_date_samples = date_samples;
+filtered_posix = posix_date;
+
 
 index_not_consecutive = find(diff(filtered_posix) ~= 1);
 for i = 1 : size(index_not_consecutive,1)
     dif_consecutive(i, 1) = filtered_date_samples(index_not_consecutive(i) + 1) - filtered_date_samples(index_not_consecutive(i));
 end
 
-filtered_date_samples(index_not_consecutive(find(dif_consecutive == max(dif_consecutive))))
-filtered_date_samples(index_not_consecutive(find(dif_consecutive == max(dif_consecutive)))+1)
+day1 = filtered_date_samples(index_not_consecutive(find(dif_consecutive == max(dif_consecutive))))
+day2 = filtered_date_samples(index_not_consecutive(find(dif_consecutive == max(dif_consecutive)))+1)
+
+seconds(day2 - day1)
+
+seconds_dif_consecutive = seconds(dif_consecutive);
+number_missing_samples = sum(seconds_dif_consecutive);
+mean_missing_samples = mean(seconds_dif_consecutive);
+median_missing_samples = median(seconds_dif_consecutive);
+
+% filtered_date_samples(index_not_consecutive(8404))
+
 
 %%
-
 clearvars -except Eq_Data
 
 nanSamplesCounter = zeros(1,8);
