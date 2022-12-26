@@ -117,37 +117,31 @@ posix_date = posixtime(date_samples);
 
 % the minlength is the minimal size that a sequence of samples must have to
 % be considered, this is, where a missing value can appear.
-minlength = 1;
-isconsecutive = diff(posix_date') == 1;
-seqedges = find(diff([false, isconsecutive, false]));
-seqstarts = seqedges(1:2:end);
-seqstops = seqedges(2:2:end);
-seqlengths = seqstops - seqstarts + 1;
-tokeep = seqlengths >=  minlength;
-indicestokeep = cell2mat(arrayfun(@(s, e) s:e, seqstarts(tokeep), seqstops(tokeep), 'UniformOutput', false));
-filtered_date_samples = date_samples(indicestokeep);
-filtered_posix = posix_date(indicestokeep);
+% minlength = 60;
+% isconsecutive = diff(posix_date') == 1;
+% seqedges = find(diff([false, isconsecutive, false]));
+% seqstarts = seqedges(1:2:end);
+% seqstops = seqedges(2:2:end);
+% seqlengths = seqstops - seqstarts + 1;
+% tokeep = seqlengths >=  minlength;
+% indicestokeep = cell2mat(arrayfun(@(s, e) s:e, seqstarts(tokeep), seqstops(tokeep), 'UniformOutput', false));
+% filtered_date_samples = date_samples(indicestokeep);
+% filtered_posix = posix_date(indicestokeep);
 
 filtered_date_samples = date_samples;
 filtered_posix = posix_date;
 
 
-index_not_consecutive = find(diff(filtered_posix) ~= 1);
-for i = 1 : size(index_not_consecutive,1)
-    dif_consecutive(i, 1) = filtered_date_samples(index_not_consecutive(i) + 1) - filtered_date_samples(index_not_consecutive(i));
-end
+diff_samples = diff(filtered_posix) - 1;
 
-day1 = filtered_date_samples(index_not_consecutive(find(dif_consecutive == max(dif_consecutive))))
-day2 = filtered_date_samples(index_not_consecutive(find(dif_consecutive == max(dif_consecutive)))+1)
+day1 = filtered_date_samples(find(diff_samples == max(diff_samples)))
+day2 = filtered_date_samples(find(diff_samples == max(diff_samples))+1)
 
 seconds(day2 - day1)
 
-seconds_dif_consecutive = seconds(dif_consecutive);
-number_missing_samples = sum(seconds_dif_consecutive);
-mean_missing_samples = mean(seconds_dif_consecutive);
-median_missing_samples = median(seconds_dif_consecutive);
-
-% filtered_date_samples(index_not_consecutive(8404))
+number_missing_samples = sum(diff_samples)
+mean_missing_samples = mean(diff_samples)
+median_missing_samples = median(diff_samples)
 
 
 %%
