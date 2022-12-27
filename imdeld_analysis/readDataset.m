@@ -35,24 +35,6 @@ end
 % 6 - voltage
 
 
-%% Histogram samples equipment
-clearvars -except eq_data
-
-figure
-for i = 1 : size(eq_data,2)
-    subplot(size(eq_data,2) / 2, 2, i);
-    eq_table = eq_data{i};
-    aux = table2array(eq_table(:,2));
-    histogram(aux);
-    title(sprintf("Equipment %i", i));
-    xlabel('Power [W]')
-    ylabel('Number of samples')
-end
-
-saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.fig');
-saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.png');
-
-
 %% Check number of samples per equipment in the dataset
 clearvars -except eq_data
 
@@ -90,7 +72,7 @@ for i = 1 : size(eq_data,2)
     array_end(i) = table2array(table_eq(end,1));
 end
 
-%% See commun timestamps between 8 equipment
+%% See common timestamps between 8 equipment
 clearvars -except eq_data
 table_eq = eq_data{1};
 
@@ -100,20 +82,18 @@ appended_categorical = sort(appended_categorical);
 
 a = categories(appended_categorical);
 b = countcats(appended_categorical);
-commun_timestamps = a(b == size(eq_data,2));
+common_timestamps = a(b == size(eq_data,2));
 
 %edges = unique(AppendedCellTimestamps,'stable');
 %b=cellfun(@(x) sum(ismember(AppendedCellTimestamps,x)),edges,'un',0);
 
 %% Missing non consecutive timestamps
 % Run previous code block to get the variable d
-clearvars -except eq_data commun_timestamps
+clearvars -except eq_data common_timestamps
 
-aux = cell2mat(commun_timestamps);
+aux = cell2mat(common_timestamps);
 date_samples = datetime(aux(:,1:end-3));
 posix_date = posixtime(date_samples);
-%observations = find(diff(posix_date) ~= 1) + 1; 
-
 
 % the minlength is the minimal size that a sequence of samples must have to
 % be considered, this is, where a missing value can appear.
@@ -128,9 +108,10 @@ posix_date = posixtime(date_samples);
 % filtered_date_samples = date_samples(indicestokeep);
 % filtered_posix = posix_date(indicestokeep);
 
+% hours(seconds(size(date_samples, 1) - size(filtered_date_samples, 1)))
+
 filtered_date_samples = date_samples;
 filtered_posix = posix_date;
-
 
 diff_samples = diff(filtered_posix) - 1;
 
@@ -144,24 +125,33 @@ mean_missing_samples = mean(diff_samples)
 median_missing_samples = median(diff_samples)
 
 
-%%
-clearvars -except Eq_Data
+%% find what are the days that are present and how many samples per day
+clearvars -except eq_data common_timestamps
+datetime_values = cell2mat(common_timestamps);
+dates_only = datetime(datetime_values(:,1:end-12));
 
-nanSamplesCounter = zeros(1,8);
-for i = 1 : size(Eq_Data,2)
-    tableEq = Eq_Data{i};
-    arrayEq = [];
-    
-    arrayEq = cell2mat(table2array(tableEq(:,1)));
-    arrayEq = arrayEq(j, 1:end-3);
-    for j = 1 : size(arrayEq,1)
-        timeEq(j,:) = convertCharsToStrings(arrayEq(j,:));
-    end
+unique_dates = unique(dates_only);
+counts = histcounts(dates_only', [unique_dates', max(unique_dates)+1] + 1);
 
-    A() = convertCharsToStrings(arrayEq(j, 1:end-3));
-    A = cellfun(@calculateDatetime,arrayEq);
+summary = table(unique_dates(:), counts(:), 'VariableNames', {'Date','count'});
+
+% find days with more than 84600 samples
+days_with_more_samples = summary(summary.count > 84600, :);
+
+%% Histogram samples equipment
+clearvars -except eq_data
+
+figure
+for i = 1 : size(eq_data,2)
+    subplot(size(eq_data,2) / 2, 2, i);
+    eq_table = eq_data{i};
+    aux = table2array(eq_table(:,2));
+    histogram(aux);
+    title(sprintf("Equipment %i", i));
+    xlabel('Power [W]')
+    ylabel('Number of samples')
 end
 
-function datetimeX = calculateDatetime(x)
-    datetimeX = (convertCharsToStrings(x(1:end-3)));
-end
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.fig');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.png');
+
