@@ -91,8 +91,8 @@ common_timestamps = a(b == size(eq_data,2));
 % Run previous code block to get the variable d
 clearvars -except eq_data common_timestamps
 
-aux = cell2mat(common_timestamps);
-date_samples = datetime(aux(:,1:end-3));
+datetime_values = cell2mat(common_timestamps);
+date_samples = datetime(datetime_values(:,1:end-3));
 posix_date = posixtime(date_samples);
 
 % the minlength is the minimal size that a sequence of samples must have to
@@ -131,12 +131,73 @@ datetime_values = cell2mat(common_timestamps);
 dates_only = datetime(datetime_values(:,1:end-12));
 
 unique_dates = unique(dates_only);
-counts = histcounts(dates_only', [unique_dates', max(unique_dates)+1] + 1);
+counts = histcounts(dates_only', [unique_dates', max(unique_dates)+1]);
 
 summary = table(unique_dates(:), counts(:), 'VariableNames', {'Date','count'});
 
 % find days with more than 84600 samples
 days_with_more_samples = summary(summary.count > 84600, :);
+
+% get the common timestamps for the days_with_more_samples
+[sharedvals,idx] = ismember(dates_only, days_with_more_samples.Date);
+
+index = [];
+for i = 1 : size(days_with_more_samples, 1)
+    index = [index; find(idx == i)];
+end
+
+date_samples = datetime(datetime_values(:,1:end-3));
+days_common_timestamps = date_samples(index);
+
+% Debug
+
+% debug_days = datestr(days_common_timestamps);
+% date_vec = datevec(debug_days, 'dd-mmm-yyyy');
+% date_str = datetime(datestr(date_vec, 'dd-mmm-yyyy'));
+% 
+% for i = 1 : size(days_with_more_samples.Date, 1)
+%     aux = find(date_str == days_with_more_samples.Date(i));
+%     size_dates(i) = size(aux,1);
+% end
+
+% sum(days_with_more_samples.count)
+% size(days_common_timestamps)
+
+
+%% For each equipment, calculate the mean of not unique timestamps
+clearvars -except eq_data days_common_timestamps
+
+tableEq = eq_data{i};
+mean_values = grpstats(tableEq, 'timestamp', 'mean', 'DataVars', 'active_power');
+
+% Debug
+% Check for duplicates
+size(unique(mean_values.timestamp)) == size(mean_values.timestamp)
+
+%% Spline interpolation
+% Run previous block to calculate 
+% Construct a table with the timestamps and active power values of the eight equipment
+clearvars -except eq_data days_common_timestamps
+
+time_power_array = table(days_common_timestamps, 'VariableNames', {'Date'});
+
+for i = 1 : size(eq_data, 2)
+    tableEq = eq_data{i};
+    datetime_values = cell2mat(tableEq.timestamp);
+    dates_only = datetime(datetime_values(:,1:end-3));
+
+    dates_only = unique (dates_only);
+
+    [sharedvals,idx] = ismember(dates_only, days_common_timestamps);
+    index = find(idx ~= 0);
+
+    active_power = tableEq.active_power;
+    active_power = active_power(index);
+    
+    name_collumn = sprintf('active_power_eq_%i', i);
+    time_power_array.(name_collumn) = active_power;
+end
+
 
 %% Histogram samples equipment
 clearvars -except eq_data
