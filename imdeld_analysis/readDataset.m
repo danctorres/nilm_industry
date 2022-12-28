@@ -3,8 +3,8 @@
 % 09/12/2022
 
 % Dataset is in ./OriginalDataset
-cd \\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\;
 clear, close all, clc;
+cd \\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\;
 
 cd imdeld_dataset/Equipment;
 file_list = dir;
@@ -72,28 +72,62 @@ for i = 1 : size(eq_data,2)
     array_end(i) = table2array(table_eq(end,1));
 end
 
-%% See common timestamps between 8 equipment
+
+%% -> RUN THIS
+% See common timestamps between 8 equipment
 clearvars -except eq_data
-table_eq = eq_data{1};
 
-AllC = {cat(1, eq_data{:})};
-appended_categorical = categorical(AllC{1}.timestamp);
-appended_categorical = sort(appended_categorical);
+% since the equipments may have duplicate samples, its needed to calculate
+% the uniques from each equipment
 
-a = categories(appended_categorical);
-b = countcats(appended_categorical);
-common_timestamps = a(b == size(eq_data,2));
+all_dates = [];
+for i = 1:size(eq_data, 2)
+    table_eq = eq_data{i};
+    dates = unique(table_eq.timestamp);
+    datetime_values = cell2mat(dates);
+    date_samples = datetime(datetime_values(:,1:end-3));
+    all_dates = [all_dates; date_samples];
+end
 
+% AllC = {cat(1, eq_data{:})};
+% dates = AllC{1}.timestamp;
+[unique_values, ~, counts] = unique(all_dates);
+
+unique_counts = unique(counts);
+[N, edges] = histcounts(counts', [unique_counts', max(unique_counts)+1]);
+
+% Debug
+% max(N) =  2536039     2536040     2536041     2536042     2536043     2536044     2536045     2536046     2536047
+% datetime_values = cell2mat(dates);
+% date_samples = datetime(datetime_values(:,1:end-3));
+% 
+% aux = (unique_values(2536039));
+% aux2 = cell2mat(aux);
+% aux2 = datetime(aux2(:,1:end-3));
+% aux3 = find(date_samples == aux2);
+% size(aux3, 1) == max(N)
+
+common_timestamps = unique_values(N >= size(eq_data,2));
+common_timestamps = sort(common_timestamps);
+
+
+% Alternative:
+% appended_categorical = categorical(dates(1:end-3));
+% 
+% a = categories(appended_categorical);
+% b = countcats(appended_categorical);
+% common_timestamps = a(b == size(eq_data,2));
+% 
+% common_timestamps = sort(common_timestamps);
 %edges = unique(AppendedCellTimestamps,'stable');
 %b=cellfun(@(x) sum(ismember(AppendedCellTimestamps,x)),edges,'un',0);
+
 
 %% Missing non consecutive timestamps
 % Run previous code block to get the variable d
 clearvars -except eq_data common_timestamps
 
-datetime_values = cell2mat(common_timestamps);
-date_samples = datetime(datetime_values(:,1:end-3));
-posix_date = posixtime(date_samples);
+posix_date = posixtime(common_timestamps);
 
 % the minlength is the minimal size that a sequence of samples must have to
 % be considered, this is, where a missing value can appear.
@@ -110,7 +144,7 @@ posix_date = posixtime(date_samples);
 
 % hours(seconds(size(date_samples, 1) - size(filtered_date_samples, 1)))
 
-filtered_date_samples = date_samples;
+filtered_date_samples = common_timestamps;
 filtered_posix = posix_date;
 
 diff_samples = diff(filtered_posix) - 1;
@@ -125,10 +159,11 @@ mean_missing_samples = mean(diff_samples)
 median_missing_samples = median(diff_samples)
 
 
-%% find what are the days that are present and how many samples per day
+%% -> RUN THIS
+% Find what are the days that are present and how many samples per day
 clearvars -except eq_data common_timestamps
-datetime_values = cell2mat(common_timestamps);
-dates_only = datetime(datetime_values(:,1:end-12));
+
+dates_only = datetime(datestr(common_timestamps, 'dd-mmm-yyyy'));
 
 unique_dates = unique(dates_only);
 counts = histcounts(dates_only', [unique_dates', max(unique_dates)+1]);
@@ -146,20 +181,14 @@ for i = 1 : size(days_with_more_samples, 1)
     index = [index; find(idx == i)];
 end
 
-date_samples = datetime(datetime_values(:,1:end-3));
-days_common_timestamps = date_samples(index);
+days_common_timestamps = common_timestamps(index);
 
 % Debug
-
-% debug_days = datestr(days_common_timestamps);
-% date_vec = datevec(debug_days, 'dd-mmm-yyyy');
-% date_str = datetime(datestr(date_vec, 'dd-mmm-yyyy'));
-% 
 % for i = 1 : size(days_with_more_samples.Date, 1)
-%     aux = find(date_str == days_with_more_samples.Date(i));
+%     aux = find(dates_only == days_with_more_samples.Date(i));
 %     size_dates(i) = size(aux,1);
 % end
-
+% 
 % sum(days_with_more_samples.count)
 % size(days_common_timestamps)
 
@@ -167,7 +196,7 @@ days_common_timestamps = date_samples(index);
 %% For each equipment, calculate the mean of not unique timestamps
 clearvars -except eq_data days_common_timestamps
 
-tableEq = eq_data{i};
+tableEq = eq_data{1};
 mean_values = grpstats(tableEq, 'timestamp', 'mean', 'DataVars', 'active_power');
 
 % Debug
@@ -182,22 +211,48 @@ clearvars -except eq_data days_common_timestamps
 time_power_array = table(days_common_timestamps, 'VariableNames', {'Date'});
 
 for i = 1 : size(eq_data, 2)
-    tableEq = eq_data{i};
-    datetime_values = cell2mat(tableEq.timestamp);
+    table_eq = eq_data{i};
+
+    mean_values = grpstats(table_eq, 'timestamp', 'mean', 'DataVars', 'active_power');
+        
+%     dates_mat = cell2mat(table_eq.timestamp);
+%     date_samples = datetime(datetime_values(:,1:end-3));
+%     posix_date = posixtime(date_samples)
+%     power = table_eq.active_power;
+%     eq_array(:, 1) = posix_date
+%     eq_array(:, 2) = power
+%     mean_values = [unique(eq_array(:,1) ), accumarray(eq_array(:,1), eq_array(:,2), [], @mean)]
+
+    datetime_values = cell2mat(mean_values.timestamp);
     dates_only = datetime(datetime_values(:,1:end-3));
 
     dates_only = unique (dates_only);
 
     [sharedvals,idx] = ismember(dates_only, days_common_timestamps);
+    val = dates_only(sharedvals);
     index = find(idx ~= 0);
 
-    active_power = tableEq.active_power;
+    % Debug
+%     [sharedvals2,idx2] = ismember(days_common_timestamps, val);
+%     val2 = days_common_timestamps(sharedvals2);
+%     aux3 = find(idx2 == 0);
+%     days_common_timestamps(aux3)
+%     find(dates_only == days_common_timestamps(aux3))
+%     datetime_values = cell2mat(common_timestamps);
+%     date_samples = datetime(datetime_values(:,1:end-3));
+%     find(date_samples == dates_only(aux3))
+%     find (appended_categorical == categorical(days_common_timestamps(aux3)));
+
+    active_power = mean_values.mean_active_power;
     active_power = active_power(index);
     
     name_collumn = sprintf('active_power_eq_%i', i);
     time_power_array.(name_collumn) = active_power;
 end
 
+% Debug
+figure,
+plot(time_power_array.active_power_eq_8)
 
 %% Histogram samples equipment
 clearvars -except eq_data
