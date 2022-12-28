@@ -247,12 +247,12 @@ for i = 1 : size(eq_data, 2)
     active_power = active_power(index);
     
     name_collumn = sprintf('active_power_eq_%i', i);
-    time_power_array.(name_collumn) = active_power;
+    time_active_power_array.(name_collumn) = active_power;
 end
 
 % Debug
 figure,
-plot(time_power_array.active_power_eq_8)
+plot(time_active_power_array.active_power_eq_8)
 
 %% Histogram samples equipment
 clearvars -except eq_data
