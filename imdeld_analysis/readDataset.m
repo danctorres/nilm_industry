@@ -208,7 +208,7 @@ size(unique(mean_values.timestamp)) == size(mean_values.timestamp)
 % Construct a table with the timestamps and active power values of the eight equipment
 clearvars -except eq_data days_common_timestamps
 
-time_power_array = table(days_common_timestamps, 'VariableNames', {'Date'});
+date_active_power = table(days_common_timestamps, 'VariableNames', {'Date'});
 
 for i = 1 : size(eq_data, 2)
     table_eq = eq_data{i};
@@ -247,12 +247,53 @@ for i = 1 : size(eq_data, 2)
     active_power = active_power(index);
     
     name_collumn = sprintf('active_power_eq_%i', i);
-    time_active_power_array.(name_collumn) = active_power;
+    date_active_power.(name_collumn) = active_power;
 end
 
 % Debug
 figure,
-plot(time_active_power_array.active_power_eq_8)
+for i = 1 : size(eq_data, 2)
+    subplot(size(eq_data, 2)/2, 2, i)
+    plot(date_active_power{:, i+1})
+    title (sprintf("Equipment %i", i));
+    xlabel ("Sample")
+    ylabel("Power [W]")
+end
+
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\dates_active_power.fig');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\dates_active_power.png');
+
+
+%% calculate average equipment active power per day
+clearvars -except eq_data date_active_power
+
+dates = date_active_power.Date;
+%dates = time_active_power_array.timestamp;
+dates_only = datetime(datestr(dates, 'dd-mmm-yyyy'));
+unique_dates = unique(dates_only);
+[~, index_dates] = ismember(dates_only, unique_dates);
+
+day_table_complete = table(unique_dates(:), 'VariableNames', {'Date'});
+
+for j = 1 : size(eq_data, 2)
+    for i = 1 : size(unique_dates, 1)
+        num_samples(i) = sum(index_dates == i);
+        mean_active_power(i,j) = round(mean(date_active_power{index_dates == i, j + 1}));
+        median_active_power(i,j) = round(median(date_active_power{index_dates == i, j + 1}));
+    end
+    mean_collumn = sprintf('Mean_W_eq_%i', j);
+    median_collumn = sprintf('Median_W_eq_%i', j);
+
+    day_table_complete.("Number_samples") = num_samples';
+    day_table_complete.(mean_collumn) = mean_active_power(:,j);
+    day_table_complete.(median_collumn) = median_active_power(:,j);
+end
+
+
+%% Remove the 30-March-2018 from the days_common_timestamps and insert missing samples for each equipment
+
+
+
 
 %% Histogram samples equipment
 clearvars -except eq_data
