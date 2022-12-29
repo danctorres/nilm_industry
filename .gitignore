@@ -6,3 +6,6 @@ imdeld_analysis/images/*
 
 # ignore all asv files
 *.asv
+
+#ignore .vscode
+.vscode
