@@ -50,17 +50,20 @@ clearvars -except eq_data
 number_samples = zeros(1, size(eq_data,2));
 unique_samples = zeros(1, size(eq_data,2));
 not_unique_samples = zeros(1, size(eq_data,2));
+nan_samples = zeros(1,8);   % incorrect size
 nan_samples_counter = zeros(1,8);
+
 for i = 1 : size(eq_data,2)
     table_eq = eq_data{i};
     number_samples(i) = size(table_eq,1);
     unique_samples(i) = size(unique(table_eq(:,1)),1);
     not_unique_samples(i) = number_samples(i) - size(unique(table_eq(:,1)),1);
-    array_eq = table2array(table_eq(:,2:end));
-    for j = 1 : number_samples(i)
-        if ( (isnan(array_eq(j,2)) + isnan(array_eq(j,3)) + isnan(array_eq(j,4)) + isnan(array_eq(j,5))) > 0)
-                nan_samples_counter(i) = nan_samples_counter(i) + 1;
-        end
+    % array_eq = table2array(table_eq(:,2:end));
+    aux_nan_counter = ones(size(table_eq,1), 1);
+    nan_samples(i) = sum(aux_nan_counter(isnan(table_eq.active_power)));
+
+    for j = 2 : 6
+        nan_samples(i, j) = sum(aux_nan_counter(isnan(table_eq{:, j})));
     end
 end
 
@@ -78,7 +81,7 @@ end
 % See common timestamps between 8 equipment
 clearvars -except eq_data
 
-% since the equipments may have duplicate samples, its needed to calculate
+% since the equipments may have duplicate samples, it is needed to calculate
 % the uniques from each equipment
 
 all_dates = [];
