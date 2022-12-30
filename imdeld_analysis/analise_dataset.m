@@ -205,7 +205,7 @@ mean_values = grpstats(tableEq, 'timestamp', 'mean', 'DataVars', 'active_power')
 % Check for duplicates
 correct = size(unique(mean_values.timestamp)) == size(mean_values.timestamp);
 
-%% Spline interpolation
+%% Construct a table with the dates and active power of the eight equipment
 % Run previous block to calculate 
 % Construct a table with the timestamps and active power values of the eight equipment
 clearvars -except eq_data days_common_timestamps
@@ -296,13 +296,73 @@ end
 
 
 %% Remove the 30-March-2018 from the days_common_timestamps and insert missing samples for each equipment
+clearvars -except eq_data date_active_power dates dates_only
+
+unique_dates = unique(dates_only);
+% Remove the 30-Mar-2018 -> unique_dates(end - 1)
+% filtered_dates_and_power = date_active_power(~ismember(dates_only, [unique_dates(end - 2), unique_dates(end - 1), unique_dates(end)]), :); 
+
+filtered_dates_and_power = date_active_power(dates_only ~=  unique_dates(end - 1), :);
+
+% Debug
+% figure,
+% for i = 1 : size(eq_data, 2)
+%     subplot(size(eq_data, 2)/2, 2, i)
+%     plot(filtered_dates_and_power{:, i+1})
+%     title (sprintf("Equipment %i", i));
+%     xlabel ("Sample")
+%     ylabel("Power [W]")
+% end
+
+% Spline interpolation
+% Define the data points
+% date_dataset = posixtime(date_active_power.Date);
+date_dataset = posixtime(filtered_dates_and_power.Date);
+
+% Define the points used for interpolation
+filtered_date_active_power = date_active_power(dates_only ~=  unique_dates(end - 1), :);
+filtered_unique_dates = unique_dates(1:end - 2);
+filtered_unique_dates = cat(1, filtered_unique_dates, unique_dates(end));
+
+dates_complete = [];
+for i = 1 : size(filtered_unique_dates, 1)
+    date_year = year(filtered_unique_dates(i));
+    date_month = month(filtered_unique_dates(i));
+    date_day = day(filtered_unique_dates(i));
+    seconds = 0:1:86400-1;  % all the seconds of the day
+    dates_complete = cat (1, dates_complete, posixtime(datetime(date_year, date_month, date_day, 0, 0, seconds))');
+end
+
+diff = setdiff(dates_complete, date_dataset);           % points at which to interpolate
+index_diff = find(ismember(dates_complete, diff));      % missing_indices
+index_date_dataset = find(ismember(dates_complete, date_dataset));
+
+active_power_complete = zeros(size(dates_complete, 1), size(eq_data, 2));
+for i = 1 : size(eq_data, 2)
+    y = filtered_date_active_power{:,i + 1};
+    active_power_complete(index_date_dataset, i) = y;
+    yi = spline(date_dataset, y, diff);  % Interpolate the data using a cubic spline
+    % csaps / pchip
+    active_power_complete(index_diff, i) = yi;
+end
 
 
+% Debug
+% figure,
+% for i = 1 : size(eq_data, 2)
+%     subplot(size(eq_data, 2)/2, 2, i)
+%     plot(active_power_complete(:, i))
+%     title (sprintf("Equipment %i", i));
+%     xlabel ("Sample")
+%     ylabel("Power [W]")
+% end
 
-
+% size(dates_complete)
+% size(active_power_complete)
 %% Histogram samples equipment
 clearvars -except eq_data
 
+% Original
 figure
 for i = 1 : size(eq_data,2)
     subplot(size(eq_data,2) / 2, 2, i);
@@ -314,8 +374,21 @@ for i = 1 : size(eq_data,2)
     ylabel('Number of samples')
 end
 
-saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.fig');
-saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.png');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_original_equipment.fig');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_original_equipment.png');
+
+% selected days
+figure
+for i = 1 : size(eq_data,2)
+    subplot(size(eq_data,2) / 2, 2, i);
+    histogram(active_power_complete(:, i));
+    title(sprintf("Equipment %i", i));
+    xlabel('Power [W]')
+    ylabel('Number of samples')
+end
+
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_selected_days_equipment.fig');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_selected_days_equipment.png');
 
 %% Check linting
-checkcode('readDataset.m')
+checkcode('analise_dataset.m')
