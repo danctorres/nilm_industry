@@ -3,7 +3,7 @@
 % 09/12/2022
 
 % Dataset is in ./OriginalDataset
-clear, close all, clc;
+clear;  close all;  clc;
 cd \\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\;
 
 cd imdeld_dataset/Equipment;
@@ -12,6 +12,7 @@ file_list = {file_list.name};
 file_list = file_list(3:end);   % remove . and ..
 
 n_Eq = size(file_list,2);
+eq_data = cell(1, n_Eq);
 for i=1:n_Eq
     eq_data{i} = readtable(string(file_list(i)));
 end
@@ -38,6 +39,7 @@ end
 %% Check number of samples per equipment in the dataset
 clearvars -except eq_data
 
+number_samples = zeros(1, size(eq_data,2));
 for i = 1 : size(eq_data,2)
     aux = eq_data{i};
     number_samples(i,:) = size(aux,1);
@@ -45,16 +47,15 @@ end
 
 %% Check number of Not unique samples and Nan samples
 clearvars -except eq_data
-number_samples = [];
-unique_samples = [];
-not_unique_samples = [];
+number_samples = zeros(1, size(eq_data,2));
+unique_samples = zeros(1, size(eq_data,2));
+not_unique_samples = zeros(1, size(eq_data,2));
 nan_samples_counter = zeros(1,8);
 for i = 1 : size(eq_data,2)
     table_eq = eq_data{i};
     number_samples(i) = size(table_eq,1);
     unique_samples(i) = size(unique(table_eq(:,1)),1);
     not_unique_samples(i) = number_samples(i) - size(unique(table_eq(:,1)),1);
-    array_eq = [];
     array_eq = table2array(table_eq(:,2:end));
     for j = 1 : number_samples(i)
         if ( (isnan(array_eq(j,2)) + isnan(array_eq(j,3)) + isnan(array_eq(j,4)) + isnan(array_eq(j,5))) > 0)
@@ -64,10 +65,10 @@ for i = 1 : size(eq_data,2)
 end
 
 % Starting and ending time samples
-array_start = {};
-array_end = {};
+array_start = cell(1, size(eq_data,2));
+array_end = cell(1, size(eq_data,2));
 for i = 1 : size(eq_data,2)
-    tableEq = eq_data{i};
+    table_eq = eq_data{i};
     array_start(i) = table2array(table_eq(1,1));
     array_end(i) = table2array(table_eq(end,1));
 end
@@ -86,7 +87,8 @@ for i = 1:size(eq_data, 2)
     dates = unique(table_eq.timestamp);
     datetime_values = cell2mat(dates);
     date_samples = datetime(datetime_values(:,1:end-3));
-    all_dates = [all_dates; date_samples];
+    all_dates = cat(1, all_dates, date_samples);
+    %all_dates = [all_dates; date_samples];
 end
 
 % AllC = {cat(1, eq_data{:})};
@@ -149,14 +151,14 @@ filtered_posix = posix_date;
 
 diff_samples = diff(filtered_posix) - 1;
 
-day1 = filtered_date_samples(find(diff_samples == max(diff_samples)))
-day2 = filtered_date_samples(find(diff_samples == max(diff_samples))+1)
+day1 = filtered_date_samples(diff_samples == max(diff_samples));
+day2 = filtered_date_samples(find(diff_samples == max(diff_samples))+1);
 
 seconds(day2 - day1)
 
-number_missing_samples = sum(diff_samples)
-mean_missing_samples = mean(diff_samples)
-median_missing_samples = median(diff_samples)
+number_missing_samples = sum(diff_samples);
+mean_missing_samples = mean(diff_samples);
+median_missing_samples = median(diff_samples);
 
 
 %% -> RUN THIS
@@ -178,7 +180,7 @@ days_with_more_samples = summary(summary.count > 84600, :);
 
 index = [];
 for i = 1 : size(days_with_more_samples, 1)
-    index = [index; find(idx == i)];
+    index = cat(1, index, find(idx == i));
 end
 
 days_common_timestamps = common_timestamps(index);
@@ -201,7 +203,7 @@ mean_values = grpstats(tableEq, 'timestamp', 'mean', 'DataVars', 'active_power')
 
 % Debug
 % Check for duplicates
-size(unique(mean_values.timestamp)) == size(mean_values.timestamp)
+correct = size(unique(mean_values.timestamp)) == size(mean_values.timestamp);
 
 %% Spline interpolation
 % Run previous block to calculate 
@@ -275,6 +277,9 @@ unique_dates = unique(dates_only);
 
 day_table_complete = table(unique_dates(:), 'VariableNames', {'Date'});
 
+num_samples = zeros(1, size(unique_dates, 1));
+mean_active_power = zeros(1, size(unique_dates, 1));
+median_active_power = zeros(1, size(unique_dates, 1));
 for j = 1 : size(eq_data, 2)
     for i = 1 : size(unique_dates, 1)
         num_samples(i) = sum(index_dates == i);
@@ -312,3 +317,5 @@ end
 saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.fig');
 saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_equipment.png');
 
+%% Check linting
+checkcode('readDataset.m')
