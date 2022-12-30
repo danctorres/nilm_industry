@@ -1,8 +1,17 @@
-%% Read dataset
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NILM dissertation dataset anaçysis code
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Daniel Torres
 % 09/12/2022
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1 - Read dataset -> RUN THIS 1st
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Dataset is in ./OriginalDataset
+
 clear;  close all;  clc;
 cd \\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\;
 
@@ -77,7 +86,11 @@ for i = 1 : size(eq_data,2)
 end
 
 
-%% -> RUN THIS
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 2 - Calculate the timestamp that equipment have in common -> RUN THIS 2nd
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % See common timestamps between 8 equipment
 clearvars -except eq_data
 
@@ -94,12 +107,13 @@ for i = 1:size(eq_data, 2)
     %all_dates = [all_dates; date_samples];
 end
 
-% AllC = {cat(1, eq_data{:})};
-% dates = AllC{1}.timestamp;
 [unique_values, ~, counts] = unique(all_dates);
 
 unique_counts = unique(counts);
 [N, edges] = histcounts(counts', [unique_counts', max(unique_counts)+1]);
+
+common_timestamps = unique_values(N >= size(eq_data,2));
+common_timestamps = sort(common_timestamps);
 
 % Debug
 % max(N) =  2536039     2536040     2536041     2536042     2536043     2536044     2536045     2536046     2536047
@@ -112,10 +126,6 @@ unique_counts = unique(counts);
 % aux3 = find(date_samples == aux2);
 % size(aux3, 1) == max(N)
 
-common_timestamps = unique_values(N >= size(eq_data,2));
-common_timestamps = sort(common_timestamps);
-
-
 % Alternative:
 % appended_categorical = categorical(dates(1:end-3));
 % 
@@ -126,7 +136,7 @@ common_timestamps = sort(common_timestamps);
 % common_timestamps = sort(common_timestamps);
 %edges = unique(AppendedCellTimestamps,'stable');
 %b=cellfun(@(x) sum(ismember(AppendedCellTimestamps,x)),edges,'un',0);
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Missing non consecutive timestamps
 % Run previous code block to get the variable d
@@ -164,7 +174,11 @@ mean_missing_samples = mean(diff_samples);
 median_missing_samples = median(diff_samples);
 
 
-%% -> RUN THIS
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 3 - Calculate the timestamp that equipment have in common -> RUN THIS 3rd
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Find what are the days that are present and how many samples per day
 clearvars -except eq_data common_timestamps
 
@@ -196,7 +210,7 @@ days_common_timestamps = common_timestamps(index);
 % 
 % sum(days_with_more_samples.count)
 % size(days_common_timestamps)
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% For each equipment, calculate the mean of not unique timestamps
 clearvars -except eq_data days_common_timestamps
@@ -208,8 +222,12 @@ mean_values = grpstats(tableEq, 'timestamp', 'mean', 'DataVars', 'active_power')
 % Check for duplicates
 correct = size(unique(mean_values.timestamp)) == size(mean_values.timestamp);
 
-%% Construct a table with the dates and active power of the eight equipment
-% Run previous block to calculate 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 4 - Construct table dates and active power -> RUN THIS 4th
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Construct a table with the timestamps and active power values of the eight equipment
 clearvars -except eq_data days_common_timestamps
 
@@ -217,9 +235,21 @@ date_active_power = table(days_common_timestamps, 'VariableNames', {'Date'});
 
 for i = 1 : size(eq_data, 2)
     table_eq = eq_data{i};
-
     mean_values = grpstats(table_eq, 'timestamp', 'mean', 'DataVars', 'active_power');
-        
+    datetime_values = cell2mat(mean_values.timestamp);
+    dates_only = datetime(datetime_values(:,1:end-3));
+    dates_only = unique (dates_only);
+    [sharedvals,idx] = ismember(dates_only, days_common_timestamps);
+    val = dates_only(sharedvals);
+    index = find(idx ~= 0);
+
+    active_power = mean_values.mean_active_power;
+    active_power = active_power(index);
+    
+    name_collumn = sprintf('active_power_eq_%i', i);
+    date_active_power.(name_collumn) = active_power;
+
+        % Debug
 %     dates_mat = cell2mat(table_eq.timestamp);
 %     date_samples = datetime(datetime_values(:,1:end-3));
 %     posix_date = posixtime(date_samples)
@@ -227,17 +257,6 @@ for i = 1 : size(eq_data, 2)
 %     eq_array(:, 1) = posix_date
 %     eq_array(:, 2) = power
 %     mean_values = [unique(eq_array(:,1) ), accumarray(eq_array(:,1), eq_array(:,2), [], @mean)]
-
-    datetime_values = cell2mat(mean_values.timestamp);
-    dates_only = datetime(datetime_values(:,1:end-3));
-
-    dates_only = unique (dates_only);
-
-    [sharedvals,idx] = ismember(dates_only, days_common_timestamps);
-    val = dates_only(sharedvals);
-    index = find(idx ~= 0);
-
-    % Debug
 %     [sharedvals2,idx2] = ismember(days_common_timestamps, val);
 %     val2 = days_common_timestamps(sharedvals2);
 %     aux3 = find(idx2 == 0);
@@ -247,12 +266,6 @@ for i = 1 : size(eq_data, 2)
 %     date_samples = datetime(datetime_values(:,1:end-3));
 %     find(date_samples == dates_only(aux3))
 %     find (appended_categorical == categorical(days_common_timestamps(aux3)));
-
-    active_power = mean_values.mean_active_power;
-    active_power = active_power(index);
-    
-    name_collumn = sprintf('active_power_eq_%i', i);
-    date_active_power.(name_collumn) = active_power;
 end
 
 % Debug
@@ -267,7 +280,7 @@ end
 
 saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\dates_active_power.fig');
 saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\dates_active_power.png');
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% calculate average equipment active power per day
 clearvars -except eq_data date_active_power
@@ -298,7 +311,12 @@ for j = 1 : size(eq_data, 2)
 end
 
 
-%% Remove the 30-March-2018 from the days_common_timestamps and insert missing samples for each equipment
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 5 - Construct table dates and active power -> RUN THIS 5th
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Remove the 30-March-2018 from the days_common_timestamps and insert missing samples for each equipment
 clearvars -except eq_data date_active_power dates dates_only
 
 unique_dates = unique(dates_only);
@@ -362,8 +380,11 @@ end
 
 % size(dates_complete)
 % size(active_power_complete)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 %% Histogram samples equipment
-clearvars -except eq_data
+clearvars -except eq_data active_power_complete filtered_dates_and_power
 
 % Original
 figure
@@ -392,6 +413,17 @@ end
 
 saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_selected_days_equipment.fig');
 saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_selected_days_equipment.png');
+
+
+%% Read data from 'pelletizer-subcircuit.csv' (LVDB-2) and 'millingmachine-subcircuit.csv' (LVDB-3)
+clearvars -except eq_data active_power_complete filtered_dates_and_power
+
+
+cd \\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_dataset\;
+
+LVDB2 = readtable('pelletizer-subcircuit.csv');
+LVDB3 = readtable('millingmachine-subcircuit.csv');
+
 
 %% Check linting
 checkcode('analise_dataset.m')
