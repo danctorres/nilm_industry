@@ -16,8 +16,8 @@ def main() -> None:
     for file in os.listdir():
         if file.endswith('.csv'):
             lst_dic_csv = read_file(f'{file}')
-            for index in enumerate(lst_dic_csv):
-                print (lst_dic_csv[index])
+            # for index in enumerate(lst_dic_csv):
+            #     print (lst_dic_csv[index])
 
 if __name__ == "__main__":
     main()
