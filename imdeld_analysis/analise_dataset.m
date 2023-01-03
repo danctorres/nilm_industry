@@ -395,9 +395,16 @@ for i = 1 : size(active_power_complete, 2)
 end
 
 path_to_save = '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\';
-table_path_format = [path_to_save 'table_timestamp_active_power.csv'];
-
+table_path_format = [path_to_save 'table_posix_active_power.csv'];
 writetable(table_useful, table_path_format);
+
+% datetime format
+table_useful_datetime = table_useful;
+table_useful_datetime.Timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');
+
+path_to_save = '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\';
+table_path_format = [path_to_save 'table_timestamp_active_power.csv'];
+writetable(table_useful_datetime, table_path_format);
 
 % Debug
 % figure,
@@ -460,7 +467,11 @@ saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analys
 saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_selected_days_equipment.png');
 
 
-%% Read data from 'pelletizer-subcircuit.csv' (LVDB-2) and 'millingmachine-subcircuit.csv' (LVDB-3)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Additional information code 
+% Objective: Get the aggregate samples.
+% Read data from 'pelletizer-subcircuit.csv' (LVDB-2) and 'millingmachine-subcircuit.csv' (LVDB-3)
 
 close all;  clc;
 clearvars -except equip_data active_power_complete filtered_dates_and_power
@@ -472,6 +483,8 @@ LVDB2 = readtable('pelletizer-subcircuit.csv');
 LVDB3 = readtable('millingmachine-subcircuit.csv');
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check lintingpath
 
 close all;  clc;
