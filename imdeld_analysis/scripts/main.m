@@ -556,5 +556,5 @@ plot (sum_equipment)
 
 close all;  clc;
 
-cd ('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis');
-checkcode('analyze_dataset.m')
+cd ('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\scripts');
+checkcode('main.m')
