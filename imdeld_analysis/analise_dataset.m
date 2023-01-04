@@ -14,17 +14,20 @@
 % Comment: Dataset files are in folder \dissertation_nilm\imdeld_dataset
 
 clear;  close all;  clc;
-% absolute path
-path_dataset = '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_dataset\Equipment';
-cd (path_dataset);
+
+% filename = mfilename;
+% fullpath = which(filename);
+% cd(..\imdeld_dataset\Equipment')
+cd ('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_dataset\Equipment'); % absolute path
+
 
 file_list = dir;
 file_list = {file_list.name};
-file_list = file_list(3:end);   % remove . and ..
+file_list = file_list(3 : end);   % remove . and ..
 
-n_Eq = size(file_list,2);
+n_Eq = size(file_list, 2);
 equip_data = cell(1, n_Eq);
-for i=1:n_Eq
+for i = 1 : n_Eq
     equip_data{i} = readtable(string(file_list(i)));
 end
 
@@ -57,10 +60,10 @@ end
 close all;  clc;
 clearvars -except equip_data
 
-number_samples = zeros(1, size(equip_data,2));
-for i = 1 : size(equip_data,2)
+number_samples = zeros(1, size(equip_data, 2));
+for i = 1 : size(equip_data, 2)
     aux = equip_data{i};
-    number_samples(i,:) = size(aux,1);
+    number_samples(i, :) = size(aux, 1);
 end
 
 
@@ -74,19 +77,18 @@ end
 close all;  clc;
 clearvars -except equip_data
 
-number_samples = zeros(1, size(equip_data,2));
-unique_samples = zeros(1, size(equip_data,2));
-not_unique_samples = zeros(1, size(equip_data,2));
-nan_samples = zeros(1,8);   % incorrect size
-nan_samples_counter = zeros(1,8);
+number_samples = zeros(1, size(equip_data, 2));
+unique_samples = zeros(1, size(equip_data, 2));
+not_unique_samples = zeros(1, size(equip_data, 2));
+nan_samples = zeros(1, size(equip_data, 2));   % incorrect size
+nan_samples_counter = zeros(1, size(equip_data, 2));
 
 for i = 1 : size(equip_data,2)
     table_eq = equip_data{i};
-    number_samples(i) = size(table_eq,1);
-    unique_samples(i) = size(unique(table_eq(:,1)),1);
-    not_unique_samples(i) = number_samples(i) - size(unique(table_eq(:,1)),1);
-    % array_eq = table2array(table_eq(:,2:end));
-    aux_nan_counter = ones(size(table_eq,1), 1);
+    number_samples(i) = size(table_eq, 1);
+    unique_samples(i) = size(unique(table_eq(:, 1)), 1);
+    not_unique_samples(i) = number_samples(i) - size(unique(table_eq(:, 1)), 1);
+    aux_nan_counter = ones(size(table_eq, 1), 1);
     nan_samples(i) = sum(aux_nan_counter(isnan(table_eq.active_power)));
 
     for j = 2 : 6
@@ -95,12 +97,12 @@ for i = 1 : size(equip_data,2)
 end
 
 % Starting and ending time samples
-array_start = cell(1, size(equip_data,2));
-array_end = cell(1, size(equip_data,2));
-for i = 1 : size(equip_data,2)
+array_start = cell(1, size(equip_data, 2));
+array_end = cell(1, size(equip_data, 2));
+for i = 1 : size(equip_data, 2)
     table_eq = equip_data{i};
-    array_start(i) = table2array(table_eq(1,1));
-    array_end(i) = table2array(table_eq(end,1));
+    array_start(i) = table2array(table_eq(1, 1));
+    array_end(i) = table2array(table_eq(end, 1));
 end
 
 
@@ -116,20 +118,20 @@ clearvars -except equip_data
 
 % equipments may have duplicate samples, find unique from each equipment
 all_dates = [];
-for i = 1:size(equip_data, 2)
+for i = 1 : size(equip_data, 2)
     table_eq = equip_data{i};
     dates = unique(table_eq.timestamp);
     datetime_values = cell2mat(dates);
-    date_samples = datetime(datetime_values(:,1:end-3));
+    date_samples = datetime(datetime_values(:, 1:end - 3));
     all_dates = cat(1, all_dates, date_samples);
 end
 
 [unique_values, ~, counts] = unique(all_dates);
 
 unique_counts = unique(counts);
-[N, edges] = histcounts(counts', [unique_counts', max(unique_counts)+1]);
+[N, edges] = histcounts(counts', [unique_counts', max(unique_counts) + 1]);
 
-common_timestamps = unique_values(N >= size(equip_data,2));
+common_timestamps = unique_values(N >= size(equip_data, 2));
 common_timestamps = sort(common_timestamps);
 
 % Debug
@@ -174,7 +176,7 @@ filtered_posix = posix_date;
 diff_samples = diff(filtered_posix) - 1;
 
 day1 = filtered_date_samples(diff_samples == max(diff_samples));
-day2 = filtered_date_samples(find(diff_samples == max(diff_samples))+1);
+day2 = filtered_date_samples(find(diff_samples == max(diff_samples)) + 1);
 
 seconds(day2 - day1)
 
@@ -195,16 +197,16 @@ clearvars -except equip_data common_timestamps
 
 dates_only = datetime(datestr(common_timestamps, 'dd-mmm-yyyy'));
 unique_dates = unique(dates_only);
-counts = histcounts(dates_only', [unique_dates', max(unique_dates)+1]);
+counts = histcounts(dates_only', [unique_dates', max(unique_dates) + 1]);
 % create table with the unique days, and number of samples
-summary = table(unique_dates(:), counts(:), 'VariableNames', {'Date','count'});
+summary = table(unique_dates(:), counts(:), 'VariableNames', {'Date', 'count'});
 
 % find days with more than 84600 samples
 threshold_number_samples = 84600;
 days_with_more_samples = summary(summary.count > threshold_number_samples, :);
 
 % get the common timestamps for the days_with_more_samples
-[sharedvals,idx] = ismember(dates_only, days_with_more_samples.Date);
+[~, idx] = ismember(dates_only, days_with_more_samples.Date);
 
 index = [];
 for i = 1 : size(days_with_more_samples, 1)
@@ -224,23 +226,6 @@ useful_common_timestamps = common_timestamps(index);
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Additional information code
-% Objective: Calculate the mean of the active_power variable for each unique timestamp
-% Input: equip_data
-% Ouput: mean_values (table with mean active power values for each timestamp)
-
-close all;  clc;
-clearvars -except equip_data common_timestamps useful_common_timestamps
-
-tableEq = equip_data{1};
-mean_values = grpstats(equip_data, 'timestamp', 'mean', 'DataVars', 'active_power');
-
-% Debug
-% Check for duplicates
-% correct = size(unique(mean_values.timestamp)) == size(mean_values.timestamp);
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. RUN THIS
@@ -257,10 +242,11 @@ for i = 1 : size(equip_data, 2)
     table_eq = equip_data{i};
     mean_values = grpstats(table_eq, 'timestamp', 'mean', 'DataVars', 'active_power');
     datetime_values = cell2mat(mean_values.timestamp);
-    dates_only = datetime(datetime_values(:,1:end-3));
+    dates_only = datetime(datetime_values(:, 1:end-3));
     dates_only = unique (dates_only);
-    [sharedvals,idx] = ismember(dates_only, useful_common_timestamps);
-    val = dates_only(       );
+    [~, idx] = ismember(dates_only, useful_common_timestamps);
+    % [sharedvals, idx] = ismember(dates_only, useful_common_timestamps);
+    % val = dates_only(sharedvals);
     index = find(idx ~= 0);
 
     active_power = mean_values.mean_active_power;
@@ -298,8 +284,8 @@ end
 %     ylabel("Power [W]")
 % end
 % 
-% saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\dates_active_power.fig');
-% saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\dates_active_power.png');
+% saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\dates_active_power.fig');
+% saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\dates_active_power.png');
 
 
 
@@ -326,15 +312,15 @@ median_active_power = zeros(1, size(unique_dates, 1));
 for j = 1 : size(equip_data, 2)
     for i = 1 : size(unique_dates, 1)
         num_samples(i) = sum(index_dates == i);
-        mean_active_power(i,j) = round(mean(date_active_power{index_dates == i, j + 1}));
-        median_active_power(i,j) = round(median(date_active_power{index_dates == i, j + 1}));
+        mean_active_power(i, j) = round(mean(date_active_power{index_dates == i, j + 1}));
+        median_active_power(i, j) = round(median(date_active_power{index_dates == i, j + 1}));
     end
     mean_collumn = sprintf('Mean_W_eq_%i', j);
     median_collumn = sprintf('Median_W_eq_%i', j);
 
     day_table_complete.("Number_samples") = num_samples';
-    day_table_complete.(mean_collumn) = mean_active_power(:,j);
-    day_table_complete.(median_collumn) = median_active_power(:,j);
+    day_table_complete.(mean_collumn) = mean_active_power(:, j);
+    day_table_complete.(median_collumn) = median_active_power(:, j);
 end
 
 
@@ -343,7 +329,7 @@ end
 %% 5. RUN THIS
 % Objective: Remove the 30-March-2018 from the useful_common_timestamps and insert missing samples for each equipment
 % Input: equip_data, date_active_power dates dates_only
-% Output: active_power_complete (table with all the datetimes and the active power value of each equipment)
+% Output: table_useful_datetime, equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
 
 close all;  clc;
 clearvars -except equip_data common_timestamps useful_common_timestamps date_active_power
@@ -362,7 +348,7 @@ date_dataset = posixtime(filtered_dates_and_power.Date);
 
 % Define the points used for interpolation
 filtered_date_active_power = date_active_power(dates_only ~=  unique_dates(end - 1), :);
-filtered_unique_dates = unique_dates(1:end - 2);
+filtered_unique_dates = unique_dates(1 : end - 2);
 filtered_unique_dates = cat(1, filtered_unique_dates, unique_dates(end));
 
 dates_complete = [];
@@ -370,41 +356,38 @@ for i = 1 : size(filtered_unique_dates, 1)
     date_year = year(filtered_unique_dates(i));
     date_month = month(filtered_unique_dates(i));
     date_day = day(filtered_unique_dates(i));
-    seconds = 0:1:86400-1;  % all the seconds of the day
+    seconds = 0 : 1 : 86400 - 1;  % all the seconds of the day
     dates_complete = cat (1, dates_complete, posixtime(datetime(date_year, date_month, date_day, 0, 0, seconds))');
 end
 
-diff = setdiff(dates_complete, date_dataset);           % points at which to interpolate
-index_diff = find(ismember(dates_complete, diff));      % missing_indices
-index_date_dataset = find(ismember(dates_complete, date_dataset));
+% diff = setdiff(dates_complete, date_dataset);           % points at which to interpolate
+% index_date_dataset = find(ismember(dates_complete, date_dataset));
+
+[diff, index_diff] = setdiff(dates_complete, date_dataset);
+[~, index_date_dataset, ~] = intersect(dates_complete, date_dataset);
 
 active_power_complete = zeros(size(dates_complete, 1), size(equip_data, 2));
 for i = 1 : size(equip_data, 2)
-    y = filtered_date_active_power{:,i + 1};
+    y = filtered_date_active_power{:, i + 1};
     active_power_complete(index_date_dataset, i) = y;
-    yi = spline(date_dataset, y, diff);  % Interpolate the data using a cubic spline
-    % csaps / pchip
+    yi = spline(date_dataset, y, diff);  % Interpolate the data using a cubic spline, alternatives: csaps / pchip
     active_power_complete(index_diff, i) = yi;
 end
 
 date_complete = sort(cat(1, date_dataset, diff), 'ascend');
-table_useful = table(date_complete(:), 'VariableNames', {'Timestamp'});
+table_useful = table(date_complete(:), 'VariableNames', {'timestamp'});
 for i = 1 : size(active_power_complete, 2)
     name_collumn = sprintf('Active_Power_Eq_%i', i);
     table_useful.(name_collumn) = active_power_complete(:, i);
 end
 
-path_to_save = '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\';
-table_path_format = [path_to_save 'table_posix_active_power.csv'];
-writetable(table_useful, table_path_format);
+writetable(table_useful, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\data\equipment_posix_formated.csv');
 
 % datetime format
 table_useful_datetime = table_useful;
-table_useful_datetime.Timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');
+table_useful_datetime.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');
 
-path_to_save = '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\';
-table_path_format = [path_to_save 'table_timestamp_active_power.csv'];
-writetable(table_useful_datetime, table_path_format);
+writetable(table_useful_datetime, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\data\equipment_formated.csv');
 
 % Debug
 % figure,
@@ -443,15 +426,15 @@ figure
 for i = 1 : size(equip_data,2)
     subplot(size(equip_data,2) / 2, 2, i);
     eq_table = equip_data{i};
-    aux = table2array(eq_table(:,2));
+    aux = table2array(eq_table(:, 2));
     histogram(aux);
     title(sprintf("Equipment %i", i));
     xlabel('Power [W]')
     ylabel('Number of samples')
 end
 
-saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_original_equipment.fig');
-saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_original_equipment.png');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\histogram_original_equipment.fig');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\histogram_original_equipment.png');
 
 % selected days
 figure
@@ -463,32 +446,115 @@ for i = 1 : size(equip_data,2)
     ylabel('Number of samples')
 end
 
-saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_selected_days_equipment.fig');
-saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\images\histogram_selected_days_equipment.png');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\histogram_selected_days_equipment.fig');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\histogram_selected_days_equipment.png');
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Additional information code 
-% Objective: Get the aggregate samples.
-% Read data from 'pelletizer-subcircuit.csv' (LVDB-2) and 'millingmachine-subcircuit.csv' (LVDB-3)
+%% 6. RUN THIS
+% Objective: Read data from 'pelletizer-subcircuit.csv' (LVDB-2) and 'millingmachine-subcircuit.csv' (LVDB-3) and get active power for the same datetime values of table_datetime_active_power
+% Input: equipment_path (path to equipment_formated.csv), lvdb2_path and lvdb3_path (path to \pelletizer-subcircuit.csv and millingmachine-subcircuit.csv)
+% Output: lvdb2_formated and lvdb3_formated (table with the datetimes and the active power for the dates of lvdb2 and lvdb3 in common with equipment_formated)
 
-close all;  clc;
-clearvars -except equip_data active_power_complete filtered_dates_and_power
+clear; close all;  clc;
 
+equipment_table = readtable('\\wsl.localhost\Ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\data\equipment_formated.csv');
+lvdb2_original_table = readtable('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_dataset\pelletizer-subcircuit.csv');
+lvdb3_original_table = readtable('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_dataset\millingmachine-subcircuit.csv');
 
-cd \\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_dataset\;
+% LVDB2
+lvdb2_original_timestamps = cell2mat(lvdb2_original_table.timestamp);
+lvdb2_timestamps_datetime = datetime(lvdb2_original_timestamps(:, 1:end-3));
+[sharedvals, ~] = ismember(lvdb2_timestamps_datetime, equipment_table.timestamp);
+lvdb2_original_table = table(lvdb2_timestamps_datetime(sharedvals), lvdb2_original_table.active_power(sharedvals), 'VariableNames', {'timestamp', 'active_power'});
+lvdb2_mean_values = grpstats(lvdb2_original_table, 'timestamp', 'mean', 'DataVars', 'active_power');
+lvdb2_missing_dates_table = table(lvdb2_mean_values.timestamp, lvdb2_mean_values.mean_active_power, 'VariableNames', {'timestamp', 'active_power'});
+clear lvdb2_mean_values;
 
-LVDB2 = readtable('pelletizer-subcircuit.csv');
-LVDB3 = readtable('millingmachine-subcircuit.csv');
+% interpolate
+lvdb2_missing_dates_posix = posixtime(lvdb2_missing_dates_table.timestamp);
+equipment_table_posix = posixtime(equipment_table.timestamp);
+% ia = index pf data in equipment_table_posix that is not in lvdb2_missing_dates_posix
+[~, ia] = setdiff(equipment_table_posix, lvdb2_missing_dates_posix);
+% index_a = index of equipment_table_posix of data in common, index_b = index of lvdb2_missing_dates_posix of the data in common
+[~, index_a, index_b] = intersect(equipment_table_posix, lvdb2_missing_dates_posix);
+
+yi = spline(lvdb2_missing_dates_posix, lvdb2_missing_dates_table.active_power, equipment_table_posix(ia));
+active_power(index_a, 1) = lvdb2_missing_dates_table.active_power(index_b);
+active_power(ia, 1) = yi;
+lvdb2_complete_table = table(equipment_table.timestamp, active_power, 'VariableNames', {'timestamp', 'active_power'});
+
+writetable(lvdb2_complete_table, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\data\lvdb2_formated.csv');
+
+%%% Code duplicated, just for not creating a function file
+% LVDB3
+lvdb3_original_timestamps = cell2mat(lvdb3_original_table.timestamp);
+lvdb3_timestamps_datetime = datetime(lvdb3_original_timestamps(:, 1:end-3));
+[sharedvals, idx] = ismember(lvdb3_timestamps_datetime, equipment_table.timestamp);
+lvdb3_original_table = table(lvdb3_timestamps_datetime(sharedvals), lvdb3_original_table.active_power(sharedvals), 'VariableNames', {'timestamp', 'active_power'});
+lvdb3_mean_values = grpstats(lvdb3_original_table, 'timestamp', 'mean', 'DataVars', 'active_power');
+lvdb3_missing_dates_table = table(lvdb3_mean_values.timestamp, lvdb3_mean_values.mean_active_power, 'VariableNames', {'timestamp', 'active_power'});
+clear lvdb3_mean_values;
+
+% interpolate
+lvdb3_missing_dates_posix = posixtime(lvdb3_missing_dates_table.timestamp);
+equipment_table_posix = posixtime(equipment_table.timestamp);
+% ia = index pf data in equipment_table_posix that is not in lvdb2_missing_dates_posix
+[~, ia] = setdiff(equipment_table_posix, lvdb3_missing_dates_posix);
+% index_a = index of equipment_table_posix of data in common, index_b = index of lvdb2_missing_dates_posix of the data in common
+[~, index_a, index_b] = intersect(equipment_table_posix, lvdb3_missing_dates_posix);
+
+yi = spline(lvdb3_missing_dates_posix, lvdb3_missing_dates_table.active_power, equipment_table_posix(ia));
+active_power(index_a, 1) = lvdb3_missing_dates_table.active_power(index_b);
+active_power(ia, 1) = yi;
+lvdb3_complete_table = table(equipment_table.timestamp, active_power, 'VariableNames', {'timestamp', 'active_power'});
+
+writetable(lvdb3_complete_table, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\data\lvdb3_formated.csv');
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Check lintingpath
+%% 7. RUN THIS
+% Objective: get aggregate data
+% Input: lvdb2_formated and lvdb3_formated paths
+% Output: aggregate_power
+
+clear; close all;  clc;
+
+lvdb2_table = readtable('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\data\lvdb2_formated.csv');
+lvdb3_table = readtable('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\data\lvdb3_formated.csv');
+
+aggregate_table = table(lvdb2_table.timestamp, lvdb2_table.active_power + lvdb3_table.active_power, 'VariableNames', {'timestamp', 'active_power'});
+
+figure,
+plot(aggregate_table.active_power);
+title('Aggregate Power')
+xlabel('Index')
+ylabel('Active Power [W]')
+
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\aggregate_power.fig');
+saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\aggregate_power.png');
+
+
+% Debug
+equipment_table = readtable('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\data\equipment_formated.csv');
+name_collumn = cell(1, size(equipment_table, 2) - 1);
+for i = 1 : size(equipment_table, 2) - 1
+    name_collumn{i} = sprintf('Active_Power_Eq_%i', i);
+end
+
+sum_equipment = sum(equipment_table{:, name_collumn}, 2);
+
+figure,
+plot (sum_equipment)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Linting 
 
 close all;  clc;
 
-path_dataset = '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis';
-cd (path_dataset);
-checkcode('analise_dataset.m')
+cd ('\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis');
+checkcode('analyze_dataset.m')
