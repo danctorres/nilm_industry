@@ -2,7 +2,7 @@
 imdeld_dataset/*
 
 # ignore imdeld_analysis/images folder
-imdeld_analysis/images/*
+imdeld_analysis/results/images/*
 
 # ignore documentation/images folder
 documentation/images/*
