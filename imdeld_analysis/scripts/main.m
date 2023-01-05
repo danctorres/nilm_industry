@@ -550,6 +550,21 @@ plot(sum_equipment)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Additional code
+% Objective: Convert table to json file template
+% Input: 
+% Output: json file
+
+struct = table2struct(table);
+
+jsonString = jsonencode(struct);
+
+fid = fopen('table.json', 'w');
+fprintf(fid, '%s', jsonString);
+fclose(fid);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Linting and Indentation tool
 
 close all;  clc;
