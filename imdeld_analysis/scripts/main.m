@@ -12,10 +12,11 @@
 % Input: path_dataset (folder path of the nilm dataset equipment files)
 % Output: equip_data (cell array, where each cell are each equipment samples)
 % Comment: Dataset files are in folder \dissertation_nilm\imdeld_dataset
+
 close all; clear; clc;
 
 file_information = matlab.desktop.editor.getActive;
-[~, file_name, file_ext] = fileparts(file_path);
+[~, file_name, file_ext] = fileparts(file_information.Filename);
 cd([erase(file_information.Filename, ['\imdeld_analysis\scripts\' file_name file_ext]) '\imdeld_dataset\Equipment']);
 
 file_list = dir;
@@ -265,17 +266,55 @@ for i = 1:size(equip_data, 2)
 end
 
 % Debug
-% figure,
+% figure('units','normalized','outerposition',[0 0 1 1])
 % for i = 1 : size(equip_data, 2)
 %     subplot(size(equip_data, 2)/2, 2, i)
 %     plot(date_active_power{:, i+1})
-%     title (sprintf("Equipment %i", i));
-%     xlabel ("Sample")
-%     ylabel("Power [W]")
+%     title (sprintf('Equipment %i', i))
+%     xlabel ('Sample')
+%     ylabel('Power [W]')
 % end
 %
 % saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\dates_active_power.fig');
 % saveas(gcf, '\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\imdeld_analysis\results\images\dates_active_power.png');
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Additional code
+% Objective: Plot the active power values for all the equipment per day 
+% Input: date_active_power
+% Output: subplots_common_original.fig, subplots_common_original.png
+
+close all;  clc;
+clearvars -except equip_data common_timestamps useful_common_timestamps date_active_power
+
+dates_only = datetime(datestr(date_active_power.Date, 'dd-mmm-yyyy'));
+unique_dates = unique(dates_only);
+
+figure('units','normalized','outerposition',[0 0 1 1])
+for i = 1:size(unique_dates, 1)
+    legend_string = strings(1, size(date_active_power, 2) - 1);
+    index = find(ismember(dates_only, unique_dates(i)));
+    subplot((size(date_active_power, 2) - 1) / 2, 2, i)
+    for j = 2:size(date_active_power, 2)
+        plot(table2array(date_active_power(index, j)))
+        hold on;
+        legend_string(j - 1) = string(sprintf('Eq. %i', j - 1));
+    end
+    lgd = legend(legend_string);
+    lgd.FontSize = 7;
+    lgd.NumColumns = 2;
+    title(string(unique_dates(i)))
+    xlabel('Index')
+    ylabel('Active Power [W]')
+    hold off;
+end
+
+file_information = matlab.desktop.editor.getActive;
+[~, file_name, file_ext] = fileparts(file_information.Filename);
+
+saveas(gcf, [erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\images\subplots_common_original.fig']);
+saveas(gcf, [erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\images\subplots_common_original.png']);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -307,7 +346,7 @@ for j = 1:size(equip_data, 2)
     mean_collumn = sprintf('Mean_W_eq_%i', j);
     median_collumn = sprintf('Median_W_eq_%i', j);
 
-    day_table_complete.("Number_samples") = num_samples';
+    day_table_complete.('Number_samples') = num_samples';
     day_table_complete.(mean_collumn) = mean_active_power(:, j);
     day_table_complete.(median_collumn) = median_active_power(:, j);
 end
@@ -322,8 +361,7 @@ end
 close all;  clc;
 clearvars -except equip_data common_timestamps useful_common_timestamps date_active_power
 
-dates = date_active_power.Date;
-dates_only = datetime(datestr(dates, 'dd-mmm-yyyy'));
+dates_only = datetime(datestr(date_active_power.Date, 'dd-mmm-yyyy'));
 unique_dates = unique(dates_only);
 % Remove the 30-Mar-2018 -> unique_dates(end - 1)
 filtered_dates_and_power = date_active_power(dates_only ~= unique_dates(end-1), :);
@@ -379,21 +417,21 @@ table_useful_datetime.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixt
 writetable(table_useful_datetime, [erase(file_information.Filename, '\scripts\main.m') '\results\data\equipment_formated.csv']);
 
 % Debug
-% figure,
+% figure('units','normalized','outerposition',[0 0 1 1])
 % for i = 1 : size(equip_data, 2)
 %     subplot(size(equip_data, 2)/2, 2, i)
 %     plot(filtered_dates_and_power{:, i+1})
-%     title (sprintf("Equipment %i", i));
-%     xlabel ("Sample")
-%     ylabel("Power [W]")
+%     title (sprintf('Equipment %i', i))
+%     xlabel ('Sample')
+%     ylabel('Power [W]')
 % end
-% figure,
+% figure('units','normalized','outerposition',[0 0 1 1])
 % for i = 1 : size(equip_data, 2)
 %     subplot(size(equip_data, 2)/2, 2, i)
 %     plot(active_power_complete(:, i))
-%     title (sprintf("Equipment %i", i));
-%     xlabel ("Sample")
-%     ylabel("Power [W]")
+%     title (sprintf('Equipment %i', i))
+%     xlabel ('Sample')
+%     ylabel('Power [W]')
 % end
 size(dates_complete)
 size(active_power_complete)
@@ -401,8 +439,7 @@ size(active_power_complete)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Additional code
-% Objective: Create histograms of all the equipment active power samples
-% for selected days
+% Objective: Create histograms of all the equipment active power samples for selected days
 % Input: equip_data, active_power_complete
 % Output: histogram images
 
@@ -410,29 +447,29 @@ close all;  clc;
 clearvars -except equip_data active_power_complete
 
 % Original
-figure
+figure('units','normalized','outerposition',[0 0 1 1])
 for i = 1:size(equip_data, 2)
-    subplot(size(equip_data, 2)/2, 2, i);
+    subplot(size(equip_data, 2)/2, 2, i)
     eq_table = equip_data{i};
     aux = table2array(eq_table(:, 2));
     histogram(aux);
-    title(sprintf("Equipment %i", i));
+    title(sprintf('Equipment %i', i))
     xlabel('Power [W]')
     ylabel('Number of samples')
 end
 
 file_information = matlab.desktop.editor.getActive;
-[~, file_name, file_ext] = fileparts(file_path);
+[~, file_name, file_ext] = fileparts(file_information.Filename);
 
 saveas(gcf, [erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\images\histogram_original_equipment.fig']);
 saveas(gcf, [erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\images\histogram_original_equipment.png']);
 
 % selected days
-figure
+figure('units','normalized','outerposition',[0 0 1 1])
 for i = 1:size(equip_data, 2)
-    subplot(size(equip_data, 2)/2, 2, i);
-    histogram(active_power_complete(:, i));
-    title(sprintf("Equipment %i", i));
+    subplot(size(equip_data, 2)/2, 2, i)
+    histogram(active_power_complete(:, i))
+    title(sprintf('Equipment %i', i))
     xlabel('Power [W]')
     ylabel('Number of samples')
 end
@@ -450,7 +487,7 @@ saveas(gcf, [erase(file_information.Filename, ['\scripts\' file_name file_ext]) 
 close all; clear; clc;
 
 file_information = matlab.desktop.editor.getActive;
-[~, file_name, file_ext] = fileparts(file_path);
+[~, file_name, file_ext] = fileparts(file_information.Filename);
 
 equipment_table = readtable([erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\data\equipment_formated.csv']);
 lvdb2_original_table = readtable([erase(file_information.Filename, ['\imdeld_analysis\scripts\' file_name file_ext]) '\imdeld_dataset\pelletizer-subcircuit.csv']);
@@ -515,7 +552,7 @@ writetable(lvdb3_complete_table, [erase(file_information.Filename, ['\scripts\' 
 close all; clear; clc;
 
 file_information = matlab.desktop.editor.getActive;
-[~, file_name, file_ext] = fileparts(file_path);
+[~, file_name, file_ext] = fileparts(file_information.Filename);
 
 lvdb2_table_path = [erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\data\lvdb2_formated.csv'];
 lvdb3_table_path = [erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\data\lvdb3_formated.csv'];
@@ -525,8 +562,8 @@ lvdb3_table = readtable(lvdb3_table_path);
 
 aggregate_table = table(lvdb2_table.timestamp, lvdb2_table.active_power+lvdb3_table.active_power, 'VariableNames', {'timestamp', 'active_power'});
 
-figure,
-plot(aggregate_table.active_power);
+figure('units','normalized','outerposition',[0 0 1 1])
+plot(aggregate_table.active_power)
 title('Aggregate Power')
 xlabel('Index')
 ylabel('Active Power [W]')
@@ -545,7 +582,7 @@ end
 
 sum_equipment = sum(equipment_table{:, name_collumn}, 2);
 
-figure,
+figure('units','normalized','outerposition',[0 0 1 1])
 plot(sum_equipment)
 
 
@@ -570,9 +607,8 @@ fclose(fid);
 close all;  clc;
 
 file_information = matlab.desktop.editor.getActive;
-file_path = file_information.Filename;
-[~, name, ext] = fileparts(file_path);
-cd(erase(file_path, [name, ext]));
+[~, name, ext] = fileparts(file_information.Filename);
+cd(erase(file_information.Filename, [name, ext]));
 
 checkcode('main.m')
 
