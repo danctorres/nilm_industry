@@ -356,7 +356,7 @@ end
 %% 5. Core code
 % Objective: Remove the 30-March-2018 from the useful_common_timestamps and insert missing samples for each equipment
 % Input: equip_data, date_active_power dates dates_only
-% Output: table_useful_datetime, equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
+% Output: equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
 
 close all;  clc;
 clearvars -except equip_data common_timestamps useful_common_timestamps date_active_power
@@ -411,10 +411,10 @@ file_information = matlab.desktop.editor.getActive;
 writetable(table_useful, [erase(file_information.Filename, '\scripts\main.m') '\results\data\equipment_posix_formated.csv']);
 
 % datetime format
-table_useful_datetime = table_useful;
-table_useful_datetime.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');
+equipment_formated = table_useful;
+equipment_formated.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');
 
-writetable(table_useful_datetime, [erase(file_information.Filename, '\scripts\main.m') '\results\data\equipment_formated.csv']);
+writetable(equipment_formated, [erase(file_information.Filename, '\scripts\main.m') '\results\data\equipment_formated.csv']);
 
 % Debug
 % figure('units','normalized','outerposition',[0 0 1 1])
@@ -435,6 +435,49 @@ writetable(table_useful_datetime, [erase(file_information.Filename, '\scripts\ma
 % end
 size(dates_complete)
 size(active_power_complete)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Additional code
+% Objective: Plot the active power values for all the equipment per day
+% Input: equipment_formated.csv
+% Output: subplots_equipment_formated.fig, subplots_equipment_formated.png
+
+close all;  clc;
+clearvars -except equip_data common_timestamps useful_common_timestamps date_active_power
+
+file_information = matlab.desktop.editor.getActive;
+[~, file_name, file_ext] = fileparts(file_information.Filename);
+
+equipment_formated = readtable([erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\data\equipment_formated.csv']);
+
+dates_only = datetime(datestr(equipment_formated.timestamp, 'dd-mmm-yyyy'));
+unique_dates = unique(dates_only);
+
+figure('units','normalized','outerposition',[0 0 1 1])
+for i = 1:size(unique_dates, 1)
+    legend_string = strings(1, size(equipment_formated, 2) - 1);
+    index = find(ismember(dates_only, unique_dates(i)));
+    subplot((size(equipment_formated, 2) - 1) / 2, 2, i)
+    for j = 2:size(equipment_formated, 2)
+        plot(table2array(equipment_formated(index, j)))
+        hold on;
+        legend_string(j - 1) = string(sprintf('Eq. %i', j - 1));
+    end
+    lgd = legend(legend_string);
+    lgd.FontSize = 7;
+    lgd.NumColumns = 2;
+    title(string(unique_dates(i)))
+    xlabel('Index')
+    ylabel('Active Power [W]')
+    hold off;
+end
+
+file_information = matlab.desktop.editor.getActive;
+[~, file_name, file_ext] = fileparts(file_information.Filename);
+
+saveas(gcf, [erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\images\subplots_equipment_formated.fig']);
+saveas(gcf, [erase(file_information.Filename, ['\scripts\' file_name file_ext]) '\results\images\subplots_equipment_formated.png']);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
