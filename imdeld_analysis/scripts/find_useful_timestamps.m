@@ -22,13 +22,14 @@ function [useful_common_timestamps] = find_useful_timestamps(common_timestamps)
     end
     
     useful_common_timestamps = common_timestamps(index);
+    
+    % Debug
+    % for i = 1 : size(days_with_more_samples.Date, 1)
+    %     aux = find(dates_only == days_with_more_samples.Date(i));
+    %     size_dates(i) = size(aux,1);
+    % end
+    %
+    % sum(days_with_more_samples.count)
+    % size(useful_common_timestamps)
 end
 
-% Debug
-% for i = 1 : size(days_with_more_samples.Date, 1)
-%     aux = find(dates_only == days_with_more_samples.Date(i));
-%     size_dates(i) = size(aux,1);
-% end
-%
-% sum(days_with_more_samples.count)
-% size(useful_common_timestamps)
