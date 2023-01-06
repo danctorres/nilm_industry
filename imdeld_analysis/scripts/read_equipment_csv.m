@@ -8,7 +8,7 @@ function [equip_data] = read_equipment_csv(varargin)
     else
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        cd([erase(file_information.Filename, ['\imdeld_analysis\scripts\' file_name file_ext]) '\imdeld_dataset\Equipment']);
+        cd([erase(file_information.Filename, ['\imdeld_analysis\scripts\', file_name, file_ext]), '\imdeld_dataset\Equipment']);
     end
     
     file_list = dir;
@@ -20,10 +20,10 @@ function [equip_data] = read_equipment_csv(varargin)
     for i = 1:n_Eq
         equip_data{i} = readtable(string(file_list(i)));
     end
-
+    
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
-    cd(erase(file_information.Filename, [file_name file_ext]));
+    cd(erase(file_information.Filename, [file_name, file_ext]));
 end
 
 % Comments:
