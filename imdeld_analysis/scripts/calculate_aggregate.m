@@ -36,6 +36,6 @@ function [aggregate_table] = calculate_aggregate(varargin)
     %
     % sum_equipment = sum(equipment_table{:, name_collumn}, 2);
     %
-    % figure('units','normalized','outerposition',[0 0 1 1])
+    % figure('units','normalized','outerposition',[0, 0, 1, 1])
     % plot(sum_equipment)
 end

@@ -17,7 +17,7 @@ function [lvdb3_complete_table] = read_lvdb3_csv(varargin)
     end
     
     lvdb3_original_timestamps   = cell2mat(lvdb3_original_table.timestamp);
-    lvdb3_timestamps_datetime   = datetime(lvdb3_original_timestamps(:, 1:end-3));
+    lvdb3_timestamps_datetime   = datetime(lvdb3_original_timestamps(:, 1:end - 3));
     [sharedvals, ~]             = ismember(lvdb3_timestamps_datetime, equipment_table.timestamp);
     lvdb3_original_table        = table(lvdb3_timestamps_datetime(sharedvals), lvdb3_original_table.active_power(sharedvals), 'VariableNames', {'timestamp', 'active_power'});
     lvdb3_mean_values           = grpstats(lvdb3_original_table, 'timestamp', 'mean', 'DataVars', 'active_power');

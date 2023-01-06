@@ -7,8 +7,7 @@ function [] = histogram_equipment_original(equip_data, varargin)
     for i = 1:size(equip_data, 2)
         subplot(size(equip_data, 2) / 2, 2, i)
         eq_table = equip_data{i};
-        aux = table2array(eq_table(:, 2));
-        histogram(aux);
+        histogram( table2array(eq_table(:, 2)));
         title(sprintf('Equipment %i', i))
         xlabel('Power [W]')
         ylabel('Number of samples')
