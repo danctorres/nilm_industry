@@ -6,12 +6,12 @@
 
 function [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps)
     diff_samples = diff(posixtime(common_timestamps)) - 1;
-
+    
     day1 = common_timestamps(diff_samples == max(diff_samples));
     day2 = common_timestamps(find(diff_samples == max(diff_samples)) + 1);
     interval = seconds(day2 - day1);
-
+    
     number_missing_samples  = sum(diff_samples);
     mean_missing_samples    = mean(diff_samples);
     median_missing_samples  = median(diff_samples);
-end
+    end

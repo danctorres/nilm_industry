@@ -3,6 +3,7 @@
 % 09/12/2022
 
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% %% CORE CODE %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 close all; clear; clc;
 
@@ -33,6 +34,7 @@ lvdb3_table = read_lvdb3_csv(true);
 aggregate_table = calculate_aggregate(true);
 
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%% %% ADDITIONAL CODE %% %%%%%%%%%%%%%%%%%%%%%%%%%%
 [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data);
 [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps);
@@ -42,6 +44,7 @@ plot_active_power_per_day(date_active_power, false);
 plot_power_selected_days();
 
 % table_2_json(); % Convert a table and save it has a json
+
 
 
 %%%%%%%%%%%%%%%%%%%% %% Linting and Indentation tool %% %%%%%%%%%%%%%%%%%%%%
@@ -63,11 +66,10 @@ mbeautify_path = [erase(file_information.Filename, ['dissertation_nilm\imdeld_an
 cd(mbeautify_path);
 source_folder = ([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\imdeld_analysis\scripts\']);
 
-MBeautify.formatFile([source_folder, 'main.m'])
-
-
+% mbeautify_path = [erase(file_information.Filename, ['\dissertation_nilm\imdeld_analysis\scripts\', file_name, file_ext]), '\MBeautifier\'];
+% cd(mbeautify_path);
 % files_names = file_list(endsWith(file_list, 'm'));
 % for i = 1:size(files_names, 2)
-%     MBeautify.formatFile([source_folder, files_names(i)])
+%     MBeautify.formatFile([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\imdeld_analysis\scripts\', files_names{i}]);
 % end
-% MBeautify.formatCurrentEditorPage()
+ 
