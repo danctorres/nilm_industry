@@ -30,7 +30,7 @@ equipment_formated = interpolate_equipment_data(date_active_power);
 lvdb2_table = read_lvdb2_csv(true);
 lvdb3_table = read_lvdb3_csv(true);
 
-% Calculate aggregate power by the sum of lvdb2 and lvdb3
+% Compute the total power consumption  by summing LVDB2 and LVDB3
 aggregate_table = calculate_aggregate(true);
 
 
