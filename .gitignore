@@ -10,5 +10,8 @@ documentation/images/*
 # ignore all asv files
 *.asv
 
-#ignore .vscode
+# ignore .vscode
 .vscode
+
+# ignore clion
+.idea
