@@ -26,8 +26,8 @@ function [equipment_formated] = interpolate_equipment_data(date_active_power, va
     [~, index_date_dataset, ~]  = intersect(dates_complete, date_dataset);
     
     % Spline interpolation, using a cubic spline, alternatives: csaps / pchip
-    active_power_complete = zeros(size(dates_complete, 1), size(equip_data, 2));
-    for i = 1:size(equip_data, 2)
+    active_power_complete = zeros(size(dates_complete, 1), size(date_active_power, 2) - 1);
+    for i = 1:size(date_active_power, 2) - 1
         active_power_complete(index_date_dataset, i)    = filtered_date_active_power{:, i+1};
         active_power_complete(index_diff, i)            = spline(date_dataset, filtered_date_active_power{:, i+1}, diff);
     end
