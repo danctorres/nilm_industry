@@ -5,15 +5,18 @@
 function [aggregate_table] = calculate_aggregate(varargin)
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
-    
-    lvdb2_table_path = [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\data\lvdb2_formated.csv'];
-    lvdb3_table_path = [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\data\lvdb3_formated.csv'];
-    
-    lvdb2_table = readtable(lvdb2_table_path);
-    lvdb3_table = readtable(lvdb3_table_path);
-    
-    aggregate_table = table(lvdb2_table.timestamp, lvdb2_table.active_power+lvdb3_table.active_power, 'VariableNames', {'timestamp', 'active_power'});
-    
+    if (nargin == 3)
+        aggregate_table = table(varargin{2}.timestamp,  sum(varargin{2}.active_power, 2) +  sum(varargin{3}.active_power, 2), 'VariableNames', {'timestamp', 'active_power'});
+    else
+        lvdb2_table_path = [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\data\lvdb2_formated.csv'];
+        lvdb3_table_path = [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\data\lvdb3_formated.csv'];
+        
+        lvdb2_table = readtable(lvdb2_table_path);
+        lvdb3_table = readtable(lvdb3_table_path);
+        
+        aggregate_table = table(lvdb2_table.timestamp, lvdb2_table.active_power+lvdb3_table.active_power, 'VariableNames', {'timestamp', 'active_power'});
+    end
+
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
     plot(aggregate_table.active_power)
     title('Aggregate Power')

@@ -10,7 +10,7 @@ function [] = plot_power_selected_days(varargin)
     [~, file_name, file_ext] = fileparts(file_information.Filename);
     
     if (nargin > 0)
-        equipment_formated = readtable(varargin{2});
+        equipment_formated = varargin{1};
     else
         equipment_formated = readtable([erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\data\equipment_formated.csv']);
     end
@@ -37,7 +37,7 @@ function [] = plot_power_selected_days(varargin)
         hold off;
     end
     
-    if (nargin > 0 && varargin{1} == true)
+    if (nargin > 0 && varargin{2} == true)
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_equipment_formated.fig']);
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_equipment_formated.png']);
     end
