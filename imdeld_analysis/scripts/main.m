@@ -1,15 +1,16 @@
-%%%%%%%%%%%%%% %% NILM dissertation dataset analysis code %% %%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%% NILM dissertation dataset analysis code %%%%%%%%%%%%%% %%
 % Daniel Torres
 % 09/12/2022
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %% CORE CODE %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%% CORE CODE %%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
 close all; clear; clc;
 
 file_information = matlab.desktop.editor.getActive;
 [~, file_name, file_ext] = fileparts(file_information.Filename);
 cd(erase(file_information.Filename, [file_name, file_ext]));
+clearvars file_ext file_name file_information
 
 % Read the data from the equipment csv files
 equip_data = read_equipment_csv(); % read dataset equipment csv
@@ -23,27 +24,32 @@ useful_common_timestamps = find_useful_timestamps(common_timestamps);
 % Construct a table containing the timestamps and corresponding active power values for each piece of equipment
 date_active_power = construct_date_power_table(equip_data, useful_common_timestamps);
 
-% Interpolate the active power values to obtain a complete set of data for one day
-equipment_formated = interpolate_equipment_data(date_active_power);
+% Interpolate the active power values to obtain a complete set of data the choosen days
+equipment_formated = interpolate_equipment_data(date_active_power, false);
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
-lvdb2_table = read_lvdb2_csv(true);
-lvdb3_table = read_lvdb3_csv(true);
+lvdb2_table = read_lvdb2_csv(false);
+lvdb3_table = read_lvdb3_csv(false);
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
-aggregate_table = calculate_aggregate(true);
+aggregate_table = calculate_aggregate(false, lvdb2_table, lvdb3_table);
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%% %% ADDITIONAL CODE %% %%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%% ADDITIONAL CODE %%%%%%%%%%%%%%%%%%%%%%%%%% %%
 [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data);
 [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps);
 average_power_day = calculate_average_power_day(date_active_power);
-histogram_equipment_original();
+histogram_equipment_original(equip_data, false);
 plot_active_power_per_day(date_active_power, false);
-plot_power_selected_days();
+plot_power_selected_days(equipment_formated, false);
+histogram_equipment_formated(equipment_formated, false);
+statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvdb2_table, lvdb3_table, aggregate_table, false);
 
 % table_2_json(); % Convert a table and save it has a json
+
+
+%% %%%%%%%%%%%%%%%% Currently in development
 
 
 

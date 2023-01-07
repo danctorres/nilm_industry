@@ -19,5 +19,4 @@ function [] = histogram_equipment_original(equip_data, varargin)
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\histogram_original_equipment.fig']);
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\histogram_original_equipment.png']);
     end
-
 end
