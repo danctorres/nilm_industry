@@ -50,6 +50,17 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvd
 
 
 %% %%%%%%%%%%%%%%%% Currently in development
+% Perform k-means clustering with 2 clusters
+
+% Remove outliers
+% figure;
+% for i = 1:size(equipment_formated, 2) - 1
+%     x_clean = rmoutliers(table2array(equipment_formated(:, i + 1)), 'mean', 'ThresholdFactor', 3);
+%     subplot((size(equipment_formated, 2) - 1) / 2, 2, i);
+%     plot(x_clean)
+% end
+
+
 
 
 
