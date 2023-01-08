@@ -12,7 +12,7 @@ function [day_table_complete] = calculate_average_power_day(date_active_power)
     num_samples             = zeros(1, size(unique_dates, 1));
     mean_active_power       = zeros(1, size(unique_dates, 1));
     median_active_power     = zeros(1, size(unique_dates, 1));
-    for j = 1:size(equip_data, 2)
+    for j = 1:size(date_active_power, 2) - 1
         for i = 1:size(unique_dates, 1)
             num_samples(i)              = sum(index_dates == i);
             mean_active_power(i, j)     = round(mean(date_active_power{index_dates == i, j + 1}));
