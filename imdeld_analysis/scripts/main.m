@@ -1,10 +1,13 @@
-%% %%%%%%%%%%%%%% NILM dissertation dataset analysis code %%%%%%%%%%%%%% %%
-% Daniel Torres
-% 09/12/2022
+%% -------------- NILM dissertation dataset analysis code -------------- %%
+
+% main.m
+% By: Daniel Torres
+% Created: 09/12/2022
+% Updated: 09/01/2023
 
 
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%% CORE CODE %%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
+%% ----------------------------- CORE CODE ----------------------------- %%
 close all; clear; clc;
 
 file_information = matlab.desktop.editor.getActive;
@@ -37,7 +40,9 @@ aggregate_table = calculate_aggregate(false, lvdb2_table, lvdb3_table);
 [counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(equipment_formated, false);
 [curves, params_normal, ~] = get_params_normals(size(equipment_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%% ADDITIONAL CODE %%%%%%%%%%%%%%%%%%%%%%%%%% %%
+
+
+%% -------------------------- ADDITIONAL CODE -------------------------- %%
 [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data);
 [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps);
 average_power_day = calculate_average_power_day(date_active_power);
@@ -51,7 +56,8 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvd
 % table_2_json(); % Convert a table and save it has a json
 
 
-%% %%%%%%%%%%%%%%%% Currently in development
+
+%% --------------------- Currently in development ---------------------- %%
 % Plot gaussians
  for j = 1:size(equipment_formated, 2) - 1
         peaks_index = find(TF_cell{j} == 1);
@@ -135,17 +141,19 @@ end
 file_information = matlab.desktop.editor.getActive;
 [~, file_name, file_ext] = fileparts(file_information.Filename);
 cd(erase(file_information.Filename, [file_name, file_ext]));
-%%%%%%%%%%%%%%%%%%%% %% Linting and Indentation tool %% %%%%%%%%%%%%%%%%%%%%
+
+
+
+%% ------------------- Linting and Indentation tool -------------------- %%
 close all;  clc;
 
+% Linting
 file_information = matlab.desktop.editor.getActive;
 [~, file_name, file_ext] = fileparts(file_information.Filename);
 cd(erase(file_information.Filename, [file_name, file_ext]));
-
 file_list = dir;
 file_list = {file_list.name};
-file_list = file_list(3:end); % remove . and ..
-
+file_list = file_list(3:end);
 checkcode(file_list(endsWith(file_list, 'm')))
 
 % Indentation tool
@@ -153,7 +161,6 @@ checkcode(file_list(endsWith(file_list, 'm')))
 mbeautify_path = [erase(file_information.Filename, ['dissertation_nilm\imdeld_analysis\scripts\', file_name, file_ext]), '\MBeautifier\'];
 cd(mbeautify_path);
 source_folder = ([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\imdeld_analysis\scripts\']);
-
 % mbeautify_path = [erase(file_information.Filename, ['\dissertation_nilm\imdeld_analysis\scripts\', file_name, file_ext]), '\MBeautifier\'];
 % cd(mbeautify_path);
 % files_names = file_list(endsWith(file_list, 'm'));
