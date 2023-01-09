@@ -34,7 +34,8 @@ lvdb3_table = read_lvdb3_csv(false);
 % Compute the total power consumption  by summing LVDB2 and LVDB3
 aggregate_table = calculate_aggregate(false, lvdb2_table, lvdb3_table);
 
-
+[counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(equipment_formated, false);
+[curves, params_normal, ~] = get_params_normals(size(equipment_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%% ADDITIONAL CODE %%%%%%%%%%%%%%%%%%%%%%%%%% %%
 [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data);
@@ -44,13 +45,55 @@ histogram_equipment_original(equip_data, false);
 plot_active_power_per_day(date_active_power, false);
 plot_power_selected_days(equipment_formated, false);
 histogram_equipment_formated(equipment_formated, false);
+
 statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvdb2_table, lvdb3_table, aggregate_table, false);
 
 % table_2_json(); % Convert a table and save it has a json
 
 
 %% %%%%%%%%%%%%%%%% Currently in development
-% Perform k-means clustering with 2 clusters
+% Plot gaussians
+ for j = 1:size(equipment_formated, 2) - 1
+        peaks_index = find(TF_cell{j} == 1);
+        mid_peaks_index = zeros(1, size(peaks_index, 2) - 1);
+        for i = 1:size(peaks_index, 2) - 1
+            mid_peaks_index(i) = round((peaks_index(i + 1) + peaks_index(i)) / 2);
+        end
+        
+        counts = counts_cell{j};
+        for i = 1:size(peaks_index, 2)
+            if (i == 1)
+                % Multivariate Copula Analysis Toolbox (MvCAT) - allfitdist()
+                counts_group(j, i) = {counts(1, 1:mid_peaks_index(1))};
+            elseif (i == size(peaks_index, 2))
+                counts_group(j, i) = {counts(1, mid_peaks_index(end):end)};
+            else
+                counts_group(j, i) = {counts(1, mid_peaks_index(i - 1):mid_peaks_index(i))};
+            end
+        end
+    end 
+
+
+for i = 1:size(params_normal, 1)
+    figure,
+    sgtitle(sprintf('Equipment % i', i));
+    for j = 1:size(params_normal, 2)
+        aux = cell2mat(params_normal(i, j));
+        if (~isempty(aux))
+            mu = aux(1, 1);
+            sigma = aux(1, 2);
+            x = -15*mu:15*mu;
+            y = normpdf(x,mu,sigma);
+            subplot(size(params_normal, 2), 1, j)
+            plot(x, y)
+            title(sprintf('State %i', j - 1));
+        end
+    end
+end
+
+
+
+
 
 % Remove outliers
 % figure;
@@ -60,10 +103,38 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvd
 %     plot(x_clean)
 % end
 
+% read csv
+file_information = matlab.desktop.editor.getActive;
+[~, file_name, file_ext] = fileparts(file_information.Filename);
+cd([erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\data\hdbscan']);
+
+file_list = dir;
+file_list = {file_list.name};
+file_list = file_list(3:end);
 
 
 
+equip_data = cell(1, size(file_list, 2));
+for i = 1:size(file_list, 2)
+    equip_data{i} = readtable(string(file_list(i)));
+end
 
+
+ht_1 = readtable("histogram_eq7.csv");
+lt_1 = readtable("labels_eq7.csv");
+edges = [ht_1.LeftEdges; ht_1.RightEdges(end)]';
+counts = ht_1.FrequencyCount';
+h = histogram('BinEdges', edges,'BinCounts', counts);
+hold on
+scatter(ht_1.x_BinCenter, counts, 20, lt_1.x_Cluster);
+
+for i = 1:size(counts, 2)
+    set(bars(i), 'FaceColor', colors{i,1});
+end
+
+file_information = matlab.desktop.editor.getActive;
+[~, file_name, file_ext] = fileparts(file_information.Filename);
+cd(erase(file_information.Filename, [file_name, file_ext]));
 %%%%%%%%%%%%%%%%%%%% %% Linting and Indentation tool %% %%%%%%%%%%%%%%%%%%%%
 close all;  clc;
 

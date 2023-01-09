@@ -31,8 +31,8 @@ def main() -> None:
 
         labels = clustering(points)
 
-        np.savetxt(f'imdeld_analysis/results/data/hdbscan/histogram_eq{i + 1}.csv', np.column_stack([bin_centers, hist, edges[:-1], edges[1:]]), delimiter=',', header='Bin Center,Frequency Count')
-        np.savetxt(f'imdeld_analysis/results/data/hdbscan/labels_eq{i + 1}.csv', labels, delimiter=',')
+        np.savetxt(f'imdeld_analysis/results/data/hdbscan/histogram_eq{i + 1}.csv', np.column_stack([bin_centers, hist,  edges[:-1], edges[1:]]), delimiter=',', header='Bin Center, Frequency Count, Left Edges, Right Edges')
+        np.savetxt(f'imdeld_analysis/results/data/hdbscan/labels_eq{i + 1}.csv', labels, delimiter=',', header='Cluster')
     print("done")
 
 
