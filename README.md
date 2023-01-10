@@ -14,7 +14,7 @@ Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads
 ├── data
 │ ├── raw						# Imdeld dataset
 │ ├── interim				# Intermediate data
-│	└── processed			# Final dataset for modeling
+│ └── processed			# Final dataset for modeling
 ├── docs					  # Documentation files
 ├── reports					
 │ └── figures				# Generated figures to be used in reporting 
@@ -28,18 +28,15 @@ Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads
 └── README.md
 ```
 
-How to install and set up:
-============================
+### How to install and set up:
 ```
 • Clone the repo.
 • Download the imdeld dataset from IEEEDataPort into the data/raw folder.
 ```
 
-How to use the repo:
-============================
-	ToDo
+### How to use the repo:
+> ToDo
 
 
-Link to relevant resources:
-============================
+### Link to relevant resources:
 > Imdeld dataset: https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
