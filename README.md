@@ -11,7 +11,7 @@ Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads
     .
 	├── build					# Compiled files
 	├── data
-		├── raw					# Imdeld dataset
+	├── raw						# Imdeld dataset
 		├── interim				# Intermediate data
 		└── processed			# Final dataset for modeling
 	├── docs					# Documentation files
