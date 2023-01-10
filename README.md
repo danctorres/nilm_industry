@@ -10,20 +10,20 @@ Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads
 ### Structure:
 ```
 .
-├── build					# Compiled files
+├── build					          # Compiled files
 ├── data
-│ ├── raw						# Imdeld dataset
-│ ├── interim				# Intermediate data
-│ └── processed			# Final dataset for modeling
-├── docs					  # Documentation files
+│   ├── raw						      # Imdeld dataset
+│   ├── interim				      # Intermediate data
+│   └── processed			      # Final dataset for modeling
+├── docs					          # Documentation files
 ├── reports					
-│ └── figures				# Generated figures to be used in reporting 
-├── src						  # Source files
-│ ├── data_and_features	# Code to analyze the dataset
-│ ├── nilm				  # Complete algorithm
-│ └── optimization	# Optimization algorithms
-├── test					  # Automated tests
-├── tools					  # Tools and utilities
+│   └── figures				      # Generated figures to be used in reporting 
+├── src						          # Source files
+│   ├── data_and_features   # Code to analyze the dataset
+│   ├── nilm				        # Complete algorithm
+│   └── optimization        # Optimization algorithms
+├── test					          # Automated tests
+├── tools					          # Tools and utilities
 ├── LICENSE
 └── README.md
 ```
