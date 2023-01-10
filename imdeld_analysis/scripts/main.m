@@ -37,9 +37,10 @@ lvdb3_table = read_lvdb3_csv(false);
 % Compute the total power consumption  by summing LVDB2 and LVDB3
 aggregate_table = calculate_aggregate(false, lvdb2_table, lvdb3_table);
 
-[counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(equipment_formated, false);
-[curves, params_normal, ~] = get_params_normals(size(equipment_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
-
+% Histogram states
+[counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(equipment_formated, 1500, true, false);
+[curves, params_normal, ~, group_power_limit] = get_params_normals(size(equipment_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
+histogram_state_peak_equipment(equipment_formated, group_power_limit)
 
 
 %% -------------------------- ADDITIONAL CODE -------------------------- %%
@@ -58,47 +59,28 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvd
 
 
 %% --------------------- Currently in development ---------------------- %%
-% Plot gaussians
- for j = 1:size(equipment_formated, 2) - 1
-        peaks_index = find(TF_cell{j} == 1);
-        mid_peaks_index = zeros(1, size(peaks_index, 2) - 1);
-        for i = 1:size(peaks_index, 2) - 1
-            mid_peaks_index(i) = round((peaks_index(i + 1) + peaks_index(i)) / 2);
-        end
-        
-        counts = counts_cell{j};
-        for i = 1:size(peaks_index, 2)
-            if (i == 1)
-                % Multivariate Copula Analysis Toolbox (MvCAT) - allfitdist()
-                counts_group(j, i) = {counts(1, 1:mid_peaks_index(1))};
-            elseif (i == size(peaks_index, 2))
-                counts_group(j, i) = {counts(1, mid_peaks_index(end):end)};
-            else
-                counts_group(j, i) = {counts(1, mid_peaks_index(i - 1):mid_peaks_index(i))};
-            end
-        end
-    end 
 
-
-for i = 1:size(params_normal, 1)
+for i = 1:size(group_power_limit, 1)
     figure,
     sgtitle(sprintf('Equipment % i', i));
-    for j = 1:size(params_normal, 2)
-        aux = cell2mat(params_normal(i, j));
-        if (~isempty(aux))
-            mu = aux(1, 1);
-            sigma = aux(1, 2);
-            x = -15*mu:15*mu;
-            y = normpdf(x,mu,sigma);
-            subplot(size(params_normal, 2), 1, j)
-            plot(x, y)
-            title(sprintf('State %i', j - 1));
-        end
+    
+    inner_loop_count = size(group_power_limit, 2);
+    while(isempty(group_power_limit{i, inner_loop_count}))
+        inner_loop_count = inner_loop_count - 1;
+    end
+    for j = 1:inner_loop_count
+        lower_limit = group_power_limit{i, j}(1);
+        upper_limit = group_power_limit{i, j}(2);
+
+        equipment_formated_array = table2array(equipment_formated(:, i + 1));
+        groups_values = equipment_formated_array(equipment_formated_array > lower_limit & equipment_formated_array < upper_limit);
+
+        subplot(size(group_power_limit, 2), 1, j);
+        histogram(groups_values)
+        title(sprintf('State %i', j));
+
     end
 end
-
-
-
 
 
 % Remove outliers
