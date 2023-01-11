@@ -20,7 +20,7 @@ function [output_counts_cell, output_edges_cell, output_bin_center, output_TF_ce
             x_clean = data;
         end
 
-        [counts, edges] = histcounts(x_clean);
+        [counts, edges] = histcounts(x_clean, 100);
         histHandle      = histogram('BinEdges', edges, 'BinCounts', counts);
         bin_center      = histHandle.BinEdges + histHandle.BinWidth/2;
         bin_center      = bin_center(1:end - 1);
