@@ -1,8 +1,8 @@
+function [equip_data] = read_equipment_csv(varargin)
 % Objective: Read dataset
 % Input: path_dataset (Optional - folder path of the nilm dataset equipment files)
 % Output: equip_data (cell array, where each cell are each equipment samples)
 
-function [equip_data] = read_equipment_csv(varargin)
     if (nargin == 1)
         cd(varargin{1});
     else

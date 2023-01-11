@@ -19,7 +19,7 @@ function [] = histogram_state_peak_equipment(equipment_formated, group_power_lim
             groups_values = equipment_formated_array(equipment_formated_array > lower_limit & equipment_formated_array < upper_limit);
     
             subplot(size(group_power_limit_cell, 2), 1, j);
-            histogram(groups_values)
+            histogram(groups_values, 100)
             title(sprintf('State %i', j));
             xlabel('Power [W]')
             ylabel('Number of samples')

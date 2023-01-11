@@ -26,6 +26,9 @@ useful_common_timestamps = find_useful_timestamps(common_timestamps);
 
 % Construct a table containing the timestamps and corresponding active power values for each piece of equipment
 date_active_power = construct_date_power_table(equip_data, useful_common_timestamps);
+date_voltage = construct_date_voltage_table(equip_data, useful_common_timestamps, false);
+
+
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
 equipment_formated = interpolate_equipment_data(date_active_power, false);
@@ -45,6 +48,9 @@ histogram_state_peak_equipment(equipment_formated, group_power_limit)
 % Calculate ON/OFF
 on_off_array = calculate_on_off(equipment_formated, group_power_limit);
 
+% Calculate power at the events for each equipment
+
+
 
 
 %% -------------------------- ADDITIONAL CODE -------------------------- %%
@@ -53,7 +59,10 @@ on_off_array = calculate_on_off(equipment_formated, group_power_limit);
 average_power_day = calculate_average_power_day(date_active_power);
 histogram_equipment_original(equip_data, false);
 plot_active_power_per_day(date_active_power, false);
+plot_active_power_per_day(date_voltage, false);
+
 plot_power_selected_days(equipment_formated, false);
+plot_power_select_day(equipment_formated, 1, false);
 histogram_equipment_formated(equipment_formated, false);
 
 statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvdb2_table, lvdb3_table, aggregate_table, false);
@@ -63,6 +72,26 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvd
 
 
 %% --------------------- Currently in development ---------------------- %%
+aggregate_array = table2array(aggregate_table(:, 2));
+events_index = logical(zeros(size(equipment_formated, 1), size(equipment_formated, 2) - 1));
+aggregate_array_clean = rmoutliers(aggregate_array(:, 1), 'mean', 'ThresholdFactor', 3);
+figure,
+for i = 1:size(equipment_formated, 2) - 1
+    events_index(:, i) = logical([diff(on_off_array(:, i)) ~= 0; 0]);
+    %power_events(:, i) = {abs(diff(aggregate_array_clean(events_index(:, i))))};
+    power_events(:, i) = {abs(diff(aggregate_array(events_index(:, i))))};
+    subplot((size(equipment_formated, 2) - 1) / 2, 2, i)
+    power_events_clean = rmoutliers(cell2mat(power_events(:, i)), 'mean', 'ThresholdFactor', 3);
+    plot(power_events{i}, '.');
+    % histogram(power_events_clean, 100)
+    % histogram(power_events{i}, 100);
+
+    c = polyfit(1:size(power_events{i}, 1), power_events{i}, 1);
+    y_est = polyval(c, 1:size(power_events{i}, 1));
+    hold on
+    plot(1:size(power_events{i}, 1), y_est, 'r--', 'LineWidth', 2)
+
+end
 
 
 % Remove outliers
