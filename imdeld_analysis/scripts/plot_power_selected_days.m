@@ -1,7 +1,7 @@
 function [] = plot_power_selected_days(varargin)
-% Objective: Plot the active power values for all the equipment per day
-% Input: equipment_formated.csv
-% Output: subplots_equipment_formated.fig, subplots_equipment_formated.png
+    % Objective: Plot the active power values for all the equipment per day
+    % Input: equipment_formated.csv
+    % Output: subplots_equipment_formated.fig, subplots_equipment_formated.png
 
     % varargin{1} -> path
     % varargin{2} -> true for saving figure into files

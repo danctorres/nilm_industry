@@ -1,8 +1,8 @@
-% Objective: Create histograms of all the equipment active power samples for selected days
-% Input: equip_data
-% Output: histogram images
-
 function [] = histogram_equipment_original(equip_data, varargin)
+    % Objective: Create histograms of all the equipment active power samples for selected days
+    % Input: equip_data
+    % Output: histogram images
+
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
     for i = 1:size(equip_data, 2)
         subplot(size(equip_data, 2) / 2, 2, i)

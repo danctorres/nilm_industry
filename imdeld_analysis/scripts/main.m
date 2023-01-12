@@ -15,23 +15,33 @@ file_information = matlab.desktop.editor.getActive;
 cd(erase(file_information.Filename, [file_name, file_ext]));
 clearvars file_ext file_name file_information
 
+
 % Read the data from the equipment csv files
 equip_data = read_equipment_csv(); % read dataset equipment csv
+
 
 % Identify common timestamps among equipment
 common_timestamps = find_common_timestamps(equip_data);
 
+
 % Filter timestamps to obtain only those corresponding to days with relevant data
 useful_common_timestamps = find_useful_timestamps(common_timestamps);
 
+
 % Construct a table containing the timestamps and corresponding active power values for each piece of equipment
-date_active_power = construct_date_power_table(equip_data, useful_common_timestamps);
-date_voltage = construct_date_voltage_table(equip_data, useful_common_timestamps, false);
-
-
+date_active_power       = construct_date_unit_table(equip_data, useful_common_timestamps, 'Active Power [W]');
+date_reactive_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'Reactive Power [VAR]', false);
+date_apparent_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'Apparent Power [VA]', false);
+date_voltage            = construct_date_unit_table(equip_data, useful_common_timestamps, 'Voltage [V]', false);
+date_current            = construct_date_unit_table(equip_data, useful_common_timestamps, 'Current [A]', false);
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
-equipment_formated = interpolate_equipment_data(date_active_power, false);
+active_power_formated   = interpolate_equipment_data(date_active_power, false);
+reactive_power_formated = interpolate_equipment_data(reactive_power, false);
+apparent_power_formated = interpolate_equipment_data(date_apparent_power, false);
+voltage_formated        = interpolate_equipment_data(date_voltage, false);
+current_formated        = interpolate_equipment_data(date_current, false);
+
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
 lvdb2_table = read_lvdb2_csv(false);
@@ -39,6 +49,7 @@ lvdb3_table = read_lvdb3_csv(false);
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
 aggregate_table = calculate_aggregate(false, lvdb2_table, lvdb3_table);
+
 
 % Histogram states
 [counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(equipment_formated, 2000, true, false);
@@ -58,10 +69,13 @@ on_off_array = calculate_on_off(equipment_formated, group_power_limit);
 [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps);
 average_power_day = calculate_average_power_day(date_active_power);
 histogram_equipment_original(equip_data, false);
-plot_active_power_per_day(date_active_power, false);
-plot_active_power_per_day(date_voltage, false);
+plot_data_per_day(date_active_power, false);
+plot_data_per_day(date_voltage, false);
 
-plot_power_selected_days(equipment_formated, false);
+plot_data_selected_days(active_power_formated, false, 'Active Power [W]');
+plot_data_selected_days(voltage_formated, false, 'Voltage [V]');
+
+
 plot_power_select_day(equipment_formated, 1, false);
 histogram_equipment_formated(equipment_formated, false);
 

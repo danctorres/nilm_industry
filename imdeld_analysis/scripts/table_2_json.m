@@ -1,8 +1,8 @@
-% Objective: Convert table to json file template
-% Input: table
-% Output: json file
-
 function [] = table_2_json(table_variable)
+    % Objective: Convert table to json file template
+    % Input: table
+    % Output: json file
+
     struct      = table2struct(table_variable);
     jsonString  = jsonencode(struct);
     
