@@ -1,8 +1,8 @@
-% Objective: Calculate the average active power for each equipment equipment per day
-% Input: equip_data, date_active_power
-% Output: day_table_complete (table with the day and the active power for each equipment)
-
 function [day_table_complete] = calculate_average_power_day(date_active_power)
+    % Objective: Calculate the average active power for each equipment equipment per day
+    % Input: equip_data, date_active_power
+    % Output: day_table_complete (table with the day and the active power for each equipment)
+
     dates_only          = datetime(datestr(date_active_power.Date, 'dd-mmm-yyyy'));
     unique_dates        = unique(dates_only);
     [~, index_dates]    = ismember(dates_only, unique_dates);

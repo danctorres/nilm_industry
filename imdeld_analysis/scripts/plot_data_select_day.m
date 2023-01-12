@@ -1,7 +1,8 @@
-function [] = plot_power_select_day(varargin)
-% Objective: Plot the active power values for all the equipment for one day
-% Input: equipment_formated.csv
-% Output: subplots_equipment_formated.fig, subplots_equipment_formated.png
+function [] = plot_data_select_day(varargin)
+    % Objective: Plot the active power values for all the equipment for one day
+    % Input: equipment_formated.csv
+    % Output: subplots_equipment_formated.fig, subplots_equipment_formated.png
+    
     % varargin{1} -> path
     % varargin{2} -> true for saving figure into files
     
@@ -17,6 +18,7 @@ function [] = plot_power_select_day(varargin)
     dates_only = datetime(datestr(equipment_formated.timestamp, 'dd-mmm-yyyy'));
     unique_dates = unique(dates_only(varargin{2}));
     
+    unit_label = varargin{3};
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
     for i = 1:size(unique_dates, 1)
         sgtitle(string(unique_dates(i)))
@@ -30,10 +32,10 @@ function [] = plot_power_select_day(varargin)
         lgd.FontSize = 7;
         lgd.NumColumns = 2;
         xlabel('Index')
-        ylabel('Active Power [W]')
+        ylabel(unit_label)
     end
     
-    if (nargin > 0 && varargin{3} == true)
+    if (nargin > 0 && varargin{4} == true)
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_equipment_formated.fig']);
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_equipment_formated.png']);
     end

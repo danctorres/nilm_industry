@@ -1,8 +1,7 @@
-% Objective: Read data from 'pelletizer-subcircuit.csv' (LVDB-2) and 'millingmachine-subcircuit.csv' (LVDB-3) and get active power for the same datetime values of table_datetime_active_power
-% Input: equipment_path (path to equipment_formated.csv), lvdb3_path and lvdb3_path (path to \pelletizer-subcircuit.csv and millingmachine-subcircuit.csv)
-% Output: lvdb3_formated and lvdb3_formated (table with the datetimes and the active power for the dates of lvdb3 and lvdb3 in common with equipment_formated)
-
 function [lvdb3_complete_table] = read_lvdb3_csv(varargin)
+    % Objective: Read data from 'pelletizer-subcircuit.csv' (LVDB-2) and 'millingmachine-subcircuit.csv' (LVDB-3) and get active power for the same datetime values of table_datetime_active_power
+    % Input: equipment_path (path to equipment_formated.csv), lvdb3_path and lvdb3_path (path to \pelletizer-subcircuit.csv and millingmachine-subcircuit.csv)
+    % Output: lvdb3_formated and lvdb3_formated (table with the datetimes and the active power for the dates of lvdb3 and lvdb3 in common with equipment_formated)
 
 % Duplicated code from
     file_information = matlab.desktop.editor.getActive;

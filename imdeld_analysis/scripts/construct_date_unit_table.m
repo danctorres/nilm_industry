@@ -1,8 +1,8 @@
-% Objective: Construct a table with the timestamps and active power values of the eight equipment
-% Input: equip_data, useful_common_timestamps
-% Output: date_active_power (table with timestamp and active power values for eight equipment)
+function [date_active_power] = construct_date_unit_table(equip_data, useful_common_timestamps, unit, varargin)
+    % Objective: Construct a table with the timestamps and active power values of the eight equipment
+    % Input: equip_data, useful_common_timestamps
+    % Output: date_active_power (table with timestamp and active power values for eight equipment)
 
-function [date_active_power] = construct_date_power_table(equip_data, useful_common_timestamps, varargin)
     date_active_power = table(useful_common_timestamps, 'VariableNames', {'Date'});
     for i = 1:size(equip_data, 2)
         table_eq            = equip_data{i};
@@ -22,12 +22,12 @@ function [date_active_power] = construct_date_power_table(equip_data, useful_com
             plot(date_active_power{:, i + 1})
             title(sprintf('Equipment %i', i))
             xlabel('Index')
-            ylabel('Power [W]')
+            ylabel(unit)
         end
     
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\dates_active_power.fig']);
-        saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\dates_active_power.png']);
+        saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\dates_', unit, '.fig']);
+        saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\dates_', unit, '.png']);
     end
 end

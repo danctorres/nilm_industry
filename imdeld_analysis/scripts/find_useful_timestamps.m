@@ -1,8 +1,9 @@
-% Objective: Find the common timestamps that have more than 84600 samples
-% Input: equip_data, common_timestamps
-% Output: useful_common_timestamps (datetime arrray with the useful datetime samples from the dataset)
-
 function [useful_common_timestamps] = find_useful_timestamps(common_timestamps)
+    % Objective: Find the common timestamps that have more than 84600 samples
+    % Input: equip_data, common_timestamps
+    % Output: useful_common_timestamps (datetime arrray with the useful datetime samples from the dataset)
+
+
     dates_only = datetime(datestr(common_timestamps, 'dd-mmm-yyyy'));
     unique_dates = unique(dates_only);
     counts = histcounts(dates_only', [unique_dates', max(unique_dates) + 1]);

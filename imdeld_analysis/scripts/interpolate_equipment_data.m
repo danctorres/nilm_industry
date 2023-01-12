@@ -1,8 +1,8 @@
-% Objective: Remove the 30-March-2018 from the useful_common_timestamps and insert missing samples for each equipment
-% Input: equip_data, date_active_power dates dates_only
-% Output: equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
-
 function [equipment_formated] = interpolate_equipment_data(date_active_power, varargin)
+    % Objective: Remove the 30-March-2018 from the useful_common_timestamps and insert missing samples for each equipment
+    % Input: equip_data, date_active_power dates dates_only
+    % Output: equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
+
     dates_only                  = datetime(datestr(date_active_power.Date, 'dd-mmm-yyyy'));
     unique_dates                = unique(dates_only);
     filtered_dates_and_power    = date_active_power(dates_only ~= unique_dates(end - 1), :); % Remove the 30-Mar-2018 -> unique_dates(end - 1)

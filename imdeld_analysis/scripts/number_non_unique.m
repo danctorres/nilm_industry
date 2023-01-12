@@ -1,8 +1,8 @@
-% Objective: Check number of Not unique samples and Nan samples
-% Input: equip_data
-% Output: number_samples (array with the number of timesamples that each equipment has)
-
 function [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data)
+    % Objective: Check number of Not unique samples and Nan samples
+    % Input: equip_data
+    % Output: number_samples (array with the number of timesamples that each equipment has)
+
     number_samples      = zeros(1, size(equip_data, 2));
     unique_samples      = zeros(1, size(equip_data, 2));
     not_unique_samples  = zeros(1, size(equip_data, 2));
