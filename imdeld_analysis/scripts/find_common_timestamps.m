@@ -1,8 +1,8 @@
-% Objective: Find common timestamps between 8 equipment
-% Input: equip_data (cell array with equipment samples)
-% Output: common_timestamps (datetime sorted arrray with the dates of the common timestamp between the equipment)
-
 function [common_timestamps] = find_common_timestamps(equip_data)
+    % Objective: Find common timestamps between 8 equipment
+    % Input: equip_data (cell array with equipment samples)
+    % Output: common_timestamps (datetime sorted arrray with the dates of the common timestamp between the equipment)
+
     all_dates = [];
     for i = 1:size(equip_data, 2)
         table_eq = equip_data{i};

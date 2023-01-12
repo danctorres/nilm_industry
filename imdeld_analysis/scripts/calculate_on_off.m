@@ -1,7 +1,7 @@
 function [on_off_array] = calculate_on_off(equipment_formated, group_power_limit)
-% Objective: Use the values of the first midpeak, state limite, to construct the on/off array
-% Input: equipment_formated, group_power_limit(cell of the state limits)
-% Output: on_off_array (array with with one if the equipment is in ON state for that sample otherwise is 0)
+    % Objective: Use the values of the first midpeak, state limite, to construct the on/off array
+    % Input: equipment_formated, group_power_limit(cell of the state limits)
+    % Output: on_off_array (array with with one if the equipment is in ON state for that sample otherwise is 0)
 
     on_off_array = zeros(size(equipment_formated, 1), size(equipment_formated, 2) - 1);
     for i = 1:size(group_power_limit, 1)

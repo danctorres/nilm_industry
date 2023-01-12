@@ -1,8 +1,8 @@
-% Objective: get aggregate data
-% Input: lvdb2_formated and lvdb3_formated paths
-% Output: aggregate_power
-
 function [aggregate_table] = calculate_aggregate(varargin)
+    % Objective: get aggregate data
+    % Input: lvdb2_formated and lvdb3_formated paths
+    % Output: aggregate_power
+
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
     if (nargin == 3)

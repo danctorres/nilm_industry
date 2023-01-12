@@ -1,7 +1,7 @@
 function [] = histogram_state_peak_equipment(equipment_formated, group_power_limit_cell)
-% Objective: plot the histogram of each state of the equipment based on the values of the active power indexed by the peaks and in betweens of the peaks
-% Inputs: equipment_formated, group_power_limit_cell (cell of the edge values of each state) per equipment
-% Ouputs: histograms
+    % Objective: plot the histogram of each state of the equipment based on the values of the active power indexed by the peaks and in betweens of the peaks
+    % Inputs: equipment_formated, group_power_limit_cell (cell of the edge values of each state) per equipment
+    % Ouputs: histograms
 
     for i = 1:size(group_power_limit_cell, 1)
         figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),

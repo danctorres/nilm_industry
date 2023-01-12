@@ -1,8 +1,8 @@
 function [curves, params_normal, pd, group_power_limit] = get_params_normals(size_eq, TF_cell, counts_cell, edges_cell, bin_center_cell)
-% Objective: calculate the curves that fit the histogram, per peak, with the allfitdist() and
-% get the params of the normal function
-% Inputs: TF_cell (one if is peak), counts_cell (count of each edge of hist)
-% Outputs: curves (cell array), params_normal (cell array)
+    % Objective: calculate the curves that fit the histogram, per peak, with the allfitdist() and
+    % get the params of the normal function
+    % Inputs: TF_cell (one if is peak), counts_cell (count of each edge of hist)
+    % Outputs: curves (cell array), params_normal (cell array)
 
     for j = 1:size_eq
         peaks_index = find(TF_cell{j} == 1);

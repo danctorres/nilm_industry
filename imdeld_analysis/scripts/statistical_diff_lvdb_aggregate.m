@@ -1,8 +1,8 @@
-% Objective: Analize the relationship between the measured values of lvdb2, lvdb3 and the equipment and the calculated aggregate power
-% Input: equipment_formated, lvdb2_table, lvdb3_table, aggregate_table
-% Output: diff_mean_lvdb2, diff_mean_lvdb3, diff_mean_aggregate, diff_std_lvdb2, diff_std_lvdb3, diff_std_aggregate, r_lvdb2, r_lvdb3, r_aggregate, h_lvdb2, h_lvdb3, h_aggregate, p_anova_lvdb2, p_anova_lvdb3, p_anova_aggregate
-
 function [results_cell] = statistical_diff_lvdb_aggregate(equipment_formated, lvdb2_table, lvdb3_table, aggregate_table, varargin)
+    % Objective: Analize the relationship between the measured values of lvdb2, lvdb3 and the equipment and the calculated aggregate power
+    % Input: equipment_formated, lvdb2_table, lvdb3_table, aggregate_table
+    % Output: diff_mean_lvdb2, diff_mean_lvdb3, diff_mean_aggregate, diff_std_lvdb2, diff_std_lvdb3, diff_std_aggregate, r_lvdb2, r_lvdb3, r_aggregate, h_lvdb2, h_lvdb3, h_aggregate, p_anova_lvdb2, p_anova_lvdb3, p_anova_aggregate
+
     check_lvdb2 = sum(table2array(equipment_formated(:, 2:5)), 2) +  sum(table2array(equipment_formated(:, 8:9)), 2);
     check_lvdb3 = sum(table2array(equipment_formated(:, 7:8)), 2);
     
