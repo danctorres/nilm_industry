@@ -29,11 +29,12 @@ useful_common_timestamps = find_useful_timestamps(common_timestamps);
 
 
 % Construct a table containing the timestamps and corresponding active power values for each piece of equipment
-date_active_power       = construct_date_unit_table(equip_data, useful_common_timestamps);
-date_reactive_power     = construct_date_unit_table(equip_data, useful_common_timestamps);
-date_apparent_power     = construct_date_unit_table(equip_data, useful_common_timestamps);
-date_voltage            = construct_date_unit_table(equip_data, useful_common_timestamps);
-date_current            = construct_date_unit_table(equip_data, useful_common_timestamps);
+date_active_power       = construct_date_unit_table(equip_data, useful_common_timestamps, 'active_power');
+date_reactive_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'reactive_power');
+date_apparent_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'apparent_power');
+date_current            = construct_date_unit_table(equip_data, useful_common_timestamps, 'current');
+date_voltage            = construct_date_unit_table(equip_data, useful_common_timestamps, 'voltage');
+
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
 active_power_formated   = interpolate_equipment_data(date_active_power, false);
@@ -72,6 +73,7 @@ histogram_equipment_original(equip_data, false);
 
 plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
 plot_data_per_equipment(date_voltage, 'Voltage [V]', false);
+plot_data_per_equipment(date_current, 'Current [A]', false);
 
 
 plot_data_selected_days(active_power_formated, 'Active Power [W]', false);
