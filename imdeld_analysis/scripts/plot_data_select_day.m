@@ -18,21 +18,18 @@ function [] = plot_data_select_day(varargin)
     dates_only = datetime(datestr(equipment_formated.timestamp, 'dd-mmm-yyyy'));
     unique_dates = unique(dates_only(varargin{2}));
     
-    unit_label = varargin{3};
+    unit_label = string(varargin{3});
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
     for i = 1:size(unique_dates, 1)
         sgtitle(string(unique_dates(i)))
-        legend_string = strings(1, size(equipment_formated, 2) - 1);
         [sharedvals, ~] = (ismember(dates_only, unique_dates(i)));
         for j = 2:size(equipment_formated, 2)
             subplot((size(equipment_formated, 2) - 1) / 2, 2, j - 1)
             plot(table2array(equipment_formated(sharedvals, j)))
+            title(sprintf('Equipment %i', j - 1))
+            xlabel('Index')
+            ylabel(unit_label)
         end
-        lgd = legend(legend_string);
-        lgd.FontSize = 7;
-        lgd.NumColumns = 2;
-        xlabel('Index')
-        ylabel(unit_label)
     end
     
     if (nargin > 0 && varargin{4} == true)

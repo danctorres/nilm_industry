@@ -29,11 +29,11 @@ useful_common_timestamps = find_useful_timestamps(common_timestamps);
 
 
 % Construct a table containing the timestamps and corresponding active power values for each piece of equipment
-date_active_power       = construct_date_unit_table(equip_data, useful_common_timestamps, 'Active Power [W]');
-date_reactive_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'Reactive Power [VAR]', false);
-date_apparent_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'Apparent Power [VA]', false);
-date_voltage            = construct_date_unit_table(equip_data, useful_common_timestamps, 'Voltage [V]', false);
-date_current            = construct_date_unit_table(equip_data, useful_common_timestamps, 'Current [A]', false);
+date_active_power       = construct_date_unit_table(equip_data, useful_common_timestamps);
+date_reactive_power     = construct_date_unit_table(equip_data, useful_common_timestamps);
+date_apparent_power     = construct_date_unit_table(equip_data, useful_common_timestamps);
+date_voltage            = construct_date_unit_table(equip_data, useful_common_timestamps);
+date_current            = construct_date_unit_table(equip_data, useful_common_timestamps);
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
 active_power_formated   = interpolate_equipment_data(date_active_power, false);
@@ -69,14 +69,16 @@ on_off_array = calculate_on_off(equipment_formated, group_power_limit);
 [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps);
 average_power_day = calculate_average_power_day(date_active_power);
 histogram_equipment_original(equip_data, false);
-plot_data_per_day(date_active_power, false);
-plot_data_per_day(date_voltage, false);
 
-plot_data_selected_days(active_power_formated, false, 'Active Power [W]');
-plot_data_selected_days(voltage_formated, false, 'Voltage [V]');
+plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
+plot_data_per_equipment(date_voltage, 'Voltage [V]', false);
 
 
-plot_power_select_day(equipment_formated, 1, false);
+plot_data_selected_days(active_power_formated, 'Active Power [W]', false);
+
+plot_data_select_day(equipment_formated, 1, 'Active Power [W]', false);
+plot_data_select_day(voltage_formated, false, 'Voltage [V]', false);
+
 histogram_equipment_formated(equipment_formated, false);
 
 statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvdb2_table, lvdb3_table, aggregate_table, false);
