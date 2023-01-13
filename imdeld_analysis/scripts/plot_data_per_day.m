@@ -1,4 +1,4 @@
-function [] = plot_data_per_day(data, varargin)
+function [] = plot_data_per_day(data, save)
     % Objective: Plot the formated data values for all the equipment per day
     % Input: data
     % Output: subplots_common_original.fig, subplots_common_original.png
@@ -25,7 +25,7 @@ function [] = plot_data_per_day(data, varargin)
         hold off;
     end
     
-    if (nargin == 1 && varargin{1} == true)
+    if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_common_original.fig']);
