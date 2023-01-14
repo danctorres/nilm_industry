@@ -21,7 +21,7 @@ equip_data = read_equipment_csv(); % read dataset equipment csv
 
 
 % Identify common timestamps among equipment
-common_timestamps = find_common_timestamps(equip_data);
+common_timestamps = find_common_timestamps(equip_data, 1:(size(equip_data, 2)));
 
 
 % Filter timestamps to obtain only those corresponding to days with relevant data
