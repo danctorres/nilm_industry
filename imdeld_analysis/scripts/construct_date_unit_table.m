@@ -9,6 +9,6 @@ function [date_unit] = construct_date_unit_table(equip_data, useful_common_times
         datetime_values     = cell2mat(mean_values.timestamp);
         [sharedvals, ~]     = ismember(unique(datetime(datetime_values(:, 1:end - 3))), useful_common_timestamps);
     
-        date_unit.(sprintf('active_power_eq_%i', i)) = mean_values.mean_values(sharedvals);
+        date_unit.(join([ string(unit) sprintf('%i', i)], '_')) = table2array(mean_values(sharedvals, 3));
     end
 end
