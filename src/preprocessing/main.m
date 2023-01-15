@@ -17,7 +17,7 @@ close all; clear; clc;
 
 
 % Read the data from the equipment csv files
-equip_data = read_equipment_csv(); % read dataset equipment csv, has optional input (absolute path of equipment folder)
+equip_data = read_equipment_csv(); % read dataset equipment csv, optional input (absolute path of equipment folder)
 
 
 % Identify common timestamps among equipment
@@ -37,16 +37,17 @@ date_voltage            = construct_date_unit_table(equip_data, useful_common_ti
 
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
-active_power_formated   = interpolate_equipment_data(date_active_power, false);
-reactive_power_formated = interpolate_equipment_data(reactive_power, false);
-apparent_power_formated = interpolate_equipment_data(date_apparent_power, false);
-voltage_formated        = interpolate_equipment_data(date_voltage, false);
-current_formated        = interpolate_equipment_data(date_current, false);
+active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', false);
+reactive_power_formated = interpolate_equipment_data(reactive_power, 'reactive_power', false);
+apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', false);
+current_formated        = interpolate_equipment_data(date_current, 'current', false);
+voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', false);
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
-lvdb2_table = read_lvdb2_csv(false);
-lvdb3_table = read_lvdb3_csv(false);
+lvdb2_table = read_lvdb_csv('active_power', 2, false);
+lvdb3_table = read_lvdb_csv('active_power', 3, false);
+
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
 aggregate_table = calculate_aggregate(false, lvdb2_table, lvdb3_table);
@@ -91,7 +92,7 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvd
 
 %% --------------------- Currently in development ---------------------- %%
 aggregate_array = table2array(aggregate_table(:, 2));
-events_index = logical(zeros(size(equipment_formated, 1), size(equipment_formated, 2) - 1));
+events_index = false(zeros(size(equipment_formated, 1), size(equipment_formated, 2) - 1));
 aggregate_array_clean = rmoutliers(aggregate_array(:, 1), 'mean', 'ThresholdFactor', 3);
 figure,
 for i = 1:size(equipment_formated, 2) - 1
