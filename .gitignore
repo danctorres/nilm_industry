@@ -1,8 +1,8 @@
 # ignore OriginalDataset folder
-imdeld_dataset/*
+data/raw/*
 
 # ignore imdeld_analysis/images folder
-src/preprocessing/esresults/images/*
+src/preprocessing/results/images/*
 
 # ignore documentation/images folder
 documentation/images/*
