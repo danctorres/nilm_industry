@@ -8,7 +8,7 @@ function [equip_data] = read_equipment_csv(varargin)
     else
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        cd([erase(file_information.Filename, ['\src\preprocessing\scripts\', file_name, file_ext]), '\data\raw\Equipment']);
+        cd([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\Equipment']);
     end
     
     file_list = dir;
