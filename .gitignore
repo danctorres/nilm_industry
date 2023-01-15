@@ -5,7 +5,7 @@ data/raw/*
 src/preprocessing/results/images/*
 
 # ignore documentation/images folder
-documentation/images/*
+docs/images/*
 
 # ignore all asv files
 *.asv
