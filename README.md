@@ -5,6 +5,8 @@ Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads
 
 > The dissertation titled "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads" focuses on developing innovative techniques for monitoring industrial loads.
 
+> The main contribution of the dissertation is the development of a novel method for nilm, called Multi-Modal Functional Matrix Factorization with Kalman Filtering.
+
 > Code developed in MATLAB, Python and C++, and techniques include numerical and metaheuristic algorithms for nonlinear constrained optimization.
 
 ### Structure:
@@ -19,9 +21,9 @@ Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads
 ├── reports					
 │   └── figures             # Generated figures to be used in reporting 
 ├── src                     # Source files
-│   ├── data_and_features   # Code to analyze the dataset
+│   ├── preprocessing       # Code to analyze the dataset, cleaning, transforming and organizing the data in a format that is suitable for the algorithm
 │   ├── nilm                # Complete algorithm
-│   └── optimization        # Optimization algorithms
+│   └── optimization        # Optimization algorithms (estimating the coefficients of the functions in the W matrix)
 ├── test                    # Automated tests
 ├── tools                   # Tools and utilities
 ├── LICENSE
