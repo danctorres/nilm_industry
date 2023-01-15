@@ -9,15 +9,15 @@
 
 %% ----------------------------- CORE CODE ----------------------------- %%
 close all; clear; clc;
-
 file_information = matlab.desktop.editor.getActive;
 [~, file_name, file_ext] = fileparts(file_information.Filename);
 cd(erase(file_information.Filename, [file_name, file_ext]));
 clearvars file_ext file_name file_information
+close all; clear; clc;
 
 
 % Read the data from the equipment csv files
-equip_data = read_equipment_csv(); % read dataset equipment csv
+equip_data = read_equipment_csv(); % read dataset equipment csv, has optional input (absolute path of equipment folder)
 
 
 % Identify common timestamps among equipment
