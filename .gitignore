@@ -1,11 +1,11 @@
 # ignore OriginalDataset folder
 data/raw/*
 
-# ignore imdeld_analysis/images folder
-src/preprocessing/results/images/*
+# ignore imdeld_analysis images folder
+reports/figures/*
 
-# ignore documentation/images folder
-docs/images/*
+# ignore images folder
+docs/Images/*
 
 # ignore all asv files
 *.asv
