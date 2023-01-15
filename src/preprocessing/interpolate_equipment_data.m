@@ -1,4 +1,4 @@
-function [equipment_formated] = interpolate_equipment_data(date_active_power, varargin)
+function [equipment_formated] = interpolate_equipment_data(date_active_power, save)
     % Objective: Remove the 30-March-2018 from the useful_common_timestamps and insert missing samples for each equipment
     % Input: equip_data, date_active_power dates dates_only
     % Output: equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
@@ -46,7 +46,7 @@ function [equipment_formated] = interpolate_equipment_data(date_active_power, va
     equipment_formated.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime'); %     % datetime format
     
     % Save to file
-    if (nargin == 1 && varargin{1} == true)
+    if (save == true)
         writetable(equipment_formated, [erase(file_information.Filename, '\scripts\main.m'), '\results\data\equipment_formated.csv']);
     end
     
