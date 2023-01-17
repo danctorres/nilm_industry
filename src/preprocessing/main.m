@@ -9,6 +9,8 @@
 
 %% ----------------------------- CORE CODE ----------------------------- %%
 close all; clear; clc;
+
+% Make sure in correct path
 file_information = matlab.desktop.editor.getActive;
 [~, file_name, file_ext] = fileparts(file_information.Filename);
 cd(erase(file_information.Filename, [file_name, file_ext]));
@@ -72,26 +74,39 @@ power_events = estimate_power_events(aggregate_table, active_power_formated);
 
 
 %% -------------------------- ADDITIONAL CODE -------------------------- %%
+
+% Analyze the original data, active power, to find how many samples are not unique
 [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data);
+
+% For the days that have information of the 8 equipment, find how many timestamps samples are missing
 [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps);
-average_power_day = calculate_average_power_day(date_active_power);
+
+% Calculate the average power for each day
+metric_power_table = calculate_metrics_power_day(date_active_power);
+
+% Plot the histogram of each equipment power
 histogram_equipment_original(equip_data, false);
 
+% Plot the variables for the selected days before interpolation
 plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
-plot_data_per_equipment(date_voltage, 'Voltage [V]', false);
-plot_data_per_equipment(date_current, 'Current [A]', false);
 
-
+% Plot the variables for the selected days after interpolation 
 plot_data_selected_days(active_power_formated, 'Active Power [W]', false);
+plot_data_selected_days(date_voltage, 'Voltage [V]', false);
+plot_data_selected_days(date_current, 'Current [A]', false);
 
-plot_data_select_day(equipment_formated, 1, 'Active Power [W]', false);
-plot_data_select_day(voltage_formated, false, 'Voltage [V]', false);
+% Plot the variable for one day, by specifying what is the day index
+plot_data_select_day(active_power_formated, 1, 'Active Power [W]', false);
+plot_data_select_day(voltage_formated, 1, 'Voltage [V]', false);
 
-histogram_equipment_formated(equipment_formated, false);
+% Plot histogram of the interpolated variables
+histogram_equipment_formated(active_power_formated, false);
 
+% Analyze the difference between the lvdb2, lvdb3 and agrgegate power
 statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvdb2_table, lvdb3_table, aggregate_table, false);
 
-% table_2_json(); % Convert a table and save it has a json
+% Function to convert and save a table as a json
+% table_2_json();
 
 
 
