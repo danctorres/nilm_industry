@@ -40,7 +40,7 @@ date_voltage            = construct_date_unit_table(equip_data, useful_common_ti
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
 active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', true);
-reactive_power_formated = interpolate_equipment_data(reactive_power, 'reactive_power', true);
+reactive_power_formated = interpolate_equipment_data(date_reactive_power, 'reactive_power', true);
 apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', true);
 current_formated        = interpolate_equipment_data(date_current, 'current', true);
 voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', true);
@@ -92,8 +92,8 @@ plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
 
 % Plot the variables for the selected days after interpolation 
 plot_data_selected_days(active_power_formated, 'Active Power [W]', false);
-plot_data_selected_days(date_voltage, 'Voltage [V]', false);
-plot_data_selected_days(date_current, 'Current [A]', false);
+plot_data_selected_days(date_voltage_formated, 'Voltage [V]', false);
+plot_data_selected_days(date_current_formated, 'Current [A]', false);
 
 % Plot the variable for one day, by specifying what is the day index
 plot_data_select_day(active_power_formated, 1, 'Active Power [W]', false);
