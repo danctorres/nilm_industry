@@ -38,7 +38,7 @@ function [] = plot_data_selected_days(varargin)
         hold off;
     end
     
-    if (nargin > 0 && varargin{3} == true)
+    if (save == true)
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_equipment_formated.fig']);
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_equipment_formated.png']);
     end
