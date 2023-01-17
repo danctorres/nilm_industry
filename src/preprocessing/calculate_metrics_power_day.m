@@ -1,4 +1,4 @@
-function [day_table_complete] = calculate_average_power_day(date_active_power)
+function [day_table_complete] = calculate_metrics_power_day(date_active_power)
     % Objective: Calculate the average active power for each equipment equipment per day
     % Input: equip_data, date_active_power
     % Output: day_table_complete (table with the day and the active power for each equipment)
