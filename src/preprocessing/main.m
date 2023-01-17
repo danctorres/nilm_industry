@@ -52,11 +52,11 @@ lvdb3_table = read_lvdb_csv('active_power', 3, false);
 
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
-aggregate_table = calculate_aggregate(false, lvdb2_table, lvdb3_table);
+aggregate_power = calculate_aggregate(false);
 
 
 % Correlation-based feature selection (CFS) to select features
-R = select_feature([active_power_formated, reactive_power_formated, apparent_power_formated, current_formated, voltage_formated], aggregate_power);
+R = select_feature([active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end)], aggregate_power(:, 2:end));
 
 
 % Histogram states for ON / OFF
@@ -92,8 +92,10 @@ plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
 
 % Plot the variables for the selected days after interpolation 
 plot_data_selected_days(active_power_formated, 'Active Power [W]', false);
-plot_data_selected_days(date_voltage_formated, 'Voltage [V]', false);
-plot_data_selected_days(date_current_formated, 'Current [A]', false);
+plot_data_selected_days(reactive_power_formated, 'Reactive Power [VAR]', false);
+plot_data_selected_days(apparent_power_formated, 'Apparent Power [VA]', false);
+plot_data_selected_days(voltage_formated, 'Voltage [V]', false);
+plot_data_selected_days(current_formated, 'Current [A]', false);
 
 % Plot the variable for one day, by specifying what is the day index
 plot_data_select_day(active_power_formated, 1, 'Active Power [W]', false);

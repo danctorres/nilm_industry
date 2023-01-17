@@ -32,7 +32,8 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
     end
     
     date_complete = sort(cat(1, date_dataset, diff), 'ascend');
-    units_formated = table(date_complete(:), 'VariableNames', {'timestamp'});
+
+    units_formated = table(datetime(datenum(1970,1,1) + date_complete/86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
     for i = 1:size(unit_complete, 2)
         units_formated.(join( [string(unit_name), sprintf('%i', i)], '_')) = unit_complete(:, i);
     end
@@ -40,7 +41,7 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
     % Save to file
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
-        writetable(units_formated, join([erase(file_information.Filename, '\src\preprocessing\main.m'), join( [join(['\data\interim\', string(unit_name)], ''), 'datetime.csv'], '_')], '\'));
+        writetable(units_formated, join([erase(file_information.Filename, '\src\preprocessing\main.m'), join( [join(['\data\interim\', string(unit_name)], ''), 'formated.csv'], '_')], '\'));
         % units_formated.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');     % posix format
         % writetable(units_formated, join([erase(file_information.Filename, '\src\preprocessing\main.m'), join( [join(['\data\interim\', string(unit_name)], ''), 'posix.csv'], '_')], '\'));
     end
