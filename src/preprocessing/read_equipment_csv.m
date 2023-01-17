@@ -1,15 +1,11 @@
-function [equip_data] = read_equipment_csv(varargin)
+function [equip_data] = read_equipment_csv()
     % Objective: Read dataset
     % Input: path_dataset (Optional - folder path of the nilm dataset equipment files)
     % Output: equip_data (cell array, where each cell are each equipment samples)
 
-    if (nargin == 1)
-        cd(varargin{1});
-    else
-        file_information = matlab.desktop.editor.getActive;
-        [~, file_name, file_ext] = fileparts(file_information.Filename);
-        cd([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\Equipment']);
-    end
+    file_information = matlab.desktop.editor.getActive;
+    [~, file_name, file_ext] = fileparts(file_information.Filename);
+    cd([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\Equipment']);
     
     file_list = dir;
     file_list = {file_list.name};
