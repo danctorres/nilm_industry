@@ -40,9 +40,9 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
     % Save to file
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
-        writetable(units_formated, [erase(file_information.Filename, '\src\preprocessing\main.m'), join( ['\data\interim\', string(unit_name), 'datetime.csv'], '_')]);
-        units_formated.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');     % posix format
-        writetable(units_formated, [erase(file_information.Filename, '\src\preprocessing\main.m'), join( ['\data\interim\', string(unit_name), 'posix.csv'], '_')]);
+        writetable(units_formated, join([erase(file_information.Filename, '\src\preprocessing\main.m'), join( [join(['\data\interim\', string(unit_name)], ''), 'datetime.csv'], '_')], '\'));
+        % units_formated.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');     % posix format
+        % writetable(units_formated, join([erase(file_information.Filename, '\src\preprocessing\main.m'), join( [join(['\data\interim\', string(unit_name)], ''), 'posix.csv'], '_')], '\'));
     end
     
     % Debug
