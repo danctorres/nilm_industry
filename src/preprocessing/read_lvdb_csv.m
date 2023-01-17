@@ -6,7 +6,7 @@ function [lvdb_complete_table] = read_lvdb_csv(units, lvdb_number, save)
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
     
-    equipment_table         = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\equipment_formated.csv']);
+    equipment_table             = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\equipment_formated.csv']);
     if (lvdb_number == 2)
         lvdb_original_table    = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\pelletizer-subcircuit.csv']);
     elseif (lvdb_number == 3)
