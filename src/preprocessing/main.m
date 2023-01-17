@@ -37,11 +37,11 @@ date_voltage            = construct_date_unit_table(equip_data, useful_common_ti
 
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
-active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', false);
-reactive_power_formated = interpolate_equipment_data(reactive_power, 'reactive_power', false);
-apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', false);
-current_formated        = interpolate_equipment_data(date_current, 'current', false);
-voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', false);
+active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', true);
+reactive_power_formated = interpolate_equipment_data(reactive_power, 'reactive_power', true);
+apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', true);
+current_formated        = interpolate_equipment_data(date_current, 'current', true);
+voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', true);
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
@@ -53,7 +53,11 @@ lvdb3_table = read_lvdb_csv('active_power', 3, false);
 aggregate_table = calculate_aggregate(false, lvdb2_table, lvdb3_table);
 
 
-% Histogram states
+% Correlation-based feature selection (CFS) to select features
+R = select_feature([active_power_formated, reactive_power_formated, apparent_power_formated, current_formated, voltage_formated], aggregate_power);
+
+
+% Histogram states for ON / OFF
 [counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(equipment_formated, 2000, true, false);
 [curves, params_normal, ~, group_power_limit] = get_params_normals(size(equipment_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
 histogram_state_peak_equipment(equipment_formated, group_power_limit)
@@ -61,8 +65,9 @@ histogram_state_peak_equipment(equipment_formated, group_power_limit)
 % Calculate ON/OFF
 on_off_array = calculate_on_off(equipment_formated, group_power_limit);
 
-% Calculate power at the events for each equipment
 
+% Calculate power at the events for each equipment
+power_events = estimate_power_events(aggregate_table, active_power_formated);
 
 
 
@@ -91,26 +96,7 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvd
 
 
 %% --------------------- Currently in development ---------------------- %%
-aggregate_array = table2array(aggregate_table(:, 2));
-events_index = false(zeros(size(equipment_formated, 1), size(equipment_formated, 2) - 1));
-aggregate_array_clean = rmoutliers(aggregate_array(:, 1), 'mean', 'ThresholdFactor', 3);
-figure,
-for i = 1:size(equipment_formated, 2) - 1
-    events_index(:, i) = logical([diff(on_off_array(:, i)) ~= 0; 0]);
-    %power_events(:, i) = {abs(diff(aggregate_array_clean(events_index(:, i))))};
-    power_events(:, i) = {abs(diff(aggregate_array(events_index(:, i))))};
-    subplot((size(equipment_formated, 2) - 1) / 2, 2, i)
-    power_events_clean = rmoutliers(cell2mat(power_events(:, i)), 'mean', 'ThresholdFactor', 3);
-    plot(power_events{i}, '.');
-    % histogram(power_events_clean, 100)
-    % histogram(power_events{i}, 100);
 
-    c = polyfit(1:size(power_events{i}, 1), power_events{i}, 1);
-    y_est = polyval(c, 1:size(power_events{i}, 1));
-    hold on
-    plot(1:size(power_events{i}, 1), y_est, 'r--', 'LineWidth', 2)
-
-end
 
 
 % Remove outliers
@@ -170,9 +156,9 @@ checkcode(file_list(endsWith(file_list, 'm')))
 
 % Indentation tool
 % git clone github.com/davidvarga/MBeautifier into the same path level that dissertation_nilm
-mbeautify_path = [erase(file_information.Filename, ['dissertation_nilm\imdeld_analysis\scripts\', file_name, file_ext]), '\MBeautifier\'];
+mbeautify_path = [erase(file_information.Filename, ['dissertation_nilm\src\preprocessing\', file_name, file_ext]), '\MBeautifier\'];
 cd(mbeautify_path);
-source_folder = ([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\imdeld_analysis\scripts\']);
+source_folder = ([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\src\preprocessing\']);
 % mbeautify_path = [erase(file_information.Filename, ['\dissertation_nilm\imdeld_analysis\scripts\', file_name, file_ext]), '\MBeautifier\'];
 % cd(mbeautify_path);
 % files_names = file_list(endsWith(file_list, 'm'));
