@@ -111,6 +111,8 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvd
 % table_2_json();
 
 
+% read csv from iterim dataset
+active_power_formated = read_interim_data('active_power_formated.csv');
 
 %% --------------------- Currently in development ---------------------- %%
 
