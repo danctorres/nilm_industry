@@ -23,7 +23,10 @@ equip_data = read_equipment_csv(); % read dataset equipment csv, optional input 
 
 
 % Identify common timestamps among equipment
-common_timestamps = find_common_timestamps(equip_data, 1:(size(equip_data, 2)));
+% selected_equipment_index =  1:(size(equip_data, 2));
+selected_equipment_index = [1, 2, 3, 4, 7, 8];
+common_timestamps = find_common_timestamps(equip_data, selected_equipment_index);
+
 
 
 % Filter timestamps to obtain only those corresponding to days with relevant data
@@ -31,11 +34,11 @@ useful_common_timestamps = find_useful_timestamps(common_timestamps);
 
 
 % Construct a table containing the timestamps and corresponding active power values for each piece of equipment
-date_active_power       = construct_date_unit_table(equip_data, useful_common_timestamps, 'active_power');
-date_reactive_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'reactive_power');
-date_apparent_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'apparent_power');
-date_current            = construct_date_unit_table(equip_data, useful_common_timestamps, 'current');
-date_voltage            = construct_date_unit_table(equip_data, useful_common_timestamps, 'voltage');
+date_active_power       = construct_date_unit_table(equip_data, useful_common_timestamps, 'active_power', selected_equipment_index);
+date_reactive_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'reactive_power', selected_equipment_index);
+date_apparent_power     = construct_date_unit_table(equip_data, useful_common_timestamps, 'apparent_power', selected_equipment_index);
+date_current            = construct_date_unit_table(equip_data, useful_common_timestamps, 'current', selected_equipment_index);
+date_voltage            = construct_date_unit_table(equip_data, useful_common_timestamps, 'voltage', selected_equipment_index);
 
 
 % Interpolate the active power values to obtain a complete set of data the choosen days

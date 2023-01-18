@@ -6,8 +6,7 @@ function [common_timestamps] = find_common_timestamps(equip_data, eq_index)
     all_dates = [];
 
     for i = 1:size(eq_index, 2)
-        table_eq = equip_data{eq_index(i)};
-        datetime_values = cell2mat(unique(table_eq.timestamp));
+        datetime_values = cell2mat(unique(equip_data{eq_index(i)}.timestamp));
         all_dates = cat(1, all_dates, datetime(datetime_values(:, 1:end - 3)));
     end
     
@@ -17,7 +16,7 @@ function [common_timestamps] = find_common_timestamps(equip_data, eq_index)
     unique_counts = unique(counts);
     [N, ~] = histcounts(counts', [unique_counts', max(unique_counts) + 1]);
     
-    common_timestamps = sort(unique_values(N >= size(equip_data, 2)));
+    common_timestamps = sort(unique_values(N >= size(eq_index, 2)));
 
     % Debug
     % max(N) =  2536039     2536040     2536041     2536042     2536043     2536044     2536045     2536046     2536047
