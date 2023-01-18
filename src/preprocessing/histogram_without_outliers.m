@@ -1,20 +1,19 @@
-function [output_counts_cell, output_edges_cell, output_bin_center, output_TF_cell] = histogram_without_outliers(varargin)
-    % Objective: Create histograms of all the equipment active power samples for selected days
-    % Input: equipment_formated, minimum_prominence (value for islocalmax
-    % function), true or false for removing outliers, save or not image
+function [output_counts_cell, output_edges_cell, output_bin_center, output_TF_cell] = histogram_without_outliers(data, minimum_prominence, bool_outl, save)
+    % Objective: Create histograms of all the equipment active power samples
+    % Input: active_power table, minimum_prominence for islocalmax,
+    % bool_out (bool to remove outliers), save to save the histograms
     % Output: histogram images
 
-    equipment_formated = varargin{1};
-    output_counts_cell      = cell(1, size(equipment_formated, 2) - 1);
-    output_edges_cell       = cell(1, size(equipment_formated, 2) - 1);
-    output_bin_center       = cell(1, size(equipment_formated, 2) - 1);
-    output_TF_cell          = cell(1, size(equipment_formated, 2) - 1);
+    output_counts_cell      = cell(1, size(data, 2) - 1);
+    output_edges_cell       = cell(1, size(data, 2) - 1);
+    output_bin_center       = cell(1, size(data, 2) - 1);
+    output_TF_cell          = cell(1, size(data, 2) - 1);
 
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
-    for i = 1:size(equipment_formated, 2) - 1
-        subplot((size(equipment_formated, 2) - 1) / 2, 2, i)
-        data = table2array(equipment_formated(:, i + 1));
-        if varargin{3} == true
+    for i = 1:size(data, 2) - 1
+        subplot((size(data, 2) - 1) / 2, 2, i)
+        data = table2array(data(:, i + 1));
+        if bool_outl == true
             x_clean = rmoutliers( data(data >= 0), 'mean', 'ThresholdFactor', 3);
         else
             x_clean = data;
@@ -26,8 +25,7 @@ function [output_counts_cell, output_edges_cell, output_bin_center, output_TF_ce
         bin_center      = bin_center(1:end - 1);
         hold on
 
-        % minimum_prominence = varargin{2}
-        [TF, ~] = islocalmax([0, counts], 'MinProminence', varargin{2});
+        [TF, ~] = islocalmax([0, counts], 'MinProminence', minimum_prominence);
 
         output_counts_cell(i)   = {counts};
         output_edges_cell(i)    = {edges};
@@ -45,10 +43,10 @@ function [output_counts_cell, output_edges_cell, output_bin_center, output_TF_ce
         hold off
     end
     
-    if (nargin == 3 && varargin{3} == true)
+    if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\histogram_equipment_no_outliers.fig']);
-        saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\histogram_equipment_no_outliers.png']);
+        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\',  'histogram_power_no_outliers.fig']]);
+        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\',  'histogram_power_no_outliers.png']]);
     end
 end

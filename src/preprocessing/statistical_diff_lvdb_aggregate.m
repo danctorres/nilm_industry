@@ -1,12 +1,12 @@
-function [results_cell] = statistical_diff_lvdb_aggregate(equipment_formated, lvdb2_table, lvdb3_table, aggregate_table, varargin)
+function [results_cell] = statistical_diff_lvdb_aggregate(active_power, lvdb2_table, lvdb3_table, aggregate_table, visualize)
     % Objective: Analize the relationship between the measured values of lvdb2, lvdb3 and the equipment and the calculated aggregate power
-    % Input: equipment_formated, lvdb2_table, lvdb3_table, aggregate_table
+    % Input: active_power, lvdb2_table, lvdb3_table, aggregate_tablepower_events_cell
     % Output: diff_mean_lvdb2, diff_mean_lvdb3, diff_mean_aggregate, diff_std_lvdb2, diff_std_lvdb3, diff_std_aggregate, r_lvdb2, r_lvdb3, r_aggregate, h_lvdb2, h_lvdb3, h_aggregate, p_anova_lvdb2, p_anova_lvdb3, p_anova_aggregate
 
-    check_lvdb2 = sum(table2array(equipment_formated(:, 2:5)), 2) +  sum(table2array(equipment_formated(:, 8:9)), 2);
-    check_lvdb3 = sum(table2array(equipment_formated(:, 7:8)), 2);
+    check_lvdb2 = sum(table2array(active_power(:, 2:5)), 2) +  sum(table2array(active_power(:, 8:9)), 2);
+    check_lvdb3 = sum(table2array(active_power(:, 7:8)), 2);
     
-    % aggregate = sum(table2array(equipment_formated(:, 2:end)), 2);
+    % aggregate = sum(table2array(active_power(:, 2:end)), 2);
     check_aggregate = check_lvdb2 + check_lvdb3;
     
     % difference_lvdb2 = abs(lvdb2_table.active_power - check_lvdb2);
@@ -46,7 +46,7 @@ function [results_cell] = statistical_diff_lvdb_aggregate(equipment_formated, lv
     
     results_cell = {diff_mean_lvdb2, diff_mean_lvdb3, diff_mean_aggregate, diff_std_lvdb2, diff_std_lvdb3, diff_std_aggregate, r_lvdb2, r_lvdb3, r_aggregate, h_lvdb2, h_lvdb3, h_aggregate, p_anova_lvdb2, p_anova_lvdb3, p_anova_aggregate};
 
-    if (nargin == 1 && varargin{1} == true)
+    if (visualize == true)
         figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
         plot(check_lvdb2)
         hold on
