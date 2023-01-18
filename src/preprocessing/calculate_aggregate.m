@@ -19,9 +19,8 @@ function [aggregate_table] = calculate_aggregate(save)
         xlabel('Second [s]')
         ylabel('Active Power [W]')
 
-        writetable(aggregate_table, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\aggregate_table.csv']);
-        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\aggregate_power.fig']);
-        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\aggregate_power.png']);
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\aggregate_power.fig'], '') );
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\aggregate_power.png'], '') );
     end
     
     

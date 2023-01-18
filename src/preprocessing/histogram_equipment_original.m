@@ -1,4 +1,4 @@
-function [] = histogram_equipment_original(equip_data, varargin)
+function [] = histogram_equipment_original(equip_data, save)
     % Objective: Create histograms of all the equipment active power samples for selected days
     % Input: equip_data
     % Output: histogram images
@@ -13,10 +13,10 @@ function [] = histogram_equipment_original(equip_data, varargin)
         ylabel('Number of samples')
     end
     
-    if (nargin == 1 && varargin{1} == true)
+    if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\histogram_original_equipment.fig']);
-        saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\histogram_original_equipment.png']);
+        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\',  'histogram_original_power.fig']]);
+        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\',  'histogram_original_power.png']]);
     end
 end

@@ -39,11 +39,11 @@ date_voltage            = construct_date_unit_table(equip_data, useful_common_ti
 
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
-active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', true);
-reactive_power_formated = interpolate_equipment_data(date_reactive_power, 'reactive_power', true);
-apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', true);
-current_formated        = interpolate_equipment_data(date_current, 'current', true);
-voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', true);
+active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', false);
+reactive_power_formated = interpolate_equipment_data(date_reactive_power, 'reactive_power', false);
+apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', false);
+current_formated        = interpolate_equipment_data(date_current, 'current', false);
+voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', false);
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
@@ -90,8 +90,8 @@ histogram_equipment_original(equip_data, false);
 % Plot the variables for the selected days before interpolation
 plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
 
-% Plot the variables for the selected days after interpolation 
-plot_data_selected_days(active_power_formated, 'Active Power [W]', false);
+% Plot the variables for the selected days after interpolation
+plot_data_selected_days(active_power_formated, 'Active Power [W]', true);
 plot_data_selected_days(reactive_power_formated, 'Reactive Power [VAR]', false);
 plot_data_selected_days(apparent_power_formated, 'Apparent Power [VA]', false);
 plot_data_selected_days(voltage_formated, 'Voltage [V]', false);
@@ -105,7 +105,7 @@ plot_data_select_day(voltage_formated, 1, 'Voltage [V]', false);
 histogram_equipment_formated(active_power_formated, false);
 
 % Analyze the difference between the lvdb2, lvdb3 and agrgegate power
-statistics_result_cell = statistical_diff_lvdb_aggregate(equipment_formated, lvdb2_table, lvdb3_table, aggregate_table, false);
+statistics_result_cell = statistical_diff_lvdb_aggregate(active_power_formated, lvdb2_table, lvdb3_table, aggregate_power, true);
 
 % Function to convert and save a table as a json
 % table_2_json();
