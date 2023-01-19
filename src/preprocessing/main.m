@@ -42,11 +42,13 @@ date_voltage            = construct_date_unit_table(equip_data, useful_common_ti
 
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
-active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', false);
-reactive_power_formated = interpolate_equipment_data(date_reactive_power, 'reactive_power', false);
-apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', false);
-current_formated        = interpolate_equipment_data(date_current, 'current', false);
-voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', false);
+metric_power_table      = calculate_metrics_power_day(date_active_power, selected_equipment_index);
+
+active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', metric_power_table, false);
+reactive_power_formated = interpolate_equipment_data(date_reactive_power, 'reactive_power', metric_power_table, false);
+apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', metric_power_table, false);
+current_formated        = interpolate_equipment_data(date_current, 'current', metric_power_table, false);
+voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', metric_power_table, false);
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
@@ -94,7 +96,7 @@ histogram_equipment_original(equip_data, false);
 plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
 
 % Plot the variables for the selected days after interpolation
-plot_data_selected_days(active_power_formated, 'Active Power [W]', true);
+plot_data_selected_days(active_power_formated, 'Active Power [W]', false);
 plot_data_selected_days(reactive_power_formated, 'Reactive Power [VAR]', false);
 plot_data_selected_days(apparent_power_formated, 'Apparent Power [VA]', false);
 plot_data_selected_days(voltage_formated, 'Voltage [V]', false);

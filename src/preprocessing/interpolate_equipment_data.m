@@ -1,4 +1,4 @@
-function [units_formated] = interpolate_equipment_data(date_unit_table, unit_name, save)
+function [units_formated] = interpolate_equipment_data(date_unit_table, unit_name, metrics, save)
     % Objective: Remove the 30-March-2018 from the useful_common_timestamps and insert missing samples for each equipment
     % Input: date_unit_table
     % Output: units_formated and equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
@@ -7,9 +7,10 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
     unique_dates    = unique(dates_only);
     
     % Define the points used for interpolation
-    filtered_dates_and_unit     = date_unit_table(dates_only ~= unique_dates(end - 1), :); % Remove the 30-Mar-2018 -> unique_dates(end - 1)
-    filtered_unique_dates       = unique_dates(1:end - 2);
-    filtered_unique_dates       = cat(1, filtered_unique_dates, unique_dates(end));
+    dates_to_remove             = table2array(metrics(mean(table2array(metrics(:, 4:2:size(metrics, 2))), 2) < 10, 1));     % Remove useless dates
+
+    filtered_dates_and_unit     = date_unit_table(~ismember(dates_only, dates_to_remove), :); % Remove days with mean median smaller than 500
+    filtered_unique_dates       = unique_dates(~ismember(unique_dates, dates_to_remove), :);
     
     dates_complete = [];
     for i = 1:size(filtered_unique_dates, 1)
