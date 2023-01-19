@@ -17,7 +17,7 @@ function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, s
     
     lvdb_original_timestamps   = cell2mat(lvdb_original_table.timestamp);
     lvdb_timestamps_datetime   = datetime(lvdb_original_timestamps(:, 1:end - 3));
-    [sharedvals, ~]             = ismember(lvdb_timestamps_datetime, equipment_table.timestamp);
+    [sharedvals, ~]            = ismember(lvdb_timestamps_datetime, equipment_table.timestamp);
     lvdb_unit_column           = lvdb_original_table.(string(units));
     lvdb_original_table        = table(lvdb_timestamps_datetime(sharedvals), lvdb_unit_column(sharedvals), 'VariableNames', {'timestamp', units});
     lvdb_mean_values           = grpstats(lvdb_original_table, 'timestamp', 'mean', 'DataVars', string(units));
