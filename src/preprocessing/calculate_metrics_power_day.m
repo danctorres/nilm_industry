@@ -1,4 +1,4 @@
-function [day_table_complete] = calculate_metrics_power_day(date_active_power)
+function [day_table_complete] = calculate_metrics_power_day(date_active_power, selected_equipment_index)
     % Objective: Calculate the average active power for each equipment equipment per day
     % Input: equip_data, date_active_power
     % Output: day_table_complete (table with the day and the active power for each equipment)
@@ -19,7 +19,7 @@ function [day_table_complete] = calculate_metrics_power_day(date_active_power)
             median_active_power(i, j)   = round(median(date_active_power{index_dates == i, j + 1}));
         end
         day_table_complete.('Number_samples') = num_samples';
-        day_table_complete.(sprintf('Mean_W_eq_%i', j)) = mean_active_power(:, j);
-        day_table_complete.(sprintf('Median_W_eq_%i', j)) = median_active_power(:, j);
+        day_table_complete.(sprintf('Mean_W_eq_%i', selected_equipment_index(j))) = mean_active_power(:, j);
+        day_table_complete.(sprintf('Median_W_eq_%i', selected_equipment_index(j))) = median_active_power(:, j);
     end
 end

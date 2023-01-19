@@ -19,7 +19,7 @@ function [] = plot_data_selected_days(data, units, save)
     for i = 1:size(unique_dates, 1)
         legend_string = strings(1, size(data, 2) - 1);
         [sharedvals, ~] = (ismember(dates_only, unique_dates(i)));
-        subplot((size(data, 2) - 1) / 2, 2, i)
+        subplot(round(size(unique_dates, 1) / 2), 2, i)
         for j = 2:size(data, 2)
             plot(table2array(data(sharedvals, j)))
             hold on;
