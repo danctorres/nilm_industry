@@ -52,8 +52,8 @@ voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', me
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
-lvdb2_table = read_lvdb_csv('active_power', 2, false);
-lvdb3_table = read_lvdb_csv('active_power', 3, false);
+lvdb2_table = read_lvdb_csv(active_power_formated, 'active_power', 2, false);
+lvdb3_table = read_lvdb_csv(active_power_formated, 'active_power', 3, false);
 
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
