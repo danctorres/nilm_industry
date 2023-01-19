@@ -1,16 +1,16 @@
-function [aggregate_table] = calculate_aggregate(save)
+function [aggregate_table] = calculate_aggregate(lvdb2_table, lvdb3_table, save)
     % Objective: get aggregate data
     % Input: lvdb2_formated and lvdb3_formated paths
     % Output: aggregate_power
 
-    file_information = matlab.desktop.editor.getActive;
-    [~, file_name, file_ext] = fileparts(file_information.Filename);
-    lvdb2_table_path = [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\lvdb2_formated.csv'];
-    lvdb3_table_path = [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\lvdb3_formated.csv'];    
-    lvdb2_table = readtable(lvdb2_table_path);
-    lvdb3_table = readtable(lvdb3_table_path);
-        
-    aggregate_table = table(lvdb2_table.timestamp, lvdb2_table.active_power+lvdb3_table.active_power, 'VariableNames', {'timestamp', 'active_power'});
+    % file_information = matlab.desktop.editor.getActive;
+    % [~, file_name, file_ext] = fileparts(file_information.Filename);
+    % lvdb2_table_path = [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\lvdb2_formated.csv'];
+    % lvdb3_table_path = [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\lvdb3_formated.csv'];    
+    % lvdb2_table = readtable(lvdb2_table_path);
+    % lvdb3_table = readtable(lvdb3_table_path);
+
+    aggregate_table = table(lvdb2_table.timestamp, lvdb2_table.active_power + lvdb3_table.active_power, 'VariableNames', {'timestamp', 'active_power'});
    
     if (save == true)
         figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])

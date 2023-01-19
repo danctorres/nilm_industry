@@ -52,12 +52,12 @@ voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', me
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
-lvdb2_table = read_lvdb_csv(active_power_formated, 'active_power', 2, false);
+lvdb2_table = read_lvdb_csv(active_power_formated, 'active_power', 2, false);   % figure, plot(lvdb2_table.active_power)
 lvdb3_table = read_lvdb_csv(active_power_formated, 'active_power', 3, false);
 
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
-aggregate_power = calculate_aggregate(false);
+aggregate_power = calculate_aggregate(lvdb2_table, lvdb3_table, false);
 
 
 % Correlation-based feature selection (CFS) to select features
