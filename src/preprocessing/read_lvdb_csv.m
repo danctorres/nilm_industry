@@ -1,4 +1,4 @@
-function [lvdb_complete_table] = read_lvdb_csv(units, lvdb_number, save)
+function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, save)
     % Objective: Read data from 'pelletizer-subcircuit.csv' (LVDB-2) and 'millingmachine-subcircuit.csv' (LVDB-3) and get active power for the same datetime values of table_datetime_active_power
     % Input: equipment_path (path to equipment_formated.csv), lvdb_path and lvdb3_path (path to \pelletizer-subcircuit.csv and millingmachine-subcircuit.csv)
     % Output: lvdb_formated and lvdb3_formated (table with the datetimes and the active power for the dates of lvdb and lvdb3 in common with equipment_formated)
@@ -6,7 +6,8 @@ function [lvdb_complete_table] = read_lvdb_csv(units, lvdb_number, save)
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
     
-    equipment_table             = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\equipment_formated.csv']);
+    % equipment_table             = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\equipment_formated.csv']);
+    equipment_table            = units_data;
     if (lvdb_number == 2)
         lvdb_original_table    = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\pelletizer-subcircuit.csv']);
     elseif (lvdb_number == 3)
