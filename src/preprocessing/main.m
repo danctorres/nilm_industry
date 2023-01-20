@@ -61,7 +61,7 @@ aggregate_power = calculate_aggregate(lvdb2_table, lvdb3_table, false);
 
 
 % Correlation-based feature selection (CFS) to select features
-R = select_feature(aggregate_power(:, 2:end), [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end)]);
+[R_per_eq, R_per_unit] = select_feature(aggregate_power.active_power, [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end)]);
 
 
 % Histogram states for ON / OFF
