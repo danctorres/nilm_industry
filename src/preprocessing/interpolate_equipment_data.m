@@ -1,4 +1,4 @@
-function [units_formated] = interpolate_equipment_data(date_unit_table, unit_name, metrics, save)
+function [units_formated] = interpolate_equipment_data(date_unit_table, unit_name, metrics, selected_equipment_index, save)
     % Objective: Remove the 30-March-2018 from the useful_common_timestamps and insert missing samples for each equipment
     % Input: date_unit_table
     % Output: units_formated and equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
@@ -36,7 +36,7 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
 
     units_formated = table(datetime(datenum(1970,1,1) + date_complete/86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
     for i = 1:size(unit_complete, 2)
-        units_formated.(join( [string(unit_name), sprintf('%i', i)], '_')) = unit_complete(:, i);
+        units_formated.(join( [string(unit_name), sprintf('%i', selected_equipment_index(i))], '_')) = unit_complete(:, i);
     end
 
     % Save to file
