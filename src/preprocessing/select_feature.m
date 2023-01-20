@@ -1,4 +1,4 @@
-function [coeff] = select_feature(features, aggregate_power)
+function [coeff] = select_feature(aggregate_power, features)
     % Objective: calculate the correlation coefficients
     % Input: each 'unit' for all equipment and aggregate power
     % Ouput: coefficient R(1, 2) for each equipment unit
