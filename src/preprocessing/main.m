@@ -44,11 +44,11 @@ date_voltage            = construct_date_unit_table(equip_data, useful_common_ti
 % Interpolate the active power values to obtain a complete set of data the choosen days
 metric_power_table      = calculate_metrics_power_day(date_active_power, selected_equipment_index);
 
-active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', metric_power_table, false);
-reactive_power_formated = interpolate_equipment_data(date_reactive_power, 'reactive_power', metric_power_table, false);
-apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', metric_power_table, false);
-current_formated        = interpolate_equipment_data(date_current, 'current', metric_power_table, false);
-voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', metric_power_table, false);
+active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', metric_power_table, selected_equipment_index, false);
+reactive_power_formated = interpolate_equipment_data(date_reactive_power, 'reactive_power', metric_power_table, selected_equipment_index, false);
+apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', metric_power_table, selected_equipment_index, false);
+current_formated        = interpolate_equipment_data(date_current, 'current', metric_power_table, selected_equipment_index, false);
+voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', metric_power_table, selected_equipment_index, false);
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
@@ -61,8 +61,9 @@ aggregate_power = calculate_aggregate(lvdb2_table, lvdb3_table, false);
 
 
 % Correlation-based feature selection (CFS) to select features
-features = [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end)];
-[R_per_eq, R_per_unit] = select_feature(aggregate_power.active_power, features);
+pover_factor = calculate_PF(current_formated, voltage_formated, selected_equipment_index);
+features = [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), pover_factor(:, 2:end)];
+[R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, features);
 
 
 % Histogram states for ON / OFF

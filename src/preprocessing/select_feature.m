@@ -15,5 +15,6 @@ function [R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = 
     features_per_eq_sorted = (features.Properties.VariableNames(R_per_eq_sorted_idx));
 
     [~, R_per_unit_sorted_idx] = sort(abs(R_per_unit), 'descend');
-    features_unit_sorted = erase((features.Properties.VariableNames(R_per_unit_sorted_idx * 6)), '_6');
+    features_unit_sorted = features.Properties.VariableNames(R_per_unit_sorted_idx * 6);
+    features_unit_sorted = regexprep(features_unit_sorted, '..$', '', 'lineanchors');
 end
