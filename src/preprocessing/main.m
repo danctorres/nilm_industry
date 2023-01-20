@@ -52,8 +52,8 @@ voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', me
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
-lvdb2_table = read_lvdb_csv(active_power_formated, 'active_power', 2, false);   % figure, plot(lvdb2_table.active_power)
-lvdb3_table = read_lvdb_csv(active_power_formated, 'active_power', 3, false);
+lvdb2_table = read_lvdb_csv(active_power_formated, 'active_power', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
+lvdb3_table = read_lvdb_csv(active_power_formated, 'active_power', 3, selected_equipment_index, false);
 
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
@@ -61,7 +61,7 @@ aggregate_power = calculate_aggregate(lvdb2_table, lvdb3_table, false);
 
 
 % Correlation-based feature selection (CFS) to select features
-R = select_feature([active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end)], aggregate_power(:, 2:end));
+R = select_feature(aggregate_power(:, 2:end), [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end)]);
 
 
 % Histogram states for ON / OFF
