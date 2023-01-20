@@ -49,7 +49,7 @@ flowchart TD;
     kalman-- Updated W -->main;
     main-- Equipment power estimate-->visualization;
     end
-    measurements-- Aggregate: P, S, Q, PF, V and I. Equipment: ON/OFF -->kalman;
+    measurements-- Aggregate features and equipment states -->main;
     dataset -- raw data --> preprocessing;
     estimation -- Estimated W --> main;
 ```
