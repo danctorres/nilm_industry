@@ -38,31 +38,35 @@ Code developed in MATLAB, Python and C++.
 ### Architecture:
 Multi-modal Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering algorithm flowchart:
 ```mermaid
-flowchart TD;
+flowchart TD
     subgraph Offline
-    preprocessing-- Input trainning data -->estimation;
-    optimization-- Optimization algorithms -->estimation;
+    preprocessing-- Input trainning data -->estimation
+    optimization-- Optimization algorithms -->estimation
     end
     subgraph Online
-    kalman-- Updated W -->main;
-    main:::someclass-- Current W and selected features -->kalman;
+    kalman-- Updated W -->main
+    main:::someclass-- Current W and selected features -->kalman
     classDef someclass fill:#A64D79
-    main -- Estimates and options --> visualization
-    visualization -->  estimates[/Output: Equipment power estimate/];
+    main -- Measurements and estimates --> history
+    main --> visualization
+    history --> visualization
+    history --> patterns
+    patterns --> visualization
+    visualization -->  estimates[/Output: Equipment power estimate/]
+    estimation -- Estimated W --> main
     end
     start((start)) --> dataset
-    dataset[/Input: dataset/] -- raw data --> preprocessing;
-    measurements[/Input: measurements/]-- Aggregate features and equipment states -->main;
-    estimation -- Estimated W --> main;
-    visualization -- User input --> main
+    dataset[/Input: dataset/] -- raw data --> preprocessing
+    measurements[/Input: measurements/]-- Aggregate features and equipment states -->main
+    inputs[/Input: User options/] --> visualization
 ```
 Pre-processing algorithm flowchart:
 ```mermaid
 graph TB
     X((Start)) --> A
     A[/Dataset/] --> B[Find 'complete' days]
-    B --> C[Calculate the mean of duplicates]
-    C --> D[Filter days]
+    B --> C[Eliminate duplicates by calculating mean]
+    C --> D[Filter days based on missing samples]
     D --> E[Interpolate]
 
     E --> F[Calculate ON/OFF]
