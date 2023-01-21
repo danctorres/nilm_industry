@@ -3,13 +3,13 @@ Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads
 
 ### Description:
 
-> Repo of the code and documentation related to my master's degree dissertation in Electrical and Computer Engineering at the University of Coimbra.
+Repo of the code and documentation related to my master's degree dissertation in Electrical and Computer Engineering at the University of Coimbra.
 
-> The dissertation titled "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads" focuses on developing innovative techniques for monitoring industrial loads.
+My dissertation titled "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads" focuses on developing innovative techniques for monitoring industrial loads.
 
-> Main contribution: development of a novel method for NILM, called Multi-Modal Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering.
+Main contribution: development of a novel method for NILM, called Multi-Modal Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering.
 
-> Code developed in MATLAB, Python and C++.
+Code developed in MATLAB, Python and C++.
 
 ### Structure:
 ```
@@ -41,17 +41,20 @@ Multi-modal Functional Matrix Factorization with Ensemble of Numerical and Metah
 flowchart TD;
     subgraph Offline
     preprocessing-- Input trainning data -->estimation;
-    optimization-- Optimization algorithms ---estimation;
+    optimization-- Optimization algorithms -->estimation;
     end
     subgraph Online
-    main:::someclass-- Current W -->kalman;
-    classDef someclass fill:#A64D79
     kalman-- Updated W -->main;
-    main-- Equipment power estimate-->visualization;
+    main:::someclass-- Current W and selected features -->kalman;
+    classDef someclass fill:#A64D79
+    main --> visualization
+    visualization -->  estimates[/Output: Equipment power estimate/];
     end
-    measurements-- Aggregate features and equipment states -->main;
-    dataset -- raw data --> preprocessing;
+    start((start)) --> dataset
+    dataset[/Input: dataset/] -- raw data --> preprocessing;
+    measurements[/Input: measurements/]-- Aggregate features and equipment states -->main;
     estimation -- Estimated W --> main;
+    visualization -- User input --> main
 ```
 
 ### How to install and set up:
