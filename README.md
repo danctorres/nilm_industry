@@ -47,7 +47,7 @@ flowchart TD;
     kalman-- Updated W -->main;
     main:::someclass-- Current W and selected features -->kalman;
     classDef someclass fill:#A64D79
-    main --> visualization
+    main -- Estimates and options --> visualization
     visualization -->  estimates[/Output: Equipment power estimate/];
     end
     start((start)) --> dataset
