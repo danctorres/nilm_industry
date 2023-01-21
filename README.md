@@ -56,6 +56,23 @@ flowchart TD;
     estimation -- Estimated W --> main;
     visualization -- User input --> main
 ```
+Pre-processing algorithm flowchart:
+```mermaid
+graph TB
+    X((Start)) --> A
+    A[/Dataset/] --> B[Find 'complete' days]
+    B --> C[Calculate the mean of duplicates]
+    C --> D[Filter days]
+    D --> E[Interpolate]
+
+    E --> F[Calculate ON/OFF]
+    F --> I[/Trainning and Evaluation Data/]
+
+    D --> G[Calculate aggregate data]
+    G --> I
+    I --> Z((Stop))
+``` 
+    
 
 ### How to install and set up:
 ```
