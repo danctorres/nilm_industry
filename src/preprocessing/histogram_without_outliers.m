@@ -12,11 +12,11 @@ function [output_counts_cell, output_edges_cell, output_bin_center, output_TF_ce
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
     for i = 1:size(data, 2) - 1
         subplot((size(data, 2) - 1) / 2, 2, i)
-        data = table2array(data(:, i + 1));
+        data_collumn = table2array(data(:, i + 1));
         if bool_outl == true
-            x_clean = rmoutliers( data(data >= 0), 'mean', 'ThresholdFactor', 3);
+            x_clean = rmoutliers( data_collumn(data_collumn >= 0), 'mean', 'ThresholdFactor', 3);
         else
-            x_clean = data;
+            x_clean = data_collumn;
         end
 
         [counts, edges] = histcounts(x_clean, 100);

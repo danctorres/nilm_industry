@@ -1,5 +1,5 @@
 function [units_formated] = interpolate_equipment_data(date_unit_table, unit_name, metrics, selected_equipment_index, save)
-    % Objective: Remove the 30-March-2018 from the useful_common_timestamps and insert missing samples for each equipment
+    % Objective: Remove useless dates and insert missing samples for each equipment
     % Input: date_unit_table
     % Output: units_formated and equipment_formated.csv (table with all the datetimes and the active power value of each equipment)
 
@@ -22,19 +22,21 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
     end
     
     date_dataset                = posixtime(filtered_dates_and_unit.Date);
-    [diff, index_diff]          = setdiff(dates_complete, date_dataset);
+    %%[diff, index_diff]          = setdiff(dates_complete, date_dataset);
     [~, index_date_dataset, ~]  = intersect(dates_complete, date_dataset);
     
     % Spline interpolation, using a cubic spline, alternatives: csaps / pchip
     unit_complete = zeros(size(dates_complete, 1), size(date_unit_table, 2) - 1);
     for i = 1:size(date_unit_table, 2) - 1
-        unit_complete(index_date_dataset, i)    = filtered_dates_and_unit{:, i+1};
-        unit_complete(index_diff, i)            = spline(date_dataset, filtered_dates_and_unit{:, i+1}, diff);
+        [filtered_unit_no_outliers, TFrm]              = rmoutliers(filtered_dates_and_unit{:, i+1}, 'mean', 'ThresholdFactor', 3);      % remove outliers
+        unit_complete(index_date_dataset(~TFrm), i)     = filtered_unit_no_outliers;
+        
+        [diff, index_diff]                              = setdiff(dates_complete, date_dataset(~TFrm));
+        unit_complete(index_diff, i)                    = spline(date_dataset(~TFrm), filtered_unit_no_outliers, diff);
+        unit_complete (unit_complete < 0) = 0;          % remove values smaller than zero, negative consumption not possible
     end
     
-    date_complete = sort(cat(1, date_dataset, diff), 'ascend');
-
-    units_formated = table(datetime(datenum(1970,1,1) + date_complete/86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
+    units_formated = table(datetime(datenum(1970,1,1) + dates_complete/86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
     for i = 1:size(unit_complete, 2)
         units_formated.(join( [string(unit_name), sprintf('%i', selected_equipment_index(i))], '_')) = unit_complete(:, i);
     end

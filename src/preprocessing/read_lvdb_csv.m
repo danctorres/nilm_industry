@@ -7,15 +7,14 @@ function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, s
     [~, file_name, file_ext] = fileparts(file_information.Filename);
     
     % equipment_table             = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\equipment_formated.csv']);
-    missing_eq                      = false;
-    equipment_table                 = units_data;
+    missing_eq = false;
     if (lvdb_number == 2)
         lvdb_original_table         = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\pelletizer-subcircuit.csv']);
     elseif (lvdb_number == 3)
         if (any(ismember(selected_equipment_index, 5) == 1) && any(ismember(selected_equipment_index, 6) == 1))
             lvdb_original_table     = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\millingmachine-subcircuit.csv']);
         else
-            lvdb_complete_table     =  table(zeros(size(units_data, 1), 1), zeros(size(units_data, 1), 1), 'VariableNames', {'timestamp', units});
+            lvdb_complete_table     = table(zeros(size(units_data, 1), 1), zeros(size(units_data, 1), 1), 'VariableNames', {'timestamp', units});
             missing_eq = true;
         end
     end
@@ -23,7 +22,7 @@ function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, s
     if (missing_eq == false)
         lvdb_original_timestamps    = cell2mat(lvdb_original_table.timestamp);
         lvdb_timestamps_datetime    = datetime(lvdb_original_timestamps(:, 1:end - 3));
-        [sharedvals, ~]             = ismember(lvdb_timestamps_datetime, equipment_table.timestamp);
+        [sharedvals, ~]             = ismember(lvdb_timestamps_datetime, units_data);
         lvdb_unit_column            = lvdb_original_table.(string(units));
         lvdb_original_table         = table(lvdb_timestamps_datetime(sharedvals), lvdb_unit_column(sharedvals), 'VariableNames', {'timestamp', units});
         lvdb_mean_values            = grpstats(lvdb_original_table, 'timestamp', 'mean', 'DataVars', string(units));
@@ -31,19 +30,20 @@ function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, s
         clear lvdb_mean_values;
         
         lvdb_missing_dates_posix    = posixtime(lvdb_missing_dates_table.timestamp);
-        equipment_table_posix       = posixtime(equipment_table.timestamp);
+        equipment_table_posix       = posixtime(units_data);
     
-        
-        
-        % ia = index pf data in equipment_table_posix that is not in lvdb_missing_dates_posix
-        [~, ia]                 = setdiff(equipment_table_posix, lvdb_missing_dates_posix);
-        [~, index_a, index_b]   = intersect(equipment_table_posix, lvdb_missing_dates_posix);
-        
+               
+        lvdb_unit                       = lvdb_missing_dates_table.(string(units));
+        % remove outliers
+        [lvdb_no_outliers, TFrm]        = rmoutliers(lvdb_unit, 'mean', 'ThresholdFactor', 3);
+        [~, idx_miss]                   = setdiff(equipment_table_posix, lvdb_missing_dates_posix(~TFrm));     % timestamps missing from the lvdb data
+        [~, index_a, index_b]           = intersect(equipment_table_posix, lvdb_missing_dates_posix(~TFrm));   % timestamps in the lvdb data
+
         % interpolate
-        lvdb_missing_dates_column   = lvdb_missing_dates_table.(string(units));
-        unit_values(index_a, 1)     = lvdb_missing_dates_column(index_b);
-        unit_values(ia, 1)          = spline(lvdb_missing_dates_posix, lvdb_missing_dates_column, equipment_table_posix(ia));
-        lvdb_complete_table         = table(equipment_table.timestamp, unit_values, 'VariableNames', {'timestamp', units});
+        unit_values(index_a, 1)         = lvdb_no_outliers(index_b);
+        unit_values(idx_miss, 1)        = spline(lvdb_missing_dates_posix, lvdb_unit, equipment_table_posix(idx_miss));
+        unit_values(unit_values < 0)    = 0;
+        lvdb_complete_table             = table(units_data, unit_values, 'VariableNames', {'timestamp', units});
     end
 
     if (save == true)
