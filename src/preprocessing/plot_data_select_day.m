@@ -22,11 +22,11 @@ function [] = plot_data_select_day(data, date_index, unit, save)
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
     sgtitle(string(selected_date))
     [sharedvals, ~] = (ismember(dates_only, selected_date));
-    for j = 2:size(data, 2)
-        subplot((size(data, 2) - 1) / 2, 2, j - 1)
-        plot(table2array(data(sharedvals, j)))
+    for i = 2:size(data, 2)
+        subplot((size(data, 2) - 1) / 2, 2, i - 1)
+        plot(table2array(data(sharedvals, i)))
 
-        table_collumn_name = data.Properties.VariableNames{j};
+        table_collumn_name = data.Properties.VariableNames{i};
 
         title(['Equipment ', table_collumn_name(end)])
         xlabel('Index')
