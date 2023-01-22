@@ -1,4 +1,4 @@
-function [on_off_array] = calculate_on_off(equipment_formated, group_power_limit)
+function [on_off_array] = calculate_on_off(equipment_formated, group_power_limit, save)
     % Objective: Use the values of the first midpeak, state limite, to construct the on/off array
     % Input: equipment_formated, group_power_limit(cell of the state limits)
     % Output: on_off_array (array with with one if the equipment is in ON state for that sample otherwise is 0)
@@ -18,5 +18,13 @@ function [on_off_array] = calculate_on_off(equipment_formated, group_power_limit
         xlabel('Second [s]')  
         ylabel('State')  
         title(sprintf('Equipment %i', i))
+    end
+
+    if save == true
+        file_information = matlab.desktop.editor.getActive;
+        [~, called_file_name, ~] = fileparts(file_information.Filename);
+        writetable(units_formated, join([erase(file_information.Filename,  join(['\src\preprocessing\', called_file_name, '.m'])), 'data\interim\on_off.csv'], '\'));
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\on_off.fig'], '') );
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\on_off.png'], '') );
     end
 end

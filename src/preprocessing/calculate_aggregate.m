@@ -19,6 +19,7 @@ function [aggregate_table] = calculate_aggregate(lvdb2_table, lvdb3_table, save)
         xlabel('Second [s]')
         ylabel('Active Power [W]')
 
+        writetable(units_formated, join([erase(file_information.Filename,  join(['\src\preprocessing\', called_file_name, '.m'])), 'data\interim\aggregate_power.csv'], '\'));
         saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\aggregate_power.fig'], '') );
         saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\aggregate_power.png'], '') );
     end
