@@ -24,7 +24,7 @@ equip_data = read_equipment_csv(); % read dataset equipment csv, optional input 
 
 % Identify common timestamps among equipment
 % selected_equipment_index =  1:(size(equip_data, 2));
-selected_equipment_index = [1, 2, 3, 4, 7, 8];
+selected_equipment_index = [1, 2, 3, 4, 5, 6, 7, 8];
 common_timestamps = find_common_timestamps(equip_data, selected_equipment_index);
 
 
@@ -52,12 +52,17 @@ voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', me
 
 
 % Read and format data from 'pelletizer-subcircuit.csv' and 'millingmachine-subcircuit.csv'
-lvdb2_table = read_lvdb_csv(active_power_formated, 'active_power', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
-lvdb3_table = read_lvdb_csv(active_power_formated, 'active_power', 3, selected_equipment_index, false);
+lvdb2_active_power_table = read_lvdb_csv(active_power_formated.timestamp, 'active_power', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
+lvdb3_active_power_table = read_lvdb_csv(active_power_formated.timestamp, 'active_power', 3, selected_equipment_index, false);
 
+lvdb2_voltage_table = read_lvdb_csv(voltage_formated.timestamp, 'voltage', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
+lvdb3_voltage_table = read_lvdb_csv(voltage_formated.timestamp, 'voltage', 3, selected_equipment_index, false);
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
-aggregate_power = calculate_aggregate(lvdb2_table, lvdb3_table, false);
+aggregate_active_power  = calculate_aggregate(lvdb2_active_power_table, lvdb3_active_power_table, 'Active Power [W]', false);
+aggregate_voltage       = calculate_aggregate(lvdb2_voltage_table, lvdb3_voltage_table, 'Voltage [V]', false);
+
+
 
 
 % Correlation-based feature selection (CFS) to select features
@@ -66,16 +71,16 @@ power_factor = calculate_PF(current_formated, voltage_formated, selected_equipme
 
 
 % Histogram states for ON / OFF
-[counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(equipment_formated, 2000, true, false);
-[curves, params_normal, ~, group_power_limit] = get_params_normals(size(equipment_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
-histogram_state_peak_equipment(equipment_formated, group_power_limit)
+[counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(active_power_formated, 2000, true, false);
+[curves, params_normal, ~, group_power_limit] = get_params_normals(size(active_power_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
+histogram_state_peak_equipment(active_power_formated, group_power_limit)
 
 % Calculate ON/OFF
-on_off_array = calculate_on_off(equipment_formated, group_power_limit);
+on_off_array = calculate_on_off(active_power_formated, group_power_limit, false);
 
 
 % Calculate power at the events for each equipment
-power_events = estimate_power_events(aggregate_table, active_power_formated);
+power_events = estimate_power_events(aggregate_active_power, on_off_array);
 
 
 
@@ -95,6 +100,8 @@ histogram_equipment_original(equip_data, false);
 
 % Plot the variables for the selected days before interpolation
 plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
+plot_data_per_equipment(active_power_formated, 'Active Power [W]', false);
+
 
 % Plot the variables for the selected days after interpolation
 plot_data_selected_days(active_power_formated, 'Active Power [W]', false);
