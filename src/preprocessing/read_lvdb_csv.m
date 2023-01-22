@@ -47,6 +47,6 @@ function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, s
     end
 
     if (save == true)
-        writetable(lvdb_complete_table, join([erase(file_information.Filename,  join(['\src\preprocessing\', called_file_name, '.m'])), join( [join(['data\interim\', string(lvdb_number)], ''), 'formated.csv'], '_')], '\'));
+        writetable(lvdb_complete_table, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), join( [join(['data\interim\', string(lvdb_number)], ''), 'formated.csv'], '_')], '\'));
     end
 end

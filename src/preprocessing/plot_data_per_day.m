@@ -28,6 +28,7 @@ function [] = plot_data_per_day(data, save)
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
+ 
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_common_original.fig']);
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_common_original.png']);
     end

@@ -61,9 +61,8 @@ aggregate_power = calculate_aggregate(lvdb2_table, lvdb3_table, false);
 
 
 % Correlation-based feature selection (CFS) to select features
-pover_factor = calculate_PF(current_formated, voltage_formated, selected_equipment_index);
-features = [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), pover_factor(:, 2:end)];
-[R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, features);
+power_factor = calculate_PF(current_formated, voltage_formated, selected_equipment_index);
+[R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), power_factor(:, 2:end)]);
 
 
 % Histogram states for ON / OFF
@@ -107,6 +106,7 @@ plot_data_selected_days(current_formated, 'Current [A]', false);
 % Plot the variable for one day, by specifying what is the day index
 plot_data_select_day(active_power_formated, 1, 'Active Power [W]', false);
 plot_data_select_day(voltage_formated, 1, 'Voltage [V]', false);
+plot_data_select_day(aggregate_power, 1, 'Active Power [W]', false);
 
 % Plot histogram of the interpolated variables
 histogram_equipment_formated(active_power_formated, false);
