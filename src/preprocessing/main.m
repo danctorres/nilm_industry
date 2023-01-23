@@ -65,6 +65,8 @@ lvdb3_current_table = read_lvdb_csv(current_formated.timestamp, 'voltage', 3, se
 
 aggregate_formated_table = calculate_aggregate_six_equipment(active_power_formated.timestamp, false);
 
+aggregate_correlation = calculate_corr(aggregate_formated_table);
+
 
 % Correlation-based feature selection (CFS) to select features
 [R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), power_factor(:, 2:end)]);
