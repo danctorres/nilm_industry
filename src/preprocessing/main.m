@@ -55,18 +55,18 @@ voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', me
 lvdb2_active_power_table = read_lvdb_csv(active_power_formated.timestamp, 'active_power', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
 lvdb3_active_power_table = read_lvdb_csv(active_power_formated.timestamp, 'active_power', 3, selected_equipment_index, false);
 
-lvdb2_voltage_table = read_lvdb_csv(voltage_formated.timestamp, 'voltage', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
-lvdb3_voltage_table = read_lvdb_csv(voltage_formated.timestamp, 'voltage', 3, selected_equipment_index, false);
+lvdb2_current_table = read_lvdb_csv(current_formated.timestamp, 'voltage', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
+lvdb3_current_table = read_lvdb_csv(current_formated.timestamp, 'voltage', 3, selected_equipment_index, false);
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
-aggregate_active_power  = calculate_aggregate(lvdb2_active_power_table, lvdb3_active_power_table, 'Active Power [W]', false);
-aggregate_voltage       = calculate_aggregate(lvdb2_voltage_table, lvdb3_voltage_table, 'Voltage [V]', false);
 
+% aggregate_active_power  = calculate_aggregate(lvdb2_active_power_table, lvdb3_active_power_table, 'Active Power [W]', false);
+% aggregate_current       = calculate_aggregate(lvdb2_current_table, lvdb3_current_table, 'Current [V]', false);
 
+aggregate_formated_table = calculate_aggregate_six_equipment(active_power_formated.timestamp, false);
 
 
 % Correlation-based feature selection (CFS) to select features
-power_factor = calculate_PF(current_formated, voltage_formated, selected_equipment_index);
 [R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), power_factor(:, 2:end)]);
 
 
