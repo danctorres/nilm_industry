@@ -60,17 +60,11 @@ lvdb3_current_table = read_lvdb_csv(current_formated.timestamp, 'voltage', 3, se
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
 
-% aggregate_active_power  = calculate_aggregate(lvdb2_active_power_table, lvdb3_active_power_table, 'Active Power [W]', false);
+aggregate_active_power  = calculate_aggregate(lvdb2_active_power_table, lvdb3_active_power_table, 'Active Power [W]', false);
 % aggregate_current       = calculate_aggregate(lvdb2_current_table, lvdb3_current_table, 'Current [V]', false);
 
 aggregate_formated_table = calculate_aggregate_six_equipment(active_power_formated.timestamp, false);
-
 aggregate_correlation   = calculate_corr(aggregate_formated_table);
-
-
-% Correlation-based feature selection (CFS) to select features
-power_factor = calculate_PF(active_power_formated, apparent_power_formated, selected_equipment_index);
-[R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), power_factor(:, 2:end)]);
 
 
 % Histogram states for ON / OFF
@@ -130,6 +124,12 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(active_power_formated, 
 
 % Function to convert and save a table as a json
 % table_2_json();
+
+
+% Correlation-based feature selection (CFS) to select features
+power_factor = calculate_PF(active_power_formated, apparent_power_formated, selected_equipment_index);
+[R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), power_factor(:, 2:end)]);
+
 
 
 % read csv from iterim dataset
