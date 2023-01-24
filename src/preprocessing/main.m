@@ -65,24 +65,29 @@ lvdb3_current_table = read_lvdb_csv(current_formated.timestamp, 'voltage', 3, se
 
 aggregate_formated_table = calculate_aggregate_six_equipment(active_power_formated.timestamp, false);
 
-aggregate_correlation = calculate_corr(aggregate_formated_table);
+aggregate_correlation   = calculate_corr(aggregate_formated_table);
 
 
 % Correlation-based feature selection (CFS) to select features
+power_factor = calculate_PF(active_power_formated, apparent_power_formated, selected_equipment_index);
 [R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), power_factor(:, 2:end)]);
 
 
 % Histogram states for ON / OFF
 [counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(active_power_formated, 2000, true, false);
-[curves, params_normal, ~, group_power_limit] = get_params_normals(size(active_power_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
+[curves, params_normal, ~, group_power_limit]       = get_params_normals(size(active_power_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
 histogram_state_peak_equipment(active_power_formated, group_power_limit)
 
 % Calculate ON/OFF
-on_off_array = calculate_on_off(active_power_formated, group_power_limit, false);
-
+% on_off_array = calculate_on_off(active_power_formated, group_power_limit, false);
+on_off_array = calculate_on_off(active_power_formated, 5, false);
 
 % Calculate power at the events for each equipment
 power_events = estimate_power_events(aggregate_active_power, on_off_array);
+
+
+% Save final data
+[aggregate_training, on_off_training, aggregate_testing, on_off_testing] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, true);
 
 
 
