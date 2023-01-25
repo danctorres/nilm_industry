@@ -3,10 +3,10 @@ Table of Contents
 
 * [Description](#description)
 * [Directory Structure](#directory-structure)
-* [Architecture flowchart](#architecture-flowchart)
-* [Set up](#set-up)
-* [How to use](#how-to-use)
-* [Relevant resources](#relevant-resources)
+* [Architecture Flowchart](#architecture-flowchart)
+* [How to Set Up](#how-to-set-up)
+* [How to Use](#how-to-use)
+* [Relevant Resources](#relevant-resources)
 * [Licensing](#licensing)
 ---
 
@@ -45,7 +45,7 @@ Directory Structure
     └── README.md
 
 
-Architecture flowchart
+Architecture Flowchart
 ------
 ```mermaid
 flowchart TD
@@ -72,13 +72,13 @@ flowchart TD
 ```
   
 
-Set up
+How to Set Up
 ------
 * Clone the repo.
 * Download the imdeld dataset from IEEEDataPort into the data/raw folder.
 
 
-How to use
+How to Use
 ------
 > ToDo
 
