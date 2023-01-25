@@ -1,96 +1,93 @@
-Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads
-============================
+Table of Contents
+------
 
-### Description:
+* [Description](#description)
+* [Directory Structure](#directory-structure)
+* [Architecture flowchart](#architecture-flowchart)
+* [Set up](#set-up)
+* [How to use](#how-to-use)
+* [Relevant resources](#relevant-resources)
+* [Licensing](#licensing)
+---
 
-Repo of the code and documentation related to my master's degree dissertation in Electrical and Computer Engineering at the University of Coimbra.
 
-My dissertation titled "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads" focuses on developing innovative techniques for monitoring industrial loads.
+Description
+------
+[Multi-Modal Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering](https://github.com/danctorres/nilm_disseration) is an innovative algorithm for NILM, developed for my master's degree dissertation in Electrical and Computer Engineering at the [University of Coimbra](https://www.uc.pt/).
 
-Main contribution: development of a novel method for NILM, called Multi-Modal Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering.
+My dissertation titled "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads" focuses on developing a novel NILM algorithm to assist the industrial sector in the reduction of its energy demand. The algorithm performs source separation and could be used by any factory with a [SCADA system](https://en.wikipedia.org/wiki/SCADA), since it does not require data about the individual equipment consumption.
 
-Code developed in MATLAB, Python and C++.
 
-### Structure:
-```
-.
-├── build                   # Compiled files
-├── data
-│   ├── raw                 # Imdeld dataset
-│   ├── interim             # Intermediate data
-│   └── processed           # Final dataset for modeling
-├── docs                    # Documentation files
-├── reports					
-│   └── figures             # Generated figures to be used in reporting 
-├── src                     # Source files
-│   ├── preprocessing       # Analysis, cleaning and transforming of data into suitable format for algorithm
-│   ├── estimation          # Estimate values of W
-│   ├── kalman		    # Kalman filter to estimate state
-│   ├── main
-│   ├── optimization        # Optimization algorithms (estimating the coefficients of the functions in the W matrix)
-│   └── visualization	    # Code to display the results and performance metrics
-├── test                    # Automated tests
-├── tools                   # Tools and utilities
-├── LICENSE
-└── README.md
-```
+The proposed algorithm, uses the aggregate data and the ON/OFF equipment information from the SCADA system as training data to model each equipment by a polynomial function, the training is offline. The functions are estimated with numerical and metaheuristic optimization algorithms and the results depend upon the amount and quality of the training data. In the online part of the algorithm, the functions are constantly updated as new measurements arrived by Kalman filtering. The algorithm can be considered has unsupervised, since it does not require individual equipment consumption data, however, can also be treated as semi-supervised, since it uses the ON/OFF equipment data.
 
-### Architecture:
-Multi-modal Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering algorithm flowchart:
+
+Directory Structure
+------
+    .
+    ├── build                   # Compiled files
+    ├── data
+    │   ├── raw                 # Imdeld dataset
+    │   ├── interim             # Intermediate data
+    │   └── processed           # Final dataset for modeling
+    ├── docs                    # Documentation files
+    ├── reports					
+    │   └── figures             # Generated figures to be used in reporting 
+    ├── src                     # Source files
+    │   ├── preprocessing       # Analysis, cleaning and transforming of data into suitable format for algorithm
+    │   ├── estimation          # Estimate values of W
+    │   ├── kalman		        # Kalman filter to estimate state
+    │   ├── main
+    │   ├── optimizer           # Optimization algorithms (estimating the coefficients of the functions in the W matrix)
+    │   └── ui	                # Code to display the results and performance metrics
+    ├── test                    # Automated tests
+    ├── tools                   # Tools and utilities
+    ├── LICENSE
+    └── README.md
+
+
+Architecture flowchart
+------
 ```mermaid
 flowchart TD
     subgraph Offline
     preprocessing-- Input trainning data -->estimation
-    optimization-- Optimization algorithms -->estimation
+    optimizer-- Optimization algorithms -->estimation
     end
     subgraph Online
     kalman-- Updated W -->main
     main:::someclass-- Current W and selected features -->kalman
     classDef someclass fill:#A64D79
     main -- Measurements and estimates --> history
-    main --> visualization
-    history --> visualization
-    history --> patterns
-    patterns --> visualization
-    visualization -->  estimates[/Output: Equipment power estimate/]
+    main --> ui
+    history --> ui
+    history --> pattern
+    pattern --> ui
+    ui -->  estimates[/Output: Equipment power estimate/]
     estimation -- Estimated W --> main
     end
     start((start)) --> dataset
     dataset[/Input: dataset/] -- raw data --> preprocessing
     measurements[/Input: measurements/]-- Aggregate features and equipment states -->main
-    inputs[/Input: User options/] --> visualization
+    inputs[/Input: User options/] --> ui
 ```
-Pre-processing algorithm flowchart:
-```mermaid
-graph TB
-    X((Start)) --> A
-    A[/Dataset/] --> B[Find 'complete' days]
-    B --> C[Eliminate duplicates by calculating mean]
-    C --> D[Filter days based on missing samples]
-    D --> E[Interpolate]
+  
 
-    E --> F[Calculate ON/OFF]
-    F --> I[/Trainning and Evaluation Data/]
+Set up
+------
+* Clone the repo.
+* Download the imdeld dataset from IEEEDataPort into the data/raw folder.
 
-    D --> G[Calculate aggregate data]
-    G --> I
-    I --> Z((Stop))
-``` 
-    
 
-### How to install and set up:
-```
-• Clone the repo.
-• Download the imdeld dataset from IEEEDataPort into the data/raw folder.
-```
-
-### How to use the repo:
+How to use
+------
 > ToDo
 
 
-### Link to relevant resources:
-> Imdeld dataset: https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
+Relevant resources
+------
+Imdeld dataset: https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
 
-### License
+Licensing
+------
 Copyright © 2023 [Daniel Torres](https://github.com/danctorres).<br />
 This project is [MIT](https://github.com/danctorres/nilm_disseration/blob/main/LICENSE) licensed.
