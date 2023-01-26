@@ -74,9 +74,24 @@ flowchart TD
 
 How to Set Up
 ------
-* Clone the repo.
-* Download the imdeld dataset from IEEEDataPort into the data/raw folder.
-
+1. Clone nilm repo into your home directory:
+``` bash
+cd ~
+git clone https://github.com/danctorres/nilm_industry.git
+```
+2. [Optional] - Download the imdeld dataset from IEEEDataPort into the data/raw folder to run pre-processing MATLAB scripts.
+``` bash
+cd ~/nilm_industry/data/raw/
+download https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
+```
+3. Run setup script and build
+``` bash
+...
+```
+4. Run the simulation and test UI
+``` bash
+./nilm_simulation
+```
 
 How to Use
 ------
