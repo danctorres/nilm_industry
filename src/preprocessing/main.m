@@ -24,7 +24,7 @@ equip_data = read_equipment_csv(); % read dataset equipment csv, optional input 
 
 % Identify common timestamps among equipment
 % selected_equipment_index =  1:(size(equip_data, 2));
-selected_equipment_index = [1, 2, 3, 4, 5, 6, 7, 8];
+selected_equipment_index = [1, 2, 3, 4, 7, 8];
 common_timestamps = find_common_timestamps(equip_data, selected_equipment_index);
 
 
@@ -55,8 +55,8 @@ voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', me
 lvdb2_active_power_table = read_lvdb_csv(active_power_formated.timestamp, 'active_power', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
 lvdb3_active_power_table = read_lvdb_csv(active_power_formated.timestamp, 'active_power', 3, selected_equipment_index, false);
 
-lvdb2_current_table = read_lvdb_csv(current_formated.timestamp, 'voltage', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
-lvdb3_current_table = read_lvdb_csv(current_formated.timestamp, 'voltage', 3, selected_equipment_index, false);
+lvdb2_current_table = read_lvdb_csv(current_formated.timestamp, 'current', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
+lvdb3_current_table = read_lvdb_csv(current_formated.timestamp, 'current', 3, selected_equipment_index, false);
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
 
