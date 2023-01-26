@@ -1,0 +1,15 @@
+/home/dtorres/dissertation_nilm/data/processed/6_equipment/aggregate_training.csv filter=lfs diff=lfs merge=lfs -text
+/home/dtorres/dissertation_nilm/data/processed/6_equipment/aggregate_validation.csv filter=lfs diff=lfs merge=lfs -text
+/home/dtorres/dissertation_nilm/data/processed/6_equipment/equipment_validation.csv filter=lfs diff=lfs merge=lfs -text
+/home/dtorres/dissertation_nilm/data/processed/6_equipment/on_off_training.csv filter=lfs diff=lfs merge=lfs -text
+/home/dtorres/dissertation_nilm/data/processed/6_equipment/on_off_validation.csv filter=lfs diff=lfs merge=lfs -text
+data/raw/millingmachine-subcircuit.csv filter=lfs diff=lfs merge=lfs -text
+data/raw/mvlv-transformer.csv filter=lfs diff=lfs merge=lfs -text
+data/raw/pelletizer-subcircuit.csv filter=lfs diff=lfs merge=lfs -text
+data/raw/Equipment filter=lfs diff=lfs merge=lfs -text
+data/processed/data_6_equipment filter=lfs diff=lfs merge=lfs -text
+data/processed/data_8_equipment/aggregate_training.csv filter=lfs diff=lfs merge=lfs -text
+data/processed/data_8_equipment/aggregate_validation.csv filter=lfs diff=lfs merge=lfs -text
+data/processed/data_8_equipment/equipment_validation.csv filter=lfs diff=lfs merge=lfs -text
+data/processed/data_8_equipment/on_off_training.csv filter=lfs diff=lfs merge=lfs -text
+data/processed/data_8_equipment/on_off_validation.csv filter=lfs diff=lfs merge=lfs -text
