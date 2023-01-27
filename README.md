@@ -79,7 +79,7 @@ How to Set Up
 cd ~
 git clone https://github.com/danctorres/nilm_industry.git
 ```
-2. [Optional] - Download the imdeld dataset from IEEEDataPort into the data/raw folder to run pre-processing MATLAB scripts.
+2. [Optional] Download the imdeld dataset from IEEEDataPort into the data/raw folder to run pre-processing MATLAB scripts.
 ``` bash
 cd ~/nilm_industry/data/raw/
 download https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
