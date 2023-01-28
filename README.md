@@ -3,7 +3,7 @@ Table of Contents
 
 * [Description](#description)
 * [Directory Structure](#directory-structure)
-* [Architecture Flowchart](#architecture-flowchart)
+* [Software Flowchart](#software-flowchart)
 * [How to Set Up](#how-to-set-up)
 * [How to Use](#how-to-use)
 * [Relevant Resources](#relevant-resources)
@@ -36,17 +36,17 @@ Directory Structure
     ├── src                     # Source files
     │   ├── preprocessing       # Analysis, cleaning and transforming of data into suitable format for algorithm
     │   ├── estimation          # Estimate values of W
-    │   ├── kalman		        # Kalman filter to estimate state
+    │   ├── kalman              # Kalman filter to estimate state
     │   ├── main
     │   ├── optimizer           # Optimization algorithms (estimating the coefficients of the functions in the W matrix)
-    │   └── ui	                # Code to display the results and performance metrics
+    │   └── ui                  # Code to display the results and performance metrics
     ├── test                    # Automated tests
     ├── tools                   # Tools and utilities
     ├── LICENSE
     └── README.md
 
 
-Architecture Flowchart
+Software Flowchart
 ------
 ```mermaid
 flowchart TD
