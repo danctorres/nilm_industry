@@ -18,7 +18,8 @@ Description
 My dissertation titled "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads" focuses on developing a novel NILM algorithm to assist the industrial sector in the reduction of its energy demand. The algorithm performs source separation and could be used by any factory with a [SCADA system](https://en.wikipedia.org/wiki/SCADA), since it does not require data about the individual equipment consumption.
 
 
-The proposed algorithm, uses the aggregate data and the ON/OFF equipment information from the SCADA system as training data to model each equipment by a polynomial function, the training is offline. The functions are estimated with numerical and metaheuristic optimization algorithms and the results depend upon the amount and quality of the training data. In the online part of the algorithm, the functions are constantly updated as new measurements arrived by Kalman filtering. The algorithm can be considered has unsupervised, since it does not require individual equipment consumption data, however, can also be treated as semi-supervised, since it uses the ON/OFF equipment data.
+The proposed algorithm, uses the aggregate data and the ON/OFF equipment information from the SCADA system as training data to model each equipment by a polynomial function, the training is offline. The functions are estimated with numerical and metaheuristic optimization algorithms. In the online part of the algorithm, the functions are constantly updated as new measurements arrived by Kalman filtering.
+The algorithm was developed and validated using the IMDELD dataset, which required preprocessing.
 
 
 Directory Structure
