@@ -50,8 +50,8 @@ Software Flowchart
 ------
 ```mermaid
 flowchart TD
+    pre-processing-- Input trainning data -->estimation
     subgraph Offline
-    preprocessing-- Input trainning data -->estimation
     optimizer-- Optimization algorithms -->estimation
     end
     subgraph Online
@@ -67,7 +67,7 @@ flowchart TD
     estimation -- Estimated W --> main
     end
     start((start)) --> dataset
-    dataset[/Input: dataset/] -- raw data --> preprocessing
+    dataset[/Input: dataset/] -- raw data --> pre-processing
     measurements[/Input: measurements/]-- Aggregate features and equipment states -->main
     inputs[/Input: User options/] --> ui
 ```
