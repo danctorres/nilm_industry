@@ -13,7 +13,7 @@ Table of Contents
 
 Description
 ------
-[Multi-Modal Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering](https://github.com/danctorres/nilm_disseration) is an innovative algorithm for NILM, developed for my master's degree dissertation in Electrical and Computer Engineering at the [University of Coimbra](https://www.uc.pt/).
+[Multivariate Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering](https://github.com/danctorres/nilm_disseration) is an innovative algorithm for NILM, developed for my master's degree dissertation in Electrical and Computer Engineering at the [University of Coimbra](https://www.uc.pt/).
 
 My dissertation titled "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads" focuses on developing a novel NILM algorithm to assist the industrial sector in the reduction of its energy demand. The algorithm performs source separation and could be used by any factory with a [SCADA system](https://en.wikipedia.org/wiki/SCADA), since it does not require data about the individual equipment consumption.
 
