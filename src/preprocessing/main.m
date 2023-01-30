@@ -10,7 +10,7 @@
 %% ----------------------------- CORE CODE ----------------------------- %%
 close all; clear; clc;
 
-% Make sure in correct path
+% Set path
 file_information = matlab.desktop.editor.getActive;
 [~, file_name, file_ext] = fileparts(file_information.Filename);
 cd(erase(file_information.Filename, [file_name, file_ext]));
@@ -24,7 +24,7 @@ equip_data = read_equipment_csv(); % read dataset equipment csv, optional input 
 
 % Identify common timestamps among equipment
 % selected_equipment_index =  1:(size(equip_data, 2));
-selected_equipment_index = [1, 2, 3, 4, 7, 8];
+selected_equipment_index = [1, 2, 3, 4, 5, 6, 7, 8];
 common_timestamps = find_common_timestamps(equip_data, selected_equipment_index);
 
 
@@ -90,6 +90,9 @@ power_events = estimate_power_events(aggregate_active_power, on_off_array);
 % Analyze the original data, active power, to find how many samples are not unique
 [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data);
 
+% Plot raw data for each equipment
+plot_raw_active_power(equip_data, 'active_power')
+
 % For the days that have information of the 8 equipment, find how many timestamps samples are missing
 [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps);
 
@@ -136,7 +139,6 @@ power_factor = calculate_PF(active_power_formated, apparent_power_formated, sele
 active_power_formated = read_interim_data('active_power_formated.csv');
 
 %% --------------------- Currently in development ---------------------- %%
-
 
 
 % Remove outliers
