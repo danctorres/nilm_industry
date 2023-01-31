@@ -24,7 +24,7 @@ equip_data = read_equipment_csv(); % read dataset equipment csv, optional input 
 
 % Identify common timestamps among equipment
 % selected_equipment_index =  1:(size(equip_data, 2));
-selected_equipment_index = [1, 2, 3, 4, 5, 6, 7, 8];
+selected_equipment_index = [1, 2, 3, 4, 7, 8];
 common_timestamps = find_common_timestamps(equip_data, selected_equipment_index);
 
 

@@ -7,9 +7,9 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
     unique_dates    = unique(dates_only);
     
     % Define the points used for interpolation
-    dates_to_remove             = table2array(metrics(mean(table2array(metrics(:, 4:2:size(metrics, 2))), 2) < 10, 1));     % Remove useless dates
+    dates_to_remove             = table2array(metrics(mean(table2array(metrics(:, 4:2:size(metrics, 2))), 2) < 10, 1));     % Remove useless dates, dates with a mean smaller than 10
 
-    filtered_dates_and_unit     = date_unit_table(~ismember(dates_only, dates_to_remove), :); % Remove days with mean median smaller than 500
+    filtered_dates_and_unit     = date_unit_table(~ismember(dates_only, dates_to_remove), :); 
     filtered_unique_dates       = unique_dates(~ismember(unique_dates, dates_to_remove), :);
     
     dates_complete = [];

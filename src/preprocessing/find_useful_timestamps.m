@@ -11,7 +11,7 @@ function [useful_common_timestamps] = find_useful_timestamps(common_timestamps)
     summary = table(unique_dates(:), counts(:), 'VariableNames', {'Date', 'count'});
     
     % find days with more than 84600 samples
-    threshold_number_samples = 84600;
+    threshold_number_samples = 83520;
     days_with_more_samples = summary(summary.count > threshold_number_samples, :);
     
     % get the common timestamps for the days_with_more_samples
