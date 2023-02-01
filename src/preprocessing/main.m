@@ -24,7 +24,7 @@ equip_data = read_equipment_csv(); % read dataset equipment csv, optional input 
 
 % Identify common timestamps among equipment
 % selected_equipment_index =  1:(size(equip_data, 2));
-selected_equipment_index = [1, 2, 3, 4, 7, 8];
+selected_equipment_index = [1, 2, 3, 4, 5, 6, 7, 8];
 common_timestamps = find_common_timestamps(equip_data, selected_equipment_index);
 
 
@@ -41,6 +41,14 @@ date_current            = construct_date_unit_table(equip_data, useful_common_ti
 date_voltage            = construct_date_unit_table(equip_data, useful_common_timestamps, 'voltage', selected_equipment_index);
 
 
+% Delete NaN values
+date_active_power       = rmmissing(date_active_power);
+date_reactive_power     = rmmissing(date_reactive_power);
+date_apparent_power     = rmmissing(date_apparent_power);
+date_current            = rmmissing(date_current);
+date_voltage            = rmmissing(date_voltage);
+
+
 % Interpolate the active power values to obtain a complete set of data the choosen days
 metric_power_table      = calculate_metrics_power_day(date_active_power, selected_equipment_index);
 
@@ -55,16 +63,16 @@ voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', me
 lvdb2_active_power_table = read_lvdb_csv(active_power_formated.timestamp, 'active_power', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
 lvdb3_active_power_table = read_lvdb_csv(active_power_formated.timestamp, 'active_power', 3, selected_equipment_index, false);
 
-lvdb2_current_table = read_lvdb_csv(current_formated.timestamp, 'current', 2, selected_equipment_index, false);   % figure, plot(lvdb2_table.active_power)
+lvdb2_current_table = read_lvdb_csv(current_formated.timestamp, 'current', 2, selected_equipment_index, false);   % figur   e, plot(lvdb2_table.active_power)
 lvdb3_current_table = read_lvdb_csv(current_formated.timestamp, 'current', 3, selected_equipment_index, false);
 
 % Compute the total power consumption  by summing LVDB2 and LVDB3
 
-aggregate_active_power  = calculate_aggregate(lvdb2_active_power_table, lvdb3_active_power_table, 'Active Power [W]', false);
-% aggregate_current       = calculate_aggregate(lvdb2_current_table, lvdb3_current_table, 'Current [V]', false);
+aggregate_active_power      = calculate_aggregate(lvdb2_active_power_table, lvdb3_active_power_table, 'Active Power [W]', false);
+% aggregate_current         = calculate_aggregate(lvdb2_current_table, lvdb3_current_table, 'Current [V]', false);
 
-aggregate_formated_table = calculate_aggregate_six_equipment(active_power_formated.timestamp, false);
-aggregate_correlation   = calculate_corr(aggregate_formated_table);
+aggregate_formated_table    = calculate_aggregate_six_equipment(active_power_formated.timestamp, false);
+aggregate_correlation       = calculate_corr(aggregate_formated_table);
 
 
 % Histogram states for ON / OFF

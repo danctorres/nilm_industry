@@ -24,7 +24,7 @@ function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, s
         lvdb_timestamps_datetime    = datetime(lvdb_original_timestamps(:, 1:end - 3));
         [sharedvals, ~]             = ismember(lvdb_timestamps_datetime, units_data);
         lvdb_unit_column            = lvdb_original_table.(string(units));
-        lvdb_original_table         = table(lvdb_timestamps_datetime(sharedvals), lvdb_unit_column(sharedvals), 'VariableNames', {'timestamp', units});
+        lvdb_original_table         = rmmissing(table(lvdb_timestamps_datetime(sharedvals), lvdb_unit_column(sharedvals), 'VariableNames', {'timestamp', units}));
         lvdb_mean_values            = grpstats(lvdb_original_table, 'timestamp', 'mean', 'DataVars', string(units));
         lvdb_missing_dates_table    = table(lvdb_mean_values.timestamp, lvdb_mean_values.(join(['mean', string(units)], '_')), 'VariableNames', {'timestamp', units});
         clear lvdb_mean_values;
