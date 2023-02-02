@@ -27,7 +27,7 @@ function [on_off_array] = calculate_on_off(data, group_power_limit, save)
     if save == true
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        writetable(units_formated, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\interim\on_off.csv'], '\'));
+        writematrix(on_off_array, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\interim\on_off.csv'], '\'));
         saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\on_off.fig'], '') );
         saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\on_off.png'], '') );
     end
