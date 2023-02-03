@@ -114,7 +114,8 @@ statistics_result_cell = statistical_diff_lvdb_aggregate(active_power_formated, 
 power_factor = calculate_PF(active_power_formated, apparent_power_formated, selected_equipment_index);
 [R_per_eq, R_per_unit, features_per_eq_sorted, features_unit_sorted] = select_feature(aggregate_power.active_power, [active_power_formated(:, 2:end), reactive_power_formated(:, 2:end), apparent_power_formated(:, 2:end), current_formated(:, 2:end), voltage_formated(:, 2:end), power_factor(:, 2:end)]);
 
-aggregate_correlation       = calculate_corr(aggregate_formated_table);
+aggregate_correlation = calculate_corr(aggregate_formated_table);
+
 
 
 corr = calculate_corr_aggregate_eq(aggregate_formated_table, active_power_formated);
