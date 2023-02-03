@@ -117,6 +117,9 @@ power_factor = calculate_PF(active_power_formated, apparent_power_formated, sele
 aggregate_correlation       = calculate_corr(aggregate_formated_table);
 
 
+corr = calculate_corr_aggregate_eq(aggregate_formated_table, active_power_formated);
+
+
 % Histogram states for ON / OFF
 [counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(active_power_formated, 2000, true, false);
 [curves, params_normal, ~, group_power_limit]       = get_params_normals(size(active_power_formated, 2) - 1, TF_cell, counts_cell, edges_cell, bin_center_cell);
