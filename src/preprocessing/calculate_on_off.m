@@ -19,8 +19,8 @@ function [on_off_array] = calculate_on_off(data, group_power_limit, save)
     for i = 1:size(data, 2) - 1
         subplot((size(data, 2) - 1)/ 2, 2, i)
         plot(on_off_array(:, i))
-        xlabel('Samples')  
-        ylabel('State [ON/OFF]')  
+        xlabel('Samples')
+        ylabel('State [ON/OFF]')
         title(sprintf('Equipment %i', i))
     end
 
