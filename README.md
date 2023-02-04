@@ -51,10 +51,10 @@ Software Flowchart
 ```mermaid
 flowchart TD
     pre-processing-- Input trainning data -->estimation
-    subgraph Offline
+    subgraph Offline - modeling stage
     optimizer-- Optimization algorithms -->estimation
     end
-    subgraph Online
+    subgraph Online - predictions stage
     kalman-- Updated W -->main
     main:::someclass-- Current W and selected features -->kalman
     classDef someclass fill:#A64D79
