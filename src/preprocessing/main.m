@@ -3,7 +3,7 @@
 % main.m
 % By: Daniel Torres
 % Created: 09/12/2022
-% Updated: 02/02/2023
+% Updated: 04/02/2023
 
 
 
@@ -97,6 +97,11 @@ plot_data_selected_days(current_formated, 'Current [A]', false);
 plot_data_select_day(active_power_formated, 1, 'Active Power [W]', false);
 plot_data_select_day(voltage_formated, 1, 'Voltage [V]', false);
 plot_data_select_day(aggregate_power, 1, 'Active Power [W]', false);
+
+
+% Plot aggregate features vs individual equipment active power
+plot_aggregate_vs_equipment(aggregate_formated_table, active_power_formated);
+
 
 
 %--------------------------- EXTRAS CORE CODE ---------------------------%
