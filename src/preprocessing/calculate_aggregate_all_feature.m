@@ -1,4 +1,4 @@
- function [aggregate_data] = calculate_aggregate_all_feature(timestamp, selected_equipment_index, save)
+function [aggregate_data] = calculate_aggregate_all_feature(timestamp, selected_equipment_index, save)
        
     active_pow      = read_lvdb_csv(timestamp, 'active_power', 2, false);
     reactive_pow    = read_lvdb_csv(timestamp, 'reactive_power', 2, false);
@@ -36,6 +36,8 @@
         subplot((size(aggregate_data, 2) - 1) / 2, 2, i - 1)
         plot(table2array(aggregate_data(:, i)))
         title(regexprep(unit_names(i), '_', ' '))
+        xlabel('Samples')
+        ylabel(string(strrep(aggregate_data.Properties.VariableNames(i), '_', ' ')));
     end
 
     if save == true

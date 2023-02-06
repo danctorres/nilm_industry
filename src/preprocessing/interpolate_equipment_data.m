@@ -19,28 +19,29 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
         date_day        = day(filtered_unique_dates(i));
         seconds         = 0:1:86400 - 1; % number of seconds in one day
         dates_complete  = cat(1, dates_complete, posixtime(datetime(date_year, date_month, date_day, 0, 0, seconds))');
+        clear date_year date_month date_day seconds;
     end
     
     date_dataset                = posixtime(filtered_dates_and_unit.Date);
-    %%[diff, index_diff]          = setdiff(dates_complete, date_dataset);
     [~, index_date_dataset, ~]  = intersect(dates_complete, date_dataset);
     
     % Spline interpolation, using a cubic spline, alternatives: csaps / pchip
     unit_complete = zeros(size(dates_complete, 1), size(date_unit_table, 2) - 1);
     for i = 1:size(date_unit_table, 2) - 1
-        [filtered_unit_no_outliers, TFrm]              = rmoutliers(filtered_dates_and_unit{:, i+1}, 'mean', 'ThresholdFactor', 3);      % remove outliers
+        [filtered_unit_no_outliers, TFrm]               = rmoutliers(filtered_dates_and_unit{:, i+1}, 'mean', 'ThresholdFactor', 3);      % remove outliers
         unit_complete(index_date_dataset(~TFrm), i)     = filtered_unit_no_outliers;
-        
         [diff, index_diff]                              = setdiff(dates_complete, date_dataset(~TFrm));
         unit_complete(index_diff, i)                    = spline(date_dataset(~TFrm), filtered_unit_no_outliers, diff);
         unit_complete (unit_complete < 0) = 0;          % remove values smaller than zero, negative consumption not possible
+        clear filtered_unit_no_outliers TFrm diff index_diff;
     end
     
-    units_formated = table(datetime(datenum(1970,1,1) + dates_complete/86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
+    units_formated = table(datetime(datenum(1970,1,1) + dates_complete / 86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
     for i = 1:size(unit_complete, 2)
         units_formated.(join( [string(unit_name), sprintf('%i', selected_equipment_index(i))], '_')) = unit_complete(:, i);
     end
-
+    clear unit_complete;
+    
     % Save to file
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
@@ -49,22 +50,4 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
         % units_formated.timestamp = datetime(date_complete, 'ConvertFrom', 'Posixtime');     % posix format
         % writetable(units_formated, join([erase(file_information.Filename, '\src\preprocessing\main.m'), join( [join(['\data\interim\', string(unit_name)], ''), 'posix.csv'], '_')], '\'));
     end
-    
-    % Debug
-    % figure('units','normalized','outerposition',[0 0 1 1])
-    % for i = 1 : size(equip_data, 2)
-    %     subplot(size(equip_data, 2)/2, 2, i)
-    %     plot(filtered_dates_and_power{:, i+1})
-    %     title (sprintf('Equipment %i', i))
-    %     xlabel ('Sample')
-    %     ylabel('Power [W]')
-    % end
-    % figure('units','normalized','outerposition',[0 0 1 1])
-    % for i = 1 : size(equip_data, 2)
-    %     subplot(size(equip_data, 2)/2, 2, i)
-    %     plot(unit_complete(:, i))
-    %     title (sprintf('Equipment %i', i))
-    %     xlabel ('Sample')
-    %     ylabel('Power [W]')
-    % end
 end
