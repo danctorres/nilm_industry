@@ -82,8 +82,8 @@ metric_power_table = calculate_metrics_power_day(date_active_power);
 histogram_equipment_original(equip_data, false);
 
 % Plot the variables for the selected days before interpolation
-plot_data_per_equipment(date_active_power, 'Active Power [W]', false);
-plot_data_per_equipment(active_power_formated, 'Active Power [W]', false);
+plot_data_per_equipment(date_active_power, 'Active Power [W]', false);          % before interpolation
+plot_data_per_equipment(active_power_formated, 'Active Power [W]', false);      % after interpolation
 
 
 % Plot the variables for the selected days after interpolation
