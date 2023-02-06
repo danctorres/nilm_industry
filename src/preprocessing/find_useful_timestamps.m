@@ -3,7 +3,6 @@ function [useful_common_timestamps] = find_useful_timestamps(common_timestamps)
     % Input: equip_data, common_timestamps
     % Output: useful_common_timestamps (datetime arrray with the useful datetime samples from the dataset)
 
-
     dates_only = datetime(datestr(common_timestamps, 'dd-mmm-yyyy'));
     [unique_dates, ~, indices] = unique(dates_only);
 
@@ -21,9 +20,10 @@ function [useful_common_timestamps] = find_useful_timestamps(common_timestamps)
     summary = table(unique_dates(:), counts(:), max_diff(:), 'VariableNames', {'date', 'count', 'max_diff'});
     
     % find days with more than 84600 samples 83520
-    threshold_total_missing = 2880;
+    threshold_total_missing = 5760;     % 4 every minute
     threshold_interval = 15;
     days_with_more_samples = summary(summary.count > (86400 - threshold_total_missing) & (summary.max_diff < threshold_interval), :);
+    % days_with_more_samples = summary((summary.max_diff < threshold_interval), :);
     
     % get the common timestamps for the days_with_more_samples
     [~, idx] = ismember(dates_only, days_with_more_samples.date);
@@ -34,14 +34,5 @@ function [useful_common_timestamps] = find_useful_timestamps(common_timestamps)
     end
     
     useful_common_timestamps = common_timestamps(index);
-    
-    % Debug
-    % for i = 1 : size(days_with_more_samples.Date, 1)
-    %     aux = find(dates_only == days_with_more_samples.Date(i));
-    %     size_dates(i) = size(aux,1);
-    % end
-    %
-    % sum(days_with_more_samples.count)
-    % size(useful_common_timestamps)
 end
 
