@@ -36,8 +36,8 @@ function [aggregate_data] = calculate_aggregate_all_feature(timestamp, selected_
         subplot((size(aggregate_data, 2) - 1) / 2, 2, i - 1)
         plot(table2array(aggregate_data(:, i)))
         title(regexprep(unit_names(i), '_', ' '))
-        xlabel('Samples')
-        ylabel(string(strrep(aggregate_data.Properties.VariableNames(i), '_', ' ')));
+        xlabel('samples')
+        ylabel(strrep(aggregate_data.Properties.VariableNames(i), '_', ' '));
     end
 
     if save == true
