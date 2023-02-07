@@ -3,7 +3,7 @@
 % main.m
 % By: Daniel Torres
 % Created: 09/12/2022
-% Updated: 05/02/2023
+% Updated: 07/02/2023
 
 
 
@@ -58,10 +58,10 @@ voltage_formated        = interpolate_equipment_data(date_voltage, 'voltage', me
 aggregate_formated_table = calculate_aggregate_all_feature(active_power_formated.timestamp, selected_equipment_index, false);
 
 % Calculate ON/OFF
-on_off_array = calculate_on_off(active_power_formated, 5, true);
+on_off_array = calculate_on_off(active_power_formated, 5, false);
 
 % Save final data
-[aggregate_training, on_off_training, aggregate_testing, on_off_testing] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, true);
+[aggregate_training, on_off_training, aggregate_testing, on_off_testing] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, false);
 
 
 
