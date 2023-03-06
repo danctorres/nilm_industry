@@ -11,18 +11,18 @@ void Transform_Read::set_parameters(){
     const std::vector<std::vector<std::string>> data = this->get_data();
     for (int i = 1; i < data.size(); i++){
         for (int j = 0; j < data[i].size(); j++) {
-            timestamp.push_back(data[i][0]);
-            active_power.push_back(data[i][1]);
-            reactive_power.push_back(data[i][2]);
-            apparent_power.push_back(data[i][3]);
-            current.push_back(data[i][4]);
-            voltage.push_back(data[i][5]);
-            power_factor.push_back(data[i][6]);
+            timestamp.push_back(std::stoi(data[i][0]));
+            active_power.push_back(std::stoi(data[i][1]));
+            reactive_power.push_back(std::stoi(data[i][2]));
+            apparent_power.push_back(std::stoi(data[i][3]));
+            current.push_back(std::stoi(data[i][4]));
+            voltage.push_back(std::stoi(data[i][5]));
+            power_factor.push_back(std::stoi(data[i][6]));
         }
     }
 }
 
-std::vector<std::string> Transform_Read::get_parameter(const std::string name_parameter) const {
+std::vector<int> Transform_Read::get_parameter(const std::string name_parameter) const {
     if (name_parameter == "Timestamp"){
         return timestamp;
     }
@@ -50,8 +50,8 @@ std::vector<std::string> Transform_Read::get_parameter(const std::string name_pa
     }
 }
 
-void Transform_Read::print_parameter(const std::vector<std::string> &parameter) const {
-    for (std::string values: parameter){
+void Transform_Read::print_parameter(const std::vector<int> &parameter) const {
+    for (int values: parameter){
         std::cout << values << std::endl;
     }
 }
