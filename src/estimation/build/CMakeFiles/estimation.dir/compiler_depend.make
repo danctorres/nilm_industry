@@ -264,16 +264,20 @@ CMakeFiles/estimation.dir/main.cpp.o: ../main.cpp \
   /usr/include/c++/11/bits/ranges_uninitialized.h \
   /usr/include/c++/11/bits/uses_allocator_args.h \
   /usr/include/c++/11/pstl/glue_memory_defs.h \
+  ../Read.cpp \
+  ../Read.h \
   /usr/include/c++/11/fstream \
   /usr/include/c++/11/bits/codecvt.h \
   /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
   /usr/include/c++/11/bits/fstream.tcc \
-  ../Read.cpp \
-  ../Read.h
+  /usr/include/c++/11/sstream \
+  /usr/include/c++/11/bits/sstream.tcc \
+  ../Transform_Read.cpp \
+  ../Transform_Read.h
 
 
-../Read.cpp:
+../Transform_Read.h:
 
 /usr/include/c++/11/bits/fstream.tcc:
 
@@ -282,6 +286,8 @@ CMakeFiles/estimation.dir/main.cpp.o: ../main.cpp \
 /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h:
 
 /usr/include/c++/11/fstream:
+
+../Read.cpp:
 
 /usr/include/c++/11/pstl/glue_memory_defs.h:
 
@@ -368,6 +374,8 @@ CMakeFiles/estimation.dir/main.cpp.o: ../main.cpp \
 /usr/include/c++/11/bits/stl_algo.h:
 
 /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
+
+/usr/include/c++/11/sstream:
 
 /usr/include/x86_64-linux-gnu/asm/unistd_64.h:
 
@@ -733,9 +741,13 @@ CMakeFiles/estimation.dir/main.cpp.o: ../main.cpp \
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/syslimits.h:
 
+../Transform_Read.cpp:
+
 /usr/include/c++/11/bits/ranges_util.h:
 
 /usr/include/c++/11/array:
+
+/usr/include/c++/11/bits/sstream.tcc:
 
 /usr/include/c++/11/new:
 
