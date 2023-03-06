@@ -13,6 +13,6 @@ int main(){
     data->set_data("../../../data/processed/aggregate_training.csv");
     auto test = data->get_data();
     data->set_parameters();
-    data->print_parameter(data->get_parameter("Active Power"));
+    data->print_parameter(data->get_parameter("Timestamp"));
     return 0;
 }

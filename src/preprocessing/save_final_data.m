@@ -48,7 +48,10 @@ function [aggregate_training, aggregate_validation, on_off_training, on_off_vali
     ylabel('Active Power [W]')
     title('Validation data')
 
-    
+    % Convert to posix time format
+    aggregate.timestamp     = posixtime(table2array(aggregate(:, 1)));
+
+    % Split into training and validation data
     aggregate_training      = aggregate(training_index, :);
     aggregate_validation    = aggregate(validation_index, :);
     on_off_training         = on_off(training_index, :);
