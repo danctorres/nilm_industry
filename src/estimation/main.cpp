@@ -6,13 +6,18 @@
 #include <algorithm>
 #include <memory>
 #include "Read.cpp"
-#include "Transform_Read.cpp"
+#include "Aggregate_Read.cpp"
+#include "State_Read.cpp"
 
 int main(){
-    auto data = std::make_unique<Transform_Read>();
-    data->set_data("../../../data/processed/aggregate_training.csv");
-    auto test = data->get_data();
-    data->set_parameters();
-    data->print_parameter(data->get_parameter("Timestamp"));
+    auto a_data = std::make_unique<Aggregate_Read>();
+    a_data->set_data("../../../data/processed/aggregate_training.csv");
+    a_data->set_parameters();
+    a_data->print_parameter(a_data->get_parameter("Timestamp"));
+
+    auto s_data = std::make_unique<State_Read>();
+    s_data->set_data("../../../data/processed/on_off_training.csv");
+    s_data->set_parameters();
+    s_data->print_parameter(s_data->get_parameter("State 0"));
     return 0;
 }

@@ -13,6 +13,7 @@ public:
     void set_data(std::string name_file);
     std::vector<std::vector<std::string>> get_data() const;
     void print_file();
+    void print_parameter(const std::vector<int> &parameter) const;
     ~Read();
 private:
     std::vector<std::vector<std::string>> input_data;

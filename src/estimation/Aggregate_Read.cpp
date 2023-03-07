@@ -2,12 +2,12 @@
 // Created by dtorres on 3/5/23.
 //
 
-#include "Transform_Read.h"
+#include "Aggregate_Read.h"
 #include <iostream>
 #include <string>
 #include <vector>
 
-void Transform_Read::set_parameters(){
+void Aggregate_Read::set_parameters(){
     const std::vector<std::vector<std::string>> data = this->get_data();
     for (int i = 1; i < data.size(); i++){
         for (int j = 0; j < data[i].size(); j++) {
@@ -22,7 +22,7 @@ void Transform_Read::set_parameters(){
     }
 }
 
-std::vector<int> Transform_Read::get_parameter(const std::string name_parameter) const {
+std::vector<int> Aggregate_Read::get_parameter(const std::string name_parameter) const {
     if (name_parameter == "Timestamp"){
         return timestamp;
     }
@@ -50,8 +50,3 @@ std::vector<int> Transform_Read::get_parameter(const std::string name_parameter)
     }
 }
 
-void Transform_Read::print_parameter(const std::vector<int> &parameter) const {
-    for (int values: parameter){
-        std::cout << values << std::endl;
-    }
-}

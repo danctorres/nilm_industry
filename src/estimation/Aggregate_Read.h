@@ -2,22 +2,19 @@
 // Created by dtorres on 3/5/23.
 //
 
-#ifndef DISSERTATION_NILM_TRANSFORM_READ_H
-#define DISSERTATION_NILM_TRANSFORM_READ_H
+#ifndef DISSERTATION_NILM_AGGREGATE_READ_H
+#define DISSERTATION_NILM_AGGREGATE_READ_H
 
 #include "Read.h"
 #include <string>
 #include <vector>
 
-class Transform_Read : public Read{
+class Aggregate_Read : public Read{
 public:
     // setters
     void set_parameters();
-
     // getters
     std::vector<int> get_parameter(const std::string name_parameter) const;
-
-    void print_parameter(const std::vector<int> &parameter) const;
 
 private:
     std::vector<int> timestamp;
@@ -30,4 +27,4 @@ private:
 };
 
 
-#endif //DISSERTATION_NILM_TRANSFORM_READ_H
+#endif //DISSERTATION_NILM_AGGREGATE_READ_H
