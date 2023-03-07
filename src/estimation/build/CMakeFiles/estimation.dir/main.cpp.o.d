@@ -221,5 +221,7 @@ CMakeFiles/estimation.dir/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
  /usr/include/c++/11/bits/fstream.tcc /usr/include/c++/11/sstream \
  /usr/include/c++/11/bits/sstream.tcc \
- /home/dtorres/dissertation_nilm/src/estimation/Transform_Read.cpp \
- /home/dtorres/dissertation_nilm/src/estimation/Transform_Read.h
+ /home/dtorres/dissertation_nilm/src/estimation/Aggregate_Read.cpp \
+ /home/dtorres/dissertation_nilm/src/estimation/Aggregate_Read.h \
+ /home/dtorres/dissertation_nilm/src/estimation/State_Read.cpp \
+ /home/dtorres/dissertation_nilm/src/estimation/State_Read.h

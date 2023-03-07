@@ -273,15 +273,19 @@ CMakeFiles/estimation.dir/main.cpp.o: ../main.cpp \
   /usr/include/c++/11/bits/fstream.tcc \
   /usr/include/c++/11/sstream \
   /usr/include/c++/11/bits/sstream.tcc \
-  ../Transform_Read.cpp \
-  ../Transform_Read.h
+  ../Aggregate_Read.cpp \
+  ../Aggregate_Read.h \
+  ../State_Read.cpp \
+  ../State_Read.h
 
 
-../Transform_Read.h:
+../State_Read.cpp:
 
 /usr/include/c++/11/bits/fstream.tcc:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h:
+
+../State_Read.h:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h:
 
@@ -364,6 +368,8 @@ CMakeFiles/estimation.dir/main.cpp.o: ../main.cpp \
 /usr/include/c++/11/bits/localefwd.h:
 
 /usr/include/x86_64-linux-gnu/sys/select.h:
+
+../Aggregate_Read.cpp:
 
 /usr/include/c++/11/unordered_map:
 
@@ -713,6 +719,8 @@ CMakeFiles/estimation.dir/main.cpp.o: ../main.cpp \
 
 /usr/include/c++/11/bits/basic_ios.h:
 
+../Aggregate_Read.h:
+
 /usr/include/c++/11/bits/exception.h:
 
 /usr/include/c++/11/bits/locale_facets.h:
@@ -740,8 +748,6 @@ CMakeFiles/estimation.dir/main.cpp.o: ../main.cpp \
 /usr/include/features-time64.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/syslimits.h:
-
-../Transform_Read.cpp:
 
 /usr/include/c++/11/bits/ranges_util.h:
 

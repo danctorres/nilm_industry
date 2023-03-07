@@ -48,6 +48,13 @@ std::vector <std::vector<std::string>> Read::get_data() const {
     return input_data;
 }
 
+void Read::print_parameter(const std::vector<int> &parameter) const {
+    for (int values: parameter){
+        std::cout << values << std::endl;
+    }
+}
+
+
 Read::~Read() {
     std::cout << "Parent destructor" << std::endl;
 }
