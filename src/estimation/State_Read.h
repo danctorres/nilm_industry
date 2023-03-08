@@ -15,14 +15,14 @@ public:
     void set_parameters();
 
     // getters
-    std::vector<int> get_parameter(const std::string name_parameter) const;
+    std::vector<uint_fast32_t> get_parameter(const std::string name_parameter) const;
 private:
-    std::vector<int> state_0;
-    std::vector<int> state_1;
-    std::vector<int> state_2;
-    std::vector<int> state_3;
-    std::vector<int> state_4;
-    std::vector<int> state_5;
+    std::vector<uint_fast32_t> state_0;
+    std::vector<uint_fast32_t> state_1;
+    std::vector<uint_fast32_t> state_2;
+    std::vector<uint_fast32_t> state_3;
+    std::vector<uint_fast32_t> state_4;
+    std::vector<uint_fast32_t> state_5;
 };
 
 #endif //DISSERTATION_NILM_STATE_READ_H

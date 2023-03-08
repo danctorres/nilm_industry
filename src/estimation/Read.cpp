@@ -48,13 +48,14 @@ std::vector <std::vector<std::string>> Read::get_data() const {
     return input_data;
 }
 
-void Read::print_parameter(const std::vector<int> &parameter) const {
-    for (int values: parameter){
+void Read::print_parameter(const std::vector<uint_fast32_t> &parameter) const {
+    for (uint_fast32_t values: parameter){
         std::cout << values << std::endl;
     }
 }
 
-
+/*
 Read::~Read() {
     std::cout << "Parent destructor" << std::endl;
 }
+*/

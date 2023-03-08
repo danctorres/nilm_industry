@@ -19,5 +19,8 @@ int main(){
     s_data->set_data("../../../data/processed/on_off_training.csv");
     s_data->set_parameters();
     s_data->print_parameter(s_data->get_parameter("State 0"));
+    std::cout << std::endl << s_data->get_parameter("State 0").size() << std::endl;
+    std::cout << std::endl << a_data->get_parameter("Timestamp").size() << std::endl;
+
     return 0;
 }

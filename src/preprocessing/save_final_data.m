@@ -52,20 +52,23 @@ function [aggregate_training, aggregate_validation, on_off_training, on_off_vali
     aggregate.timestamp     = posixtime(table2array(aggregate(:, 1)));
 
     % Split into training and validation data
-    aggregate_training      = aggregate(training_index, :);
-    aggregate_validation    = aggregate(validation_index, :);
-    on_off_training         = on_off(training_index, :);
-    on_off_validation       = on_off(validation_index, :);
+    aggregate_training              = aggregate(training_index, :);
+    aggregate_validation            = aggregate(validation_index, :);
+    if(size(on_off, 2) == 8)
+        on_off = table(on_off(:, 1), on_off(:, 2), on_off(:, 3), on_off(:, 4), on_off(:, 5), on_off(:, 6), on_off(:, 7), on_off(:, 8), 'VariableNames', {'State DPCI', 'State DPCII', 'State EFI', 'State EFII', 'State MI', 'State MII', 'State PI', 'State PII'});
+    end
+    on_off_training                 = on_off(training_index, :);
+    on_off_validation               = on_off(validation_index, :);
 
-    equipment_validation    = equipment_active_pow(validation_index, :);
+    equipment_validation            = equipment_active_pow(validation_index, :);
 
     if save == true
         file_information    = matlab.desktop.editor.getActive;
         [~, file_name, ~] = fileparts(file_information.Filename);
         writetable(aggregate_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\aggregate_training.csv'], '\'));
         writetable(aggregate_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\aggregate_validation.csv'], '\'));
-        writematrix(on_off_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\on_off_training.csv'], '\'))
-        writematrix(on_off_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\on_off_validation.csv'], '\'))
+        writetable(on_off_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\on_off_training.csv'], '\'))
+        writetable(on_off_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\on_off_validation.csv'], '\'))
         writetable(equipment_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\equipment_validation.csv'], '\'));
     end
 end
