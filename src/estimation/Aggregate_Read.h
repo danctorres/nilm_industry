@@ -14,16 +14,16 @@ public:
     // setters
     void set_parameters();
     // getters
-    std::vector<int> get_parameter(const std::string name_parameter) const;
+    std::vector<uint_fast32_t> get_parameter(const std::string name_parameter) const;
 
 private:
-    std::vector<int> timestamp;
-    std::vector<int> active_power;
-    std::vector<int> reactive_power;
-    std::vector<int> apparent_power;
-    std::vector<int> current;
-    std::vector<int> voltage;
-    std::vector<int> power_factor;
+    std::vector<uint_fast32_t> timestamp;
+    std::vector<uint_fast32_t> active_power;
+    std::vector<uint_fast32_t> reactive_power;
+    std::vector<uint_fast32_t> apparent_power;
+    std::vector<uint_fast32_t> current;
+    std::vector<uint_fast32_t> voltage;
+    std::vector<uint_fast32_t> power_factor;
 };
 
 
