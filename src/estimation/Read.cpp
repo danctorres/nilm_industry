@@ -36,8 +36,8 @@ void Read::set_data(std::string name_file){
     }
 }
 
-void Read::print_file() {
-    for (std::vector<std::string> r : this->input_data) {
+[[maybe_unused]] void Read::print_file() {
+    for (const std::vector<std::string>& r : this->input_data) {
         for (std::string w: r) {
             std::cout << "value w: " << w << std::endl;
         }
@@ -48,7 +48,7 @@ std::vector <std::vector<std::string>> Read::get_data() const {
     return input_data;
 }
 
-void Read::print_parameter(const std::vector<uint_fast32_t> &parameter) const {
+void Read::print_parameter(const std::vector<uint_fast32_t> &parameter) {
     for (uint_fast32_t values: parameter){
         std::cout << values << std::endl;
     }
