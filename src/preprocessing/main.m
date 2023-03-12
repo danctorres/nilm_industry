@@ -1,10 +1,7 @@
 %% ----------------------- DATASET PRE-PROCESSING ---------------------- %%
 
 % main.m
-% By: Daniel Torres
-% Created: 09/12/2022
-% Updated: 07/02/2023
-
+% Created by Daniel Torres on 12/09/2022 (MM-DD-YYYY)
 
 
 %% ----------------------------- CORE CODE ----------------------------- %%

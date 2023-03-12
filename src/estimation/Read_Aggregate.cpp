@@ -2,12 +2,12 @@
 // Created by dtorres on 3/5/23.
 //
 
-#include "Aggregate_Read.h"
+#include "Read_Aggregate.h"
 #include <iostream>
 #include <string>
 #include <vector>
 
-void Aggregate_Read::set_parameters(){
+void Read_Aggregate::set_parameters(){
     const std::vector<std::vector<std::string>> data = this->get_data();
     for (int i = 1; i < data.size() - 1; i++){
         timestamp.push_back(std::stoi(data[i][0]));
@@ -20,17 +20,17 @@ void Aggregate_Read::set_parameters(){
     }
 }
 
-std::vector<uint_fast32_t> Aggregate_Read::get_parameter(const std::string name_parameter) const {
+std::vector<uint32_t> Read_Aggregate::get_parameter(const std::string name_parameter) const {
     if (name_parameter == "Timestamp"){
         return timestamp;
     }
-    if (name_parameter == "Active Power"){
+    if (name_parameter == "Active power"){
         return active_power;
     }
-    if (name_parameter == "Reactive Power"){
+    if (name_parameter == "Reactive power"){
         return reactive_power;
     }
-    if (name_parameter == "Apparent Power"){
+    if (name_parameter == "Apparent power"){
         return apparent_power;
     }
     if (name_parameter == "Current"){
@@ -39,7 +39,7 @@ std::vector<uint_fast32_t> Aggregate_Read::get_parameter(const std::string name_
     if (name_parameter == "Voltage"){
         return voltage;
     }
-    if (name_parameter == "Power Factor"){
+    if (name_parameter == "Power factor"){
         return power_factor;
     }
     else{
@@ -48,3 +48,14 @@ std::vector<uint_fast32_t> Aggregate_Read::get_parameter(const std::string name_
     }
 }
 
+std::vector<std::vector<uint32_t>> Read_Aggregate::get_all_parameters() const {
+    std::vector<std::vector<uint32_t>> data;
+    data.push_back(timestamp);
+    data.push_back(apparent_power);
+    data.push_back(reactive_power);
+    data.push_back(apparent_power);
+    data.push_back(current);
+    data.push_back(voltage);
+    data.push_back(power_factor);
+    return data;
+}
