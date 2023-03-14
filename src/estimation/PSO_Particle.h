@@ -14,24 +14,26 @@
 class PSO_Particle{
 public:
     PSO_Particle();
-    PSO_Particle(std::vector<int> &position, std::vector<int> &velocity, int fitness);
+    PSO_Particle(std::vector<float> &position, std::vector<float> &velocity, float fitness);
 
     // Setters
-    void set_position(std::vector<int> &position);
-    void set_velocity(std::vector<int> &velocity);
-    void set_fitness(int fitness);
+    void set_position(std::vector<float> &position);
+    void set_velocity(std::vector<float> &velocity);
+    void set_fitness(float fitness);
     void set_best();
     void set_best(const PSO_Particle &particle);
 
     // Getters
-    std::vector<int> get_position() const;
-    std::vector<int> get_velocity() const;
-    int get_fitness() const;
+    std::vector<float> get_position() const;
+    std::vector<float> get_velocity() const;
+    float get_fitness() const;
     PSO_Best_Particle get_best() const;
+
+    void update_pbest();
 private:
-    std::vector<int> position;
-    std::vector<int> velocity;
-    int fitness;
+    std::vector<float> position;
+    std::vector<float> velocity;
+    float fitness;
     PSO_Best_Particle p_best;
 };
 
