@@ -16,7 +16,7 @@
 
 class PSO{
 public:
-    PSO(int rank, int n_particles, int max_iter, int c1, int c2, int w_min, int w_max, int v_max);
+    PSO(int rank, int n_particles, int max_iter, float c1, float c2, float w_min, float w_max, float v_max);
 
     // Setters
     void set_global_best();
@@ -25,23 +25,27 @@ public:
     std::vector<PSO_Particle> get_particles() const;
     PSO_Best_Particle get_global_best() const;
 
+    void update_global_best();
+
+    void run_pso();
+
 private:
     // PSO constants
     int rank;           // rank of the polynomial function
     int n_particles;    // number of particles
     int max_iter;       // max number of algorithm iterations
-    int c1;             // cognitive constant
-    int c2;             // social constant
-    int w_min;          // minimum inertia weight value
-    int w_max;          // max inertia weight value
-    int v_max;          // max velocity
+    float c1;             // cognitive constant
+    float c2;             // social constant
+    float w_min;          // minimum inertia weight value
+    float w_max;          // max inertia weight value
+    float v_max;          // max velocity
 
     // Particles
     PSO_Best_Particle global_best;               // global best
     std::vector<PSO_Particle> particles;    // PSO particles
 
     // Objective function
-    void objective_function();
+    float objective_function(std::vector<float> position);
 
 };
 
