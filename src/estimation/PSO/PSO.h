@@ -8,25 +8,24 @@
 #include <iostream>
 #include <vector>
 
-#include "Matrix_W.h"
-#include "Read_Aggregate.h"
-#include "Read_State.h"
+#include "../Matrix_W.h"
+#include "../read_data/Read_Aggregate.h"
+#include "../read_data/Read_State.h"
 #include "PSO_Particle.h"
 #include "PSO_Best_Particle.h"
 
 class PSO{
 public:
-    PSO(int rank, int n_particles, int max_iter, float c1, float c2, float w_min, float w_max, float v_max);
+    PSO(int rank, int n_particles, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound);
 
     // Setters
-    void set_global_best();
+    void set_vmax(const float lower_bound, const float upper_bound);
 
     // Getters
     std::vector<PSO_Particle> get_particles() const;
     PSO_Best_Particle get_global_best() const;
 
     void update_global_best();
-
     void run_pso();
 
 private:
