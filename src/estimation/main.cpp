@@ -6,10 +6,10 @@
 #include <algorithm>
 #include <chrono>
 #include <memory>
-#include "Read.cpp"
-#include "Read_Aggregate.cpp"
-#include "Read_State.cpp"
-#include "PSO.cpp"
+#include "read_data/Read.cpp"
+#include "read_data/Read_Aggregate.cpp"
+#include "read_data/Read_State.cpp"
+#include "PSO/PSO.cpp"
 
 int main(){
     // Read training aggregate data
@@ -35,13 +35,14 @@ int main(){
     int max_iter = 20;
     float c1 = 2.0;
     float c2 = 2.0;
-    float w_max = 0.9;
     float w_min = 0.2;
+    float w_max = 0.9;
+    float upper_bound = 10.0;
+    float lower_bound = -10.0;
 
-    int v_max = 10000;  // define later
 
     auto start_time = std::chrono::high_resolution_clock::now();
-    PSO pso(rank, number_particles, max_iter, c1, c2, w_min, w_max, v_max);
+    PSO pso(rank, number_particles, max_iter, c1, c2, w_min, w_max, lower_bound, upper_bound);
     pso.run_pso();
     auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -51,5 +52,8 @@ int main(){
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
     std::cout << "Execution time: " << duration.count() << " milliseconds" << std::endl;
+
+    // ToDo: Add code to save estimation into file
+
     return 0;
 }
