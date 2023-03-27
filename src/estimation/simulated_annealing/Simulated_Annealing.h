@@ -6,11 +6,9 @@
 #define DISSERTATION_NILM_SIMULATED_ANNEALING_H
 
 
-
 class Simulated_Annealing {
 
 };
-
 
 
 #endif //DISSERTATION_NILM_SIMULATED_ANNEALING_H

@@ -8,10 +8,9 @@
 #include "../optimization_interface/Particle.h"
 #include "PSO_Particle.h"
 
-class Adapter {
+class PSO_Adapter {
 public:
-    Adapter(const std::vector<PSO_Particle> &pso_particles);
-    Adapter(const std::vector<Particle> &particles);
+    PSO_Adapter(const std::vector<PSO_Particle> &pso_particles);
     std::vector<Particle> convert_to_particle() const;
 protected:
     std::vector<PSO_Particle> pso_particles;    // Particles with the velocity and personal best

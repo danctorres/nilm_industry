@@ -2,12 +2,12 @@
 // Created by danie on 3/7/2023.
 //
 
-#include "Read_State.h"
 #include <iostream>
 #include <string>
 #include <vector>
+#include "Read_State.h"
 
-void Read_State::set_parameters(){
+Read_State::Read_State(const std::string &name_file) : Read(name_file){
     const std::vector<std::vector<std::string>> data = this->get_data();
     for (int i = 1; i < data.size() - 1; i++){
         state_0.push_back(std::stoi(data[i][0]));
@@ -19,7 +19,7 @@ void Read_State::set_parameters(){
     }
 }
 
-std::vector<uint32_t> Read_State::get_parameter(const std::string name_parameter) const {
+std::vector<uint> Read_State::get_parameter(const std::string& name_parameter) const {
     if (name_parameter == "State 0"){
         return state_0;
     }
@@ -45,8 +45,8 @@ std::vector<uint32_t> Read_State::get_parameter(const std::string name_parameter
     }
 }
 
-std::vector<std::vector<uint32_t>> Read_State::get_all_parameter() const {
-    std::vector<std::vector<uint32_t>> data;
+std::vector<std::vector<uint>> Read_State::get_all_parameter() const {
+    std::vector<std::vector<uint>> data;
     data.push_back(state_0);
     data.push_back(state_1);
     data.push_back(state_2);
