@@ -2,13 +2,11 @@
 // Created by dtorres on 3/11/23.
 //
 
-#include "PSO.h"
 #include <cmath>
 #include <iostream>
 #include <random>
 #include <cstdlib>
-#include "PSO_Particle.h"
-#include "PSO_Particle.cpp"
+#include "PSO.h"
 
 /*
 int PSO::objective_function(Read_Aggregate &data, Read_State &states){
@@ -17,15 +15,6 @@ int PSO::objective_function(Read_Aggregate &data, Read_State &states){
     //states.get_all_parameter();
 }
  */
-
-// Testing PSO
-float PSO::objective_function(std::vector<float> position){
-    float fitness = 0.0;
-    for(auto pos : position){
-        fitness += pow(pos, 2);
-    }
-    return fitness;
-}
 
 void PSO::set_vmax(const float lower_bound, const float upper_bound) {
     this->v_max = (upper_bound - lower_bound) * 0.2;
@@ -40,11 +29,12 @@ void PSO::update_global_best() {
     }
 }
 
-PSO::PSO(int rank, int n_particles, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound) {
-    // Set PSO constants
-    this->rank = rank;
+PSO::PSO(int rank, int n_particles, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound) : Optimization(n_particles, rank, max_iter) {
     this->n_particles = n_particles;
+    this->rank = rank;
     this->max_iter = max_iter;
+
+    // Set PSO constants
     this->c1 = c1;
     this->c2 = c2;
     this->w_min = w_min;
