@@ -2,12 +2,15 @@
 // Created by dtorres on 3/1/23.
 //
 
-#include "Read.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
+#include "Read.h"
 
-void Read::set_data(std::string name_file){
+Read::Read() {}
+
+Read::Read(const std::string& name_file) {
     std::fstream fin;
     fin.open(name_file, std::ios::in);
 
@@ -32,30 +35,18 @@ void Read::set_data(std::string name_file){
         }
         std::cout << "Read -> " << name_file << std::endl;
         fin.close();
-        input_data = content;
-    }
-}
-
-[[maybe_unused]] void Read::print_file() {
-    for (const std::vector<std::string>& r : this->input_data) {
-        for (std::string w: r) {
-            std::cout << "value w: " << w << std::endl;
-        }
+        data = content;
     }
 }
 
 std::vector <std::vector<std::string>> Read::get_data() const {
-    return input_data;
+    return data;
 }
 
-void Read::print_parameter(const std::vector<uint_fast32_t> &parameter) {
-    for (uint_fast32_t values: parameter){
-        std::cout << values << std::endl;
+void Read::print_file() const {
+    for (const auto& r : this->data) {
+        for (auto w: r) {
+            std::cout << "value w: " << w << std::endl;
+        }
     }
 }
-
-/*
-Read::~Read() {
-    std::cout << "Parent destructor" << std::endl;
-}
-*/

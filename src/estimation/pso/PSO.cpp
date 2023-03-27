@@ -1,40 +1,39 @@
 //
 // Created by dtorres on 3/11/23.
 //
-
 #include <cmath>
 #include <iostream>
 #include <random>
-#include <cstdlib>
 #include "PSO.h"
 
 /*
-int PSO::objective_function(Read_Aggregate &data, Read_State &states){
+int pso::objective_function(Read_Aggregate &data, Read_State &states){
     // Define objective function: || X - WH|| ^ 2
     //std::vector<uint32_t> active_power = data.get_parameter("Active power");
     //states.get_all_parameter();
 }
  */
 
+void PSO::set_velocities() {
+    for (int i = 0; i < get_n_particles(); i++) {
+        std::vector<float> velocity;
+        for (int j = 0; j < rank; j++) {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<> dis(min_vel, max_vel);
+            velocity.push_back(static_cast<float> (dis(gen)));
+        }
+        auto pso_part = std::make_unique<PSO_Particle>(velocity);
+        pso_particles.push_back(*pso_part);
+    }
+}
+
 void PSO::set_vmax(const float lower_bound, const float upper_bound) {
     this->v_max = (upper_bound - lower_bound) * 0.2;
 }
 
-void PSO::update_global_best() {
-    for(auto particle : particles){
-        if(particle.get_fitness() < global_best.get_fitness()){
-            global_best.set_position(particle.get_position());
-            global_best.set_fitness(particle.get_fitness());
-        }
-    }
-}
-
-PSO::PSO(int rank, int n_particles, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound) : Optimization(n_particles, rank, max_iter) {
-    this->n_particles = n_particles;
-    this->rank = rank;
-    this->max_iter = max_iter;
-
-    // Set PSO constants
+PSO::PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound) : Optimization(n_particles, rank, max_iter) {
+    // Set pso constants
     this->c1 = c1;
     this->c2 = c2;
     this->w_min = w_min;
@@ -42,20 +41,22 @@ PSO::PSO(int rank, int n_particles, int max_iter, float c1, float c2, float w_mi
     this->v_max = (upper_bound - lower_bound) * 0.2;
 
     // Initialize population of N particles
-    std::cout << "Initializing PSO population" << std::endl;
-    for (int i = 0; i < n_particles; i++){
-        std::vector<float> position;
-        std::vector<float> velocity;
-        for (int j = 0; j < rank; j++){
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<> dis(0, 10);
-            position.push_back(dis(gen));
-            velocity.push_back(0);
-        }
+    std::cout << "Initializing pso population" << std::endl;
+    // Set the  initial particles position
+    set_positions(0, 10);   // change!!!
+    // Set the fitness for the particles
+    calculate_set_fitness();
+    // Set global best
+    calculate_set_global_best();
 
-        // Calculate fitness
-        float fitness = objective_function(position);
+    // Set PSO particles
+    // Set velocities
+    set_velocities();
+    // Set personal best
+    update_best();
+
+    // Set max velocity
+    set_vmax(lower_bound, upper_bound);
 
         // Set particles
         PSO_Particle particle(position, velocity, fitness);
@@ -84,7 +85,7 @@ PSO_Best_Particle PSO::get_global_best() const{
 }
 
 void PSO::run_pso() {
-    // Main PSO loop
+    // Main pso loop
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0, 1);

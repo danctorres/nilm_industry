@@ -5,20 +5,18 @@
 #ifndef DISSERTATION_NILM_PSO_H
 #define DISSERTATION_NILM_PSO_H
 
-#include <iostream>
 #include <vector>
 
-#include "../read_data/Read_Aggregate.h"
-#include "../read_data/Read_State.h"
-#include "../Optimization/Optimization.h"
-#include "../Matrix_W.h"
+#include "../optimization_interface/Optimization.h"
+#include "../optimization_interface/Particle.h"
+#include "PSO_Adapter.h"
 #include "PSO_Particle.h"
-#include "PSO_Best_Particle.h"
 
-class PSO : public Optimization {
+class PSO : public Optimization, public PSO_Adapter {
 public:
-    PSO(int rank, int n_particles, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound);
+    PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound);
 
+    void set_velocities();
     void set_vmax(const float lower_bound, const float upper_bound);
 
     std::vector<PSO_Particle> get_particles() const;
@@ -28,16 +26,11 @@ public:
     void run_pso();
 
 private:
-    // PSO constants
     float c1;             // cognitive constant
     float c2;             // social constant
     float w_min;          // minimum inertia weight value
     float w_max;          // max inertia weight value
     float v_max;          // max velocity
-
-    // Particles
-    PSO_Best_Particle global_best;               // global best
-    std::vector<PSO_Particle> particles;    // PSO particles
 };
 
 

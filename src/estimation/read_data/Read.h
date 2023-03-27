@@ -7,17 +7,23 @@
 
 #include <algorithm>
 #include <string>
+#include <vector>
 
 class Read{
 public:
-    void set_data(std::string name_file);
-    [[nodiscard]] std::vector<std::vector<std::string>> get_data() const;
+    Read();
+    Read(const std::string& name_file);
+    std::vector<std::vector<std::string>> get_data() const;
 
-    [[maybe_unused]] void print_file();
-    static void print_parameter(const std::vector<uint_fast32_t> &parameter) ;
-    //~Read();
+    template<typename T>
+    void print_parameter(const std::vector<T>& vec) const {
+        for (const auto& elem : vec){
+            std::cout << elem << std::endl;
+        }
+    }
+    void print_file() const;
 private:
-    std::vector<std::vector<std::string>> input_data;
+    std::vector<std::vector<std::string>> data;
 };
 
 #endif //DISSERTATION_NILM_READ_H

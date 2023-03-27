@@ -7,19 +7,22 @@
 
 #include <memory>
 #include <vector>
-#include "../optimization/Particle.h"
+#include "../optimization_interface/Particle.h"
 
 class PSO_Particle : public Particle{
 public:
     PSO_Particle();
+    PSO_Particle(const std::vector<float> vel);
     PSO_Particle(const Particle &particle);
     PSO_Particle(const std::vector<float> &position, const std::vector<float> &velocity, const float fitness);
 
-    void set_velocity(const std::vector<float> &velocity);
-    void check_update_best();
+    void set_personal_best();
+
+    void update_velocity(const std::vector<float> &velocity);
+    void update_personal_best();
 
     std::vector<float> get_velocity() const;
-    PSO_Best_Particle get_personal_best() const;
+    Particle get_personal_best() const;
 
 private:
     std::vector<float> velocity;
