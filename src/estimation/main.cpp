@@ -26,12 +26,16 @@ int main(){
 
     auto start = std::chrono::high_resolution_clock::now(); // get start time
 
-    auto pso = std::make_unique<PSO>(10000, 2, 10000, 2.0, 2.0, 0.2, 0.9, -10.0, 10.0);
-    pso->run_pso();
+    auto pso = std::make_unique<PSO>(10000, 2, 10000, 2.0, 2.0, 0.2, 0.9, -10, 10);
+    pso->run();
 
     auto stop = std::chrono::high_resolution_clock::now(); // get stop time
     auto duration = std::chrono::duration_cast< std::chrono::seconds>(stop - start); // calculate duration in microseconds
     std::cout << "Time taken by function: " << duration.count() << " seconds" << std::endl;
+
+    std::cout << "--- PSO Solution ---" << std::endl;
+    std::cout << "Fitness: " << pso->get_global_best().get_fitness() << std::endl;
+    std::cout << "x: " << pso->get_global_best().get_position()[0] << ", y: " << pso->get_global_best().get_position()[1] << std::endl;
 
     return 0;
 }

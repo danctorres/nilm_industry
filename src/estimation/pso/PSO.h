@@ -12,7 +12,7 @@
 
 class PSO : public Optimization{
 public:
-    PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound);
+    PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_min, float w_max, int lower_bound, int upper_bound);
 
     void adapter_particles_pso();
     void adapter_pso_particles();
@@ -23,7 +23,7 @@ public:
     std::vector<PSO_Particle> get_particles() const;
 
     void update_personal_best();
-    void run_pso();
+    void run();
 
 private:
     float c1;             // cognitive constant
