@@ -21,11 +21,13 @@ public:
     void set_max_iter(int max_iter);
     void set_global_best_parameters(const std::vector<float> &position, const float fitness);
     void set_global_best(const Particle &global_best);
+    void set_particles(const std::vector<Particle> particles);
 
     int get_n_particles() const;
     int get_rank() const;
     int get_max_iter() const;
     Particle get_global_best() const;
+    std::vector<Particle> get_particles() const;
 
     // Returns fitness for positions
     float objective_function(std::vector<float> position);
@@ -55,6 +57,7 @@ protected:
     int rank;                           // rank of the polynomial function
     int max_iter;                       // max number of algorithm iterations
     Particle global_best;               // global best
+    std::vector<Particle> particles;
 };
 
 

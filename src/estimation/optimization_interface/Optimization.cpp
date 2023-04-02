@@ -34,6 +34,10 @@ void Optimization::set_global_best(const Particle &global_best) {
     this->global_best.set_parameters_Particle(global_best);
 }
 
+void Optimization::set_particles(const std::vector<Particle> particles) {
+    this->particles = particles;
+}
+
 int Optimization::get_n_particles() const{
     return n_particles;
 }
@@ -48,6 +52,10 @@ int Optimization::get_max_iter() const {
 
 Particle Optimization::get_global_best() const {
     return global_best;
+}
+
+std::vector<Particle> Optimization::get_particles() const {
+    return particles;
 }
 
 // Returns fitness for positions
