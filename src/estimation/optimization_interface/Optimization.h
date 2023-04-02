@@ -4,8 +4,11 @@
 
 #ifndef DISSERTATION_NILM_OPTIMIZATION_H
 #define DISSERTATION_NILM_OPTIMIZATION_H
-#include <vector>
+
+#include <iostream>
+#include <memory>
 #include <random>
+#include <vector>
 #include "Particle.h"
 
 
@@ -28,68 +31,26 @@ public:
     float objective_function(std::vector<float> position);
 
     // Set the first global best for a vector of particles
-    template<typename T>
-    void initiate_global_best(std::vector<T> particles) {
-        global_best = new T(particles.front());
-        for (auto &part : particles) {
-            if (part.get_fitness() > global_best.get_fitness()) {
-                set_global_best(part);
-            }
-        }
-    }
+    void initiate_global_best(const std::vector<Particle> &particles);
 
-    // Goes through all the particles and sets the global best to the particle with the biggest fitness
-    template<typename T>
-    void update_global_best(const std::vector<T> &particles) {
-        for (auto &part : particles) {
-            if (part.get_fitness() > global_best.get_fitness()) {
-                set_global_best(part);
-            }
-        }
-    }
+    // Goes through all the particles and sets the global best to the particle with the smallest fitness
+    void update_global_best(const std::vector<Particle> &particles);
 
     // Initialize and return n particles with random values
-    template<typename T>
-    void initialize_positions(std::vector<T> &particles, int min_pos, int max_pos) {
-        for (int i = 0; i < n_particles; i++){
-            std::vector<float> position;
-            for (int j = 0; j < rank; j++) {
-                std::random_device rd;
-                std::mt19937 gen(rd());
-                std::uniform_real_distribution<> dis(min_pos, max_pos);
-                position.push_back(static_cast<float> (dis(gen)));
-            }
-            auto part = std::make_unique<T>(position);
-            particles.push_back(*part);
-        }
-    }
+    std::vector<Particle> initialize_positions(int min_pos, int max_pos);
 
     // Update the position of all particles with positions
-    template<typename T>
-    void update_positions(std::vector<T> &particles, const std::vector<std::vector<float>> &new_positions) {
-        for (int i = 0; i < n_particles ; i++){
-            particles[i].set_position(new_positions[i]);
-        }
-    }
+    void update_positions(std::vector<Particle> &particles, const std::vector<std::vector<float>> &new_positions);
 
     // Update the position of all particles with positions and fitness
-    template<typename T>
-    void update_particles(std::vector<T> &particles, const std::vector<std::vector<float>> &pos, const std::vector<float> &fit) {
-        for (int i = 0; i < n_particles ; i++){
-            particles[i].set_position(pos[i]);
-            particles[i].set_fitness(fit[i]);
-        }
-    }
+    void update_particles(std::vector<Particle> &particles, const std::vector<std::vector<float>> &pos, const std::vector<float> &fit);
 
     // Goes through all the particles, calculates the fitness and assigns to the particle
-    template<typename T>
-    void calculate_set_fitness(std::vector<T> &particles) {
-        std::for_each(particles.begin(), particles.end(), [this](Particle &par) {
-            par.set_fitness(objective_function(par.get_position()));
-        });
-    }
+    void calculate_set_fitness(std::vector<Particle> &particles);
 
-private:
+    std::vector<Particle> initialize_optimization(int min_pos, int max_pos);
+
+protected:
     int n_particles;                    // number of particles
     int rank;                           // rank of the polynomial function
     int max_iter;                       // max number of algorithm iterations

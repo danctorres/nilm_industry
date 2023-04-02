@@ -6,14 +6,14 @@ file(GLOB_RECURSE HEADERS
         "${CMAKE_SOURCE_DIR}/main.h"
         "${CMAKE_SOURCE_DIR}/read_data/*.h"
         "${CMAKE_SOURCE_DIR}/optimization_interface/*.h"
-        "${CMAKE_SOURCE_DIR}/pso/PSO_Particle.h"
+        "${CMAKE_SOURCE_DIR}/pso/*.h"
 )
 
 file(GLOB_RECURSE SOURCES
         "${CMAKE_SOURCE_DIR}/main.cpp"
         "${CMAKE_SOURCE_DIR}/read_data/*.cpp"
         "${CMAKE_SOURCE_DIR}/optimization_interface/*.cpp"
-        "${CMAKE_SOURCE_DIR}/pso/PSO_Particle.h"
+        "${CMAKE_SOURCE_DIR}/pso/*.cpp"
 )
 
 # Define the executable target
