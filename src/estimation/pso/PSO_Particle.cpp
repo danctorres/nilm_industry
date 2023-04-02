@@ -24,7 +24,7 @@ PSO_Particle::PSO_Particle(const std::vector<float> &pos, const std::vector<floa
 }
 
 void PSO_Particle::set_velocity(const std::vector<float> &velocity) {
-    this->velocity = velocity;
+    this->velocity = std::move(velocity);
 }
 
 void PSO_Particle::set_personal_best(const Particle &particle) {
