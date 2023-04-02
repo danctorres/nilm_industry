@@ -15,10 +15,12 @@
 class Optimization {
 public:
     Optimization();
-    Optimization(int n_particles, int rank, int max_iter);
+    Optimization(int n_particles, int rank, int max_iter, int min_pos, int max_pos);
     void set_n_particles(int n_particles);
     void set_rank(int rank);
     void set_max_iter(int max_iter);
+    void set_min_pos(int min_pos);
+    void set_max_pos(int max_pos);
     void set_global_best_parameters(const std::vector<float> &position, const float fitness);
     void set_global_best(const Particle &global_best);
     void set_particles(const std::vector<Particle> &particles);
@@ -26,6 +28,8 @@ public:
     int get_n_particles() const;
     int get_rank() const;
     int get_max_iter() const;
+    int get_min_pos() const;
+    int get_max_pos() const;
     Particle get_global_best() const;
     std::vector<Particle> get_particles() const;
 
@@ -39,7 +43,7 @@ public:
     void update_global_best();
 
     // Initialize and return n particles with random values
-    void initialize_positions(int min_pos, int max_pos);
+    void initialize_positions();
 
     // Update the position of all particles with positions
     void update_positions(std::vector<Particle> &particles, const std::vector<std::vector<float>> &new_positions);
@@ -50,12 +54,14 @@ public:
     // Goes through all the particles, calculates the fitness and assigns to the particle
     void calculate_set_fitness();
 
-    void initialize_optimization(int min_pos, int max_pos);
+    void initialize_optimization();
 
 protected:
     int n_particles;                    // number of particles
     int rank;                           // rank of the polynomial function
     int max_iter;                       // max number of algorithm iterations
+    int min_pos;
+    int max_pos;
     Particle global_best;               // global best
     std::vector<Particle> particles;
 };
