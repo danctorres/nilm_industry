@@ -48,21 +48,19 @@ void PSO::update_personal_best() {
 }
 
 // Create pso particles from particles
-void PSO::adapter_particles_pso(const std::vector<Particle> &par) {
-    for (int i = 0; i < n_particles; i++){
-        std::unique_ptr<PSO_Particle> pso_par = std::make_unique<PSO_Particle>(par[i]);
+void PSO::adapter_particles_pso() {
+    for (auto &particle : particles){
+        std::unique_ptr<PSO_Particle> pso_par = std::make_unique<PSO_Particle>(particle);
         pso_particles.push_back(*pso_par);
     }
 }
 
 // Change particles, in function of the pso particles
-std::vector<Particle> PSO::adapter_pso_particles(const std::vector<PSO_Particle> &pso_par) {
-    std::vector<Particle> opt_particles;
+void PSO::adapter_pso_particles() {
     for (int i = 0; i < n_particles; i++){
-        std::unique_ptr<Particle> opt_particle = std::make_unique<Particle>(pso_par[i].get_position(), pso_par[i].get_fitness());
-        opt_particles.push_back(*opt_particle);
+        particles[i].set_position(pso_particles[i].get_position());
+        particles[i].set_fitness(pso_particles[i].get_fitness());
     }
-    return opt_particles;
 }
 
 PSO::PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound) : Optimization(n_particles, rank, max_iter) {
@@ -75,9 +73,9 @@ PSO::PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_mi
 
     // Initialize position, fitness and global bests
     std::cout << "Initializing pso population" << std::endl;
-    std::vector<Particle> par = initialize_optimization(lower_bound, upper_bound);
-    adapter_particles_pso(par);
-    set_particles(par);
+    initialize_optimization(lower_bound, upper_bound);
+    adapter_particles_pso();
+    set_particles(particles);
 
     initialize_velocities();
     initialize_personal_best();
@@ -121,6 +119,10 @@ void PSO::run_pso() {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0, 1);
     float w = 1.0;
+
+    float stop_condition = global_best.get_fitness();
+    int stoping_counter = 0;
+
     for(int i = 0; i < max_iter; i++){
         //w = w_max - i * ((w_max - w_min) / w_min);
 
@@ -148,19 +150,30 @@ void PSO::run_pso() {
             }
             particle.set_velocity(new_velocity);
             particle.set_position(new_position);
-
-            //std::cout << "New position: " << part.get_position()[0] << " " << part.get_position()[1] << std::endl;
-
-
-            // Calculate fitness
-            //calculate_set_fitness(particles);
-            // Update personal_best
-            //update_personal_best();
         }
 
-        particles = adapter_pso_particles(pso_particles);
-        calculate_set_fitness(particles);
-        update_global_best(particles);
+        adapter_pso_particles();
+        calculate_set_fitness();
+        update_global_best();
+
+
+        auto pos_aux = pso_particles[0].get_position();
+        auto vel_aux = pso_particles[0].get_velocity();
+        auto pbest_pos_aux = pso_particles[0].get_personal_best().get_position();
+        auto gbest_pos_aux = get_global_best().get_position();
+        std::cout << "DEBUG -> x: " << pos_aux[0] << " y: " << pos_aux[1] << std::endl;
+        std::cout << "DEBUG -> fit: " << pso_particles[0].get_fitness() << std::endl;
+        std::cout << "DEBUG -> Vel x: " << vel_aux[0] << " Vel y: " << vel_aux[1] << std::endl;
+        std::cout << "DEBUG -> Pbest x: " << pbest_pos_aux[0] << " y: " << pbest_pos_aux[1] << std::endl;
+        std::cout << "DEBUG -> Pbest fit: " << pso_particles[0].get_personal_best().get_fitness() << std::endl;
+        std::cout << "DEBUG -> Gbest x: " << gbest_pos_aux[0] << " y: " << gbest_pos_aux[1] << std::endl;
+        std::cout << "DEBUG -> Gbest fit: " << get_global_best().get_fitness() << std::endl;
+
+        if(stop_condition == get_global_best().get_fitness() && stoping_counter == 2 || get_global_best().get_fitness() < 0.01){
+            break;
+        }
+        stop_condition = global_best.get_fitness();
+        stoping_counter++;
     }
 
     std::cout << "--- END ---" << std::endl;

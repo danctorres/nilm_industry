@@ -19,7 +19,7 @@ Read_State::Read_State(const std::string &name_file) : Read(name_file){
     }
 }
 
-std::vector<uint> Read_State::get_parameter(const std::string& name_parameter) const {
+std::vector<int> Read_State::get_parameter(const std::string& name_parameter) const {
     if (name_parameter == "State 0"){
         return state_0;
     }
@@ -45,8 +45,8 @@ std::vector<uint> Read_State::get_parameter(const std::string& name_parameter) c
     }
 }
 
-std::vector<std::vector<uint>> Read_State::get_all_parameter() const {
-    std::vector<std::vector<uint>> data;
+std::vector<std::vector<int>> Read_State::get_all_parameter() const {
+    std::vector<std::vector<int>> data;
     data.push_back(state_0);
     data.push_back(state_1);
     data.push_back(state_2);

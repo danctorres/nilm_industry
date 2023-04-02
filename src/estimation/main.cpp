@@ -24,8 +24,14 @@ int main(){
     //auto st_data = std::make_unique<Read_State>("../../../data/processed/data_8_equipment/on_off_training.csv");
     //st_data->print_parameter(st_data->get_parameter("State 0"));
 
-    auto pso = std::make_unique<PSO>(1000, 2, 100, 2.0, 2.0, 0.2, 0.9, -10.0, 10.0);
+    auto start = std::chrono::high_resolution_clock::now(); // get start time
+
+    auto pso = std::make_unique<PSO>(100000, 2, 1000, 2.0, 2.0, 0.2, 0.9, -10.0, 10.0);
     pso->run_pso();
+
+    auto stop = std::chrono::high_resolution_clock::now(); // get stop time
+    auto duration = std::chrono::duration_cast< std::chrono::seconds>(stop - start); // calculate duration in microseconds
+    std::cout << "Time taken by function: " << duration.count() << " seconds" << std::endl;
 
     return 0;
 }
