@@ -6,9 +6,9 @@
 
 Particle::Particle() : position(), fitness(0) {}
 
-Particle::Particle(std::vector<float> &pos) : position(pos), fitness(0){}
+Particle::Particle(const std::vector<float> &pos) : position(pos), fitness(0){}
 
-Particle::Particle(std::vector<float> &position, float fitness) {
+Particle::Particle(const std::vector<float> &position, const float fitness) {
     this->position = position;
     this->fitness = fitness;
 }

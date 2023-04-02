@@ -12,6 +12,7 @@
 #include "optimization_interface/Optimization.h"
 #include "optimization_interface/Particle.h"
 #include "pso/PSO_Particle.h"
+#include "pso/PSO.h"
 
 
 
@@ -24,8 +25,8 @@ int main(){
     //auto st_data = std::make_unique<Read_State>("../../../data/processed/data_8_equipment/on_off_training.csv");
     //st_data->print_parameter(st_data->get_parameter("State 0"));
 
-
-    auto opt = std::make_unique<Optimization> ();
+    auto pso = std::make_unique<PSO>(1000, 2, 100, 2.0, 2.0, 0.2, 0.9, -10.0, 10.0);
+    pso->run_pso();
 
     return 0;
 }
