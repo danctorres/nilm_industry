@@ -15,7 +15,6 @@
 #include "pso/PSO.h"
 
 
-
 int main(){
     // Read training aggregate data
     //auto agg_data = std::make_unique<Read_Aggregate>("../../data/processed/aggregate_training.csv");

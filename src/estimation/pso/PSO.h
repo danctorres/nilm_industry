@@ -31,7 +31,7 @@ private:
     float w_min;          // minimum inertia weight value
     float w_max;          // max inertia weight value
     float v_max;          // max velocity
-    std::vector<PSO_Particle> particles;
+    std::vector<PSO_Particle> pso_particles;
 };
 
 
