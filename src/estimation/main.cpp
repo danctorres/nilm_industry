@@ -26,7 +26,7 @@ int main(){
 
     auto start = std::chrono::high_resolution_clock::now(); // get start time
 
-    auto pso = std::make_unique<PSO>(100000, 2, 1000, 2.0, 2.0, 0.2, 0.9, -10.0, 10.0);
+    auto pso = std::make_unique<PSO>(10000, 2, 10000, 2.0, 2.0, 0.2, 0.9, -10.0, 10.0);
     pso->run_pso();
 
     auto stop = std::chrono::high_resolution_clock::now(); // get stop time

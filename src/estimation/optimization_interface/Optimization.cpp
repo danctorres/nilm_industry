@@ -96,8 +96,8 @@ void Optimization::initialize_positions(int min_pos, int max_pos) {
             std::uniform_real_distribution<> dis(min_pos, max_pos);
             position.push_back(static_cast<float> (dis(gen)));
         }
-        auto part = std::make_unique<Particle>(position);
-        particles.push_back(*part);
+        Particle part = Particle(position);
+        particles.push_back(part);
     }
 }
 

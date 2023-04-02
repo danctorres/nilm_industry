@@ -14,7 +14,7 @@ Particle::Particle(const std::vector<float> &position, const float fitness) {
 }
 
 void Particle::set_position(const std::vector<float> &position) {
-    this->position = position;
+    this->position = std::move(position);
 }
 
 void Particle::set_fitness(const float fitness) {
@@ -22,12 +22,12 @@ void Particle::set_fitness(const float fitness) {
 }
 
 void Particle::set_parameters(const std::vector<float> &position, const float fitness) {
-    this->position = position;
+    this->position = std::move(position);
     this->fitness = fitness;
 }
 
 void Particle::set_parameters_Particle(const Particle &particle) {
-    this->position = particle.get_position();
+    this->position = std::move(particle.get_position());
     this->fitness = particle.get_fitness();
 }
 

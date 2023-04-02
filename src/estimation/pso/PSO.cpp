@@ -50,8 +50,8 @@ void PSO::update_personal_best() {
 // Create pso particles from particles
 void PSO::adapter_particles_pso() {
     for (auto &particle : particles){
-        std::unique_ptr<PSO_Particle> pso_par = std::make_unique<PSO_Particle>(particle);
-        pso_particles.push_back(*pso_par);
+        PSO_Particle pso_par = PSO_Particle(particle);
+        pso_particles.push_back(pso_par);
     }
 }
 
@@ -124,10 +124,11 @@ void PSO::run_pso() {
     int stoping_counter = 0;
 
     for(int i = 0; i < max_iter; i++){
-        //w = w_max - i * ((w_max - w_min) / w_min);
+        w = w_max - i * ((w_max - w_min) / max_iter);
 
+        std::vector<float> new_velocity;
+        std::vector<float> new_position;
         for(PSO_Particle &particle : pso_particles){
-            //std::cout << "w: " << w << std::endl;
             // Update particle position and velocity
             auto pos = particle.get_position();             // Particles position
             auto vel = particle.get_velocity();             // Particles velocity
@@ -136,12 +137,15 @@ void PSO::run_pso() {
 
             float r1 = dis(gen);
             float r2 = dis(gen);
-            std::vector<float> new_velocity;
-            std::vector<float> new_position;
+
             float nv = 0.0;
             float np = 0.0;
             for (int k = 0; k < rank; k++){
                 nv = w * vel[k] + c1 * r1 * (pb[k] - pos[k]) + c2 * r2 * (gb[k] - pos[k]);
+                /*if(nv > v_max || nv < -v_max) {
+                    nv = v_max;
+                }*/
+
                 if (nv < v_max || nv > -v_max){
                     np = pos[k] + nv;
                     new_velocity.push_back(nv);
@@ -150,6 +154,9 @@ void PSO::run_pso() {
             }
             particle.set_velocity(new_velocity);
             particle.set_position(new_position);
+
+            new_position.clear();
+            new_velocity.clear();
         }
 
         adapter_pso_particles();
@@ -157,23 +164,29 @@ void PSO::run_pso() {
         update_global_best();
 
 
-        auto pos_aux = pso_particles[0].get_position();
+        //auto pos_aux = pso_particles[0].get_position();
         auto vel_aux = pso_particles[0].get_velocity();
-        auto pbest_pos_aux = pso_particles[0].get_personal_best().get_position();
-        auto gbest_pos_aux = get_global_best().get_position();
-        std::cout << "DEBUG -> x: " << pos_aux[0] << " y: " << pos_aux[1] << std::endl;
-        std::cout << "DEBUG -> fit: " << pso_particles[0].get_fitness() << std::endl;
+        //auto pbest_pos_aux = pso_particles[0].get_personal_best().get_position();
+        //auto gbest_pos_aux = get_global_best().get_position();
+        /*std::cout << "DEBUG -> x: " << pos_aux[0] << " y: " << pos_aux[1] << std::endl;
+        std::cout << "DEBUG -> fit: " << pso_particles[0].get_fitness() << std::endl;*/
         std::cout << "DEBUG -> Vel x: " << vel_aux[0] << " Vel y: " << vel_aux[1] << std::endl;
-        std::cout << "DEBUG -> Pbest x: " << pbest_pos_aux[0] << " y: " << pbest_pos_aux[1] << std::endl;
+        /*std::cout << "DEBUG -> Pbest x: " << pbest_pos_aux[0] << " y: " << pbest_pos_aux[1] << std::endl;
         std::cout << "DEBUG -> Pbest fit: " << pso_particles[0].get_personal_best().get_fitness() << std::endl;
         std::cout << "DEBUG -> Gbest x: " << gbest_pos_aux[0] << " y: " << gbest_pos_aux[1] << std::endl;
-        std::cout << "DEBUG -> Gbest fit: " << get_global_best().get_fitness() << std::endl;
+        std::cout << "DEBUG -> Gbest fit: " << get_global_best().get_fitness() << std::endl;*/
 
-        if(stop_condition == get_global_best().get_fitness() && stoping_counter == 2 || get_global_best().get_fitness() < 0.01){
-            break;
+        if(stop_condition == get_global_best().get_fitness()) {
+            if (stoping_counter == 10 || get_global_best().get_fitness() < 0.001) {
+                std::cout << "--- Number of cycles " << i << " --- " << std::endl;
+                break;
+            }
+            std::cout << "DEBUG -> Gbest fit: " << get_global_best().get_fitness() << std::endl;
+            stoping_counter++;
         }
-        stop_condition = global_best.get_fitness();
-        stoping_counter++;
+        else {
+            stop_condition = global_best.get_fitness();
+        }
     }
 
     std::cout << "--- END ---" << std::endl;
