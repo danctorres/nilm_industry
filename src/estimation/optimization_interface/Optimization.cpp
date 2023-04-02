@@ -34,7 +34,7 @@ void Optimization::set_global_best(const Particle &global_best) {
     this->global_best.set_parameters_Particle(global_best);
 }
 
-void Optimization::set_particles(const std::vector<Particle> particles) {
+void Optimization::set_particles(const std::vector<Particle> &particles) {
     this->particles = particles;
 }
 
@@ -68,7 +68,7 @@ float Optimization::objective_function(std::vector<float> position){
 }
 
 // Set the first global best for a vector of particles
-void Optimization::initiate_global_best(const std::vector<Particle> &particles) {
+void Optimization::initiate_global_best() {
     set_global_best(particles.front());
     for (auto &part : particles) {
         if (part.get_fitness() < global_best.get_fitness()) {
@@ -78,7 +78,7 @@ void Optimization::initiate_global_best(const std::vector<Particle> &particles) 
 }
 
 // Goes through all the particles and sets the global best to the particle with the smallest fitness
-void Optimization::update_global_best(const std::vector<Particle> &particles) {
+void Optimization::update_global_best() {
     for (auto &part : particles) {
         if (part.get_fitness() < global_best.get_fitness()) {
             set_global_best(part);
@@ -87,8 +87,7 @@ void Optimization::update_global_best(const std::vector<Particle> &particles) {
 }
 
 // Initialize and return n particles with random values
-std::vector<Particle> Optimization::initialize_positions(int min_pos, int max_pos) {
-    std::vector<Particle> particles;
+void Optimization::initialize_positions(int min_pos, int max_pos) {
     for (int i = 0; i < n_particles; i++){
         std::vector<float> position;
         for (int j = 0; j < rank; j++) {
@@ -100,7 +99,6 @@ std::vector<Particle> Optimization::initialize_positions(int min_pos, int max_po
         auto part = std::make_unique<Particle>(position);
         particles.push_back(*part);
     }
-    return particles;
 }
 
 // Update the position of all particles with positions
@@ -120,18 +118,17 @@ void Optimization::update_particles(std::vector<Particle> &particles, const std:
 }
 
 // Goes through all the particles, calculates the fitness and assigns to the particle
-void Optimization::calculate_set_fitness(std::vector<Particle> &particles) {
+void Optimization::calculate_set_fitness() {
     std::for_each(particles.begin(), particles.end(), [this](Particle &par) {
         par.set_fitness(objective_function(par.get_position()));
     });
 }
 
-std::vector<Particle> Optimization::initialize_optimization(int min_pos, int max_pos) {
+void Optimization::initialize_optimization(int min_pos, int max_pos) {
     std::cout << "Initializing population" << std::endl;
-    std::vector<Particle> particles = initialize_positions(min_pos, max_pos);
+    initialize_positions(min_pos, max_pos);
     std::cout << "Initializing fitness" << std::endl;
-    calculate_set_fitness(particles);
+    calculate_set_fitness();
     std::cout << "Initializing global best" << std::endl;
-    initiate_global_best(particles);
-    return particles;
+    initiate_global_best();
 }

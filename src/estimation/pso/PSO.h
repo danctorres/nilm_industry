@@ -14,8 +14,8 @@ class PSO : public Optimization{
 public:
     PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_min, float w_max, float lower_bound, float upper_bound);
 
-    void adapter_particles_pso(const std::vector<Particle> &par);
-    std::vector<Particle> adapter_pso_particles(const std::vector<PSO_Particle> &pso_par);
+    void adapter_particles_pso();
+    void adapter_pso_particles();
     void initialize_velocities();
     void initialize_personal_best();
     void set_vmax(const float lower_bound, const float upper_bound);
