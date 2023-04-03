@@ -12,7 +12,7 @@ PSO_Particle::PSO_Particle(const Particle &particle) {
     this->position = particle.get_position();
     this->fitness = particle.get_fitness();
     for (int i = 0; i < position.size(); i++) {
-        velocity.push_back(0);
+        velocity.push_back(0.0f);
     }
     personal_best = *this;
 }

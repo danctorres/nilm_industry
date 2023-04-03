@@ -10,8 +10,8 @@ Optimization::Optimization() : global_best(){
     n_particles = 0;
     rank = 0;
     max_iter = 0;
-    min_pos.push_back(0.0);
-    max_pos.push_back(0.0);
+    min_pos.push_back(0.0f);
+    max_pos.push_back(0.0f);
 }
 
 Optimization::Optimization(int n_particles, int rank, int max_iter, float min_pos, float max_pos) : global_best() {
@@ -88,7 +88,7 @@ std::vector<Particle> Optimization::get_particles() const {
 
 // Returns fitness for positions
 float Optimization::objective_function(std::vector<float> position){
-    float fitness = 0.0;
+    float fitness = 0.0f;
     for(const auto &pos : position){
         fitness += pow(pos, 2);
     }

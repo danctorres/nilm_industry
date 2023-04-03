@@ -4,9 +4,9 @@
 
 #include "Particle.h"
 
-Particle::Particle() : position(), fitness(0) {}
+Particle::Particle() : position(), fitness(0.0f) {}
 
-Particle::Particle(const std::vector<float> &pos) : position(pos), fitness(0){}
+Particle::Particle(const std::vector<float> &pos) : position(pos), fitness(0.0f){}
 
 Particle::Particle(const std::vector<float> &position, const float fitness) {
     this->position = position;

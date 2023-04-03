@@ -77,9 +77,9 @@ void Simulated_Annealing::run() {
 
     for (int i = 0; i < max_iter; i++) {
         std::vector<float> new_position;
-        float new_fitness = 0.0;
-        float delta = 0.0;
-        float cond = 0.0;
+        float new_fitness = 0.0f;
+        float delta = 0.0f;
+        float cond = 0.0f;
         for (Particle &particle: particles) {
             for (int j = 0; j < rank; j++) {
                 new_position.push_back(particle.get_position()[j] + dis1(gen));
@@ -100,6 +100,7 @@ void Simulated_Annealing::run() {
             }
             new_position.clear();
         }
+        update_global_best();
 
         //update_global_best();
         //std::cout << "GB fit: " << global_best.get_fitness() << std::endl;
@@ -112,16 +113,15 @@ void Simulated_Annealing::run() {
             break;
         }
         if(stop_condition == get_global_best().get_fitness()) {
-            if (stopping_counter == 10 || get_global_best().get_fitness() < 0.001) {
+            if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
                 std::cout << "- Number of cycles " << i << " - " << std::endl;
                 break;
             }
             stopping_counter++;
         }
         else {
+            stopping_counter = 0;
             stop_condition = global_best.get_fitness();
         }
-
     }
-    update_global_best();
 }

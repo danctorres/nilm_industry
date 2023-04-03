@@ -14,6 +14,7 @@
 #include "pso/PSO_Particle.h"
 #include "pso/PSO.h"
 #include "simulated_annealing/Simulated_Annealing.h"
+#include "newton/Newton.h"
 
 
 int main(){
@@ -28,10 +29,10 @@ int main(){
     //auto start = std::chrono::high_resolution_clock::now(); // get start time
     std::cout << std::endl << "--- PSO ---" << std::endl;
 
-    std::vector<float> min_pos = {-10};
-    std::vector<float> max_pos = {10};
+    std::vector<float> min_pos = {-10.0f};
+    std::vector<float> max_pos = {10.0f};
 
-    auto pso = std::make_unique<PSO>(10, 2, 10000, min_pos, max_pos, 2.0, 2.0, 0.2, 0.9);
+    auto pso = std::make_unique<PSO>(10, 2, 100, min_pos, max_pos, 2.0f, 2.0f, 0.2f, 0.9f);
     pso->run();
 
     //auto stop = std::chrono::high_resolution_clock::now(); // get stop time
@@ -40,11 +41,18 @@ int main(){
     std::cout << "Fitness: " << pso->get_global_best().get_fitness() << std::endl;
     //std::cout << "Time taken by function: " << duration.count() << " seconds" << std::endl;
 
-    std::cout << std::endl << "--- Simulated_Annealing ---" << std::endl;
-    auto sa = std::make_unique<Simulated_Annealing>(10, 2, 10000, -10, 10, 5.0, 0.001, 0.99);
+    std::cout << std::endl << "--- SIMULATED ANNEALING ---" << std::endl;
+    auto sa = std::make_unique<Simulated_Annealing>(10, 2, 100, -10.0f, 10.0f, 5.0f, 0.001f, 0.99f);
     sa->run();
     std::cout << "x: " << sa->get_global_best().get_position()[0] << ", y: " << sa->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << sa->get_global_best().get_fitness() << std::endl;
+
+
+    std::cout << std::endl << "--- NEWTON ---" << std::endl;
+    auto newton = std::make_unique<Newton>(10, 2, 100, -10.0f, 10.0f);
+    newton->run();
+    std::cout << "x: " << newton->get_global_best().get_position()[0] << ", y: " << newton->get_global_best().get_position()[1] << std::endl;
+    std::cout << "Fitness: " << newton->get_global_best().get_fitness() << std::endl;
 
     return 0;
 }
