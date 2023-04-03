@@ -69,7 +69,6 @@ PSO::PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_mi
     std::cout << "Initializing pso population" << std::endl;
     initialize_optimization();
     adapter_particles_pso();
-    set_particles(particles);
 
     initialize_velocities();
     initialize_personal_best();
