@@ -88,8 +88,8 @@ void PSO::run() {
     // Main PSO loop
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0, 1);
-    float w = 1.0;
+    std::uniform_real_distribution<> dis(0.0, 1.1);
+    float w = 1.0f;
 
     float stop_condition = global_best.get_fitness();
     int stopping_counter = 0;
@@ -109,8 +109,8 @@ void PSO::run() {
             float r1 = dis(gen);
             float r2 = dis(gen);
 
-            float nv = 0.0;
-            float np = 0.0;
+            float nv = 0.0f;
+            float np = 0.0f;
             for (int k = 0; k < rank; k++){
                 nv = w * vel[k] + c1 * r1 * (pb[k] - pos[k]) + c2 * r2 * (gb[k] - pos[k]);
 
@@ -133,7 +133,7 @@ void PSO::run() {
 
         // Stopping conditions
         if(stop_condition == get_global_best().get_fitness()) {
-            if (stopping_counter == 10 || get_global_best().get_fitness() < 0.001) {
+            if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
                 std::cout << "- Number of cycles " << i << " - " << std::endl;
                 break;
             }
@@ -141,6 +141,7 @@ void PSO::run() {
             stopping_counter++;
         }
         else {
+            stopping_counter = 0;
             stop_condition = global_best.get_fitness();
         }
     }
