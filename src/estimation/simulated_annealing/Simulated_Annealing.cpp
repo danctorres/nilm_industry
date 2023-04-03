@@ -49,13 +49,18 @@ float Simulated_Annealing::calculate_delta(const Particle &particle, float fitne
     return particle.get_fitness() - fitness;
 }
 
-Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter, int lower_bound, int upper_bound, float temperature, float temp_min, float cooling_factor) : Optimization(n_particles, rank, max_iter, lower_bound, upper_bound) {
+Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter, int min_pos, int max_pos, float temperature, float temp_min, float cooling_factor) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
     // Initializing member variables
     this->temperature = temperature;
     this->temp_min = temp_min;
     this->cooling_factor = cooling_factor;
 
-    std::cout << "Initializing simulated annealing population" << std::endl;
+    //std::cout << "Initializing simulated annealing population" << std::endl;
+    std::cout << "- Number of particles: " << n_particles << ", ";
+    std::cout << "temperature: " << temperature << ", ";
+    std::cout << "temp_min: " << temp_min << ", ";
+    std::cout << "cooling_factor: " << cooling_factor << " - " << std::endl;
+
     initialize_optimization();
     set_last_fitness();
 }
@@ -108,7 +113,7 @@ void Simulated_Annealing::run() {
         }
         if(stop_condition == get_global_best().get_fitness()) {
             if (stopping_counter == 10 || get_global_best().get_fitness() < 0.001) {
-                std::cout << "--- Number of cycles " << i << " --- " << std::endl;
+                std::cout << "- Number of cycles " << i << " - " << std::endl;
                 break;
             }
             stopping_counter++;

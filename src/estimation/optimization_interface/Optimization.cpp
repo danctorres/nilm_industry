@@ -10,16 +10,24 @@ Optimization::Optimization() : global_best(){
     n_particles = 0;
     rank = 0;
     max_iter = 0;
-    min_pos = 0;
-    max_pos = 0;
+    min_pos.push_back(0.0);
+    max_pos.push_back(0.0);
 }
 
-Optimization::Optimization(int n_particles, int rank, int max_iter, int min_pos, int max_pos) : global_best() {
+Optimization::Optimization(int n_particles, int rank, int max_iter, float min_pos, float max_pos) : global_best() {
     this->n_particles = n_particles;
     this->rank = rank;
     this->max_iter = max_iter;
-    this->min_pos = min_pos;
-    this->max_pos = max_pos;
+    this->min_pos.push_back(min_pos);
+    this->max_pos.push_back(max_pos);
+}
+
+Optimization::Optimization(int n_particles, int rank, int max_iter, std::vector<float> min_pos, std::vector<float> max_pos) : global_best() {
+    this->n_particles = n_particles;
+    this->rank = rank;
+    this->max_iter = max_iter;
+    this->min_pos = std::move(min_pos);
+    this->max_pos = std::move(max_pos);
 }
 
 void Optimization::set_n_particles(int n_particles) {
@@ -34,12 +42,12 @@ void Optimization::set_max_iter(int max_iter) {
     this->max_iter = max_iter;
 }
 
-void Optimization::set_min_pos(int min_pos) {
-    this->min_pos = min_pos;
+void Optimization::set_min_pos(std::vector<float> min_pos) {
+    this->min_pos = std::move(min_pos);
 }
 
-void Optimization::set_max_pos(int max_pos) {
-    this->max_pos = max_pos;
+void Optimization::set_max_pos(std::vector<float> max_pos) {
+    this->max_pos = std::move(max_pos);
 }
 
 void Optimization::set_global_best(const Particle &global_best) {
@@ -62,11 +70,11 @@ int Optimization::get_max_iter() const {
     return max_iter;
 }
 
-int Optimization::get_min_pos() const {
+std::vector<float> Optimization::get_min_pos() const {
     return min_pos;
 }
 
-int Optimization::get_max_pos() const {
+std::vector<float> Optimization::get_max_pos() const {
     return max_pos;
 }
 
@@ -113,7 +121,7 @@ void Optimization::initialize_positions() {
         for (int j = 0; j < rank; j++) {
             std::random_device rd;
             std::mt19937 gen(rd());
-            std::uniform_real_distribution<> dis(min_pos, max_pos);
+            std::uniform_real_distribution<> dis(min_pos[j], max_pos[j]);
             position.push_back(static_cast<float> (dis(gen)));
         }
         Particle part = Particle(position);
@@ -145,10 +153,10 @@ void Optimization::calculate_set_fitness() {
 }
 
 void Optimization::initialize_optimization() {
-    std::cout << "Initializing population" << std::endl;
+    //std::cout << "Initializing population" << std::endl;
     initialize_positions();
-    std::cout << "Initializing fitness" << std::endl;
+    //std::cout << "Initializing fitness" << std::endl;
     calculate_set_fitness();
-    std::cout << "Initializing global best" << std::endl;
+    //std::cout << "Initializing global best" << std::endl;
     initiate_global_best();
 }

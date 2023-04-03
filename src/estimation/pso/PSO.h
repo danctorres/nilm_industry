@@ -12,13 +12,13 @@
 
 class PSO : public Optimization{
 public:
-    PSO(int n_particles, int rank, int max_iter, float c1, float c2, float w_min, float w_max, int lower_bound, int upper_bound);
+    PSO(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float c1, float c2, float w_min, float w_max);
 
     void adapter_particles_pso();
     void adapter_pso_particles();
     void initialize_velocities();
     void initialize_personal_best();
-    void set_vmax(const float lower_bound, const float upper_bound);
+    void set_v_max(const std::vector<float> &pos_min, const std::vector<float> &pos_max);
 
     std::vector<PSO_Particle> get_particles() const;
 
@@ -30,7 +30,7 @@ private:
     float c2;             // social constant
     float w_min;          // minimum inertia weight value
     float w_max;          // max inertia weight value
-    float v_max;          // max velocity
+    std::vector<float> v_max;          // max velocity
     std::vector<PSO_Particle> pso_particles;
 };
 
