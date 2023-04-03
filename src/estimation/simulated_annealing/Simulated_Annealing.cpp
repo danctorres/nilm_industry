@@ -1,40 +1,122 @@
 //
-// Created by danie on 3/16/2023.
+// Created by dtorres on 3/16/2023.
 //
 
+#include <cmath>
 #include "Simulated_Annealing.h"
+#include "../optimization_interface/Particle.h"
 
 void Simulated_Annealing::set_temperature(float temperature) {
     this->temperature = temperature;
+}
+
+void Simulated_Annealing::set_temp_min(float temp_min) {
+    this->temp_min = temp_min;
+}
+
+void Simulated_Annealing::set_cooling_factor(float cooling_factor) {
+    this->cooling_factor = cooling_factor;
+}
+
+void Simulated_Annealing::set_last_fitness() {
+    for (Particle &particle : particles) {
+        last_fitness.push_back(particle.get_fitness());
+    }
 }
 
 float Simulated_Annealing::get_temperature() const {
     return temperature;
 }
 
-Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter) : Optimization(n_particles, rank, max_iter, lower_bound, upper_bound) {
+float Simulated_Annealing::get_temp_min() const {
+    return temp_min;
+}
+
+float Simulated_Annealing::get_cooling_factor() const {
+    return cooling_factor;
+}
+
+
+std::vector<float> Simulated_Annealing::get_last_fitness() const {
+    return last_fitness;
+}
+
+float Simulated_Annealing::calculate_new_fitness(const std::vector<float> &new_positions) {
+    return objective_function(new_positions);
+}
+
+float Simulated_Annealing::calculate_delta(const Particle &particle, float fitness) {
+    return particle.get_fitness() - fitness;
+}
+
+Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter, int lower_bound, int upper_bound, float temperature, float temp_min, float cooling_factor) : Optimization(n_particles, rank, max_iter, lower_bound, upper_bound) {
+    // Initializing member variables
+    this->temperature = temperature;
+    this->temp_min = temp_min;
+    this->cooling_factor = cooling_factor;
+
     std::cout << "Initializing simulated annealing population" << std::endl;
     initialize_optimization();
-    adapter_particles_pso();
-    set_particles(particles);
+    set_last_fitness();
 }
 
 void Simulated_Annealing::run() {
     // Main loop
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0, 1);
-    float w = 1.0;
+    std::uniform_real_distribution<> dis1(-0.5, 0.5);
+    std::uniform_real_distribution<> dis2(0, 1);
 
-    float stop_condition = global_best.get_fitness();
     int stopping_counter = 0;
+    float stop_condition = global_best.get_fitness();
 
     for (int i = 0; i < max_iter; i++) {
-        w = w_max - i * ((w_max - w_min) / max_iter);
-
-        std::vector<float> new_velocity;
         std::vector<float> new_position;
-        for (PSO_Particle &particle: pso_particles) {
+        float new_fitness = 0.0;
+        float delta = 0.0;
+        float cond = 0.0;
+        for (Particle &particle: particles) {
+            for (int j = 0; j < rank; j++) {
+                new_position.push_back(particle.get_position()[j] + dis1(gen));
+            }
+            new_fitness = calculate_new_fitness(new_position);
+            delta = calculate_delta(particle, new_fitness);
+
+            // new position has smaller fitness
+            if (delta < 0.0){
+                particle.set_position(new_position);
+                particle.set_fitness(new_fitness);
+            }
+            else{
+                if (exp(-delta / temperature) > dis2(gen)){
+                    particle.set_position(new_position);
+                    particle.set_fitness(new_fitness);
+                }
+            }
+            new_position.clear();
         }
+
+        //update_global_best();
+        //std::cout << "GB fit: " << global_best.get_fitness() << std::endl;
+        //std::cout << "GB pos x: " << global_best.get_position()[0] << " y: " << global_best.get_position()[1] << std::endl;
+
+
+        temperature *= cooling_factor;
+
+        if (temperature < temp_min){
+            break;
+        }
+        if(stop_condition == get_global_best().get_fitness()) {
+            if (stopping_counter == 10 || get_global_best().get_fitness() < 0.001) {
+                std::cout << "--- Number of cycles " << i << " --- " << std::endl;
+                break;
+            }
+            stopping_counter++;
+        }
+        else {
+            stop_condition = global_best.get_fitness();
+        }
+
     }
+    update_global_best();
 }
