@@ -1,11 +1,12 @@
 //
-// Created by dtorres on 3/19/2023.
+// Created by danctorres on 3/19/2023.
 //
 
 #ifndef DISSERTATION_NILM_PARTICLE_H
 #define DISSERTATION_NILM_PARTICLE_H
 
 #include <vector>
+
 
 class Particle{
 public:

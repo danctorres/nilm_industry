@@ -1,5 +1,5 @@
 //
-// Created by dtorres on 4/3/2023.
+// Created by danctorres on 4/3/2023.
 //
 
 #ifndef DISSERTATION_NILM_NEWTON_H
@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "../optimization_interface/Optimization.h"
+
 
 class Newton : public Optimization{
 public:

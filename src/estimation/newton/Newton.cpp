@@ -1,9 +1,9 @@
 //
-// Created by danie on 4/3/2023.
+// Created by danctorres on 4/3/2023.
 //
 
-#include <vector>
 #include "Newton.h"
+
 
 std::vector<float> Newton::gradient(const std::vector<float> &position) {
     std::vector<float> grad = {2 * position[0], 2 * position[1]};

@@ -1,8 +1,9 @@
 //
-// Created by dtorres on 3/11/23.
+// Created by danctorres on 3/11/23.
 //
 
 #include "PSO_Particle.h"
+
 
 PSO_Particle::PSO_Particle() : Particle(), velocity(), personal_best() {}
 

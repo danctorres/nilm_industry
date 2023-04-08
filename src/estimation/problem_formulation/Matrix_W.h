@@ -1,5 +1,5 @@
 //
-// Created by dtorres on 3/11/23.
+// Created by danctorres on 3/11/23.
 //
 
 #ifndef DISSERTATION_NILM_MATRIX_W_H

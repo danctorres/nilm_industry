@@ -1,5 +1,5 @@
 //
-// Created by dtorres on 3/11/23.
+// Created by danctorres on 3/11/23.
 //
 
 #ifndef DISSERTATION_NILM_PSO_PARTICLE_H
@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 #include "../optimization_interface/Particle.h"
+
 
 class PSO_Particle : public Particle{
 public:

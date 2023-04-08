@@ -1,10 +1,10 @@
 //
-// Created by dtorres on 3/16/2023.
+// Created by danctorres on 3/16/2023.
 //
 
-#include <cmath>
 #include "Simulated_Annealing.h"
 #include "../optimization_interface/Particle.h"
+
 
 void Simulated_Annealing::set_temperature(float temperature) {
     this->temperature = temperature;

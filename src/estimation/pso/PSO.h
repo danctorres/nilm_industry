@@ -1,14 +1,18 @@
 //
-// Created by dtorres on 3/11/23.
+// Created by danctorres on 3/11/23.
 //
 
 #ifndef DISSERTATION_NILM_PSO_H
 #define DISSERTATION_NILM_PSO_H
 
+#include <cmath>
+#include <iostream>
+#include <random>
 #include <vector>
 #include "../optimization_interface/Optimization.h"
 #include "../optimization_interface/Particle.h"
 #include "PSO_Particle.h"
+
 
 class PSO : public Optimization{
 public:

@@ -1,10 +1,9 @@
 //
-// Created by dtorres on 3/5/23.
+// Created by danctorres on 3/5/23.
 //
-#include <iostream>
-#include <string>
-#include <vector>
+
 #include "Read_Aggregate.h"
+
 
 Read_Aggregate::Read_Aggregate(const std::string& name_file) : Read(name_file){
     const std::vector<std::vector<std::string>> data = this->get_data();

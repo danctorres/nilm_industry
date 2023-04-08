@@ -1,11 +1,9 @@
 //
-// Created by danie on 3/7/2023.
+// Created by danctorres on 3/7/2023.
 //
 
-#include <iostream>
-#include <string>
-#include <vector>
 #include "Read_State.h"
+
 
 Read_State::Read_State(const std::string &name_file) : Read(name_file){
     const std::vector<std::vector<std::string>> data = this->get_data();

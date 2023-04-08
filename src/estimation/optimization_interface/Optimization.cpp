@@ -1,10 +1,9 @@
 //
-// Created by dtorres on 3/16/2023.
+// Created by danctorres on 3/16/2023.
 //
-#include <algorithm>
-#include <cmath>
-#include <memory>
+
 #include "Optimization.h"
+
 
 Optimization::Optimization() : global_best(){
     n_particles = 0;
@@ -22,7 +21,8 @@ Optimization::Optimization(int n_particles, int rank, int max_iter, float min_po
     this->max_pos.push_back(max_pos);
 }
 
-Optimization::Optimization(int n_particles, int rank, int max_iter, std::vector<float> min_pos, std::vector<float> max_pos) : global_best() {
+Optimization::Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
+                           const std::vector<float> &max_pos) : global_best() {
     this->n_particles = n_particles;
     this->rank = rank;
     this->max_iter = max_iter;
@@ -30,23 +30,33 @@ Optimization::Optimization(int n_particles, int rank, int max_iter, std::vector<
     this->max_pos = std::move(max_pos);
 }
 
-void Optimization::set_n_particles(int n_particles) {
+Optimization::Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
+                           const std::vector<float> &max_pos, const std::vector<Particle> &particles)  : global_best() {
+    this->n_particles = n_particles;
+    this->rank = rank;
+    this->max_iter = max_iter;
+    this->min_pos = std::move(min_pos);
+    this->max_pos = std::move(max_pos);
+    this->particles = std::move(particles);
+}
+
+void Optimization::set_n_particles(const int n_particles) {
     this->n_particles = n_particles;
 }
 
-void Optimization::set_rank(int rank) {
+void Optimization::set_rank(const int rank) {
     this->rank = rank;
 }
 
-void Optimization::set_max_iter(int max_iter) {
+void Optimization::set_max_iter(const int max_iter) {
     this->max_iter = max_iter;
 }
 
-void Optimization::set_min_pos(std::vector<float> min_pos) {
+void Optimization::set_min_pos(const std::vector<float> &min_pos) {
     this->min_pos = std::move(min_pos);
 }
 
-void Optimization::set_max_pos(std::vector<float> max_pos) {
+void Optimization::set_max_pos(const std::vector<float> &max_pos) {
     this->max_pos = std::move(max_pos);
 }
 
@@ -87,7 +97,7 @@ std::vector<Particle> Optimization::get_particles() const {
 }
 
 // Returns fitness for positions
-float Optimization::objective_function(std::vector<float> position){
+float Optimization::objective_function(const std::vector<float> &position){
     float fitness = 0.0f;
     for(const auto &pos : position){
         fitness += pow(pos, 2);
@@ -96,7 +106,7 @@ float Optimization::objective_function(std::vector<float> position){
 }
 
 // Set the first global best for a vector of particles
-void Optimization::initiate_global_best() {
+void Optimization::initialize_global_best() {
     set_global_best(particles.front());
     for (auto &part : particles) {
         if (part.get_fitness() < global_best.get_fitness()) {
@@ -129,6 +139,19 @@ void Optimization::initialize_positions() {
     }
 }
 
+void Optimization::initialize_positions(std::vector<Particle> &particles) {
+    for (Particle &particle : particles){
+        std::vector<float> position;
+        for (int j = 0; j < rank; j++) {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<> dis(min_pos[j], max_pos[j]);
+            position.push_back(static_cast<float> (dis(gen)));
+        }
+        particle.set_position(position);
+    }
+}
+
 // Update the position of all particles with positions
 void Optimization::update_positions(std::vector<Particle> &particles, const std::vector<std::vector<float>> &new_positions) {
     for (int i = 0; i < n_particles ; i++){
@@ -158,5 +181,11 @@ void Optimization::initialize_optimization() {
     //std::cout << "Initializing fitness" << std::endl;
     calculate_set_fitness();
     //std::cout << "Initializing global best" << std::endl;
-    initiate_global_best();
+    initialize_global_best();
+}
+
+void Optimization::initialize_optimization(std::vector<Particle> &particles) {
+    initialize_positions(particles);
+    calculate_set_fitness();
+    initialize_global_best();
 }
