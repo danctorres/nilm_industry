@@ -1,13 +1,15 @@
 //
-// Created by dtorres on 3/5/23.
+// Created by danctorres on 3/5/23.
 //
 
 #ifndef DISSERTATION_NILM_READ_AGGREGATE_H
 #define DISSERTATION_NILM_READ_AGGREGATE_H
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include "Read.h"
+
 
 class Read_Aggregate : public Read{
 public:

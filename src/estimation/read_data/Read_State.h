@@ -1,13 +1,15 @@
 //
-// Created by danie on 3/7/2023.
+// Created by danctorres on 3/7/2023.
 //
 
 #ifndef DISSERTATION_NILM_READ_STATE_H
 #define DISSERTATION_NILM_READ_STATE_H
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include "Read.h"
+
 
 class Read_State : public Read{
 public:

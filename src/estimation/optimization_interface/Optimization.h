@@ -1,10 +1,12 @@
 //
-// Created by dtorres on 3/16/2023.
+// Created by danctorres on 3/16/2023.
 //
 
 #ifndef DISSERTATION_NILM_OPTIMIZATION_H
 #define DISSERTATION_NILM_OPTIMIZATION_H
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <memory>
 #include <random>
@@ -15,13 +17,16 @@
 class Optimization {
 public:
     Optimization();
-    Optimization(int n_particles, int rank, int max_iter, std::vector<float> min_pos, std::vector<float> max_pos);
-    Optimization(int n_particles, int rank, int max_iter, float min_pos, float max_pos);
-    void set_n_particles(int n_particles);
-    void set_rank(int rank);
-    void set_max_iter(int max_iter);
-    void set_min_pos(std::vector<float> min_pos);
-    void set_max_pos(std::vector<float> max_pos);
+    Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
+                 const std::vector<float> &max_pos);
+    Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
+                 const std::vector<float> &max_pos, const std::vector<Particle> &particles);
+    Optimization(const int n_particles, const int rank, const int max_iter, const float min_pos, const float max_pos);
+    void set_n_particles(const int n_particles);
+    void set_rank(const int rank);
+    void set_max_iter(const int max_iter);
+    void set_min_pos(const std::vector<float> &min_pos);
+    void set_max_pos(const std::vector<float> &max_pos);
     void set_global_best_parameters(const std::vector<float> &position, const float fitness);
     void set_global_best(const Particle &global_best);
     void set_particles(const std::vector<Particle> &particles);
@@ -35,16 +40,17 @@ public:
     std::vector<Particle> get_particles() const;
 
     // Returns fitness for positions
-    float objective_function(std::vector<float> position);
+    float objective_function(const std::vector<float> &position);
 
     // Set the first global best for a vector of particles
-    void initiate_global_best();
+    void initialize_global_best();
 
     // Goes through all the particles and sets the global best to the particle with the smallest fitness
     void update_global_best();
 
     // Initialize and return n particles with random values
     void initialize_positions();
+    void initialize_positions(std::vector<Particle> &particles);
 
     // Update the position of all particles with positions
     void update_positions(std::vector<Particle> &particles, const std::vector<std::vector<float>> &new_positions);
@@ -56,6 +62,8 @@ public:
     void calculate_set_fitness();
 
     void initialize_optimization();
+    void initialize_optimization(std::vector<Particle> &particles);
+
 
 protected:
     int n_particles;                    // number of particles

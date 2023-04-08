@@ -1,11 +1,13 @@
 //
-// Created by dtorres on 3/16/2023.
+// Created by danctorres on 3/16/2023.
 //
 
 #ifndef DISSERTATION_NILM_SIMULATED_ANNEALING_H
 #define DISSERTATION_NILM_SIMULATED_ANNEALING_H
 
+#include <cmath>
 #include "../optimization_interface/Optimization.h"
+
 
 class Simulated_Annealing : public Optimization {
 public:

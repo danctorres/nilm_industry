@@ -1,8 +1,9 @@
 //
-// Created by dtorres on 3/19/2023.
+// Created by danctorres on 3/19/2023.
 //
 
 #include "Particle.h"
+
 
 Particle::Particle() : position(), fitness(0.0f) {}
 

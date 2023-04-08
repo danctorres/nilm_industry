@@ -1,13 +1,17 @@
 //
-// Created by dtorres on 3/1/23.
+// Created by danctorres on 3/1/23.
 //
 
 #ifndef DISSERTATION_NILM_READ_H
 #define DISSERTATION_NILM_READ_H
 
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
+
 
 class Read{
 public:
