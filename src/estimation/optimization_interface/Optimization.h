@@ -60,6 +60,7 @@ public:
 
     // Goes through all the particles, calculates the fitness and assigns to the particle
     void calculate_set_fitness();
+    void calculate_set_fitness(std::vector<Particle> &particles);
 
     void initialize_optimization();
     void initialize_optimization(std::vector<Particle> &particles);

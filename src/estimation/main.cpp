@@ -15,6 +15,8 @@
 #include "pso/PSO.h"
 #include "simulated_annealing/Simulated_Annealing.h"
 #include "newton/Newton.h"
+#include "ant_colony/Ant_Colony.h"
+
 
 
 int main(){
@@ -53,6 +55,13 @@ int main(){
     newton->run();
     std::cout << "x: " << newton->get_global_best().get_position()[0] << ", y: " << newton->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << newton->get_global_best().get_fitness() << std::endl;
+
+
+    std::cout << std::endl << "--- ACOR ---" << std::endl;
+    auto acor = std::make_unique<Ant_Colony>(10, 2, 10, -10, 10, 10, 10, -4, 4);
+    acor->run();
+    std::cout << "x: " << acor->get_global_best().get_position()[0] << ", y: " << acor->get_global_best().get_position()[1] << std::endl;
+    std::cout << "Fitness: " << acor->get_global_best().get_fitness() << std::endl;
 
     return 0;
 }

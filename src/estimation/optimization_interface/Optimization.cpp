@@ -175,6 +175,12 @@ void Optimization::calculate_set_fitness() {
     });
 }
 
+void Optimization::calculate_set_fitness(std::vector<Particle> &particles) {
+    for (Particle &particle : particles) {
+        particle.set_fitness(objective_function(particle.get_position()));
+    }
+}
+
 void Optimization::initialize_optimization() {
     //std::cout << "Initializing population" << std::endl;
     initialize_positions();
