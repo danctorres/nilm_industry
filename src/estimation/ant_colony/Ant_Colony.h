@@ -22,23 +22,22 @@ public:
     void set_x_min(const int x_min);
     void set_x_max(const int x_max);
     void set_weights(const std::vector<float> &weights);
-    void set_probability_gaussians(const std::vector<float> &probability_gaussians);
+    void set_prob_gauss_funcs(const std::vector<float> &prob_gauss_funcs);
 
     float get_q() const;
     float get_xi() const;
     float get_x_min() const;
     float get_x_max() const;
     std::vector<float> get_weights() const;
-    std::vector<float> get_probability_gaussians() const;
+    std::vector<float> get_prob_gauss_funcs() const;
 
     void initialize_weights();
-    void initialize_probability_gaussians();
+    void initialize_prob_gauss_funcs();
     void sort_particles();
     std::vector<int> select_gaussian();      // return Gaussian Index
-    float calculate_std(const int gaussian_index);
-    std::vector<float> calculate_all_std(const std::vector<int> &gaussian_index);
-    float gaussian_function(const int ant_index, const int gaussian_index, const float sdt, const float x);
-    std::vector<Particle> calculate_new_particles(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector);
+    std::vector<float> calculate_all_std(const std::vector<int> &gaussian_index, const int solution_index);
+    float gaussian_function(const int ant_index, const int gaussian_index, const float std, const float x);
+    Particle calculate_new_particle(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector);
 
     void run();
 
@@ -48,7 +47,7 @@ private:
     int x_min;
     int x_max;
     std::vector<float> weights;
-    std::vector<float> probability_gaussians;
+    std::vector<float> prob_gauss_funcs;
 };
 
 

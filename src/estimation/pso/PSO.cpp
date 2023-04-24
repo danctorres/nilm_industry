@@ -131,17 +131,20 @@ void PSO::run() {
         update_global_best();
 
         // Stopping conditions
-        if(stop_condition == get_global_best().get_fitness()) {
-            if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
-                std::cout << "- Number of cycles " << i << " - " << std::endl;
-                break;
-            }
-            //std::cout << "DEBUG -> Gbest fit: " << get_global_best().get_fitness() << std::endl;
-            stopping_counter++;
+        if (get_global_best().get_fitness() < 0.001){
+            break;
         }
         else {
-            stopping_counter = 0;
-            stop_condition = global_best.get_fitness();
+            if (stop_condition == get_global_best().get_fitness()) {
+                if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
+                    std::cout << "- Number of cycles " << i << " - " << std::endl;
+                    break;
+                }
+                stopping_counter++;
+            } else {
+                stopping_counter = 0;
+                stop_condition = global_best.get_fitness();
+            }
         }
     }
 }
