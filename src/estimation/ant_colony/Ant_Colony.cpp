@@ -67,16 +67,20 @@ void Ant_Colony::sort_particles() {
     std::sort(particles.begin(), particles.end(), [](const Particle& par1, const Particle& par2) {
         return par1.get_fitness() < par2.get_fitness();
     });
-    std::cout << "Sorted First: " << particles[0].get_fitness() << " Last: " << particles[particles.size()].get_fitness() << std::endl;
+    std::cout << "Particle size: " << particles.size() << " - ";
+    std::cout << "Sorted Fitness First: " << particles[0].get_fitness() << ", Last: " << particles[particles.size() - 1].get_fitness() << std::endl;
 }
 
-void Ant_Colony::initialize_prob_gauss_funcs() {
+
+std::vector<float> Ant_Colony::calculate_probabilities() {
+    std::vector<float> probs;
     float sum_weights = std::accumulate(weights.begin(), weights.end(), 0.0f);
     // The number of solutions is equal to the number of particles
     for (int i = 0; i < n_particles; i++){
-        prob_gauss_funcs.push_back(weights[i] / sum_weights);
-        std::cout << "Initialize probability Gaussian functions: " << prob_gauss_funcs[i] << std::endl;
+        probs.push_back(weights[i] / sum_weights);
+        std::cout << "Initialize probability Gaussian functions: " << probs[i] << std::endl;
     }
+    return probs;
 }
 
 // Each Gaussian kernel has one Gaussian function
@@ -98,44 +102,46 @@ std::vector<int> Ant_Colony::select_gaussian() {
             }
         }
     }
+    std::cout << "Size gaussian index: " << gauss_funcs_idx.size() << std::endl;
     return gauss_funcs_idx;
 }
 
 
 // Create a vector with the std of all the Gaussian functions for one solution
-std::vector<float> Ant_Colony::calculate_all_std(const std::vector<int> &gaussian_index, const int solution_index) {
+std::vector<float> Ant_Colony::calculate_all_std(const std::vector<int> &gaussian_index) {
     std::vector<float> std_vector;
-    float std = 0.0f;
+    float stdeviation = 0.0f;
 
     // The rank is equal to number of Gaussian Kernels, and is equal to gaussian_index.size()
     for (int i = 0; i < rank; i++){
+        stdeviation = 0.0f;
         // The n_particles is equal to the number of solutions
         for (int j = 0; j < n_particles; j++){
-            //std::cout << "Debugging Std 1: " << particles[solution_index].get_position()[j] - particles[solution_index].get_position()[gaussian_index[i]] << std::endl;
-            //std::cout << "Debugging Std 2: " << sqrt(pow(particles[solution_index].get_position()[j] - particles[solution_index].get_position()[gaussian_index[i]], 2)) << std::endl;
-            std += sqrt(pow(particles[solution_index].get_position()[j] - particles[solution_index].get_position()[gaussian_index[i]], 2)) / (n_particles - 1);
-            //std::cout << "Debugging Std: " << std << std::endl;
+            std::cout << "Debugging Std Gaussian Index: " << particles[j].get_position()[i] << std::endl;
+
+            stdeviation += fabs (particles[j].get_position()[i] - particles[gaussian_index[i]].get_position()[i]) / (n_particles - 1);
+            std::cout << "Debugging Std: " << stdeviation << " Current particle: " << particles[j].get_position()[i] << " Selected: " << particles[gaussian_index[i]].get_position()[i] << std::endl;
 
         }
-        std::cout << "Std: " << std << " solution index " << solution_index << std::endl;
-        std_vector.push_back(std * xi);
-        std = 0.0f;
+        std::cout << "Std: " << stdeviation << std::endl;
+        std_vector.push_back(stdeviation * xi);
     }
     return std_vector;
 }
 
-float Ant_Colony::gaussian_function(const int ant_index, const int gaussian_index, const float std, const float x) {
-    std::vector<float> median_positions = particles[ant_index].get_position();
-    std::cout << "Gaussian function: " << ( 1 / (std * sqrt(2 * std::numbers::pi)) * exp(-( pow((x - median_positions[gaussian_index]), 2) / (2 * pow(std, 2)) ))) << std::endl;
-    return weights[ant_index] * ( 1 / (std * sqrt(2 * std::numbers::pi)) * exp(-( pow((x - median_positions[gaussian_index]), 2) / (2 * pow(std, 2)) )));
+float Ant_Colony::gaussian_function(const int dim, const int gaussian_index, const float std, const float x) {
+    float median_positions = particles[gaussian_index].get_position()[dim];
+    std::cout << "Selected solution: " << median_positions << std::endl;
+    std::cout << "Gaussian function: " << weights[gaussian_index] * ( 1 / (std * sqrt(2 * std::numbers::pi))) * exp(-( pow((x - median_positions), 2)) / (2 * pow(std, 2))) << std::endl;
+    return weights[gaussian_index] * ( 1 / (std * sqrt(2 * std::numbers::pi))) * exp(-( pow((x - median_positions), 2)) / (2 * pow(std, 2)));
 }
 
-Particle Ant_Colony::calculate_new_particle(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector){
+Particle Ant_Colony::sample_new_particle(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector){
     std::vector<float> new_position;
-    // Calculate the new position
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(x_min, x_max);
+
     for (int i = 0; i < rank; i++){
         new_position.push_back(gaussian_function(i, gaussian_index[i], std_vector[i], dis(gen)));
         std::cout << "New position: " << new_position[i] << std::endl;
@@ -144,17 +150,17 @@ Particle Ant_Colony::calculate_new_particle(const std::vector<int> &gaussian_ind
 }
 
 
-Ant_Colony::Ant_Colony(int n_particles, int rank, int max_iter, int min_pos, int max_pos, float q, float xi, int x_min, int x_max) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+Ant_Colony::Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float q, float xi, int x_min, int x_max) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
     this->q = q;
     this->xi = xi;
     this->x_min = x_min;
     this->x_max = x_max;
 
-    initialize_weights();                   // Calculate the weight vector w
-    initialize_prob_gauss_funcs();     // Calculate the probability of selecting each Gaussian function
+    initialize_weights();           // Calculate the weight vector w
+    set_prob_gauss_funcs(calculate_probabilities());  // Calculate the probability of selecting each Gaussian function
     initialize_optimization();
 
-    sort_particles();                       // sort particles in descending order
+    sort_particles();               // sort particles in descending order
 }
 
 void Ant_Colony::run(){
@@ -168,21 +174,32 @@ void Ant_Colony::run(){
     for (int i = 0; i < max_iter; i++) {
         std::cout << "---------------------- New iter number: " << i << "---------------------- " << std::endl;
         for (int j = 0; j < n_particles; j++) {
-            gaussian_index = std::move(select_gaussian());  // Select one Gaussian function
-            //std::cout << "Particle number: " << j <<std::endl;
-            std_vector = std::move(calculate_all_std(gaussian_index, j));
-            //}
-            new_particles.push_back(Particle(calculate_new_particle(gaussian_index, std_vector)));
+            gaussian_index = std::move(select_gaussian());              // Select one Gaussian function per Gausian kernel
+            std_vector = std::move(calculate_all_std(gaussian_index));  // Vector with the std for each Gaussian function
+            new_particles.push_back(Particle(sample_new_particle(gaussian_index, std_vector)));
         }
         calculate_set_fitness(new_particles);
+        std::cout << "New particle pos x: " << new_particles[0].get_position()[0] << " y: " << new_particles[0].get_position()[1] << std::endl;
+        std::cout << "New particle pos x: " << new_particles[1].get_position()[0] << " y: " << new_particles[1].get_position()[1] << std::endl;
+        std::cout << "New particle pos x: " << new_particles[2].get_position()[0] << " y: " << new_particles[2].get_position()[1] << std::endl;
+
         std::cout << "New particle fit: " << new_particles[0].get_fitness() << std::endl;
+        std::cout << "New particle fit: " << new_particles[1].get_fitness() << std::endl;
+        std::cout << "New particle fit: " << new_particles[2].get_fitness() << std::endl;
+
 
         particles.insert(particles.end(), new_particles.begin(), new_particles.end());
+        std::cout << "New particles size: " << particles.size() << std::endl;
+
         sort_particles();
         particles.erase(particles.end() - n_particles, particles.end());
+        std::cout << "New particles size after deletion: " << particles.size() << std::endl;
+
         new_particles.clear();
 
         update_global_best();
+
+        set_prob_gauss_funcs(calculate_probabilities());
 
         std::cout << "Global best fitness: " << global_best.get_fitness() << std::endl;
         std::cout << "Global best pos x: " << global_best.get_position()[0] << ", pos y: " << global_best.get_position()[1] << std::endl;

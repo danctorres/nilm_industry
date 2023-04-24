@@ -15,7 +15,7 @@
 
 class Ant_Colony : public Optimization{
 public:
-    Ant_Colony(int n_particles, int rank, int max_iter, int min_pos, int max_pos, float q, float xi, int x_min, int x_max);
+    Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float q, float xi, int x_min, int x_max);
 
     void set_q(const float q);
     void set_xi(const float xi);
@@ -32,12 +32,13 @@ public:
     std::vector<float> get_prob_gauss_funcs() const;
 
     void initialize_weights();
-    void initialize_prob_gauss_funcs();
+    std::vector<float> calculate_probabilities();
     void sort_particles();
     std::vector<int> select_gaussian();      // return Gaussian Index
-    std::vector<float> calculate_all_std(const std::vector<int> &gaussian_index, const int solution_index);
-    float gaussian_function(const int ant_index, const int gaussian_index, const float std, const float x);
-    Particle calculate_new_particle(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector);
+    std::vector<float> calculate_all_std(const std::vector<int> &gaussian_index);
+    float gaussian_function(const int dimension, const int gaussian_index, const float std, const float x);
+    Particle sample_new_particle(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector);
+
 
     void run();
 

@@ -122,16 +122,17 @@ void Optimization::update_global_best() {
 
 // Initialize and return n particles with random values
 void Optimization::initialize_positions() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::vector<float> position;
     for (int i = 0; i < n_particles; i++){
-        std::vector<float> position;
         for (int j = 0; j < rank; j++) {
-            std::random_device rd;
-            std::mt19937 gen(rd());
             std::uniform_real_distribution<> dis(min_pos[j], max_pos[j]);
             position.push_back(static_cast<float> (dis(gen)));
         }
         Particle part = Particle(position);
         particles.push_back(part);
+        position.clear();
     }
 }
 

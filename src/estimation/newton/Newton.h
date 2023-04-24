@@ -11,7 +11,7 @@
 
 class Newton : public Optimization{
 public:
-    Newton(int n_particles, int rank, int max_iter, int min_pos, int max_pos);
+    Newton(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos);
 
     std::vector<float> gradient(const std::vector<float> &position);
     std::vector<float> hessian(const std::vector<float> &position);

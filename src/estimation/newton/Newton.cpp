@@ -32,7 +32,7 @@ std::vector<float> Newton::step(const std::vector<float> &grad, const std::vecto
     return new_position;
 }
 
-Newton::Newton(int n_particles, int rank, int max_iter, int min_pos, int max_pos) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+Newton::Newton(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
     initialize_optimization();
 }
 
