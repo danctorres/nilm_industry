@@ -188,13 +188,13 @@ void Ant_Colony::run(){
         std::cout << "Global best pos x: " << global_best.get_position()[0] << ", pos y: " << global_best.get_position()[1] << std::endl;
 
         if (get_global_best().get_fitness() < 0.001){
-            break;
+            return;
         }
         else {
             if (stop_condition == get_global_best().get_fitness()) {
                 if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
                     std::cout << "- Number of cycles " << i << " - " << std::endl;
-                    break;
+                    return;
                 }
                 stopping_counter++;
             } else {

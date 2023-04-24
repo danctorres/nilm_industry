@@ -98,11 +98,7 @@ std::vector<Particle> Optimization::get_particles() const {
 
 // Returns fitness for positions
 float Optimization::objective_function(const std::vector<float> &position){
-    float fitness = 0.0f;
-    for(const auto &pos : position){
-        fitness += pow(pos, 2);
-    }
-    return fitness;
+    return pow(position[0] + 3, 2) + sqrt(pow(position[1], 2));
 }
 
 // Set the first global best for a vector of particles
