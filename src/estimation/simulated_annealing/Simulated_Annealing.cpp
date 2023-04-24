@@ -49,7 +49,7 @@ float Simulated_Annealing::calculate_delta(const Particle &particle, float fitne
     return particle.get_fitness() - fitness;
 }
 
-Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter, int min_pos, int max_pos, float temperature, float temp_min, float cooling_factor) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float temperature, float temp_min, float cooling_factor) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
     // Initializing member variables
     this->temperature = temperature;
     this->temp_min = temp_min;
