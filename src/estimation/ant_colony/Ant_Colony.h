@@ -22,14 +22,14 @@ public:
     void set_x_min(const int x_min);
     void set_x_max(const int x_max);
     void set_weights(const std::vector<float> &weights);
-    void set_prob_gauss_funcs(const std::vector<float> &prob_gauss_funcs);
+    void set_probabilities(const std::vector<float> &prob_gauss_funcs);
 
     float get_q() const;
     float get_xi() const;
     float get_x_min() const;
     float get_x_max() const;
     std::vector<float> get_weights() const;
-    std::vector<float> get_prob_gauss_funcs() const;
+    std::vector<float> get_probabilities() const;
 
     void initialize_weights();
     std::vector<float> calculate_probabilities();
@@ -48,7 +48,7 @@ private:
     int x_min;
     int x_max;
     std::vector<float> weights;
-    std::vector<float> prob_gauss_funcs;
+    std::vector<float> probabilities;
 };
 
 
