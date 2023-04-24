@@ -45,9 +45,6 @@ float Simulated_Annealing::calculate_new_fitness(const std::vector<float> &new_p
     return objective_function(new_positions);
 }
 
-float Simulated_Annealing::calculate_delta(const Particle &particle, float fitness) {
-    return particle.get_fitness() - fitness;
-}
 
 Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float temperature, float temp_min, float cooling_factor) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
     // Initializing member variables
@@ -69,8 +66,9 @@ void Simulated_Annealing::run() {
     // Main loop
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis1(-0.5, 0.5);
-    std::uniform_real_distribution<> dis2(0, 1);
+    // Values need to be tuned in to the specific problem
+    std::uniform_real_distribution<> dis1(-0.2f, 0.2f);
+    std::uniform_real_distribution<> dis2(0.0f, 0.2f);
 
     int stopping_counter = 0;
     float stop_condition = global_best.get_fitness();
@@ -85,7 +83,7 @@ void Simulated_Annealing::run() {
                 new_position.push_back(particle.get_position()[j] + dis1(gen));
             }
             new_fitness = calculate_new_fitness(new_position);
-            delta = calculate_delta(particle, new_fitness);
+            delta = particle.get_fitness() - new_fitness;
 
             // new position has smaller fitness
             if (delta < 0.0){
@@ -99,6 +97,7 @@ void Simulated_Annealing::run() {
                 }
             }
             new_position.clear();
+            new_fitness = 0.0f;
         }
         update_global_best();
 
@@ -106,8 +105,7 @@ void Simulated_Annealing::run() {
         //std::cout << "GB fit: " << global_best.get_fitness() << std::endl;
         //std::cout << "GB pos x: " << global_best.get_position()[0] << " y: " << global_best.get_position()[1] << std::endl;
 
-
-        temperature *= cooling_factor;
+        set_temperature(temperature * cooling_factor);
 
         if (temperature < temp_min){
             return;
