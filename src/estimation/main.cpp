@@ -58,8 +58,8 @@ int main(){
 
 
     std::cout << std::endl << "--- ACOR ---" << std::endl;
-    auto acor = std::make_unique<Ant_Colony>(3, 2, 2, min_pos, max_pos, 0.1f, 1.0f, -4, 4);
-    acor->run();
+    auto acor = std::make_unique<Ant_Colony>(3, 2, 1, min_pos, max_pos, 0.1f, 1.0f, -4, 4);
+    //acor->run();
     /*std::cout << "x: " << acor->get_global_best().get_position()[0] << ", y: " << acor->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << acor->get_global_best().get_fitness() << std::endl;*/
 

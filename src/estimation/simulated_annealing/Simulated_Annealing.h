@@ -22,7 +22,6 @@ public:
     std::vector<float> get_last_fitness() const;
 
     float calculate_new_fitness(const std::vector<float> &new_positions);
-    float calculate_delta(const Particle &particle, float fitness);
 
     void run();
 
