@@ -110,16 +110,16 @@ void Simulated_Annealing::run() {
         temperature *= cooling_factor;
 
         if (temperature < temp_min){
-            break;
+            return;
         }
         if (get_global_best().get_fitness() < 0.001){
-            break;
+            return;
         }
         else {
             if (stop_condition == get_global_best().get_fitness()) {
                 if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
                     std::cout << "- Number of cycles " << i << " - " << std::endl;
-                    break;
+                    return;
                 }
                 stopping_counter++;
             } else {
