@@ -57,9 +57,9 @@ int main(){
     std::cout << "Fitness: " << newton->get_global_best().get_fitness() << std::endl;
 
 
-    std::cout << std::endl << "--- ACOR ---" << std::endl;
+    std::cout << std::endl << "--- ANT COLONY ---" << std::endl;
     // The std cant be equal to 0, for the gaussian function to work
-    auto acor = std::make_unique<Ant_Colony>(10, 2, 100, min_pos, max_pos, 0.1f, 0.9f, -6, 6);
+    auto acor = std::make_unique<Ant_Colony>(10, 2, 100, min_pos, max_pos, 0.001f, 0.85f, -5, 5);
     acor->run();
     std::cout << "x: " << acor->get_global_best().get_position()[0] << ", y: " << acor->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << acor->get_global_best().get_fitness() << std::endl;

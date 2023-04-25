@@ -150,6 +150,8 @@ Ant_Colony::Ant_Colony(int n_particles, int rank, int max_iter, std::vector<floa
     sort_particles();               // sort particles in descending order
     initialize_weights();           // Calculate the weight vector w
     set_probabilities(calculate_probabilities());  // Calculate the probability of selecting each Gaussian function
+
+    std::cout << "- Number of solutions " << n_particles << ", q " << q << ", xi " << xi << " -" << std::endl;
 }
 
 void Ant_Colony::run(){
@@ -192,4 +194,5 @@ void Ant_Colony::run(){
             }
         }
     }
+    std::cout << "- Number of cycles " << max_iter << " - " << std::endl;
 }

@@ -147,4 +147,5 @@ void PSO::run() {
             }
         }
     }
+    std::cout << "- Number of cycles " << max_iter << " - " << std::endl;
 }
