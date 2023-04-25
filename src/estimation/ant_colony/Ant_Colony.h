@@ -13,6 +13,9 @@
 #include "../optimization_interface/Optimization.h"
 
 
+// Ant colony optimization for continuous domains by Krzysztof Socha and Marco Dorigo
+// One ant per solution
+
 class Ant_Colony : public Optimization{
 public:
     Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float q, float xi, int x_min, int x_max);
