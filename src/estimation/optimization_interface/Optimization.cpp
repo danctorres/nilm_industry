@@ -26,8 +26,8 @@ Optimization::Optimization(const int n_particles, const int rank, const int max_
     this->n_particles = n_particles;
     this->rank = rank;
     this->max_iter = max_iter;
-    this->min_pos = std::move(min_pos);
-    this->max_pos = std::move(max_pos);
+    this->min_pos = min_pos;
+    this->max_pos = max_pos;
 }
 
 Optimization::Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
@@ -35,9 +35,9 @@ Optimization::Optimization(const int n_particles, const int rank, const int max_
     this->n_particles = n_particles;
     this->rank = rank;
     this->max_iter = max_iter;
-    this->min_pos = std::move(min_pos);
-    this->max_pos = std::move(max_pos);
-    this->particles = std::move(particles);
+    this->min_pos = min_pos;
+    this->max_pos = max_pos;
+    this->particles = particles;
 }
 
 void Optimization::set_n_particles(const int n_particles) {
@@ -53,11 +53,11 @@ void Optimization::set_max_iter(const int max_iter) {
 }
 
 void Optimization::set_min_pos(const std::vector<float> &min_pos) {
-    this->min_pos = std::move(min_pos);
+    this->min_pos = min_pos;
 }
 
 void Optimization::set_max_pos(const std::vector<float> &max_pos) {
-    this->max_pos = std::move(max_pos);
+    this->max_pos = max_pos;
 }
 
 void Optimization::set_global_best(const Particle &global_best) {
