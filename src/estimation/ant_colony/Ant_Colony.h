@@ -44,7 +44,7 @@ public:
 
 private:
     float q;
-    float xi;
+    float xi;       // pheromone evaporation rate
     int x_min;
     int x_max;
     std::vector<float> weights;
