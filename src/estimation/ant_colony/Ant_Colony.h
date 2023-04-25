@@ -18,8 +18,9 @@
 
 class Ant_Colony : public Optimization{
 public:
-    Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float q, float xi, int x_min, int x_max);
+    Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, int number_ants, float q, float xi, int x_min, int x_max);
 
+    void set_number_ants(const int number_ants);
     void set_q(const float q);
     void set_xi(const float xi);
     void set_x_min(const int x_min);
@@ -27,6 +28,7 @@ public:
     void set_weights(const std::vector<float> &weights);
     void set_probabilities(const std::vector<float> &prob_gauss_funcs);
 
+    int get_number_ants() const;
     float get_q() const;
     float get_xi() const;
     float get_x_min() const;
@@ -46,6 +48,7 @@ public:
     void run();
 
 private:
+    int number_ants;
     float q;
     float xi;       // pheromone evaporation rate
     int x_min;

@@ -5,6 +5,10 @@
 #include "Ant_Colony.h"
 
 
+void Ant_Colony::set_number_ants(const int number_ants) {
+    this->number_ants = number_ants;
+}
+
 void Ant_Colony::set_q(const float q) {
     this->q = q;
 }
@@ -27,6 +31,10 @@ void Ant_Colony::set_weights(const std::vector<float> &weights) {
 
 void Ant_Colony::set_probabilities(const std::vector<float> &probabilities) {
     this->probabilities = probabilities;
+}
+
+int Ant_Colony::get_number_ants() const {
+    return number_ants;
 }
 
 float Ant_Colony::get_q() const {
@@ -103,7 +111,6 @@ std::vector<int> Ant_Colony::select_gaussian() {
     return gauss_idx;
 }
 
-
 // Create a vector with the std of all the Gaussian functions for one solution
 std::vector<float> Ant_Colony::calculate_all_std(const std::vector<int> &gaussian_index) {
     std::vector<float> std_vector;
@@ -139,17 +146,19 @@ Particle Ant_Colony::sample_new_particle(const std::vector<int> &gaussian_index,
     return new_position;
 }
 
-
-Ant_Colony::Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float q, float xi, int x_min, int x_max) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+Ant_Colony::Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos,
+                       std::vector<float> &max_pos, int number_ants, float q, float xi, int x_min, int x_max)
+                       : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+    this->number_ants = number_ants;
     this->q = q;
     this->xi = xi;
     this->x_min = x_min;
     this->x_max = x_max;
 
     initialize_optimization();
-    sort_particles();               // sort particles in descending order
-    initialize_weights();           // Calculate the weight vector w
-    set_probabilities(calculate_probabilities());  // Calculate the probability of selecting each Gaussian function
+    sort_particles();                               // Sort particles in descending order
+    initialize_weights();                           // Calculate the weight vector w
+    set_probabilities(calculate_probabilities());   // Calculate the probability of selecting each Gaussian function
 
     std::cout << "- Number of solutions " << n_particles << ", q " << q << ", xi " << xi << " -" << std::endl;
 }
@@ -163,8 +172,8 @@ void Ant_Colony::run(){
     float stop_condition = global_best.get_fitness();
 
     for (int i = 0; i < max_iter; i++) {
-        for (int j = 0; j < n_particles; j++) {
-            gaussian_index = select_gaussian();              // Select one Gaussian function per Gausian kernel
+        for (int j = 0; j < number_ants; j++) {
+            gaussian_index = select_gaussian();              // Select one Gaussian function per Gaussian kernel
             std_vector = calculate_all_std(gaussian_index);  // Vector with the std for each Gaussian function
             new_particles.push_back(Particle(sample_new_particle(gaussian_index, std_vector)));
         }
