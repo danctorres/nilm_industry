@@ -18,7 +18,8 @@
 
 class Ant_Colony : public Optimization{
 public:
-    Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, int number_ants, float q, float xi, int x_min, int x_max);
+    Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos,
+               int number_ants, float q, float xi, int x_min, int x_max);
 
     void set_number_ants(const int number_ants);
     void set_q(const float q);

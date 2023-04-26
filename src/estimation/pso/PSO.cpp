@@ -5,7 +5,57 @@
 #include "PSO.h"
 
 
-std::vector<PSO_Particle> PSO::get_particles() const {
+void PSO::set_c1(const float c1) {
+    this->c1 = c1;
+}
+
+void PSO::set_c2(const float c2) {
+    this->c2 = c2;
+}
+
+void PSO::set_w_min(const float w_min) {
+    this->w_min = w_min;
+}
+
+void PSO::set_w_max(const float w_max) {
+    this->w_max = w_max;
+}
+
+void PSO::set_v_max(const std::vector<float> &v_max) {
+    this->v_max = v_max;
+}
+
+void PSO::set_v_max(const std::vector<float> &pos_min, const std::vector<float> &pos_max) {
+    for (int i = 0; i < rank; i++) {
+        this->v_max.push_back((pos_max[i] - pos_min[i]) * 0.2);
+    }
+}
+
+void PSO::set_pso_particles(const std::vector<PSO_Particle> &pso_particles) {
+    this->pso_particles = pso_particles;
+}
+
+float PSO::get_c1() const {
+    return c1;
+}
+
+float PSO::get_c2() const {
+    return c2;
+}
+
+float PSO::get_w_min() const {
+    return w_min;
+}
+
+float PSO::get_w_max() const {
+    return w_max;
+}
+
+std::vector<float> PSO::get_v_max() const {
+    return v_max;
+}
+
+std::vector<PSO_Particle> PSO::get_pso_particles() const {
     return pso_particles;
 }
 
@@ -26,12 +76,6 @@ void PSO::initialize_velocities() {
 void PSO::initialize_personal_best() {
     for (PSO_Particle &particle : pso_particles) {
         particle.set_personal_best(particle);
-    }
-}
-
-void PSO::set_v_max(const std::vector<float> &pos_min, const std::vector<float> &pos_max) {
-    for (int i = 0; i < rank; i++) {
-        this->v_max.push_back((pos_max[i] - pos_min[i]) * 0.2);
     }
 }
 
