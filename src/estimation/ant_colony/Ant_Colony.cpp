@@ -70,13 +70,6 @@ void Ant_Colony::initialize_weights() {
     }
 }
 
-void Ant_Colony::sort_particles() {
-    std::sort(particles.begin(), particles.end(), [](const Particle& par1, const Particle& par2) {
-        return par1.get_fitness() < par2.get_fitness();
-    });
-}
-
-
 std::vector<float> Ant_Colony::calculate_probabilities() {
     std::vector<float> probs;
     float sum_weights = std::accumulate(weights.begin(), weights.end(), 0.0f);

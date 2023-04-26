@@ -39,7 +39,6 @@ public:
 
     void initialize_weights();
     std::vector<float> calculate_probabilities();
-    void sort_particles();
     std::vector<int> select_gaussian();      // return Gaussian Index
     std::vector<float> calculate_all_std(const std::vector<int> &gaussian_index);
     float gaussian_function(const int dimension, const int gaussian_index, const float std, const float x);

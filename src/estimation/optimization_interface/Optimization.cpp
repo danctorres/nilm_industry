@@ -178,6 +178,12 @@ void Optimization::calculate_set_fitness(std::vector<Particle> &particles) {
     }
 }
 
+void Optimization::sort_particles() {
+    std::sort(particles.begin(), particles.end(), [](const Particle& par1, const Particle& par2) {
+        return par1.get_fitness() < par2.get_fitness();
+    });
+}
+
 void Optimization::initialize_optimization() {
     //std::cout << "Initializing population" << std::endl;
     initialize_positions();
