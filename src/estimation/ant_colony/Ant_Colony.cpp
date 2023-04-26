@@ -65,7 +65,7 @@ void Ant_Colony::initialize_weights() {
     float weight = 0.0f;
     weights.clear();
     for (int i = 1; i <= n_particles; i++){
-        weight = (1 / (q * n_particles * sqrt(2 * std::numbers::pi)) ) * exp(- pow(i - 1, 2) / (2 * pow(q, 2) * pow(n_particles, 2)));
+        weight = (1 / (q * n_particles * sqrt(2 * std::numbers::pi)) ) * exp(- pow(i - 1, 2) / ((2 * pow(q, 2) * pow(n_particles, 2))));
         this->weights.push_back(weight);
     }
 }
@@ -187,12 +187,12 @@ void Ant_Colony::run(){
         gaussian_index.clear();
         new_particles.clear();
 
-        if (get_global_best().get_fitness() < 0.001){
+        if (get_global_best().get_fitness() < 0.01){
             return;
         }
         else {
             if (stop_condition == get_global_best().get_fitness()) {
-                if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
+                if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.1) {
                     std::cout << "- Number of cycles " << i << " - " << std::endl;
                     return;
                 }
