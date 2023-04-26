@@ -62,6 +62,8 @@ public:
     void calculate_set_fitness();
     void calculate_set_fitness(std::vector<Particle> &particles);
 
+    void sort_particles();
+
     void initialize_optimization();
     void initialize_optimization(std::vector<Particle> &particles);
 
