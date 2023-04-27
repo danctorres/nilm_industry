@@ -67,7 +67,7 @@ int main(){
 
     std::cout << std::endl << "--- GENETIC ALGORITHM ---" << std::endl;
     // int n_participants = n_particles / n_tournaments;
-    auto ga = std::make_unique<GA>(10, 2, 100, min_pos, max_pos, 2, 0.5f, 1.0f , 0.5f, 1);
+    auto ga = std::make_unique<GA>(20, 2, 100, min_pos, max_pos, 10, 0.5f, 1.0f , 0.5f, 1);
     ga->run();
     std::cout << "x: " << ga->get_global_best().get_position()[0] << ", y: " << ga->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << ga->get_global_best().get_fitness() << std::endl;
