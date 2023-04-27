@@ -16,7 +16,7 @@
 #include "simulated_annealing/Simulated_Annealing.h"
 #include "newton/Newton.h"
 #include "ant_colony/Ant_Colony.h"
-
+#include "genetic_algorithm/GA.h"
 
 
 int main(){
@@ -63,6 +63,14 @@ int main(){
     acor->run();
     std::cout << "x: " << acor->get_global_best().get_position()[0] << ", y: " << acor->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << acor->get_global_best().get_fitness() << std::endl;
+
+
+    std::cout << std::endl << "--- GENETIC ALGORITHM ---" << std::endl;
+    // int n_participants = n_particles / n_tournaments;
+    auto ga = std::make_unique<GA>(10, 2, 100, min_pos, max_pos, 2, 0.5f, 1.0f , 0.5f, 1);
+    ga->run();
+    std::cout << "x: " << ga->get_global_best().get_position()[0] << ", y: " << ga->get_global_best().get_position()[1] << std::endl;
+    std::cout << "Fitness: " << ga->get_global_best().get_fitness() << std::endl;
 
     return 0;
 }
