@@ -102,11 +102,11 @@ std::vector<float> GA::mutation(std::vector<float> &particles_position) {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0f, 1.0f);
 
-    float s = p_dist * pow(dis(gen), p_dist - 1);
-    // float s = pow(dis(gen), 1 / p_dist);
+    //float s = p_dist * pow(dis(gen), p_dist - 1);
+    float s = pow(dis(gen), 1 / p_dist);
 
     for (int i = 0; i < particles_position.size(); i++) {
-        if ( ((particles_position[i] - min_pos[i]) / (max_pos[i] - min_pos[i])) < dis(gen)) {
+        if ( ((particles_position[i] - min_pos[i]) / (max_pos[i] - particles_position[i])) < dis(gen)) {
                 particles_position[i] -= s * (particles_position[i] - min_pos[i]);
         }
         else {
@@ -136,9 +136,6 @@ std::vector<Particle> GA::generate_offsprings(const Particle parent1, const Part
     std::vector<float> pos_off2;
 
     for (int i = 0; i < rank; i++) {
-
-        std::cout << " Bi:  " << Bi << std::endl;
-        std::cout << "parent1.get_position()[i]: " << parent1.get_position()[i] << " parent2.get_position()[i]: " << parent2.get_position()[i] << " Total:  " << (parent1.get_position()[i] + parent2.get_position()[i] + Bi * fabs(parent1.get_position()[i] - parent2.get_position()[i])) / 2 << std::endl;
         pos_off1.push_back( (parent1.get_position()[i] + parent2.get_position()[i] + Bi * fabs(parent1.get_position()[i] - parent2.get_position()[i])) / 2);
         pos_off2.push_back( (parent1.get_position()[i] + parent2.get_position()[i] - Bi * fabs(parent1.get_position()[i] - parent2.get_position()[i])) / 2);
     }
