@@ -8,9 +8,10 @@ file(GLOB_RECURSE HEADERS
         "${CMAKE_SOURCE_DIR}/optimization_interface/*.h"
         "${CMAKE_SOURCE_DIR}/pso/*.h"
         "${CMAKE_SOURCE_DIR}/simulated_annealing/*.h"
-        "${CMAKE_SOURCE_DIR}/newton/*.h"
         "${CMAKE_SOURCE_DIR}/ant_colony/*.h"
         "${CMAKE_SOURCE_DIR}/genetic_algorithm/*.h"
+        "${CMAKE_SOURCE_DIR}/gradient_descent/*.h"
+        "${CMAKE_SOURCE_DIR}/newton/*.h"
 )
 
 file(GLOB_RECURSE SOURCES
@@ -19,9 +20,10 @@ file(GLOB_RECURSE SOURCES
         "${CMAKE_SOURCE_DIR}/optimization_interface/*.cpp"
         "${CMAKE_SOURCE_DIR}/pso/*.cpp"
         "${CMAKE_SOURCE_DIR}/simulated_annealing/*.cpp"
-        "${CMAKE_SOURCE_DIR}/newton/*.cpp"
         "${CMAKE_SOURCE_DIR}/ant_colony/*.cpp"
         "${CMAKE_SOURCE_DIR}/genetic_algorithm/*.cpp"
+        "${CMAKE_SOURCE_DIR}/gradient_descent/*.cpp"
+        "${CMAKE_SOURCE_DIR}/newton/*.cpp"
 )
 
 # Define the executable target
@@ -41,7 +43,8 @@ target_include_directories(estimation PUBLIC
         ${CMAKE_SOURCE_DIR}/optimization_interface
         ${CMAKE_SOURCE_DIR}/pso
         ${CMAKE_SOURCE_DIR}/simulated_annealing
-        ${CMAKE_SOURCE_DIR}/newton
         ${CMAKE_SOURCE_DIR}/ant_colony
         ${CMAKE_SOURCE_DIR}/genetic_algorithm
+        ${CMAKE_SOURCE_DIR}/gradient_descent
+        ${CMAKE_SOURCE_DIR}/newton
 )
