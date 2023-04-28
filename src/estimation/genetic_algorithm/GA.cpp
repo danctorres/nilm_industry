@@ -167,9 +167,10 @@ std::vector<Particle> GA::elitism() {
     return elite;
 }
 
-GA::GA(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos,
-       const int n_tournaments, const float alpha, const float beta, const float p_dist,
-       const int size_elite) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+GA::GA(const int n_particles, const int rank, const int max_iter, const float threshold,
+       const std::vector<float> &min_pos, const std::vector<float> &max_pos,
+       const int n_tournaments, const float alpha, const float beta, const float p_dist, const int size_elite)
+       : Optimization(n_particles, rank, max_iter, threshold, min_pos, max_pos) {
 
     if (n_tournaments % 2 != 0) {
         throw std::runtime_error("Error: n_tournaments is not even.");

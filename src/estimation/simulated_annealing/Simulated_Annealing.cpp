@@ -46,7 +46,9 @@ float Simulated_Annealing::calculate_new_fitness(const std::vector<float> &new_p
 }
 
 
-Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float temperature, float temp_min, float cooling_factor) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+Simulated_Annealing::Simulated_Annealing(const int n_particles, const int rank, const int max_iter, const float threshold,
+const std::vector<float> &min_pos, const std::vector<float> &max_pos,
+const float temperature, const float temp_min, const float cooling_factor) : Optimization(n_particles, rank, max_iter, threshold, min_pos, max_pos) {
     // Initializing member variables
     this->temperature = temperature;
     this->temp_min = temp_min;
