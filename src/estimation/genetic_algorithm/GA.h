@@ -20,7 +20,8 @@
 
 class GA : public Optimization {
 public:
-    GA(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos,
+    GA(const int n_particles, const int rank, const int max_iter, const float threshold,
+       const std::vector<float> &min_pos, const std::vector<float> &max_pos,
        const int n_tournaments, const float alpha, const float beta, const float p_dist, const int size_elite);
 
     void set_n_participants(const int n_participants);

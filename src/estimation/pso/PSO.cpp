@@ -102,8 +102,9 @@ void PSO::adapter_pso_particles() {
     }
 }
 
-PSO::PSO(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std::vector<float> &max_pos, float c1,
-         float c2, float w_min, float w_max) : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+PSO::PSO(const int n_particles, const int rank, const int max_iter, const float threshold,
+         const std::vector<float> &min_pos, const std::vector<float> &max_pos, const float c1, const float c2,
+         const float w_min, const float w_max) : Optimization(n_particles, rank, max_iter, threshold, min_pos, max_pos) {
     // Set pso constants
     this->c1 = c1;
     this->c2 = c2;

@@ -17,14 +17,15 @@
 class Optimization {
 public:
     Optimization();
-    Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
-                 const std::vector<float> &max_pos);
-    Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
-                 const std::vector<float> &max_pos, const std::vector<Particle> &particles);
-    Optimization(const int n_particles, const int rank, const int max_iter, const float min_pos, const float max_pos);
+    Optimization(const int n_particles, const int rank, const int max_iter, const float threshold,
+                 const std::vector<float> &min_pos, const std::vector<float> &max_pos);
+    Optimization(const int n_particles, const int rank, const int max_iter, const float threshold,
+                 const std::vector<float> &min_pos, const std::vector<float> &max_pos, const std::vector<Particle> &particles);
+    Optimization(const int n_particles, const int rank, const int max_iter, const float threshold, const float min_pos, const float max_pos);
     void set_n_particles(const int n_particles);
     void set_rank(const int rank);
     void set_max_iter(const int max_iter);
+    void set_threshold(const float threshold);
     void set_min_pos(const std::vector<float> &min_pos);
     void set_max_pos(const std::vector<float> &max_pos);
     void set_global_best_parameters(const std::vector<float> &position, const float fitness);
@@ -34,6 +35,7 @@ public:
     int get_n_particles() const;
     int get_rank() const;
     int get_max_iter() const;
+    float get_threshold() const;
     std::vector<float> get_min_pos() const;
     std::vector<float> get_max_pos() const;
     Particle get_global_best() const;
@@ -67,11 +69,13 @@ public:
     void initialize_optimization();
     void initialize_optimization(std::vector<Particle> &particles);
 
+    void stopping_condition(const float gb_fitness, float &stopping_counter, float &stop_condition);
 
 protected:
     int n_particles;                    // number of particles
     int rank;                           // rank of the polynomial function
     int max_iter;                       // max number of algorithm iterations
+    float threshold;                    // stop if global best bellow threshold
     std::vector<float> min_pos;
     std::vector<float> max_pos;
     Particle global_best;               // global best

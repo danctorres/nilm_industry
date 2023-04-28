@@ -139,9 +139,10 @@ Particle Ant_Colony::sample_new_particle(const std::vector<int> &gaussian_index,
     return new_position;
 }
 
-Ant_Colony::Ant_Colony(int n_particles, int rank, int max_iter, std::vector<float> &min_pos,
-                       std::vector<float> &max_pos, int number_ants, float q, float xi, int x_min, int x_max)
-                       : Optimization(n_particles, rank, max_iter, min_pos, max_pos) {
+Ant_Colony::Ant_Colony(const int n_particles, const int rank, const int max_iter, const float threshold,
+                       const std::vector<float> &min_pos, const std::vector<float> &max_pos, const int number_ants,
+                       const float q, const float xi, const int x_min, const int x_max)
+                       : Optimization(n_particles, rank, max_iter, threshold, min_pos, max_pos) {
     this->number_ants = number_ants;
     this->q = q;
     this->xi = xi;

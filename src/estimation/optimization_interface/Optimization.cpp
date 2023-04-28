@@ -13,28 +13,31 @@ Optimization::Optimization() : global_best(){
     max_pos.push_back(0.0f);
 }
 
-Optimization::Optimization(int n_particles, int rank, int max_iter, float min_pos, float max_pos) : global_best() {
+Optimization::Optimization(int n_particles, int rank, int max_iter, const float threshold, float min_pos, float max_pos) : global_best() {
     this->n_particles = n_particles;
     this->rank = rank;
     this->max_iter = max_iter;
+    this->threshold = threshold;
     this->min_pos.push_back(min_pos);
     this->max_pos.push_back(max_pos);
 }
 
-Optimization::Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
-                           const std::vector<float> &max_pos) : global_best() {
+Optimization::Optimization(const int n_particles, const int rank, const int max_iter, const float threshold,
+                           const std::vector<float> &min_pos, const std::vector<float> &max_pos) : global_best() {
     this->n_particles = n_particles;
     this->rank = rank;
     this->max_iter = max_iter;
+    this->threshold = threshold;
     this->min_pos = min_pos;
     this->max_pos = max_pos;
 }
 
-Optimization::Optimization(const int n_particles, const int rank, const int max_iter, const std::vector<float> &min_pos,
-                           const std::vector<float> &max_pos, const std::vector<Particle> &particles)  : global_best() {
+Optimization::Optimization(const int n_particles, const int rank, const int max_iter, const float threshold, const std::vector<float> &min_pos,
+                           const std::vector<float> &max_pos, const std::vector<Particle> &particles) : global_best() {
     this->n_particles = n_particles;
     this->rank = rank;
     this->max_iter = max_iter;
+    this->threshold = threshold;
     this->min_pos = min_pos;
     this->max_pos = max_pos;
     this->particles = particles;
@@ -50,6 +53,10 @@ void Optimization::set_rank(const int rank) {
 
 void Optimization::set_max_iter(const int max_iter) {
     this->max_iter = max_iter;
+}
+
+void Optimization::set_threshold(const float threshold) {
+    this->threshold = threshold;
 }
 
 void Optimization::set_min_pos(const std::vector<float> &min_pos) {
@@ -78,6 +85,10 @@ int Optimization::get_rank() const {
 
 int Optimization::get_max_iter() const {
     return max_iter;
+}
+
+float Optimization::get_threshold() const {
+    return threshold;
 }
 
 std::vector<float> Optimization::get_min_pos() const {
@@ -197,4 +208,23 @@ void Optimization::initialize_optimization(std::vector<Particle> &particles) {
     initialize_positions(particles);
     calculate_set_fitness();
     initialize_global_best();
+}
+
+void Optimization::stopping_condition(const float gb_fitness, float &stopping_counter, float &stop_condition) {
+    /*if (get_global_best().get_fitness() < 0.001){
+        return;
+    }
+    else {
+        if (stop_condition == get_global_best().get_fitness()) {
+            if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
+                std::cout << "- Number of cycles " << i << " - " << std::endl;
+                return;
+            }
+            stopping_counter++;
+        } else {
+            stopping_counter = 0;
+            stop_condition = global_best.get_fitness();
+        }
+    }
+}*/
 }
