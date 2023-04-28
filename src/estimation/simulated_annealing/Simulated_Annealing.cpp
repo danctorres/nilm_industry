@@ -53,10 +53,10 @@ Simulated_Annealing::Simulated_Annealing(int n_particles, int rank, int max_iter
     this->cooling_factor = cooling_factor;
 
     //std::cout << "Initializing simulated annealing population" << std::endl;
-    std::cout << "- Number of particles: " << n_particles << ", ";
-    std::cout << "temperature: " << temperature << ", ";
-    std::cout << "temp_min: " << temp_min << ", ";
-    std::cout << "cooling_factor: " << cooling_factor << " - " << std::endl;
+    std::cout << "- Number of particles = " << n_particles << ", ";
+    std::cout << "temperature = " << temperature << ", ";
+    std::cout << "temp_min = " << temp_min << ", ";
+    std::cout << "cooling_factor = " << cooling_factor << " - " << std::endl;
 
     initialize_optimization();
     set_last_fitness();

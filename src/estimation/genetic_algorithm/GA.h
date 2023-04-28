@@ -50,7 +50,7 @@ private:
     int n_tournaments;
     float alpha;    // shape parameter
     float beta;     // scale parameter
-    float p_dist;
+    float p_dist;   // mutation parameter
     int size_elite;
 };
 

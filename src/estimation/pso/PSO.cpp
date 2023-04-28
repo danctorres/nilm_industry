@@ -113,18 +113,17 @@ PSO::PSO(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, s
         this->v_max.push_back((max_pos[i] - min_pos[i]) * 0.2);
     }
 
-    // Initialize position, fitness and global bests
-    std::cout << "- Number of particles: " << n_particles << ", ";
-    std::cout << "c1: " << c1 << ", ";
-    std::cout << "c2: " << c1 << ", ";
-    std::cout << "w_min: " << w_min << ", ";
-    std::cout << "w_max: " << w_max << " - " << std::endl;
-
     initialize_optimization();
     adapter_particles_pso();
 
     initialize_velocities();
     initialize_personal_best();
+
+    std::cout << "- Number of particles = " << n_particles << ", ";
+    std::cout << "c1 = " << c1 << ", ";
+    std::cout << "c2 = " << c1 << ", ";
+    std::cout << "w_min = " << w_min << ", ";
+    std::cout << "w_max = " << w_max << " - " << std::endl;
 }
 
 void PSO::run() {

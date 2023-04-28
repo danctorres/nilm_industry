@@ -183,6 +183,13 @@ GA::GA(int n_particles, int rank, int max_iter, std::vector<float> &min_pos, std
     this->size_elite = size_elite;
 
     initialize_optimization();
+    std::cout << "- Number of particles = " << n_particles << ", ";
+    std::cout << "number of participants = " << n_participants << ", ";
+    std::cout << "number of tournaments = " << n_tournaments << ", ";
+    std::cout << "shape parameter = " << alpha << ", ";
+    std::cout << "scale parameter = " << beta << ", ";
+    std::cout << "mutation parameter = " << p_dist << ", ";
+    std::cout << "elite size = " << size_elite << " -" << std::endl;
 }
 
 void GA::run() {
