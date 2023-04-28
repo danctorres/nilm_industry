@@ -13,9 +13,9 @@
 #include "optimization_interface/Particle.h"
 #include "pso/PSO_Particle.h"
 #include "pso/PSO.h"
-#include "simulated_annealing/Simulated_Annealing.h"
+#include "simulated_annealing/SA.h"
 #include "newton/Newton.h"
-#include "ant_colony/Ant_Colony.h"
+#include "ant_colony/AC.h"
 #include "genetic_algorithm/GA.h"
 
 
@@ -44,7 +44,7 @@ int main(){
     //std::cout << "Time taken by function: " << duration.count() << " seconds" << std::endl;
 
     std::cout << std::endl << "--- SIMULATED ANNEALING ---" << std::endl;
-    auto sa = std::make_unique<Simulated_Annealing>(20, 2, 100, 0.001, min_pos, max_pos, 5.0f, 0.001f, 0.99f);
+    auto sa = std::make_unique<SA>(20, 2, 100, 0.001, min_pos, max_pos, 5.0f, 0.001f, 0.99f);
     sa->run();
     std::cout << "x: " << sa->get_global_best().get_position()[0] << ", y: " << sa->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << sa->get_global_best().get_fitness() << std::endl;
@@ -59,7 +59,7 @@ int main(){
 
     std::cout << std::endl << "--- ANT COLONY ---" << std::endl;
     // The std cant be equal to 0, for the gaussian function to work
-    auto acor = std::make_unique<Ant_Colony>(20, 2, 100, 0.001, min_pos, max_pos, 2, 0.001f, 0.85f, -5, 5);
+    auto acor = std::make_unique<AC>(20, 2, 100, 0.001, min_pos, max_pos, 2, 0.001f, 0.85f, -5, 5);
     acor->run();
     std::cout << "x: " << acor->get_global_best().get_position()[0] << ", y: " << acor->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << acor->get_global_best().get_fitness() << std::endl;
