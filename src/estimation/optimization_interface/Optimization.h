@@ -69,7 +69,7 @@ public:
     void initialize_optimization();
     void initialize_optimization(std::vector<Particle> &particles);
 
-    void stopping_condition(const float gb_fitness, float &stopping_counter, float &stop_condition);
+    bool stopping_condition(const float gb_fitness, int &stopping_counter, float &stop_condition, const int i);
 
 protected:
     int n_particles;                    // number of particles

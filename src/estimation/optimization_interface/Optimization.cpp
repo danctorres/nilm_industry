@@ -210,21 +210,23 @@ void Optimization::initialize_optimization(std::vector<Particle> &particles) {
     initialize_global_best();
 }
 
-void Optimization::stopping_condition(const float gb_fitness, float &stopping_counter, float &stop_condition) {
-    /*if (get_global_best().get_fitness() < 0.001){
-        return;
+bool Optimization::stopping_condition(const float gb_fitness, int &stopping_counter, float &stop_condition, const int i) {
+    if (gb_fitness < threshold){
+        return true;
     }
     else {
-        if (stop_condition == get_global_best().get_fitness()) {
-            if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.01) {
+        if (stop_condition == gb_fitness) {
+            if (stopping_counter >= 2 && gb_fitness < 0.1) {
                 std::cout << "- Number of cycles " << i << " - " << std::endl;
-                return;
+                return true;
             }
             stopping_counter++;
-        } else {
+        }
+        else {
             stopping_counter = 0;
-            stop_condition = global_best.get_fitness();
+            stop_condition = gb_fitness;
+            return false;
         }
     }
-}*/
+    return false;
 }

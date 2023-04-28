@@ -181,20 +181,8 @@ void AC::run(){
         gaussian_index.clear();
         new_particles.clear();
 
-        if (get_global_best().get_fitness() < 0.01){
+        if (stopping_condition(global_best.get_fitness(), stopping_counter, stop_condition, i)) {
             return;
-        }
-        else {
-            if (stop_condition == get_global_best().get_fitness()) {
-                if (stopping_counter >= 2 && get_global_best().get_fitness() < 0.1) {
-                    std::cout << "- Number of cycles " << i << " - " << std::endl;
-                    return;
-                }
-                stopping_counter++;
-            } else {
-                stopping_counter = 0;
-                stop_condition = global_best.get_fitness();
-            }
         }
     }
     std::cout << "- Number of cycles " << max_iter << " - " << std::endl;
