@@ -2,66 +2,66 @@
 // Created by danctorres on 4/3/2023.
 //
 
-#include "Ant_Colony.h"
+#include "AC.h"
 
 
-void Ant_Colony::set_number_ants(const int number_ants) {
+void AC::set_number_ants(const int number_ants) {
     this->number_ants = number_ants;
 }
 
-void Ant_Colony::set_q(const float q) {
+void AC::set_q(const float q) {
     this->q = q;
 }
 
-void Ant_Colony::set_xi(const float xi) {
+void AC::set_xi(const float xi) {
     this->xi = xi;
 }
 
-void Ant_Colony::set_x_min(const int x_min) {
+void AC::set_x_min(const int x_min) {
     this->x_min = x_min;
 }
 
-void Ant_Colony::set_x_max(const int x_max) {
+void AC::set_x_max(const int x_max) {
     this->x_max = x_max;
 }
 
-void Ant_Colony::set_weights(const std::vector<float> &weights) {
+void AC::set_weights(const std::vector<float> &weights) {
     this->weights = weights;
 }
 
-void Ant_Colony::set_probabilities(const std::vector<float> &probabilities) {
+void AC::set_probabilities(const std::vector<float> &probabilities) {
     this->probabilities = probabilities;
 }
 
-int Ant_Colony::get_number_ants() const {
+int AC::get_number_ants() const {
     return number_ants;
 }
 
-float Ant_Colony::get_q() const {
+float AC::get_q() const {
     return q;
 }
 
-float Ant_Colony::get_xi() const {
+float AC::get_xi() const {
     return xi;
 }
 
-float Ant_Colony::get_x_min() const {
+float AC::get_x_min() const {
     return x_min;
 }
 
-float Ant_Colony::get_x_max() const {
+float AC::get_x_max() const {
     return x_max;
 }
 
-std::vector<float> Ant_Colony::get_weights() const {
+std::vector<float> AC::get_weights() const {
     return weights;
 }
 
-std::vector<float> Ant_Colony::get_probabilities() const {
+std::vector<float> AC::get_probabilities() const {
     return probabilities;
 }
 
-void Ant_Colony::initialize_weights() {
+void AC::initialize_weights() {
     float weight = 0.0f;
     weights.clear();
     for (int i = 1; i <= n_particles; i++){
@@ -70,7 +70,7 @@ void Ant_Colony::initialize_weights() {
     }
 }
 
-std::vector<float> Ant_Colony::calculate_probabilities() {
+std::vector<float> AC::calculate_probabilities() {
     std::vector<float> probs;
     float sum_weights = std::accumulate(weights.begin(), weights.end(), 0.0f);
     // The number of solutions is equal to the number of particles
@@ -82,7 +82,7 @@ std::vector<float> Ant_Colony::calculate_probabilities() {
 
 // Each Gaussian kernel has one Gaussian function
 // Returns vector of all the indexes for each ant
-std::vector<int> Ant_Colony::select_gaussian() {
+std::vector<int> AC::select_gaussian() {
     std::vector<int> gauss_idx;
     float rand_num;
     float cumulative_prob = 0.0f;
@@ -105,7 +105,7 @@ std::vector<int> Ant_Colony::select_gaussian() {
 }
 
 // Create a vector with the std of all the Gaussian functions for one solution
-std::vector<float> Ant_Colony::calculate_all_std(const std::vector<int> &gaussian_index) {
+std::vector<float> AC::calculate_all_std(const std::vector<int> &gaussian_index) {
     std::vector<float> std_vector;
     float stdeviation = 0.0f;
 
@@ -121,13 +121,13 @@ std::vector<float> Ant_Colony::calculate_all_std(const std::vector<int> &gaussia
     return std_vector;
 }
 
-float Ant_Colony::gaussian_function(const int dim, const int gaussian_index, const float sigma, const float x) {
+float AC::gaussian_function(const int dim, const int gaussian_index, const float sigma, const float x) {
     float coefficient = 1 / (sigma * sqrt(2 * std::numbers::pi));
     float exponential = - pow(x - particles[gaussian_index].get_position()[dim], 2) / (2 * pow(sigma, 2));
     return weights[gaussian_index] * coefficient * exp(exponential);
 }
 
-Particle Ant_Colony::sample_new_particle(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector){
+Particle AC::sample_new_particle(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector){
     std::vector<float> new_position;
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -139,7 +139,7 @@ Particle Ant_Colony::sample_new_particle(const std::vector<int> &gaussian_index,
     return new_position;
 }
 
-Ant_Colony::Ant_Colony(const int n_particles, const int rank, const int max_iter, const float threshold,
+AC::AC(const int n_particles, const int rank, const int max_iter, const float threshold,
                        const std::vector<float> &min_pos, const std::vector<float> &max_pos, const int number_ants,
                        const float q, const float xi, const int x_min, const int x_max)
                        : Optimization(n_particles, rank, max_iter, threshold, min_pos, max_pos) {
@@ -157,7 +157,7 @@ Ant_Colony::Ant_Colony(const int n_particles, const int rank, const int max_iter
     std::cout << "- Number of solutions = " << n_particles << ", q = " << q << ", xi = " << xi << " -" << std::endl;
 }
 
-void Ant_Colony::run(){
+void AC::run(){
     std::vector<Particle> new_particles;
     std::vector<int> gaussian_index;
     std::vector<float> std_vector;

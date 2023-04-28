@@ -2,18 +2,18 @@
 // Created by danctorres on 3/16/2023.
 //
 
-#ifndef DISSERTATION_NILM_SIMULATED_ANNEALING_H
-#define DISSERTATION_NILM_SIMULATED_ANNEALING_H
+#ifndef DISSERTATION_NILM_SA_H
+#define DISSERTATION_NILM_SA_H
 
 #include <cmath>
 #include "../optimization_interface/Optimization.h"
 
 
-class Simulated_Annealing : public Optimization {
+class SA : public Optimization {
 public:
-    Simulated_Annealing(const int n_particles, const int rank, const int max_iter, const float threshold,
-                        const std::vector<float> &min_pos, const std::vector<float> &max_pos,
-                        const float temperature, const float temp_min, const float cooling_factor);
+    SA(const int n_particles, const int rank, const int max_iter, const float threshold,
+       const std::vector<float> &min_pos, const std::vector<float> &max_pos,
+       const float temperature, const float temp_min, const float cooling_factor);
     void set_temperature(float temperature);
     void set_temp_min(float temp_min);
     void set_cooling_factor(float cooling_factor);
@@ -35,4 +35,4 @@ private:
 };
 
 
-#endif //DISSERTATION_NILM_SIMULATED_ANNEALING_H
+#endif //DISSERTATION_NILM_SA_H

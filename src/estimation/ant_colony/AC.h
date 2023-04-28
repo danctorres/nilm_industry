@@ -2,8 +2,8 @@
 // Created by danctorres on 4/3/2023.
 //
 
-#ifndef DISSERTATION_NILM_ANT_COLONY_H
-#define DISSERTATION_NILM_ANT_COLONY_H
+#ifndef DISSERTATION_NILM_AC_H
+#define DISSERTATION_NILM_AC_H
 
 #include <algorithm>
 #include <cmath>
@@ -16,11 +16,11 @@
 // Ant colony optimization for continuous domains by Krzysztof Socha and Marco Dorigo
 // One ant per solution
 
-class Ant_Colony : public Optimization{
+class AC : public Optimization{
 public:
-    Ant_Colony(const int n_particles, const int rank, const int max_iter, const float threshold,
-               const std::vector<float> &min_pos, const std::vector<float> &max_pos, const int number_ants,
-               const float q, const float xi, const int x_min, const int x_max);
+    AC(const int n_particles, const int rank, const int max_iter, const float threshold,
+       const std::vector<float> &min_pos, const std::vector<float> &max_pos, const int number_ants,
+       const float q, const float xi, const int x_min, const int x_max);
 
     void set_number_ants(const int number_ants);
     void set_q(const float q);
@@ -59,4 +59,4 @@ private:
 };
 
 
-#endif //DISSERTATION_NILM_ANT_COLONY_H
+#endif //DISSERTATION_NILM_AC_H

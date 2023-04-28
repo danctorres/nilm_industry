@@ -2,51 +2,51 @@
 // Created by danctorres on 3/16/2023.
 //
 
-#include "Simulated_Annealing.h"
+#include "SA.h"
 #include "../optimization_interface/Particle.h"
 
 
-void Simulated_Annealing::set_temperature(float temperature) {
+void SA::set_temperature(float temperature) {
     this->temperature = temperature;
 }
 
-void Simulated_Annealing::set_temp_min(float temp_min) {
+void SA::set_temp_min(float temp_min) {
     this->temp_min = temp_min;
 }
 
-void Simulated_Annealing::set_cooling_factor(float cooling_factor) {
+void SA::set_cooling_factor(float cooling_factor) {
     this->cooling_factor = cooling_factor;
 }
 
-void Simulated_Annealing::set_last_fitness() {
+void SA::set_last_fitness() {
     for (Particle &particle : particles) {
         last_fitness.push_back(particle.get_fitness());
     }
 }
 
-float Simulated_Annealing::get_temperature() const {
+float SA::get_temperature() const {
     return temperature;
 }
 
-float Simulated_Annealing::get_temp_min() const {
+float SA::get_temp_min() const {
     return temp_min;
 }
 
-float Simulated_Annealing::get_cooling_factor() const {
+float SA::get_cooling_factor() const {
     return cooling_factor;
 }
 
 
-std::vector<float> Simulated_Annealing::get_last_fitness() const {
+std::vector<float> SA::get_last_fitness() const {
     return last_fitness;
 }
 
-float Simulated_Annealing::calculate_new_fitness(const std::vector<float> &new_positions) {
+float SA::calculate_new_fitness(const std::vector<float> &new_positions) {
     return objective_function(new_positions);
 }
 
 
-Simulated_Annealing::Simulated_Annealing(const int n_particles, const int rank, const int max_iter, const float threshold,
+SA::SA(const int n_particles, const int rank, const int max_iter, const float threshold,
 const std::vector<float> &min_pos, const std::vector<float> &max_pos,
 const float temperature, const float temp_min, const float cooling_factor) : Optimization(n_particles, rank, max_iter, threshold, min_pos, max_pos) {
     // Initializing member variables
@@ -64,7 +64,7 @@ const float temperature, const float temp_min, const float cooling_factor) : Opt
     set_last_fitness();
 }
 
-void Simulated_Annealing::run() {
+void SA::run() {
     // Main loop
     std::random_device rd;
     std::mt19937 gen(rd());
