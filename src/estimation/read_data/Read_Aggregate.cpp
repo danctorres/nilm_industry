@@ -5,7 +5,7 @@
 #include "Read_Aggregate.h"
 
 
-Read_Aggregate::Read_Aggregate(const std::string& name_file) : Read(name_file){
+Read_Aggregate::Read_Aggregate(const std::string& name_file) : Read(name_file) {
     const std::vector<std::vector<std::string>> data = this->get_data();
     for (int i = 1; i < data.size() - 1; i++){
         timestamp.push_back(std::stof(data[i][0]));
@@ -18,30 +18,58 @@ Read_Aggregate::Read_Aggregate(const std::string& name_file) : Read(name_file){
     }
 }
 
-std::vector<float> Read_Aggregate::get_parameter(const std::string &name_parameter) const {
-    if (name_parameter == "Timestamp"){
+std::vector<float> Read_Aggregate::get_parameters(const std::string &name_parameter) const {
+    if (name_parameter == "Timestamp") {
         return timestamp;
     }
-    if (name_parameter == "Active power"){
+    else if (name_parameter == "Active power") {
         return active_power;
     }
-    if (name_parameter == "Reactive power"){
+    else if (name_parameter == "Reactive power") {
         return reactive_power;
     }
-    if (name_parameter == "Apparent power"){
+    else if (name_parameter == "Apparent power") {
         return apparent_power;
     }
-    if (name_parameter == "Current"){
+    else if (name_parameter == "Current") {
         return current;
     }
-    if (name_parameter == "Voltage"){
+    else if (name_parameter == "Voltage") {
         return voltage;
     }
-    if (name_parameter == "Power factor"){
+    else if (name_parameter == "Power factor") {
         return power_factor;
     }
-    else{
-        std::cerr << "Parameter name not define, use valida name!" << std::endl;
+    else {
+        std::cerr << "Parameter name not define, use valid name!" << std::endl;
+        throw;
+    }
+}
+
+float Read_Aggregate::get_one_parameter(const std::string &name_parameter, const int sample) const {
+    if (name_parameter == "Timestamp") {
+        return timestamp[sample];
+    }
+    else if (name_parameter == "Active power") {
+        return active_power[sample];
+    }
+    else if (name_parameter == "Reactive power") {
+        return reactive_power[sample];
+    }
+    else if (name_parameter == "Apparent power") {
+        return apparent_power[sample];
+    }
+    else if (name_parameter == "Current") {
+        return current[sample];
+    }
+    else if (name_parameter == "Voltage") {
+        return voltage[sample];
+    }
+    else if (name_parameter == "Power factor") {
+        return power_factor[sample];
+    }
+    else {
+        std::cerr << "Parameter name not define, use valid name!" << std::endl;
         throw;
     }
 }
@@ -49,7 +77,7 @@ std::vector<float> Read_Aggregate::get_parameter(const std::string &name_paramet
 std::vector<std::vector<float>> Read_Aggregate::get_all_parameters() const {
     std::vector<std::vector<float>> data;
     data.push_back(timestamp);
-    data.push_back(apparent_power);
+    data.push_back(active_power);
     data.push_back(reactive_power);
     data.push_back(apparent_power);
     data.push_back(current);

@@ -15,7 +15,8 @@ class Read_Aggregate : public Read{
 public:
     Read_Aggregate(const std::string& name_file);
 
-    std::vector<float> get_parameter(const std::string &name_parameter) const;
+    float get_one_parameter(const std::string &name_parameter, const int sample) const;
+    std::vector<float> get_parameters(const std::string &name_parameter) const;
     std::vector<std::vector<float>> get_all_parameters() const;
     int size();
 private:

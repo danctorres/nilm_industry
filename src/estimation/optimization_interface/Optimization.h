@@ -12,6 +12,7 @@
 #include <random>
 #include <vector>
 #include "Particle.h"
+#include "../problem_formulation/objective_function.h"
 
 
 class Optimization {
@@ -42,7 +43,7 @@ public:
     std::vector<Particle> get_particles() const;
 
     // Returns fitness for positions
-    float objective_function(const std::vector<float> &position);
+    //float objective_function(const std::vector<float> &position);
 
     // Set the first global best for a vector of particles
     void initialize_global_best();
