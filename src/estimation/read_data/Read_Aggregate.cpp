@@ -57,3 +57,7 @@ std::vector<std::vector<float>> Read_Aggregate::get_all_parameters() const {
     data.push_back(power_factor);
     return data;
 }
+
+int Read_Aggregate::size() {
+    return timestamp.size();
+}

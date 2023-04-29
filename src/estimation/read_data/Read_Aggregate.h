@@ -17,7 +17,7 @@ public:
 
     std::vector<float> get_parameter(const std::string &name_parameter) const;
     std::vector<std::vector<float>> get_all_parameters() const;
-
+    int size();
 private:
     std::vector<float> timestamp;
     std::vector<float> active_power;
