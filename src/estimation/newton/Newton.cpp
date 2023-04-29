@@ -17,16 +17,18 @@ std::vector<float> Newton::hessian(const std::vector<float> &position) {
 }
 
 // The determinant is used to calculate the inverse of the Hessian
-/*float Newton::determinant(const std::vector<float> &hess) {
+float Newton::determinant(const std::vector<float> &hess) {
     float det = hess[0] * hess[3] - hess[1] * hess[2];
     return det;
-}*/
+}
 
-std::vector<float> Newton::step(const std::vector<float> &grad, const std::vector<float> &hess, const Particle &particle) {
-    //float step_x = (hess[3] * grad[0] - hess[1] * grad[1]) / det;
-    //float step_y = (- hess[2] * grad[0] + hess[0] * grad[1]) / det;
-    float step_x = -1.0 / hess[0] * grad[0] - 1.0 / hess[1] * grad[1];
-    float step_y = -1.0 / hess[2] * grad[0] -  1.0 / hess[3] * grad[1];
+std::vector<float> Newton::step(const std::vector<float> &grad, const std::vector<float> &hess, const float det, const Particle &particle) {
+    // step = inverse of the Hessian * gradient
+    float step_x = (hess[3] * grad[0] - hess[1] * grad[1]) * ( 1 / det);
+    float step_y = (- hess[2] * grad[0] + hess[0] * grad[1]) * ( 1 / det);
+
+    // float step_x = -1.0 / hess[0] * grad[0] - 1.0 / hess[1] * grad[1];
+    // float step_y = -1.0 / hess[2] * grad[0] -  1.0 / hess[3] * grad[1];
 
     std::vector<float> new_position = {particle.get_position()[0] - step_x, particle.get_position()[1] - step_y};
     return new_position;
@@ -49,10 +51,8 @@ void Newton::run() {
     float stop_condition = global_best.get_fitness();
 
     for (int i = 0; i < max_iter; i++) {
-        for (Particle &particle: particles) {
-            grad = gradient(particle.get_position());
-            hess = hessian(particle.get_position());
-            //det = determinant(hess);
+        for (Particle &par: particles) {
+            hess = hessian(par.get_position());
 
             if (std::count(hess.begin(), hess.end(), 0)){
                 std::cout << "The Hessian is non invertible."
@@ -62,8 +62,7 @@ void Newton::run() {
                 return;
             }
 
-            new_position = step(grad, hess, particle);
-            particle.set_position(new_position);
+            par.set_position(step(gradient(par.get_position()), hess, determinant(hess), par));
         }
 
         calculate_set_fitness();

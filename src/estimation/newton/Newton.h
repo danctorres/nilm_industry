@@ -18,7 +18,7 @@ public:
     std::vector<float> hessian(const std::vector<float> &position);
 
     float determinant(const std::vector<float> &hess);
-    std::vector<float> step(const std::vector<float> &grad, const std::vector<float> &hess, const Particle &particle);
+    std::vector<float> step(const std::vector<float> &grad, const std::vector<float> &hess, const float det, const Particle &particle);
 
     void run();
 };
