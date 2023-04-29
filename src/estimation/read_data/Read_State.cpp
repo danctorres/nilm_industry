@@ -5,7 +5,7 @@
 #include "Read_State.h"
 
 
-Read_State::Read_State(const std::string &name_file) : Read(name_file){
+Read_State::Read_State(const std::string &name_file) : Read(name_file) {
     const std::vector<std::vector<std::string>> data = this->get_data();
     for (int i = 1; i < data.size() - 1; i++){
         state_0.push_back(std::stoi(data[i][0]));
@@ -14,32 +14,56 @@ Read_State::Read_State(const std::string &name_file) : Read(name_file){
         state_3.push_back(std::stoi(data[i][3]));
         state_4.push_back(std::stoi(data[i][4]));
         state_5.push_back(std::stoi(data[i][5]));
+        state_6.push_back(std::stoi(data[i][6]));
+        state_7.push_back(std::stoi(data[i][7]));
     }
 }
 
-std::vector<int> Read_State::get_parameter(const std::string& name_parameter) const {
-    if (name_parameter == "State 0"){
-        return state_0;
+std::vector<int> Read_State::get_parameters(const int eq_idx) const {
+    switch(eq_idx) {
+        case 0:
+            return state_0;
+        case 1:
+            return state_1;
+        case 2:
+            return state_2;
+        case 3:
+            return state_3;
+        case 4:
+            return state_4;
+        case 5:
+            return state_5;
+        case 6:
+            return state_6;
+        case 7:
+            return state_7;
+        default:
+            std::cerr << "Use valid equipment idx!" << std::endl;
+            throw;
     }
-    if (name_parameter == "State 1"){
-        return state_1;
-    }
-    if (name_parameter == "State 2"){
-        return state_2;
-    }
-    if (name_parameter == "State 3"){
-        return state_3;
-    }
-    if (name_parameter == "State 4"){
-        return state_4;
-    }
-    if (name_parameter == "State 5"){
-        return state_5;
-    }
+}
 
-    else{
-        std::cerr << "Parameter name not define, use valida name!" << std::endl;
-        throw;
+int Read_State::get_one_parameter(const int eq_idx, const int sample) const {
+    switch (eq_idx) {
+        case 0:
+            return state_0[sample];
+        case 1:
+            return state_1[sample];
+        case 2:
+            return state_2[sample];
+        case 3:
+            return state_3[sample];
+        case 4:
+            return state_4[sample];
+        case 5:
+            return state_5[sample];
+        case 6:
+            return state_6[sample];
+        case 7:
+            return state_7[sample];
+        default:
+            std::cerr << "Use valid equipment idx!" << std::endl;
+            throw;
     }
 }
 
@@ -51,5 +75,7 @@ std::vector<std::vector<int>> Read_State::get_all_parameter() const {
     data.push_back(state_3);
     data.push_back(state_4);
     data.push_back(state_5);
+    data.push_back(state_6);
+    data.push_back(state_7);
     return data;
 }

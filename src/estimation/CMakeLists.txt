@@ -12,6 +12,7 @@ file(GLOB_RECURSE HEADERS
         "${CMAKE_SOURCE_DIR}/genetic_algorithm/*.h"
         "${CMAKE_SOURCE_DIR}/gradient_descent/*.h"
         "${CMAKE_SOURCE_DIR}/newton/*.h"
+        "${CMAKE_SOURCE_DIR}/problem_formulation/*.h"
 )
 
 file(GLOB_RECURSE SOURCES
@@ -24,6 +25,7 @@ file(GLOB_RECURSE SOURCES
         "${CMAKE_SOURCE_DIR}/genetic_algorithm/*.cpp"
         "${CMAKE_SOURCE_DIR}/gradient_descent/*.cpp"
         "${CMAKE_SOURCE_DIR}/newton/*.cpp"
+        "${CMAKE_SOURCE_DIR}/problem_formulation/*.cpp"
 )
 
 # Define the executable target
@@ -47,4 +49,5 @@ target_include_directories(estimation PUBLIC
         ${CMAKE_SOURCE_DIR}/genetic_algorithm
         ${CMAKE_SOURCE_DIR}/gradient_descent
         ${CMAKE_SOURCE_DIR}/newton
+        ${CMAKE_SOURCE_DIR}/problem_formulation
 )

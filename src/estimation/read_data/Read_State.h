@@ -15,7 +15,8 @@ class Read_State : public Read{
 public:
     Read_State(const std::string& name_file);
 
-    std::vector<int> get_parameter(const std::string& name_parameter) const;
+    std::vector<int> get_parameters(const int eq_idx) const;
+    int get_one_parameter(const int eq_idx, const int sample) const;
     std::vector<std::vector<int>> get_all_parameter() const;
 
 private:
@@ -25,6 +26,8 @@ private:
     std::vector<int> state_3;
     std::vector<int> state_4;
     std::vector<int> state_5;
+    std::vector<int> state_6;
+    std::vector<int> state_7;
 };
 
 #endif //DISSERTATION_NILM_READ_STATE_H
