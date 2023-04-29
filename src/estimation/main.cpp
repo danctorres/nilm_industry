@@ -18,15 +18,16 @@
 #include "genetic_algorithm/GA.h"
 #include "newton/Newton.h"
 #include "gradient_descent/GD.h"
+#include "problem_formulation/Matrix_W.h"
 
 
 int main(){
     // Read training aggregate data
     //auto agg_data = std::make_unique<Read_Aggregate>("../../data/processed/aggregate_training.csv");
     auto agg_data = std::make_unique<Read_Aggregate> ("../../../data/processed/data_8_equipment/aggregate_training.csv");   // in this format for cmake
-    auto timestamps = agg_data->get_parameter ("Timestamp");
+    //auto timestamps = agg_data->get_parameter ("Timestamp");
     //agg_data->print_parameter(timestamps);
-    //auto st_data = std::make_unique<Read_State>("../../../data/processed/data_8_equipment/on_off_training.csv");
+    auto st_data = std::make_unique<Read_State>("../../../data/processed/data_8_equipment/on_off_training.csv");
     //st_data->print_parameter(st_data->get_parameter("State 0"));
 
 
@@ -82,6 +83,10 @@ int main(){
     gd->run();
     std::cout << "x: " << gd->get_global_best().get_position()[0] << ", y: " << gd->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << gd->get_global_best().get_fitness() << std::endl;
+
+
+    // For the 8 Equipment in the dataset
+    std::vector<Matrix_W> sum_est;
 
     return 0;
 }

@@ -9,18 +9,28 @@
 
 class Matrix_W {
 public:
-    std::vector<std::vector<int>> get_coefficients(int equipment_number);
-    virtual void calculate_coefficients(std::vector<std::vector<int>> data);
+    void set_coefficients(const std::vector<double> coef_0, const std::vector<double> coef_1,
+                          const std::vector<double> coef_2, const std::vector<double> coef_3,
+                          const std::vector<double> coef_4, const std::vector<double> coef_5,
+                          const std::vector<double> coef_6, const std::vector<double> coef_7);
+    void set_coefficients(const std::vector<double> coef, const int equipment_number);
+    std::vector<double> get_coefficients(const int equipment_number) const;
+
+    void sum(const std::vector<double> coef_0, const std::vector<double> coef_1,
+             const std::vector<double> coef_2, const std::vector<double> coef_3,
+             const std::vector<double> coef_4, const std::vector<double> coef_5,
+             const std::vector<double> coef_6, const std::vector<double> coef_7);
+    void sum(const std::vector<double> coef, const int equipment_number);
 private:
     // Coefficients for the polynomial equipment function
-    std::vector<std::vector<int>> coef_0;
-    std::vector<std::vector<int>> coef_1;
-    std::vector<std::vector<int>> coef_2;
-    std::vector<std::vector<int>> coef_3;
-    std::vector<std::vector<int>> coef_4;
-    std::vector<std::vector<int>> coef_5;
-    std::vector<std::vector<int>> coef_6;
-    std::vector<std::vector<int>> coef_7;
+    std::vector<double> coef_0;
+    std::vector<double> coef_1;
+    std::vector<double> coef_2;
+    std::vector<double> coef_3;
+    std::vector<double> coef_4;
+    std::vector<double> coef_5;
+    std::vector<double> coef_6;
+    std::vector<double> coef_7;
 };
 
 
