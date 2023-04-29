@@ -1,5 +1,5 @@
 //
-// Created by danie on 4/25/2023.
+// Created by danctorres on 4/25/2023.
 //
 
 #ifndef DISSERTATION_NILM_GA_H

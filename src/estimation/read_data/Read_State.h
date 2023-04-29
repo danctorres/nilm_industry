@@ -13,7 +13,6 @@
 
 class Read_State : public Read{
 public:
-
     Read_State(const std::string& name_file);
 
     std::vector<int> get_parameter(const std::string& name_parameter) const;
