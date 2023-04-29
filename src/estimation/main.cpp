@@ -94,26 +94,28 @@ int main(){
     */
 
     // For the 8 Equipment in the dataset
-    std::vector<float> min_pos = {-5000, -5000, -5000, -5000, -5000, -5000, -5000, -5000,
-                                  -5000, -5000, -5000, -5000, -5000, -5000, -5000, -5000,
-                                  -5000, -5000, -5000, -5000, -5000, -5000, -5000, -5000};
-    std::vector<float> max_pos = {5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000,
-                                  5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000,
-                                  5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000};
+    std::vector<float> min_pos = {-100000, -100000, -100000, -100000, -100000, -100000, -100000, -100000,
+                                  -100000, -100000, -100000, -100000, -100000, -100000, -100000, -100000,
+                                  -100000, -100000, -100000, -100000, -100000, -100000, -100000, -100000};
+    std::vector<float> max_pos = {100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000,
+                                  100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000,
+                                  100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000};
 
     Matrix_W sum_est;
     std::vector<float> est_eq;
 
     for (int i = 0; i < agg_data->size(); i++) {    // Iterate through training data
         agg = agg_data->get_one_parameter("Active power", i);
+        std::cout << "Agg: " << agg << std::endl;
         for (int j = 0; j < 8; j++) {
             act.push_back(st_data->get_one_parameter(j, i));
         }
 
-        auto pso = std::make_unique<PSO>(2400, 24, 100, 0.001, min_pos, max_pos,
+        auto pso = std::make_unique<PSO>(1000, 24, 1000, 0.001, min_pos, max_pos,
                                          2.0f, 2.0f, 0.2f, 0.9f);
         pso->run();
-        std::cout << "PSO run: " << i << std::endl;
+        std::cout << "PSO run: " << i << " - fitness: " << pso->get_global_best().get_fitness() << std::endl;
+
 
         est_eq.push_back(pso->get_global_best().get_position()[0]);
         est_eq.push_back(pso->get_global_best().get_position()[1]);
@@ -133,9 +135,9 @@ int main(){
     }
 
     for (int i = 0; i < 8; i++) {
-        std::cout << "Estimates eq " << i << " - c0: " << sum_est.get_coefficients(i)[0] / agg_data->size() << std::endl;
-        std::cout << "Estimates eq " << i << " - c1: " << sum_est.get_coefficients(i)[1] / agg_data->size() << std::endl;
-        std::cout << "Estimates eq " << i << " - c2: " << sum_est.get_coefficients(i)[2] / agg_data->size() << std::endl;
+        std::cout << "c" << i << "0: " << sum_est.get_coefficients(i)[0] / agg_data->size() << std::endl;
+        std::cout << "c " << i << "1: " << sum_est.get_coefficients(i)[1] / agg_data->size() << std::endl;
+        std::cout << "c" << i << "2: " << sum_est.get_coefficients(i)[2] / agg_data->size() << std::endl;
     }
 
     return 0;
