@@ -24,20 +24,22 @@
 
 float agg = 0.0f;
 std::vector<float> act;
+const float lambda = 0.1f;
 
 int main(){
     // Read training aggregate data
     //auto agg_data = std::make_unique<Read_Aggregate>("../../data/processed/aggregate_training.csv");
-    auto agg_data = std::make_unique<Read_Aggregate> ("../../../data/processed/data_8_equipment/aggregate_training.csv");   // in this format for cmake
+    //auto agg_data = std::make_unique<Read_Aggregate> ("../../../data/processed/data_8_equipment/aggregate_training.csv");   // in this format for cmake
+    auto agg_data = std::make_unique<Read_Aggregate> ("../../../data/processed/data_6_equipment/aggregate_training.csv");   // in this format for cmake
     //auto timestamps = agg_data->get_parameter ("Timestamp");
     //agg_data->print_parameter(timestamps);
-    auto st_data = std::make_unique<Read_State>("../../../data/processed/data_8_equipment/on_off_training.csv");
-    //st_data->print_parameter(st_data->get_parameter("State 0"));
-
+    //auto st_data = std::make_unique<Read_State>("../../../data/processed/data_8_equipment/on_off_training.csv");
+    auto st_data = std::make_unique<Read_State>("../../../data/processed/data_6_equipment/on_off_training.csv");
+    //st_data->print_parameter(st_data->get_parameters(0));
     /*
     // Metaheuristic optimization methods
-    std::vector<float> min_pos = {-10.0f, -10.0f};
-    std::vector<float> max_pos = {10.0f, 10.0f};
+    std::vector<float> min_pos = {-100000, -100000};
+    std::vector<float> max_pos = {100000, 100000};
 
     std::cout << std::endl << "--- PSO ---" << std::endl;
     //auto start = std::chrono::high_resolution_clock::now(); // get start time
@@ -53,7 +55,7 @@ int main(){
 
     std::cout << std::endl << "--- SIMULATED ANNEALING ---" << std::endl;
     auto sa = std::make_unique<SA>(20, 2, 100, 0.001, min_pos, max_pos,
-                                   5.0f, 0.001f, 0.99f);
+                                   100000, 0.001f, 0.99f);
     sa->run();
     std::cout << "x: " << sa->get_global_best().get_position()[0] << ", y: " << sa->get_global_best().get_position()[1] << std::endl;
     std::cout << "Fitness: " << sa->get_global_best().get_fitness() << std::endl;
@@ -93,39 +95,47 @@ int main(){
     std::cout << "Fitness: " << gd->get_global_best().get_fitness() << std::endl;
     */
 
-    // For the 8 Equipment in the dataset
-    std::vector<float> min_pos = {-100000, -100000, -100000, -100000, -100000, -100000, -100000, -100000,
+    // For the 6 Equipment in the dataset, rank 4
+    std::vector<float> min_coef = {-100000, -100000, -100000, -100000, -100000, -100000, -100000, -100000,
                                   -100000, -100000, -100000, -100000, -100000, -100000, -100000, -100000,
                                   -100000, -100000, -100000, -100000, -100000, -100000, -100000, -100000};
-    std::vector<float> max_pos = {100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000,
+    std::vector<float> max_coef = {100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000,
                                   100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000,
                                   100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000};
 
     Matrix_W sum_est;
     std::vector<float> est_eq;
 
-    for (int i = 0; i < agg_data->size(); i++) {    // Iterate through training data
+    // Iterate through training data
+    for (int i = 0; i < agg_data->size(); i++) {
         agg = agg_data->get_one_parameter("Active power", i);
         std::cout << "Agg: " << agg << std::endl;
-        for (int j = 0; j < 8; j++) {
+
+        // Iterate through each equipment
+        for (int j = 0; j < 6; j++) {
             act.push_back(st_data->get_one_parameter(j, i));
+            std::cout << "Eq: " << j << " act: " << act[j] << std::endl;
         }
 
-        auto pso = std::make_unique<PSO>(1000, 24, 1000, 0.001, min_pos, max_pos,
-                                         2.0f, 2.0f, 0.2f, 0.9f);
+        auto pso = std::make_unique<PSO>(240000, 24, 500, 1,
+                                         min_coef, max_coef, 2.0f, 2.0f, 0.2f, 0.9f);
         pso->run();
         std::cout << "PSO run: " << i << " - fitness: " << pso->get_global_best().get_fitness() << std::endl;
+        std::cout << "PSO run: " << i << " - pos 0: " << pso->get_global_best().get_position()[0] << std::endl;
+        std::cout << "PSO run: " << i << " - pos 1: " << pso->get_global_best().get_position()[1] << std::endl;
+        std::cout << "PSO run: " << i << " - pos 2: " << pso->get_global_best().get_position()[2] << std::endl;
+        std::cout << "PSO run: " << i << " - pos 3: " << pso->get_global_best().get_position()[3] << std::endl;
 
 
-        est_eq.push_back(pso->get_global_best().get_position()[0]);
-        est_eq.push_back(pso->get_global_best().get_position()[1]);
-        est_eq.push_back(pso->get_global_best().get_position()[2]);
+        est_eq.insert(est_eq.end(), {pso->get_global_best().get_position()[0], pso->get_global_best().get_position()[1],
+                                     pso->get_global_best().get_position()[2], pso->get_global_best().get_position()[3]});
+
         sum_est.set_coefficients(est_eq, 0);
-
-        for (int j = 1; j < 8; j++) {
-            est_eq.push_back(pso->get_global_best().get_position()[j * 3]);
-            est_eq.push_back(pso->get_global_best().get_position()[j * 3 + 1]);
-            est_eq.push_back(pso->get_global_best().get_position()[j * 3 + 2]);
+        for (int j = 1; j < 6; j++) {
+            est_eq.insert(est_eq.end(), {pso->get_global_best().get_position()[j * 4],
+                                                 pso->get_global_best().get_position()[j * 4 + 1],
+                                                 pso->get_global_best().get_position()[j * 4 + 2],
+                                                 pso->get_global_best().get_position()[j * 4 + 3]});
             sum_est.set_coefficients(est_eq, j);
             sum_est.sum(est_eq, j);
 
@@ -134,10 +144,11 @@ int main(){
         act.clear();
     }
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 6; i++) {
         std::cout << "c" << i << "0: " << sum_est.get_coefficients(i)[0] / agg_data->size() << std::endl;
         std::cout << "c " << i << "1: " << sum_est.get_coefficients(i)[1] / agg_data->size() << std::endl;
         std::cout << "c" << i << "2: " << sum_est.get_coefficients(i)[2] / agg_data->size() << std::endl;
+        std::cout << "c" << i << "3: " << sum_est.get_coefficients(i)[3] / agg_data->size() << std::endl;
     }
 
     return 0;
