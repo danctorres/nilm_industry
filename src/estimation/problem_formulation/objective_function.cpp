@@ -4,16 +4,13 @@
 
 #include "objective_function.h"
 
-
+// the quadratic objective function with quadratic penalty function weighted by a Lagrange multiplier
 float objective_function(const std::vector<float> &pos) {
-    return fabs (agg - (
-            pos[0] * act[0] + pos[1] * agg * act[0] + pos[2] * pow(agg, 2) * act[0] +       // eq 0
-            pos[3] * act[1] + pos[4] * agg * act[1] + pos[5] * pow(agg, 2) * act[1] +       // eq 1
-            pos[6] * act[2] + pos[7] * agg * act[2] + pos[8] * pow(agg, 2) * act[2] +       // eq 2
-            pos[9] * act[3] + pos[10] * agg * act[3] + pos[11] * pow(agg, 2) * act[3] +     // eq 4
-            pos[12] * act[4] + pos[13] * agg * act[4] + pos[14] * pow(agg, 2) * act[4] +    // eq 5
-            pos[15] * act[5] + pos[16] * agg * act[5] + pos[17] * pow(agg, 2) * act[5] +    // eq 6
-            pos[18] * act[6] + pos[19] * agg * act[6] + pos[20] * pow(agg, 2) * act[6] +    // eq 7
-            pos[21] * act[7] + pos[22] * agg * act[7] + pos[23] * pow(agg, 2) * act[7]      // eq 8
-            ));
+    float eq = act[0] * (pos[0] + pos[1] * agg + pos[2] * pow(agg, 2) + pos[3] * pow(agg, 3)) +
+            act[1] * (pos[4] + pos[5] * agg + pos[6] * pow(agg, 2) + pos[7] * pow(agg, 3)) +
+            act[2] * (pos[8] + pos[9] * agg + pos[10] * pow(agg, 2) + pos[11] * pow(agg, 3)) +
+            act[3] * (pos[12] + pos[13] * agg + pos[14] * pow(agg, 2) + pos[15] * pow(agg, 3)) +
+            act[4] * (pos[16] + pos[17] * agg + pos[18] * pow(agg, 2) + pos[19] * pow(agg, 3)) +
+            act[5] * (pos[20] + pos[21] * agg + pos[22] * pow(agg, 2) + pos[23] * pow(agg, 3));
+    return pow(agg - eq, 2) + lambda * pow(std::max(0.0f, -eq), 2);
 }

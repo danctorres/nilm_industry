@@ -26,8 +26,6 @@ private:
     std::vector<int> state_3;
     std::vector<int> state_4;
     std::vector<int> state_5;
-    std::vector<int> state_6;
-    std::vector<int> state_7;
 };
 
 #endif //DISSERTATION_NILM_READ_STATE_H
