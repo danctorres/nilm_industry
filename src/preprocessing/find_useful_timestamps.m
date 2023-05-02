@@ -19,8 +19,8 @@ function [useful_common_timestamps] = find_useful_timestamps(common_timestamps)
     % create table with the unique days, and number of samples
     summary = table(unique_dates(:), counts(:), max_diff(:), 'VariableNames', {'date', 'count', 'max_diff'});
     
-    % find days with more than 84600 samples 83520
-    threshold_total_missing = 5760;     % 4 every minute
+    % find days with more than 84600 - 5760 samples = 78840
+    threshold_total_missing = 5760;     % 4 missing samples per minute, 1 missing samples per 20 seconds
     threshold_interval = 15;
     days_with_more_samples = summary(summary.count > (86400 - threshold_total_missing) & (summary.max_diff < threshold_interval), :);
     % days_with_more_samples = summary((summary.max_diff < threshold_interval), :);

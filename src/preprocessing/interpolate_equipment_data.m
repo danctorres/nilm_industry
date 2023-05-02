@@ -36,7 +36,7 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
         clear filtered_unit_no_outliers TFrm diff index_diff;
     end
     
-    units_formated = table(datetime(datenum(1970,1,1) + dates_complete / 86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
+    units_formated = table(datetime(datenum(1970, 1, 1) + dates_complete / 86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
     for i = 1:size(unit_complete, 2)
         units_formated.(join( [string(unit_name), sprintf('%i', selected_equipment_index(i))], '_')) = unit_complete(:, i);
     end
