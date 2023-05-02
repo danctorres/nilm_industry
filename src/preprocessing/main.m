@@ -19,7 +19,7 @@ close all; clear; clc;
 equip_data = read_equipment_csv(); % read dataset equipment csv, optional input (absolute path of equipment folder)
 
 % Identify common timestamps among equipment
-selected_equipment_index = [1, 2, 3, 4, 5, 6, 7, 8];
+selected_equipment_index = [1, 2, 3, 4, 7, 8];
 common_timestamps = find_common_timestamps(equip_data, selected_equipment_index);
 
 % Filter timestamps to obtain only those corresponding to days with relevant data
