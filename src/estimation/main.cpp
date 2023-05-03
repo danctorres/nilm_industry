@@ -25,7 +25,7 @@
 
 float agg = 0.0f;
 std::vector<float> act;
-const float lambda = 50000;
+const float lambda = 100;
 
 int main(){
     // Read training aggregate data
@@ -97,25 +97,40 @@ int main(){
     */
 
     // For the 6 Equipment in the dataset, rank 4
-    std::vector<float> min_coef = {-10.0f, -10.0f, -100.0f,
-                                   -10.0f, -10.0f, -100.0f,
-                                   -10.0f, -10.0f, -100.0f,
-                                   -10.0f, -10.0f, -100.0f,
-                                   -10.0f, -10.0f, -100.0f,
-                                   -10.0f, -10.0f, -100.0f};
-    std::vector<float> max_coef = {10.0f, 10.0f, 100.0f,
-                                   10.0f, 10.0f, 100.0f,
-                                   10.0f, 10.0f, 100.0f,
-                                   10.0f, 10.0f, 100.0f,
-                                   10.0f, 10.0f, 100.0f,
-                                   10.0f, 10.0f, 100.0f};
+    std::vector<float> min_coef = {-1.0f, -1.0f, -1.0f,
+                                   -1.0f, -1.0f, -1.0f,
+                                   -1.0f, -1.0f, -1.0f,
+                                   -1.0f, -1.0f, -1.0f,
+                                   -1.0f, -1.0f, -1.0f,
+                                   -1.0f, -1.0f, -1.0f};
+    std::vector<float> max_coef = {1.0f, 1.0f, 1.0f,
+                                   1.0f, 1.0f, 1.0f,
+                                   1.0f, 1.0f, 1.0f,
+                                   1.0f, 1.0f, 1.0f,
+                                   1.0f, 1.0f, 1.0f,
+                                   1.0f, 1.0f, 1.0f};
 
     Matrix_W sum_est;
     std::vector<float> est_eq;
 
+    std::vector<float> agg_vector = agg_data->get_parameters("Active power");
+    /*double sum = std::accumulate(agg_vector.begin(), agg_vector.end(), 0.0);
+    double mean = sum / agg_vector.size();
+    std::vector<double> diff(agg_vector.size());
+    std::transform(agg_vector.begin(), agg_vector.end(), diff.begin(), [mean](double x) { return x - mean; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    double stdev = std::sqrt(sq_sum / v.size());*/
+    float agg_max = *max_element(agg_vector.begin(), agg_vector.end());
+    float agg_min = *min_element(agg_vector.begin(), agg_vector.end());
+
+
+
     // Iterate through training data
     for (int i = 0; i < agg_data->size(); i++) {
         agg = agg_data->get_one_parameter("Active power", i);
+        // Normalize agg
+        agg = (agg - agg_min) / (agg_max - agg_min);
+
         std::cout << std::endl << "Agg: " << agg << std::endl;
 
         // Iterate through each equipment
@@ -124,28 +139,31 @@ int main(){
             std::cout << "Eq " << j << " - " << act[j] << " ";
         }
 
-        auto pso = std::make_unique<PSO>(180000, 18, 1000, 100,
+        auto pso = std::make_unique<PSO>(18000, 18, 200, 100,
                                          min_coef, max_coef, 2.0f, 2.0f, 0.4f, 0.9f);
         pso->run();
+        /*auto gd = std::make_unique<GD>(1800, 18, 100, 0.001,
+                                       min_coef, max_coef, 0.1f);
+        gd->run();*/
+
         std::cout << "PSO run: " << i << " - fitness: " << pso->get_global_best().get_fitness() << std::endl;
         std::cout << " - pos 0: " << pso->get_global_best().get_position()[0] << std::endl;
         std::cout << " - pos 1: " << pso->get_global_best().get_position()[1] << std::endl;
         std::cout << " - pos 2: " << pso->get_global_best().get_position()[2] << std::endl;
 
         std::cout << "Eq 1 " << act[0] << "- Est: " <<
-        act[0] * (
-                pso->get_global_best().get_position()[0] +
-                pso->get_global_best().get_position()[1] * agg +
-                pso->get_global_best().get_position()[2] * pow(agg, 2))
+                act[0] * (
+                        pso->get_global_best().get_position()[0] +
+                        pso->get_global_best().get_position()[1] * agg +
+                        pso->get_global_best().get_position()[2] * pow(agg, 2))
         << std::endl;
-
 
         for (int j = 0; j < 6; j++) {
             if (act[j] == 1) {
                 est_eq.insert(est_eq.end(), {
-                    pso->get_global_best().get_position()[j * 3],
-                    pso->get_global_best().get_position()[j * 3 + 1],
-                    pso->get_global_best().get_position()[j * 3 + 2]
+                        pso->get_global_best().get_position()[j * 3],
+                        pso->get_global_best().get_position()[j * 3 + 1],
+                        pso->get_global_best().get_position()[j * 3 + 2]
                 });
                 sum_est.set_coefficients(est_eq, j);
                 sum_est.sum(est_eq, j);
@@ -163,6 +181,8 @@ int main(){
         std::cout << "c" << i << "4: " << sum_est.get_coefficients(i)[4] / std::count(st_data->get_parameters(4).begin(), st_data->get_parameters(4).end(), 1) << std::endl;
         std::cout << "c" << i << "5: " << sum_est.get_coefficients(i)[5] / std::count(st_data->get_parameters(5).begin(), st_data->get_parameters(5).end(), 1) << std::endl;
     }
+
+    // To estimate need to denormalize
 
     return 0;
 }

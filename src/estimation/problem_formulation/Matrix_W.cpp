@@ -7,16 +7,13 @@
 
 void Matrix_W::set_coefficients(const std::vector<float> &coef_0, const std::vector<float> &coef_1,
                                 const std::vector<float> &coef_2, const std::vector<float> &coef_3,
-                                const std::vector<float> &coef_4, const std::vector<float> &coef_5,
-                                const std::vector<float> &coef_6, const std::vector<float> &coef_7) {
+                                const std::vector<float> &coef_4, const std::vector<float> &coef_5) {
     this->coef_0 = coef_0;
     this->coef_1 = coef_1;
     this->coef_2 = coef_2;
     this->coef_3 = coef_3;
     this->coef_4 = coef_4;
     this->coef_5 = coef_5;
-    this->coef_6 = coef_6;
-    this->coef_7 = coef_7;
 }
 
 void Matrix_W::set_coefficients(const std::vector<float> &coef, const int equipment_number) {
@@ -39,12 +36,6 @@ void Matrix_W::set_coefficients(const std::vector<float> &coef, const int equipm
         case 5:
             this->coef_5 = coef;
             break;
-        case 6:
-            this->coef_6 = coef;
-            break;
-        case 7:
-            this->coef_7 = coef;
-            break;
         default:
             std::cerr << "Use valid equipment number!" << std::endl;
             throw;
@@ -65,10 +56,6 @@ std::vector<float> Matrix_W::get_coefficients(const int equipment_number) const 
             return coef_4;
         case 5:
             return coef_5;
-        case 6:
-            return coef_6;
-        case 7:
-            return coef_7;
         default:
             std::cerr << "Use valid equipment number!" << std::endl;
             throw;
@@ -76,17 +63,14 @@ std::vector<float> Matrix_W::get_coefficients(const int equipment_number) const 
 }
 
 void Matrix_W::sum(const std::vector<float> &coef_0, const std::vector<float> &coef_1,
-                                const std::vector<float> &coef_2, const std::vector<float> &coef_3,
-                                const std::vector<float> &coef_4, const std::vector<float> &coef_5,
-                                const std::vector<float> &coef_6, const std::vector<float> &coef_7) {
+                   const std::vector<float> &coef_2, const std::vector<float> &coef_3,
+                   const std::vector<float> &coef_4, const std::vector<float> &coef_5) {
     std::transform (this->coef_0.begin(), this->coef_0.end(), coef_0.begin(), this->coef_0.begin(), std::plus<float>());
     std::transform (this->coef_1.begin(), this->coef_1.end(), coef_1.begin(), this->coef_1.begin(), std::plus<float>());
     std::transform (this->coef_2.begin(), this->coef_2.end(), coef_2.begin(), this->coef_2.begin(), std::plus<float>());
     std::transform (this->coef_3.begin(), this->coef_3.end(), coef_3.begin(), this->coef_3.begin(), std::plus<float>());
     std::transform (this->coef_4.begin(), this->coef_4.end(), coef_4.begin(), this->coef_4.begin(), std::plus<float>());
     std::transform (this->coef_5.begin(), this->coef_5.end(), coef_5.begin(), this->coef_5.begin(), std::plus<float>());
-    std::transform (this->coef_6.begin(), this->coef_6.end(), coef_6.begin(), this->coef_6.begin(), std::plus<float>());
-    std::transform (this->coef_7.begin(), this->coef_7.end(), coef_7.begin(), this->coef_7.begin(), std::plus<float>());
 }
 
 void Matrix_W::sum(const std::vector<float> &coef, const int equipment_number) {
@@ -108,12 +92,6 @@ void Matrix_W::sum(const std::vector<float> &coef, const int equipment_number) {
             break;
         case 5:
             std::transform (this->coef_5.begin(), this->coef_5.end(), coef.begin(), this->coef_5.begin(), std::plus<float>());
-            break;
-        case 6:
-            std::transform (this->coef_6.begin(), this->coef_6.end(), coef.begin(), this->coef_6.begin(), std::plus<float>());
-            break;
-        case 7:
-            std::transform (this->coef_7.begin(), this->coef_7.end(), coef.begin(), this->coef_7.begin(), std::plus<float>());
             break;
         default:
             std::cerr << "Use valid equipment idx!" << std::endl;
