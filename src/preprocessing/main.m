@@ -19,7 +19,7 @@ close all; clear; clc;
 equip_data = read_equipment_csv(); % read dataset equipment csv, optional input (absolute path of equipment folder)
 
 % Identify common timestamps among equipment
-selected_equipment_index = [1, 2, 3, 4, 5, 6, 7, 8];
+selected_equipment_index = [1, 2, 3, 4, 7, 8];
 common_timestamps = find_common_timestamps(equip_data, selected_equipment_index);
 
 % Filter timestamps to obtain only those corresponding to days with relevant data
@@ -58,7 +58,7 @@ aggregate_formated_table = calculate_aggregate_all_feature(active_power_formated
 on_off_array = calculate_on_off(active_power_formated, 5, false);
 
 % Save final data
-[aggregate_training, on_off_training, aggregate_testing, on_off_testing] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, true);
+[aggregate_training, equipment_training, on_off_training, aggregate_testing, on_off_testing] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, false);
 
 
 
@@ -98,6 +98,7 @@ plot_data_select_day(aggregate_power, 1, 'Active Power [W]', false);
 
 % Plot aggregate features vs individual equipment active power
 plot_aggregate_vs_equipment(aggregate_formated_table, active_power_formated);
+plot_aggregate_vs_equipment(aggregate_training, equipment_training);
 
 
 

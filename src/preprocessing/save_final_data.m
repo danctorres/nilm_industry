@@ -1,4 +1,4 @@
-function [aggregate_training, aggregate_validation, on_off_training, on_off_validation, equipment_validation] = save_final_data(aggregate, on_off, equipment_active_pow, percentage_train, save)
+function [aggregate_training, equipment_training, aggregate_validation, on_off_training, on_off_validation, equipment_validation] = save_final_data(aggregate, on_off, equipment_active_pow, percentage_train, save)
     % Objective: divide data into training and validation, by appling adaptive binning
     % Input: aggregate_table and on_off_array
     % Output: aggregate_training, aggregate_validation, oregaten_off_training, on_off_validation
