@@ -74,21 +74,21 @@ void PSO::initialize_velocities() {
 }
 
 void PSO::initialize_personal_best() {
-    for (PSO_Particle &particle : pso_particles) {
-        particle.set_personal_best(particle);
+    for (PSO_Particle &pso_particle : pso_particles) {
+        pso_particle.set_personal_best(pso_particle);
     }
 }
 
 void PSO::update_personal_best() {
-    for (PSO_Particle &particle : pso_particles) {
-        if (particle.get_fitness() > particle.get_personal_best().get_fitness())
-            particle.set_personal_best(particle);
+    for (PSO_Particle &pso_particle : pso_particles) {
+        if (pso_particle.get_fitness() > pso_particle.get_personal_best().get_fitness())
+            pso_particle.set_personal_best(pso_particle);
     }
 }
 
 // Create pso particles from particles
 void PSO::adapter_particles_pso() {
-    for (auto &particle : particles) {
+    for (const auto &particle : particles) {
         PSO_Particle pso_par = PSO_Particle(particle);
         pso_particles.push_back(pso_par);
     }
@@ -96,9 +96,9 @@ void PSO::adapter_particles_pso() {
 
 // Change particles, in function of the pso particles
 void PSO::adapter_pso_particles() {
-    for (int i = 0; i < n_particles; i++) {
+    for (int i = 0; i < pso_particles.size(); i++) {
         particles[i].set_position(pso_particles[i].get_position());
-        particles[i].set_fitness(pso_particles[i].get_fitness());
+        //particles[i].set_fitness(pso_particles[i].get_fitness());
     }
 }
 
@@ -124,14 +124,15 @@ PSO::PSO(const int n_particles, const int rank, const int max_iter, const float 
     std::cout << "c1 = " << c1 << ", ";
     std::cout << "c2 = " << c1 << ", ";
     std::cout << "w_min = " << w_min << ", ";
-    std::cout << "w_max = " << w_max << " - " << std::endl;
+    std::cout << "w_max = " << w_max << std::endl;
+
 }
 
 void PSO::run() {
     // Main PSO loop
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0, 1.1);
+    std::uniform_real_distribution<> dis(0.0f, 2.0f);
     float w = 1.0f;
 
     float stop_condition = global_best.get_fitness();
@@ -157,11 +158,15 @@ void PSO::run() {
             for (int k = 0; k < rank; k++){
                 nv = w * vel[k] + c1 * r1 * (pb[k] - pos[k]) + c2 * r2 * (gb[k] - pos[k]);
 
-                if (nv < v_max[k] || nv > -v_max[k]){
-                    np = pos[k] + nv;
-                    new_velocity.push_back(nv);
-                    new_position.push_back(np);
+                if (nv > v_max[k]) {
+                    nv = v_max[k];
                 }
+                else if(nv < -v_max[k]) {
+                    nv = -v_max[k];
+                }
+                np = pos[k] + nv;
+                new_velocity.push_back(nv);
+                new_position.push_back(np);
             }
             pso_particle.set_velocity(new_velocity);
             pso_particle.set_position(new_position);
