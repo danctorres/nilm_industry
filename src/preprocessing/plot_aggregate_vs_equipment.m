@@ -11,7 +11,7 @@ function [] = plot_aggregate_vs_equipment(aggregate_formated_table, active_power
             plot(aggregate_formated_table.(i), active_power_formated.(j), '.')
             hold on
 
-            p = polyfit(aggregate_formated_table.(i), active_power_formated.(j), 3)
+            p = polyfit(aggregate_formated_table.(i), active_power_formated.(j), 2)
             f1 = polyval(p, aggregate_formated_table.(i));
             plot(aggregate_formated_table.(i), f1, '.')
             hold off
