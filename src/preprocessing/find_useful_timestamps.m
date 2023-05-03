@@ -35,4 +35,3 @@ function [useful_common_timestamps] = find_useful_timestamps(common_timestamps)
     
     useful_common_timestamps = common_timestamps(index);
 end
-
