@@ -2,9 +2,11 @@ data/processed/data_8_equipment/on_off_training.csv filter=lfs diff=lfs merge=lf
 data/processed/data_8_equipment/on_off_validation.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_8_equipment/aggregate_training.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_8_equipment/aggregate_validation.csv filter=lfs diff=lfs merge=lfs -text
+data/processed/data_8_equipment/equipment_training.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_8_equipment/equipment_validation.csv filter=lfs diff=lfs merge=lfs -text
+data/processed/data_6_equipment/on_off_training.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_6_equipment/on_off_validation.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_6_equipment/aggregate_training.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_6_equipment/aggregate_validation.csv filter=lfs diff=lfs merge=lfs -text
+data/processed/data_6_equipment/equipment_training.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_6_equipment/equipment_validation.csv filter=lfs diff=lfs merge=lfs -text
-data/processed/data_6_equipment/on_off_training.csv filter=lfs diff=lfs merge=lfs -text
