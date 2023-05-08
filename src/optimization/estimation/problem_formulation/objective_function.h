@@ -11,7 +11,7 @@
 #include <vector>
 
 extern float agg;
-extern std::vector<float> act;
+extern int act[6];
 extern const float lambda;
 
 float objective_function(const std::vector<float> &position);
