@@ -34,6 +34,10 @@ add_executable(estimation ${SOURCES} ${HEADERS})
 # Set the Clang++ compiler path
 # set(CMAKE_CXX_COMPILER "/usr/bin/clang")
 
+find_package(OpenMP REQUIRED)
+#find_package(OpenMP REQUIRED)
+#include_directories(${OpenCL_INCLUDE_DIRS})
+
 set_target_properties(estimation PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED YES
@@ -51,3 +55,7 @@ target_include_directories(estimation PUBLIC
         ${CMAKE_SOURCE_DIR}/newton
         ${CMAKE_SOURCE_DIR}/problem_formulation
 )
+
+#target_link_libraries(estimation ${OpenCL_LIBRARIES})
+target_link_libraries(estimation PRIVATE OpenMP::OpenMP_CXX)
+
