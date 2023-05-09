@@ -29,18 +29,18 @@
 float agg = 0.0f;
 int act[6] = {0};
 const float lambda = 1000;
-std::vector<float> min_coef = {-1.0f, -1.0f, -200.0f,
-                                -1.0f, -1.0f, -200.0f,
-                                -1.0f, -1.0f, -200.0f,
-                                -1.0f, -1.0f, -200.0f,
-                                -1.0f, -1.0f, -200.0f,
-                                -1.0f, -1.0f, -200.0f};
-std::vector<float> max_coef = {1.0f, 1.0f, 200.0f,
-                                1.0f, 1.0f, 200.0f,
-                                1.0f, 1.0f, 200.0f,
-                                1.0f, 1.0f, 200.0f,
-                                1.0f, 1.0f, 200.0f,
-                                1.0f, 1.0f, 200.0f};
+std::vector<float> min_coef = {-1.0f, -1.0f, -10.0f,
+                                -1.0f, -1.0f, -10.0f,
+                                -1.0f, -1.0f, -10.0f,
+                                -1.0f, -1.0f, -10.0f,
+                                -1.0f, -1.0f, -10.0f,
+                                -1.0f, -1.0f, -10.0f};
+std::vector<float> max_coef = {1.0f, 1.0f, 10.0f,
+                                1.0f, 1.0f, 10.0f,
+                                1.0f, 1.0f, 10.0f,
+                                1.0f, 1.0f, 10.0f,
+                                1.0f, 1.0f, 10.0f,
+                                1.0f, 1.0f, 10.0f};
 
 
 void estimation(float *sum_est, int *num_ON, const float agg_sample, Read_State &st_data, int sample_idx) {
@@ -86,11 +86,11 @@ int main(int argc, char *argv[]){
     auto st_data = std::make_unique<Read_State>("../../../../data/processed/data_6_equipment/on_off_training.csv");
 
     // Normalize
-    /* float agg_max = *max_element(agg_vector.begin(), agg_vector.end());
+    float agg_max = *max_element(agg_vector.begin(), agg_vector.end());
     float agg_min = *min_element(agg_vector.begin(), agg_vector.end());
     for (auto &agg_elem : agg_vector) {
-        agg_elem = (agg_vector[sample_idx] - agg_min) / (agg_max - agg_min); // Normalized
-    } */
+        agg_elem = (agg_elem - agg_min) / (agg_max - agg_min); // Normalized
+    }
 
     // Initialize constants
     float sum_est[18] = {0.0f};     // sum of estimated coefficients
