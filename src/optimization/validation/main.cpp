@@ -28,11 +28,11 @@ int main() {
     auto buff = est_coef->get_coef_eq(0);
 
     // Normalize agg_vector
-    /*auto max_agg = std::max_element(agg_vec.begin(), agg_vec.end());
+    auto max_agg = std::max_element(agg_vec.begin(), agg_vec.end());
     auto min_agg = std::min_element(agg_vec.begin(), agg_vec.end());
     for (auto& elem : agg_vec) {
         elem = (elem - *min_agg) / (*max_agg - *min_agg);
-    }*/
+    }
 
     for (int i = 0; i < agg_vec.size(); i++) {
         for (int j = 0; j < 6; j++) {
@@ -45,7 +45,7 @@ int main() {
         }
     }
 
-    //est->denormalize_all();
+    est->denormalize_all();
 
     auto error_eq0 = std::make_unique<Error>(est->get_eq(0), eq_val->get_eq(0));
     auto error_eq1 = std::make_unique<Error>(est->get_eq(1), eq_val->get_eq(1));
