@@ -11,7 +11,7 @@
 #include "Read.h"
 
 
-class Read_Aggregate : public Read{
+class Read_Aggregate : public Read {
 public:
     Read_Aggregate(const std::string& name_file);
 

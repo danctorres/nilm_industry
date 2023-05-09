@@ -11,7 +11,7 @@
 #include "Read.h"
 
 
-class Read_State : public Read{
+class Read_State : public Read {
 public:
     Read_State(const std::string& name_file);
 

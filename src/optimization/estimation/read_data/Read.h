@@ -13,7 +13,7 @@
 #include <vector>
 
 
-class Read{
+class Read {
 public:
     Read();
     Read(const std::string& name_file);

@@ -3,29 +3,29 @@ cmake_minimum_required (VERSION 3.10)
 project (estimation)
 
 file(GLOB_RECURSE HEADERS
-        "${CMAKE_SOURCE_DIR}/main.h"
-        "${CMAKE_SOURCE_DIR}/read_data/*.h"
-        "${CMAKE_SOURCE_DIR}/optimization_interface/*.h"
-        "${CMAKE_SOURCE_DIR}/pso/*.h"
-        "${CMAKE_SOURCE_DIR}/simulated_annealing/*.h"
-        "${CMAKE_SOURCE_DIR}/ant_colony/*.h"
-        "${CMAKE_SOURCE_DIR}/genetic_algorithm/*.h"
-        "${CMAKE_SOURCE_DIR}/gradient_descent/*.h"
-        "${CMAKE_SOURCE_DIR}/newton/*.h"
-        "${CMAKE_SOURCE_DIR}/problem_formulation/*.h"
+        "main.h"
+        "read_data/*.h"
+        "optimization_interface/*.h"
+        "pso/*.h"
+        "simulated_annealing/*.h"
+        "ant_colony/*.h"
+        "genetic_algorithm/*.h"
+        "gradient_descent/*.h"
+        "newton/*.h"
+        "problem_formulation/*.h"
 )
 
 file(GLOB_RECURSE SOURCES
-        "${CMAKE_SOURCE_DIR}/main.cpp"
-        "${CMAKE_SOURCE_DIR}/read_data/*.cpp"
-        "${CMAKE_SOURCE_DIR}/optimization_interface/*.cpp"
-        "${CMAKE_SOURCE_DIR}/pso/*.cpp"
-        "${CMAKE_SOURCE_DIR}/simulated_annealing/*.cpp"
-        "${CMAKE_SOURCE_DIR}/ant_colony/*.cpp"
-        "${CMAKE_SOURCE_DIR}/genetic_algorithm/*.cpp"
-        "${CMAKE_SOURCE_DIR}/gradient_descent/*.cpp"
-        "${CMAKE_SOURCE_DIR}/newton/*.cpp"
-        "${CMAKE_SOURCE_DIR}/problem_formulation/*.cpp"
+        "main.cpp"
+        "read_data/*.cpp"
+        "optimization_interface/*.cpp"
+        "pso/*.cpp"
+        "simulated_annealing/*.cpp"
+        "ant_colony/*.cpp"
+        "genetic_algorithm/*.cpp"
+        "gradient_descent/*.cpp"
+        "newton/*.cpp"
+        "problem_formulation/*.cpp"
 )
 
 # Define the executable target
@@ -45,15 +45,15 @@ set_target_properties(estimation PROPERTIES
 
 # Include directories for the target
 target_include_directories(estimation PUBLIC
-        ${CMAKE_SOURCE_DIR}/read_data
-        ${CMAKE_SOURCE_DIR}/optimization_interface
-        ${CMAKE_SOURCE_DIR}/pso
-        ${CMAKE_SOURCE_DIR}/simulated_annealing
-        ${CMAKE_SOURCE_DIR}/ant_colony
-        ${CMAKE_SOURCE_DIR}/genetic_algorithm
-        ${CMAKE_SOURCE_DIR}/gradient_descent
-        ${CMAKE_SOURCE_DIR}/newton
-        ${CMAKE_SOURCE_DIR}/problem_formulation
+        read_data
+        optimization_interface
+        pso
+        simulated_annealing
+        ant_colony
+        genetic_algorithm
+        gradient_descent
+        newton
+        problem_formulation
 )
 
 #target_link_libraries(estimation ${OpenCL_LIBRARIES})

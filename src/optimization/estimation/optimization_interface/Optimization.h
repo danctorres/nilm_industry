@@ -74,7 +74,7 @@ public:
 
 protected:
     int n_particles;                    // number of particles
-    int rank;                           // rank of the polynomial function
+    int rank;                           // rank of the polynomial polynomial_function
     int max_iter;                       // max number of algorithm iterations
     float threshold;                    // stop if global best bellow threshold
     std::vector<float> min_pos;

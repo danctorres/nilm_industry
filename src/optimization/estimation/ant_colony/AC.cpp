@@ -80,7 +80,7 @@ std::vector<float> AC::calculate_probabilities() {
     return probs;
 }
 
-// Each Gaussian kernel has one Gaussian function
+// Each Gaussian kernel has one Gaussian polynomial_function
 // Returns vector of all the indexes for each ant
 std::vector<int> AC::select_gaussian() {
     std::vector<int> gauss_idx;
@@ -89,7 +89,7 @@ std::vector<int> AC::select_gaussian() {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0f, 1.0f);
-    // Selects one Gaussian function for each Gaussian Kernel
+    // Selects one Gaussian polynomial_function for each Gaussian Kernel
     for (int i = rank; i > 0 ; i--) {
         cumulative_prob = 0.0f;
         rand_num = dis(gen);
@@ -152,7 +152,7 @@ AC::AC(const int n_particles, const int rank, const int max_iter, const float th
     initialize_optimization();
     sort_particles();                               // Sort particles in descending order
     initialize_weights();                           // Calculate the weight vector w
-    set_probabilities(calculate_probabilities());   // Calculate the probability of selecting each Gaussian function
+    set_probabilities(calculate_probabilities());   // Calculate the probability of selecting each Gaussian polynomial_function
 
     std::cout << "- Number of solutions = " << n_particles << ", q = " << q << ", xi = " << xi << " -" << std::endl;
 }
@@ -167,8 +167,8 @@ void AC::run(){
 
     for (int i = 0; i < max_iter; i++) {
         for (int j = 0; j < number_ants; j++) {
-            gaussian_index = select_gaussian();              // Select one Gaussian function per Gaussian kernel
-            std_vector = calculate_all_std(gaussian_index);  // Vector with the std for each Gaussian function
+            gaussian_index = select_gaussian();              // Select one Gaussian polynomial_function per Gaussian kernel
+            std_vector = calculate_all_std(gaussian_index);  // Vector with the std for each Gaussian polynomial_function
             new_particles.push_back(Particle(sample_new_particle(gaussian_index, std_vector)));
         }
         calculate_set_fitness(new_particles);
