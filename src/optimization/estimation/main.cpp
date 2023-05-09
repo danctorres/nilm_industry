@@ -28,19 +28,19 @@
 
 float agg = 0.0f;
 int act[6] = {0};
-const float lambda = 1000;
-std::vector<float> min_coef = {-1.0f, -1.0f, -10.0f,
-                                -1.0f, -1.0f, -10.0f,
-                                -1.0f, -1.0f, -10.0f,
-                                -1.0f, -1.0f, -10.0f,
-                                -1.0f, -1.0f, -10.0f,
-                                -1.0f, -1.0f, -10.0f};
-std::vector<float> max_coef = {1.0f, 1.0f, 10.0f,
-                                1.0f, 1.0f, 10.0f,
-                                1.0f, 1.0f, 10.0f,
-                                1.0f, 1.0f, 10.0f,
-                                1.0f, 1.0f, 10.0f,
-                                1.0f, 1.0f, 10.0f};
+const float lambda = 100.0f;
+std::vector<float> min_coef = {-1.0f, -1.0f, -1.0f,
+                               -1.0f, -1.0f, -1.0f,
+                               -1.0f, -1.0f, -1.0f,
+                                -1.0f, -1.0f, -1.0f,
+                                -1.0f, -1.0f, -1.0f,
+                                -1.0f, -1.0f, -1.0f};
+std::vector<float> max_coef = {1.0f, 1.0f, 1.0f,
+                                1.0f, 1.0f, 1.0f,
+                                1.0f, 1.0f, 1.0f,
+                                1.0f, 1.0f, 1.0f,
+                                1.0f, 1.0f, 1.0f,
+                                1.0f, 1.0f, 1.0f};
 
 
 void estimation(float *sum_est, int *num_ON, const float agg_sample, Read_State &st_data, int sample_idx) {
@@ -99,14 +99,14 @@ int main(int argc, char *argv[]){
     if (argc > 1 && std::string(argv[1]) == "--parallel") {
         std::cout << "--- Running parallel optimization with opencl ---" << std::endl;
         #pragma omp parallel for
-        for (int i = 0; i < agg_data->size(); i++) {
+        for (int i = 0; i < agg_vector.size(); i++) {
             estimation(sum_est, num_ON, agg_vector[i], *st_data, i);
         }
     }
     else {
         std::cout << "--- Running sequential optimization ---" << std::endl;
         // Iterate through training data
-        for (int i = 0; i < agg_data->size(); i++) {
+        for (int i = 0; i < agg_vector.size(); i++) {
             estimation(sum_est, num_ON, agg_vector[i], *st_data, i);
         }
     }
