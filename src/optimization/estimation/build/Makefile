@@ -441,30 +441,6 @@ read_data/Read_Aggregate.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.s
 .PHONY : read_data/Read_Aggregate.cpp.s
 
-read_data/Read_Coef.o: read_data/Read_Coef.cpp.o
-.PHONY : read_data/Read_Coef.o
-
-# target to build an object file
-read_data/Read_Coef.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o
-.PHONY : read_data/Read_Coef.cpp.o
-
-read_data/Read_Coef.i: read_data/Read_Coef.cpp.i
-.PHONY : read_data/Read_Coef.i
-
-# target to preprocess a source file
-read_data/Read_Coef.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.i
-.PHONY : read_data/Read_Coef.cpp.i
-
-read_data/Read_Coef.s: read_data/Read_Coef.cpp.s
-.PHONY : read_data/Read_Coef.s
-
-# target to generate assembly for a file
-read_data/Read_Coef.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.s
-.PHONY : read_data/Read_Coef.cpp.s
-
 read_data/Read_State.o: read_data/Read_State.cpp.o
 .PHONY : read_data/Read_State.o
 
@@ -561,9 +537,6 @@ help:
 	@echo "... read_data/Read_Aggregate.o"
 	@echo "... read_data/Read_Aggregate.i"
 	@echo "... read_data/Read_Aggregate.s"
-	@echo "... read_data/Read_Coef.o"
-	@echo "... read_data/Read_Coef.i"
-	@echo "... read_data/Read_Coef.s"
 	@echo "... read_data/Read_State.o"
 	@echo "... read_data/Read_State.i"
 	@echo "... read_data/Read_State.s"

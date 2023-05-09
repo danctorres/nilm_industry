@@ -56,7 +56,7 @@ void Newton::run() {
 
             if (std::count(hess.begin(), hess.end(), 0)){
                 std::cout << "The Hessian is non invertible."
-                             " Newton method is not applicable to the objective function." << std::endl;
+                             " Newton method is not applicable to the objective polynomial_function." << std::endl;
                 calculate_set_fitness();
                 update_global_best();
                 return;

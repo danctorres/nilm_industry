@@ -8,10 +8,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "Read.h"
+#include "../../estimation/read_data/Read.h"
 
 
-class Read_Coef : public Read{
+class Read_Coef : public Read {
 public:
     Read_Coef(const std::string& name_file);
     std::vector<float> get_coef_eq(const int eq_idx) const;

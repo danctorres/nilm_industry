@@ -24,7 +24,7 @@ public:
     void sum(const std::vector<float> &coef, const int equipment_number);
 
 private:
-    // Coefficients for the polynomial equipment function
+    // Coefficients for the polynomial equipment polynomial_function
     std::vector<float> coef_0;
     std::vector<float> coef_1;
     std::vector<float> coef_2;

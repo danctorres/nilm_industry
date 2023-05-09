@@ -251,24 +251,10 @@ CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp -o CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.s
 
-CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o: CMakeFiles/estimation.dir/flags.make
-CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Coef.cpp
-CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o -MF CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o.d -o CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Coef.cpp
-
-CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Coef.cpp > CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.i
-
-CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Coef.cpp -o CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.s
-
 CMakeFiles/estimation.dir/read_data/Read_State.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/read_data/Read_State.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp
 CMakeFiles/estimation.dir/read_data/Read_State.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/estimation.dir/read_data/Read_State.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/estimation.dir/read_data/Read_State.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/read_data/Read_State.cpp.o -MF CMakeFiles/estimation.dir/read_data/Read_State.cpp.o.d -o CMakeFiles/estimation.dir/read_data/Read_State.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp
 
 CMakeFiles/estimation.dir/read_data/Read_State.cpp.i: cmake_force
@@ -282,7 +268,7 @@ CMakeFiles/estimation.dir/read_data/Read_State.cpp.s: cmake_force
 CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/simulated_annealing/SA.cpp
 CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o -MF CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o.d -o CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/simulated_annealing/SA.cpp
 
 CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.i: cmake_force
@@ -308,7 +294,6 @@ estimation_OBJECTS = \
 "CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o" \
 "CMakeFiles/estimation.dir/read_data/Read.cpp.o" \
 "CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o" \
-"CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o" \
 "CMakeFiles/estimation.dir/read_data/Read_State.cpp.o" \
 "CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o"
 
@@ -328,14 +313,13 @@ estimation: CMakeFiles/estimation.dir/pso/PSO.cpp.o
 estimation: CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o
 estimation: CMakeFiles/estimation.dir/read_data/Read.cpp.o
 estimation: CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o
-estimation: CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o
 estimation: CMakeFiles/estimation.dir/read_data/Read_State.cpp.o
 estimation: CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o
 estimation: CMakeFiles/estimation.dir/build.make
 estimation: /usr/lib/libgomp.so
 estimation: /usr/lib/libpthread.a
 estimation: CMakeFiles/estimation.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Linking CXX executable estimation"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Linking CXX executable estimation"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/estimation.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

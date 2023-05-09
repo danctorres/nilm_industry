@@ -94,7 +94,7 @@ void PSO::adapter_particles_pso() {
     }
 }
 
-// Change particles, in function of the pso particles
+// Change particles, in polynomial_function of the pso particles
 void PSO::adapter_pso_particles() {
     for (int i = 0; i < pso_particles.size(); i++) {
         particles[i].set_position(pso_particles[i].get_position());

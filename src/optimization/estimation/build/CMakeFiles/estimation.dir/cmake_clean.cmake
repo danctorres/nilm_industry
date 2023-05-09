@@ -25,8 +25,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/estimation.dir/read_data/Read.cpp.o.d"
   "CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o"
   "CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o.d"
-  "CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o"
-  "CMakeFiles/estimation.dir/read_data/Read_Coef.cpp.o.d"
   "CMakeFiles/estimation.dir/read_data/Read_State.cpp.o"
   "CMakeFiles/estimation.dir/read_data/Read_State.cpp.o.d"
   "CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o"
