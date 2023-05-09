@@ -44,7 +44,7 @@ Error::Error(const std::vector<float> &est, const std::vector<float> &actual) {
     float act_mean = std::accumulate(actual.begin(), actual.end(), 0.0) / actual.size();
 
     for (int i = 0; i < est.size(); i++) {
-        std::cout << "Actual: " << actual[i]  << "Estimated: " << est[i] << std::endl;
+        //std::cout << "Actual: " << actual[i]  << " Estimated: " << est[i] << std::endl;
 
         mae_buff += fabs(actual[i] - est[i]);
         mse_buff += pow(actual[i] - est[i], 2);

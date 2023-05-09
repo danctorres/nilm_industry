@@ -28,15 +28,14 @@ int main() {
     auto buff = est_coef->get_coef_eq(0);
 
     // Normalize agg_vector
-    auto max_agg = std::max_element(agg_vec.begin(), agg_vec.end());
-    auto min_agg = std::min_element(agg_vec.begin(), agg_vec.end());
-    for (auto& elem : agg_vec) {
-        elem = (elem - *min_agg) / (*max_agg - *min_agg);
+    auto max_agg = *std::max_element(agg_vec.begin(), agg_vec.end());
+    auto min_agg = *std::min_element(agg_vec.begin(), agg_vec.end());
+    for (int i = 0; i < agg_vec.size(); i++) {
+        agg_vec[i] = (agg_vec[i] - min_agg) / (max_agg - min_agg);
     }
 
     for (int i = 0; i < agg_vec.size(); i++) {
         for (int j = 0; j < 6; j++) {
-            // std::cout << "pol: " << pol_func(agg_vec[i],st_val->get_one_parameter(j, i), est_coef->get_coef_eq(j)) << std::endl;
 
             est->set_est(pol_func(agg_vec[i],
                                             st_val->get_one_parameter(j, i),
@@ -45,7 +44,8 @@ int main() {
         }
     }
 
-    est->denormalize_all();
+    est->denormalize_all_specific();
+    //est->denormalize_all();
 
     auto error_eq0 = std::make_unique<Error>(est->get_eq(0), eq_val->get_eq(0));
     auto error_eq1 = std::make_unique<Error>(est->get_eq(1), eq_val->get_eq(1));
@@ -54,12 +54,13 @@ int main() {
     auto error_eq4 = std::make_unique<Error>(est->get_eq(4), eq_val->get_eq(4));
     auto error_eq5 = std::make_unique<Error>(est->get_eq(5), eq_val->get_eq(5));
 
-    std::cout << "MAE eq0: " << error_eq0->get_mae() << std::endl;
-    std::cout << "MAE eq1: " << error_eq1->get_mae() << std::endl;
-    std::cout << "MAE eq2: " << error_eq2->get_mae() << std::endl;
-    std::cout << "MAE eq3: " << error_eq3->get_mae() << std::endl;
-    std::cout << "MAE eq4: " << error_eq4->get_mae() << std::endl;
-    std::cout << "MAE eq5: " << error_eq5->get_mae() << std::endl;
-
+    std::cout << "MAE: " << error_eq0->get_mae() << "  " << error_eq1->get_mae() << " " << error_eq2->get_mae()
+    << " " << error_eq3->get_mae() << " " << error_eq4->get_mae() << " " << error_eq5->get_mae() << std::endl;
+    std::cout << "MSE: " << error_eq0->get_mse() << "  " << error_eq1->get_mse() << " " << error_eq2->get_mse()
+              << " " << error_eq3->get_mse() << " " << error_eq4->get_mse() << " " << error_eq5->get_mse() << std::endl;
+    std::cout << "RMSE: " << error_eq0->get_rmse() << "  " << error_eq1->get_rmse() << " " << error_eq2->get_rmse()
+              << " " << error_eq3->get_rmse() << " " << error_eq4->get_rmse() << " " << error_eq5->get_rmse() << std::endl;
+    std::cout << "R2: " << error_eq0->get_r2() << "  " << error_eq1->get_r2() << " " << error_eq2->get_r2()
+              << " " << error_eq3->get_r2() << " " << error_eq4->get_r2() << " " << error_eq5->get_r2() << std::endl;
     return 0;
 }

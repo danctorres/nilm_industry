@@ -18,6 +18,8 @@ public:
 
     void denormalize(std::vector<float> &est_vec);
     void denormalize_all();
+    void denormalize_minmax(std::vector<float> &est_vec, const float min, const float max);
+    void denormalize_all_specific();
 private:
     std::vector<float> est_eq0;
     std::vector<float> est_eq1;
