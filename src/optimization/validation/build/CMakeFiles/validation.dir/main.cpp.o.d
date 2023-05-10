@@ -180,8 +180,8 @@ CMakeFiles/validation.dir/main.cpp.o: \
  /usr/include/c++/13.1.1/vector /usr/include/c++/13.1.1/bits/stl_vector.h \
  /usr/include/c++/13.1.1/bits/stl_bvector.h \
  /usr/include/c++/13.1.1/bits/vector.tcc \
- /home/danctorres/nilm_industry/src/optimization/validation/read_data/Read_Coef.h \
- /home/danctorres/nilm_industry/src/optimization/validation/read_data/../../estimation/read_data/Read.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/handle_data/Read_Coef.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/handle_data/../../estimation/handle_data/Read.h \
  /usr/include/c++/13.1.1/algorithm \
  /usr/include/c++/13.1.1/bits/stl_algo.h \
  /usr/include/c++/13.1.1/bits/algorithmfwd.h \
@@ -194,10 +194,13 @@ CMakeFiles/validation.dir/main.cpp.o: \
  /usr/include/c++/13.1.1/x86_64-pc-linux-gnu/bits/c++io.h \
  /usr/include/c++/13.1.1/bits/fstream.tcc /usr/include/c++/13.1.1/sstream \
  /usr/include/c++/13.1.1/bits/sstream.tcc \
- /home/danctorres/nilm_industry/src/optimization/validation/../estimation/read_data/Read_Aggregate.h \
- /home/danctorres/nilm_industry/src/optimization/validation/../estimation/read_data/Read.h \
- /home/danctorres/nilm_industry/src/optimization/validation/../estimation/read_data/Read_State.h \
- /home/danctorres/nilm_industry/src/optimization/validation/read_data/Read_Eq.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/../estimation/handle_data/Read_Aggregate.h \
+ /usr/include/c++/13.1.1/variant \
+ /usr/include/c++/13.1.1/bits/enable_special_members.h \
+ /usr/include/c++/13.1.1/bits/parse_numbers.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/../estimation/handle_data/Read.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/../estimation/handle_data/Read_State.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/handle_data/Read_Eq.h \
  /home/danctorres/nilm_industry/src/optimization/validation/polynomial_function/polynomial_function.h \
  /usr/include/c++/13.1.1/cmath /usr/include/math.h \
  /usr/include/bits/math-vector.h /usr/include/bits/libm-simd-decl-stubs.h \
@@ -222,4 +225,7 @@ CMakeFiles/validation.dir/main.cpp.o: \
  /home/danctorres/nilm_industry/src/optimization/validation/error/Error.h \
  /usr/include/c++/13.1.1/numeric \
  /usr/include/c++/13.1.1/bits/stl_numeric.h \
- /usr/include/c++/13.1.1/pstl/glue_numeric_defs.h
+ /usr/include/c++/13.1.1/pstl/glue_numeric_defs.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/handle_data/save_estimates.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/handle_data/../../estimation/handle_data/Read_Aggregate.h \
+ /home/danctorres/nilm_industry/src/optimization/validation/handle_data/../estimations/Estimations.h

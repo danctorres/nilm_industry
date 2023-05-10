@@ -201,6 +201,102 @@ gradient_descent/GD.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/gradient_descent/GD.cpp.s
 .PHONY : gradient_descent/GD.cpp.s
 
+handle_data/Read.o: handle_data/Read.cpp.o
+.PHONY : handle_data/Read.o
+
+# target to build an object file
+handle_data/Read.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read.cpp.o
+.PHONY : handle_data/Read.cpp.o
+
+handle_data/Read.i: handle_data/Read.cpp.i
+.PHONY : handle_data/Read.i
+
+# target to preprocess a source file
+handle_data/Read.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read.cpp.i
+.PHONY : handle_data/Read.cpp.i
+
+handle_data/Read.s: handle_data/Read.cpp.s
+.PHONY : handle_data/Read.s
+
+# target to generate assembly for a file
+handle_data/Read.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read.cpp.s
+.PHONY : handle_data/Read.cpp.s
+
+handle_data/Read_Aggregate.o: handle_data/Read_Aggregate.cpp.o
+.PHONY : handle_data/Read_Aggregate.o
+
+# target to build an object file
+handle_data/Read_Aggregate.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o
+.PHONY : handle_data/Read_Aggregate.cpp.o
+
+handle_data/Read_Aggregate.i: handle_data/Read_Aggregate.cpp.i
+.PHONY : handle_data/Read_Aggregate.i
+
+# target to preprocess a source file
+handle_data/Read_Aggregate.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.i
+.PHONY : handle_data/Read_Aggregate.cpp.i
+
+handle_data/Read_Aggregate.s: handle_data/Read_Aggregate.cpp.s
+.PHONY : handle_data/Read_Aggregate.s
+
+# target to generate assembly for a file
+handle_data/Read_Aggregate.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.s
+.PHONY : handle_data/Read_Aggregate.cpp.s
+
+handle_data/Read_State.o: handle_data/Read_State.cpp.o
+.PHONY : handle_data/Read_State.o
+
+# target to build an object file
+handle_data/Read_State.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o
+.PHONY : handle_data/Read_State.cpp.o
+
+handle_data/Read_State.i: handle_data/Read_State.cpp.i
+.PHONY : handle_data/Read_State.i
+
+# target to preprocess a source file
+handle_data/Read_State.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read_State.cpp.i
+.PHONY : handle_data/Read_State.cpp.i
+
+handle_data/Read_State.s: handle_data/Read_State.cpp.s
+.PHONY : handle_data/Read_State.s
+
+# target to generate assembly for a file
+handle_data/Read_State.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/Read_State.cpp.s
+.PHONY : handle_data/Read_State.cpp.s
+
+handle_data/save_coef.o: handle_data/save_coef.cpp.o
+.PHONY : handle_data/save_coef.o
+
+# target to build an object file
+handle_data/save_coef.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o
+.PHONY : handle_data/save_coef.cpp.o
+
+handle_data/save_coef.i: handle_data/save_coef.cpp.i
+.PHONY : handle_data/save_coef.i
+
+# target to preprocess a source file
+handle_data/save_coef.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/save_coef.cpp.i
+.PHONY : handle_data/save_coef.cpp.i
+
+handle_data/save_coef.s: handle_data/save_coef.cpp.s
+.PHONY : handle_data/save_coef.s
+
+# target to generate assembly for a file
+handle_data/save_coef.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/handle_data/save_coef.cpp.s
+.PHONY : handle_data/save_coef.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -393,78 +489,6 @@ pso/PSO_Particle.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.s
 .PHONY : pso/PSO_Particle.cpp.s
 
-read_data/Read.o: read_data/Read.cpp.o
-.PHONY : read_data/Read.o
-
-# target to build an object file
-read_data/Read.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read.cpp.o
-.PHONY : read_data/Read.cpp.o
-
-read_data/Read.i: read_data/Read.cpp.i
-.PHONY : read_data/Read.i
-
-# target to preprocess a source file
-read_data/Read.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read.cpp.i
-.PHONY : read_data/Read.cpp.i
-
-read_data/Read.s: read_data/Read.cpp.s
-.PHONY : read_data/Read.s
-
-# target to generate assembly for a file
-read_data/Read.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read.cpp.s
-.PHONY : read_data/Read.cpp.s
-
-read_data/Read_Aggregate.o: read_data/Read_Aggregate.cpp.o
-.PHONY : read_data/Read_Aggregate.o
-
-# target to build an object file
-read_data/Read_Aggregate.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o
-.PHONY : read_data/Read_Aggregate.cpp.o
-
-read_data/Read_Aggregate.i: read_data/Read_Aggregate.cpp.i
-.PHONY : read_data/Read_Aggregate.i
-
-# target to preprocess a source file
-read_data/Read_Aggregate.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.i
-.PHONY : read_data/Read_Aggregate.cpp.i
-
-read_data/Read_Aggregate.s: read_data/Read_Aggregate.cpp.s
-.PHONY : read_data/Read_Aggregate.s
-
-# target to generate assembly for a file
-read_data/Read_Aggregate.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.s
-.PHONY : read_data/Read_Aggregate.cpp.s
-
-read_data/Read_State.o: read_data/Read_State.cpp.o
-.PHONY : read_data/Read_State.o
-
-# target to build an object file
-read_data/Read_State.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_State.cpp.o
-.PHONY : read_data/Read_State.cpp.o
-
-read_data/Read_State.i: read_data/Read_State.cpp.i
-.PHONY : read_data/Read_State.i
-
-# target to preprocess a source file
-read_data/Read_State.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_State.cpp.i
-.PHONY : read_data/Read_State.cpp.i
-
-read_data/Read_State.s: read_data/Read_State.cpp.s
-.PHONY : read_data/Read_State.s
-
-# target to generate assembly for a file
-read_data/Read_State.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/estimation.dir/build.make CMakeFiles/estimation.dir/read_data/Read_State.cpp.s
-.PHONY : read_data/Read_State.cpp.s
-
 simulated_annealing/SA.o: simulated_annealing/SA.cpp.o
 .PHONY : simulated_annealing/SA.o
 
@@ -507,6 +531,18 @@ help:
 	@echo "... gradient_descent/GD.o"
 	@echo "... gradient_descent/GD.i"
 	@echo "... gradient_descent/GD.s"
+	@echo "... handle_data/Read.o"
+	@echo "... handle_data/Read.i"
+	@echo "... handle_data/Read.s"
+	@echo "... handle_data/Read_Aggregate.o"
+	@echo "... handle_data/Read_Aggregate.i"
+	@echo "... handle_data/Read_Aggregate.s"
+	@echo "... handle_data/Read_State.o"
+	@echo "... handle_data/Read_State.i"
+	@echo "... handle_data/Read_State.s"
+	@echo "... handle_data/save_coef.o"
+	@echo "... handle_data/save_coef.i"
+	@echo "... handle_data/save_coef.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
@@ -531,15 +567,6 @@ help:
 	@echo "... pso/PSO_Particle.o"
 	@echo "... pso/PSO_Particle.i"
 	@echo "... pso/PSO_Particle.s"
-	@echo "... read_data/Read.o"
-	@echo "... read_data/Read.i"
-	@echo "... read_data/Read.s"
-	@echo "... read_data/Read_Aggregate.o"
-	@echo "... read_data/Read_Aggregate.i"
-	@echo "... read_data/Read_Aggregate.s"
-	@echo "... read_data/Read_State.o"
-	@echo "... read_data/Read_State.i"
-	@echo "... read_data/Read_State.s"
 	@echo "... simulated_annealing/SA.o"
 	@echo "... simulated_annealing/SA.i"
 	@echo "... simulated_annealing/SA.s"

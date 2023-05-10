@@ -177,77 +177,173 @@ estimations/Estimations.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/estimations/Estimations.cpp.s
 .PHONY : estimations/Estimations.cpp.s
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.o: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.o
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.o
+handle_data/Read_Coef.o: handle_data/Read_Coef.cpp.o
+.PHONY : handle_data/Read_Coef.o
 
 # target to build an object file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.o
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.o
+handle_data/Read_Coef.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/Read_Coef.cpp.o
+.PHONY : handle_data/Read_Coef.cpp.o
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.i: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.i
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.i
+handle_data/Read_Coef.i: handle_data/Read_Coef.cpp.i
+.PHONY : handle_data/Read_Coef.i
 
 # target to preprocess a source file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.i
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.i
+handle_data/Read_Coef.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/Read_Coef.cpp.i
+.PHONY : handle_data/Read_Coef.cpp.i
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.s: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.s
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.s
+handle_data/Read_Coef.s: handle_data/Read_Coef.cpp.s
+.PHONY : handle_data/Read_Coef.s
 
 # target to generate assembly for a file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.s
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp.s
+handle_data/Read_Coef.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/Read_Coef.cpp.s
+.PHONY : handle_data/Read_Coef.cpp.s
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.o: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.o
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.o
+handle_data/Read_Eq.o: handle_data/Read_Eq.cpp.o
+.PHONY : handle_data/Read_Eq.o
 
 # target to build an object file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.o
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.o
+handle_data/Read_Eq.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/Read_Eq.cpp.o
+.PHONY : handle_data/Read_Eq.cpp.o
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.i: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.i
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.i
+handle_data/Read_Eq.i: handle_data/Read_Eq.cpp.i
+.PHONY : handle_data/Read_Eq.i
 
 # target to preprocess a source file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.i
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.i
+handle_data/Read_Eq.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/Read_Eq.cpp.i
+.PHONY : handle_data/Read_Eq.cpp.i
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.s: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.s
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.s
+handle_data/Read_Eq.s: handle_data/Read_Eq.cpp.s
+.PHONY : handle_data/Read_Eq.s
 
 # target to generate assembly for a file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.s
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp.s
+handle_data/Read_Eq.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/Read_Eq.cpp.s
+.PHONY : handle_data/Read_Eq.cpp.s
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.o: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.o
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.o
+handle_data/save_estimates.o: handle_data/save_estimates.cpp.o
+.PHONY : handle_data/save_estimates.o
 
 # target to build an object file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.o
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.o
+handle_data/save_estimates.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/save_estimates.cpp.o
+.PHONY : handle_data/save_estimates.cpp.o
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.i: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.i
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.i
+handle_data/save_estimates.i: handle_data/save_estimates.cpp.i
+.PHONY : handle_data/save_estimates.i
 
 # target to preprocess a source file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.i
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.i
+handle_data/save_estimates.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/save_estimates.cpp.i
+.PHONY : handle_data/save_estimates.cpp.i
 
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.s: home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.s
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.s
+handle_data/save_estimates.s: handle_data/save_estimates.cpp.s
+.PHONY : handle_data/save_estimates.s
 
 # target to generate assembly for a file
-home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.s
-.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp.s
+handle_data/save_estimates.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/handle_data/save_estimates.cpp.s
+.PHONY : handle_data/save_estimates.cpp.s
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.o: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.o
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.o
+
+# target to build an object file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.o
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.o
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.i: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.i
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.i
+
+# target to preprocess a source file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.i
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.i
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.s: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.s
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.s
+
+# target to generate assembly for a file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.s
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp.s
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.o: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.o
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.o
+
+# target to build an object file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.o
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.o
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.i: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.i
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.i
+
+# target to preprocess a source file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.i
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.i
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.s: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.s
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.s
+
+# target to generate assembly for a file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.s
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp.s
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.o: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.o
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.o
+
+# target to build an object file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.o
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.o
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.i: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.i
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.i
+
+# target to preprocess a source file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.i
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.i
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.s: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.s
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.s
+
+# target to generate assembly for a file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.s
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp.s
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.o: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.o
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.o
+
+# target to build an object file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.o
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.o
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.i: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.i
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.i
+
+# target to preprocess a source file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.i
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.i
+
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.s: home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.s
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.s
+
+# target to generate assembly for a file
+home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.s
+.PHONY : home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp.s
 
 main.o: main.cpp.o
 .PHONY : main.o
@@ -297,54 +393,6 @@ polynomial_function/polynomial_function.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/polynomial_function/polynomial_function.cpp.s
 .PHONY : polynomial_function/polynomial_function.cpp.s
 
-read_data/Read_Coef.o: read_data/Read_Coef.cpp.o
-.PHONY : read_data/Read_Coef.o
-
-# target to build an object file
-read_data/Read_Coef.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/read_data/Read_Coef.cpp.o
-.PHONY : read_data/Read_Coef.cpp.o
-
-read_data/Read_Coef.i: read_data/Read_Coef.cpp.i
-.PHONY : read_data/Read_Coef.i
-
-# target to preprocess a source file
-read_data/Read_Coef.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/read_data/Read_Coef.cpp.i
-.PHONY : read_data/Read_Coef.cpp.i
-
-read_data/Read_Coef.s: read_data/Read_Coef.cpp.s
-.PHONY : read_data/Read_Coef.s
-
-# target to generate assembly for a file
-read_data/Read_Coef.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/read_data/Read_Coef.cpp.s
-.PHONY : read_data/Read_Coef.cpp.s
-
-read_data/Read_Eq.o: read_data/Read_Eq.cpp.o
-.PHONY : read_data/Read_Eq.o
-
-# target to build an object file
-read_data/Read_Eq.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/read_data/Read_Eq.cpp.o
-.PHONY : read_data/Read_Eq.cpp.o
-
-read_data/Read_Eq.i: read_data/Read_Eq.cpp.i
-.PHONY : read_data/Read_Eq.i
-
-# target to preprocess a source file
-read_data/Read_Eq.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/read_data/Read_Eq.cpp.i
-.PHONY : read_data/Read_Eq.cpp.i
-
-read_data/Read_Eq.s: read_data/Read_Eq.cpp.s
-.PHONY : read_data/Read_Eq.s
-
-# target to generate assembly for a file
-read_data/Read_Eq.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/validation.dir/build.make CMakeFiles/validation.dir/read_data/Read_Eq.cpp.s
-.PHONY : read_data/Read_Eq.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -360,27 +408,33 @@ help:
 	@echo "... estimations/Estimations.o"
 	@echo "... estimations/Estimations.i"
 	@echo "... estimations/Estimations.s"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.o"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.i"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.s"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.o"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.i"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.s"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.o"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.i"
-	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.s"
+	@echo "... handle_data/Read_Coef.o"
+	@echo "... handle_data/Read_Coef.i"
+	@echo "... handle_data/Read_Coef.s"
+	@echo "... handle_data/Read_Eq.o"
+	@echo "... handle_data/Read_Eq.i"
+	@echo "... handle_data/Read_Eq.s"
+	@echo "... handle_data/save_estimates.o"
+	@echo "... handle_data/save_estimates.i"
+	@echo "... handle_data/save_estimates.s"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.o"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.i"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.s"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.o"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.i"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.s"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.o"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.i"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.s"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.o"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.i"
+	@echo "... home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
 	@echo "... polynomial_function/polynomial_function.o"
 	@echo "... polynomial_function/polynomial_function.i"
 	@echo "... polynomial_function/polynomial_function.s"
-	@echo "... read_data/Read_Coef.o"
-	@echo "... read_data/Read_Coef.i"
-	@echo "... read_data/Read_Coef.s"
-	@echo "... read_data/Read_Eq.o"
-	@echo "... read_data/Read_Eq.i"
-	@echo "... read_data/Read_Eq.s"
 .PHONY : help
 
 

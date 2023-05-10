@@ -54,8 +54,8 @@ void Estimations::denormalize(std::vector<float> &est_vec) {
     auto min_val = *std::min_element(est_vec.begin(), est_vec.end());
     auto max_val = *std::max_element(est_vec.begin(), est_vec.end());
 
-    for (auto& elem : est_vec) {
-        elem = elem * (max_val - min_val) + min_val;
+    for (int i = 0; i < est_vec.size(); i++) {
+        est_vec[i] = est_vec[i] * (max_val - min_val) + min_val;
     }
 }
 
@@ -71,7 +71,9 @@ void Estimations::denormalize_all() {
 void Estimations::denormalize_minmax(std::vector<float> &est_vec, const float min, const float max) {
     for (auto& elem : est_vec) {
         //std::cout << " 1 elem: " << elem << std::endl;
-        elem = elem * (max - min) + min;
+        if (elem != 0) {
+            elem = elem * (max - min) + min;
+        }
     }
     /*for (auto& elem : est_vec) {
         std::cout << " 1 elem: " << elem << std::endl;

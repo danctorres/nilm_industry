@@ -111,10 +111,66 @@ CMakeFiles/estimation.dir/gradient_descent/GD.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/gradient_descent/GD.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/gradient_descent/GD.cpp -o CMakeFiles/estimation.dir/gradient_descent/GD.cpp.s
 
+CMakeFiles/estimation.dir/handle_data/Read.cpp.o: CMakeFiles/estimation.dir/flags.make
+CMakeFiles/estimation.dir/handle_data/Read.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp
+CMakeFiles/estimation.dir/handle_data/Read.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/estimation.dir/handle_data/Read.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/handle_data/Read.cpp.o -MF CMakeFiles/estimation.dir/handle_data/Read.cpp.o.d -o CMakeFiles/estimation.dir/handle_data/Read.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp
+
+CMakeFiles/estimation.dir/handle_data/Read.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/estimation.dir/handle_data/Read.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp > CMakeFiles/estimation.dir/handle_data/Read.cpp.i
+
+CMakeFiles/estimation.dir/handle_data/Read.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/handle_data/Read.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.cpp -o CMakeFiles/estimation.dir/handle_data/Read.cpp.s
+
+CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o: CMakeFiles/estimation.dir/flags.make
+CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp
+CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o -MF CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o.d -o CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp
+
+CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp > CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.i
+
+CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.cpp -o CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.s
+
+CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o: CMakeFiles/estimation.dir/flags.make
+CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp
+CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o -MF CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o.d -o CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp
+
+CMakeFiles/estimation.dir/handle_data/Read_State.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/estimation.dir/handle_data/Read_State.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp > CMakeFiles/estimation.dir/handle_data/Read_State.cpp.i
+
+CMakeFiles/estimation.dir/handle_data/Read_State.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/handle_data/Read_State.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.cpp -o CMakeFiles/estimation.dir/handle_data/Read_State.cpp.s
+
+CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o: CMakeFiles/estimation.dir/flags.make
+CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp
+CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o -MF CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o.d -o CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp
+
+CMakeFiles/estimation.dir/handle_data/save_coef.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/estimation.dir/handle_data/save_coef.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp > CMakeFiles/estimation.dir/handle_data/save_coef.cpp.i
+
+CMakeFiles/estimation.dir/handle_data/save_coef.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/handle_data/save_coef.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.cpp -o CMakeFiles/estimation.dir/handle_data/save_coef.cpp.s
+
 CMakeFiles/estimation.dir/main.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/main.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/main.cpp
 CMakeFiles/estimation.dir/main.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/estimation.dir/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/estimation.dir/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/main.cpp.o -MF CMakeFiles/estimation.dir/main.cpp.o.d -o CMakeFiles/estimation.dir/main.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/main.cpp
 
 CMakeFiles/estimation.dir/main.cpp.i: cmake_force
@@ -128,7 +184,7 @@ CMakeFiles/estimation.dir/main.cpp.s: cmake_force
 CMakeFiles/estimation.dir/newton/Newton.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/newton/Newton.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/newton/Newton.cpp
 CMakeFiles/estimation.dir/newton/Newton.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/estimation.dir/newton/Newton.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/estimation.dir/newton/Newton.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/newton/Newton.cpp.o -MF CMakeFiles/estimation.dir/newton/Newton.cpp.o.d -o CMakeFiles/estimation.dir/newton/Newton.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/newton/Newton.cpp
 
 CMakeFiles/estimation.dir/newton/Newton.cpp.i: cmake_force
@@ -142,7 +198,7 @@ CMakeFiles/estimation.dir/newton/Newton.cpp.s: cmake_force
 CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/optimization_interface/Optimization.cpp
 CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o -MF CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o.d -o CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/optimization_interface/Optimization.cpp
 
 CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.i: cmake_force
@@ -156,7 +212,7 @@ CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.s: cmake_force
 CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/optimization_interface/Particle.cpp
 CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.o -MF CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.o.d -o CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/optimization_interface/Particle.cpp
 
 CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.i: cmake_force
@@ -170,7 +226,7 @@ CMakeFiles/estimation.dir/optimization_interface/Particle.cpp.s: cmake_force
 CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/problem_formulation/Matrix_W.cpp
 CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o -MF CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o.d -o CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/problem_formulation/Matrix_W.cpp
 
 CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.i: cmake_force
@@ -184,7 +240,7 @@ CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.s: cmake_force
 CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/problem_formulation/objective_function.cpp
 CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o -MF CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o.d -o CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/problem_formulation/objective_function.cpp
 
 CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.i: cmake_force
@@ -198,7 +254,7 @@ CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.s: cmake_fo
 CMakeFiles/estimation.dir/pso/PSO.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/pso/PSO.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO.cpp
 CMakeFiles/estimation.dir/pso/PSO.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/estimation.dir/pso/PSO.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/estimation.dir/pso/PSO.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/pso/PSO.cpp.o -MF CMakeFiles/estimation.dir/pso/PSO.cpp.o.d -o CMakeFiles/estimation.dir/pso/PSO.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO.cpp
 
 CMakeFiles/estimation.dir/pso/PSO.cpp.i: cmake_force
@@ -212,7 +268,7 @@ CMakeFiles/estimation.dir/pso/PSO.cpp.s: cmake_force
 CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO_Particle.cpp
 CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o -MF CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o.d -o CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO_Particle.cpp
 
 CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.i: cmake_force
@@ -223,52 +279,10 @@ CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO_Particle.cpp -o CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.s
 
-CMakeFiles/estimation.dir/read_data/Read.cpp.o: CMakeFiles/estimation.dir/flags.make
-CMakeFiles/estimation.dir/read_data/Read.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp
-CMakeFiles/estimation.dir/read_data/Read.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/estimation.dir/read_data/Read.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/read_data/Read.cpp.o -MF CMakeFiles/estimation.dir/read_data/Read.cpp.o.d -o CMakeFiles/estimation.dir/read_data/Read.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp
-
-CMakeFiles/estimation.dir/read_data/Read.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/estimation.dir/read_data/Read.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp > CMakeFiles/estimation.dir/read_data/Read.cpp.i
-
-CMakeFiles/estimation.dir/read_data/Read.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/read_data/Read.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.cpp -o CMakeFiles/estimation.dir/read_data/Read.cpp.s
-
-CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o: CMakeFiles/estimation.dir/flags.make
-CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp
-CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o -MF CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o.d -o CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp
-
-CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp > CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.i
-
-CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.cpp -o CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.s
-
-CMakeFiles/estimation.dir/read_data/Read_State.cpp.o: CMakeFiles/estimation.dir/flags.make
-CMakeFiles/estimation.dir/read_data/Read_State.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp
-CMakeFiles/estimation.dir/read_data/Read_State.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/estimation.dir/read_data/Read_State.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/read_data/Read_State.cpp.o -MF CMakeFiles/estimation.dir/read_data/Read_State.cpp.o.d -o CMakeFiles/estimation.dir/read_data/Read_State.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp
-
-CMakeFiles/estimation.dir/read_data/Read_State.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/estimation.dir/read_data/Read_State.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp > CMakeFiles/estimation.dir/read_data/Read_State.cpp.i
-
-CMakeFiles/estimation.dir/read_data/Read_State.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/estimation.dir/read_data/Read_State.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.cpp -o CMakeFiles/estimation.dir/read_data/Read_State.cpp.s
-
 CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o: CMakeFiles/estimation.dir/flags.make
 CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o: /home/danctorres/nilm_industry/src/optimization/estimation/simulated_annealing/SA.cpp
 CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o: CMakeFiles/estimation.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o -MF CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o.d -o CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o -c /home/danctorres/nilm_industry/src/optimization/estimation/simulated_annealing/SA.cpp
 
 CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.i: cmake_force
@@ -284,6 +298,10 @@ estimation_OBJECTS = \
 "CMakeFiles/estimation.dir/ant_colony/AC.cpp.o" \
 "CMakeFiles/estimation.dir/genetic_algorithm/GA.cpp.o" \
 "CMakeFiles/estimation.dir/gradient_descent/GD.cpp.o" \
+"CMakeFiles/estimation.dir/handle_data/Read.cpp.o" \
+"CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o" \
+"CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o" \
+"CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o" \
 "CMakeFiles/estimation.dir/main.cpp.o" \
 "CMakeFiles/estimation.dir/newton/Newton.cpp.o" \
 "CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o" \
@@ -292,9 +310,6 @@ estimation_OBJECTS = \
 "CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o" \
 "CMakeFiles/estimation.dir/pso/PSO.cpp.o" \
 "CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o" \
-"CMakeFiles/estimation.dir/read_data/Read.cpp.o" \
-"CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o" \
-"CMakeFiles/estimation.dir/read_data/Read_State.cpp.o" \
 "CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o"
 
 # External object files for target estimation
@@ -303,6 +318,10 @@ estimation_EXTERNAL_OBJECTS =
 estimation: CMakeFiles/estimation.dir/ant_colony/AC.cpp.o
 estimation: CMakeFiles/estimation.dir/genetic_algorithm/GA.cpp.o
 estimation: CMakeFiles/estimation.dir/gradient_descent/GD.cpp.o
+estimation: CMakeFiles/estimation.dir/handle_data/Read.cpp.o
+estimation: CMakeFiles/estimation.dir/handle_data/Read_Aggregate.cpp.o
+estimation: CMakeFiles/estimation.dir/handle_data/Read_State.cpp.o
+estimation: CMakeFiles/estimation.dir/handle_data/save_coef.cpp.o
 estimation: CMakeFiles/estimation.dir/main.cpp.o
 estimation: CMakeFiles/estimation.dir/newton/Newton.cpp.o
 estimation: CMakeFiles/estimation.dir/optimization_interface/Optimization.cpp.o
@@ -311,15 +330,12 @@ estimation: CMakeFiles/estimation.dir/problem_formulation/Matrix_W.cpp.o
 estimation: CMakeFiles/estimation.dir/problem_formulation/objective_function.cpp.o
 estimation: CMakeFiles/estimation.dir/pso/PSO.cpp.o
 estimation: CMakeFiles/estimation.dir/pso/PSO_Particle.cpp.o
-estimation: CMakeFiles/estimation.dir/read_data/Read.cpp.o
-estimation: CMakeFiles/estimation.dir/read_data/Read_Aggregate.cpp.o
-estimation: CMakeFiles/estimation.dir/read_data/Read_State.cpp.o
 estimation: CMakeFiles/estimation.dir/simulated_annealing/SA.cpp.o
 estimation: CMakeFiles/estimation.dir/build.make
 estimation: /usr/lib/libgomp.so
 estimation: /usr/lib/libpthread.a
 estimation: CMakeFiles/estimation.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Linking CXX executable estimation"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/danctorres/nilm_industry/src/optimization/estimation/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Linking CXX executable estimation"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/estimation.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -212,10 +212,11 @@ CMakeFiles/estimation.dir/main.cpp.o: \
  /usr/include/c++/13.1.1/bits/ranges_uninitialized.h \
  /usr/include/c++/13.1.1/pstl/glue_memory_defs.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/13.1.1/include/omp.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_Aggregate.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/read_data/Read_State.h \
+ /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.h \
+ /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_Aggregate.h \
+ /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read.h \
+ /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/Read_State.h \
+ /home/danctorres/nilm_industry/src/optimization/estimation/handle_data/save_coef.h \
  /home/danctorres/nilm_industry/src/optimization/estimation/optimization_interface/Optimization.h \
  /usr/include/c++/13.1.1/cmath /usr/include/math.h \
  /usr/include/bits/math-vector.h /usr/include/bits/libm-simd-decl-stubs.h \
@@ -244,20 +245,7 @@ CMakeFiles/estimation.dir/main.cpp.o: \
  /home/danctorres/nilm_industry/src/optimization/estimation/optimization_interface/Particle.h \
  /home/danctorres/nilm_industry/src/optimization/estimation/optimization_interface/../problem_formulation/objective_function.h \
  /home/danctorres/nilm_industry/src/optimization/estimation/optimization_interface/Particle.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO_Particle.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/pso/../optimization_interface/Particle.h \
  /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO.h \
  /home/danctorres/nilm_industry/src/optimization/estimation/pso/../optimization_interface/Optimization.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO_Particle.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/simulated_annealing/SA.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/simulated_annealing/../optimization_interface/Optimization.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/ant_colony/AC.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/ant_colony/../optimization_interface/Optimization.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/genetic_algorithm/GA.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/genetic_algorithm/../optimization_interface/Optimization.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/newton/Newton.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/newton/../optimization_interface/Optimization.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/gradient_descent/GD.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/gradient_descent/../optimization_interface/Optimization.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/problem_formulation/Matrix_W.h \
- /home/danctorres/nilm_industry/src/optimization/estimation/problem_formulation/objective_function.h
+ /home/danctorres/nilm_industry/src/optimization/estimation/pso/../optimization_interface/Particle.h \
+ /home/danctorres/nilm_industry/src/optimization/estimation/pso/PSO_Particle.h

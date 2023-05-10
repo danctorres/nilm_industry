@@ -7,8 +7,8 @@ file(GLOB_RECURSE HEADERS
         "error/*.h"
         "estimations/*.h"
         "polynomial_function/*.h"
-        "read_data/*.h"
-        "../estimation/read_data/*.h"
+        "handle_data/*.h"
+        "../estimation/handle_data/*.h"
         )
 
 file(GLOB_RECURSE SOURCES
@@ -16,8 +16,8 @@ file(GLOB_RECURSE SOURCES
         "error/*.cpp"
         "estimations/*.cpp"
         "polynomial_function/*.cpp"
-        "read_data/*.cpp"
-        "../estimation/read_data/*.cpp"
+        "handle_data/*.cpp"
+        "../estimation/handle_data/*.cpp"
         )
 
 # Define the executable target
@@ -36,11 +36,11 @@ set_target_properties(validation PROPERTIES
 
 # Include directories for the target
 target_include_directories(validation PUBLIC
-        read_data
+        handle_data
         error
         estimations
         polynomial_function
-        ../estimation/read_data/
+        ../estimation/handle_data/
         )
 
 #target_link_libraries(estimation ${OpenCL_LIBRARIES})
