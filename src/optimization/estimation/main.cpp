@@ -10,20 +10,24 @@
 #include <omp.h>
 #include <string>
 
-#include "read_data/Read.h"
-#include "read_data/Read_Aggregate.h"
-#include "read_data/Read_State.h"
+#include "handle_data/Read.h"
+#include "handle_data/Read_Aggregate.h"
+#include "handle_data/Read_State.h"
+#include "handle_data/save_coef.h"
 #include "optimization_interface/Optimization.h"
 #include "optimization_interface/Particle.h"
-#include "pso/PSO_Particle.h"
 #include "pso/PSO.h"
-#include "simulated_annealing/SA.h"
-#include "ant_colony/AC.h"
-#include "genetic_algorithm/GA.h"
-#include "newton/Newton.h"
-#include "gradient_descent/GD.h"
-#include "problem_formulation/Matrix_W.h"
-#include "problem_formulation/objective_function.h"
+
+/*
+ * #include "pso/PSO_Particle.h"
+ * #include "simulated_annealing/SA.h"
+ * #include "ant_colony/AC.h"
+ * #include "genetic_algorithm/GA.h"
+ * #include "newton/Newton.h"
+ * #include "gradient_descent/GD.h"
+ * #include "problem_formulation/Matrix_W.h"
+ * #include "problem_formulation/objective_function.h"
+*/
 
 
 float agg = 0.0f;
@@ -65,24 +69,13 @@ void estimation(float *sum_est, int *num_ON, const float agg_sample, Read_State 
 }
 
 
-void save_file(const std::string name, const float *sum_est, const int *num_ON) {
-    std::ofstream outfile(name);
-    if (outfile.is_open()) {
-        outfile << "Coef 1, Coef 2, Coef 3" << "\n";
-        for(int i = 0; i < 6; i++) {
-            outfile << sum_est[i * 3] / num_ON[i]  << ", " << sum_est[i * 3 + 1] / num_ON[i] << ", " << sum_est[i * 3 + 2] / num_ON[i] << "\n";
-        }
-        outfile.close();
-    }
-    else {
-        std::cout << "Error saving into file." << std::endl;
-    }
-}
-
-
 int main(int argc, char *argv[]){
+    std::vector<float> agg_vector;
     auto agg_data = std::make_unique<Read_Aggregate> ("../../../../data/processed/data_6_equipment/aggregate_training.csv");   // in this format for cmake
-    std::vector<float> agg_vector = agg_data->get_parameters("Active power");
+    auto agg_variant = agg_data->get_parameters ("Active power");
+    if (auto parameters = std::get_if<std::vector<float>>(&agg_variant)) {
+        agg_vector = *parameters;
+    }
     auto st_data = std::make_unique<Read_State>("../../../../data/processed/data_6_equipment/on_off_training.csv");
 
     // Normalize
@@ -97,7 +90,7 @@ int main(int argc, char *argv[]){
     int num_ON[6] = {0};                // number of ON samples
 
     if (argc > 1 && std::string(argv[1]) == "--parallel") {
-        std::cout << "--- Running parallel optimization with opencl ---" << std::endl;
+        std::cout << "--- Running parallel optimization with openMP ---" << std::endl;
         #pragma omp parallel for
         for (int i = 0; i < agg_vector.size(); i++) {
             estimation(sum_est, num_ON, agg_vector[i], *st_data, i);
@@ -111,7 +104,7 @@ int main(int argc, char *argv[]){
         }
     }
 
-    save_file("../../../../results/estimation/estimated_coef.csv", sum_est, num_ON);
+    save_coef("../../../../results/estimation/estimated_coef.csv", sum_est, num_ON);
     return 0;
 }
 

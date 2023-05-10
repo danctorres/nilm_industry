@@ -8,12 +8,12 @@
 Read_State::Read_State(const std::string &name_file) : Read(name_file) {
     const std::vector<std::vector<std::string>> data = this->get_data();
     for (int i = 1; i < data.size() - 1; i++){
-        state_0.push_back(std::stoi(data[i][0]));
-        state_1.push_back(std::stoi(data[i][1]));
-        state_2.push_back(std::stoi(data[i][2]));
-        state_3.push_back(std::stoi(data[i][3]));
-        state_4.push_back(std::stoi(data[i][4]));
-        state_5.push_back(std::stoi(data[i][5]));
+        state_0.push_back(std::stoi(data[i][1]));
+        state_1.push_back(std::stoi(data[i][2]));
+        state_2.push_back(std::stoi(data[i][3]));
+        state_3.push_back(std::stoi(data[i][4]));
+        state_4.push_back(std::stoi(data[i][5]));
+        state_5.push_back(std::stoi(data[i][6]));
     }
 }
 

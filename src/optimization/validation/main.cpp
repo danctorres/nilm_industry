@@ -7,25 +7,29 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "read_data/Read_Coef.h"
-#include "../estimation/read_data/Read_Aggregate.h"
-#include "../estimation/read_data/Read_State.h"
-#include "read_data/Read_Eq.h"
+#include "handle_data/Read_Coef.h"
+#include "../estimation/handle_data/Read_Aggregate.h"
+#include "../estimation/handle_data/Read_State.h"
+#include "handle_data/Read_Eq.h"
 #include "polynomial_function/polynomial_function.h"
 #include "estimations/Estimations.h"
 #include "error/Error.h"
+#include "handle_data/save_estimates.h"
 
 
 int main() {
-    auto est_coef = std::make_unique<Read_Coef> ("../../../../results/estimation/estimated_coef.csv");
-    auto agg_val = std::make_unique<Read_Aggregate> ("../../../../data/processed/data_6_equipment/aggregate_validation.csv");
-    std::vector<float> agg_vec = agg_val->get_parameters("Active power");
-    auto st_val = std::make_unique<Read_State>("../../../../data/processed/data_6_equipment/on_off_validation.csv");
-    auto eq_val = std::make_unique<Read_Eq> ("../../../../data/processed/data_6_equipment/equipment_validation.csv");
+    std::unique_ptr<Read_Coef> est_coef = std::make_unique<Read_Coef> ("../../../../results/estimation/estimated_coef.csv");
+    std::unique_ptr<Read_Aggregate>  agg_val = std::make_unique<Read_Aggregate> ("../../../../data/processed/data_6_equipment/aggregate_validation.csv");
+    std::unique_ptr<Read_State> st_val = std::make_unique<Read_State>("../../../../data/processed/data_6_equipment/on_off_validation.csv");
+    std::unique_ptr<Read_Eq>  eq_val = std::make_unique<Read_Eq> ("../../../../data/processed/data_6_equipment/equipment_validation.csv");
 
-    auto est = std::make_unique<Estimations>();
+    std::vector<float> agg_vec;
+    auto agg_variant = agg_val->get_parameters ("Active power");
+    if (auto parameters = std::get_if<std::vector<float>>(&agg_variant)) {
+        agg_vec = *parameters;
+    }
 
-    auto buff = est_coef->get_coef_eq(0);
+    std::unique_ptr<Estimations>  est = std::make_unique<Estimations>();
 
     // Normalize agg_vector
     auto max_agg = *std::max_element(agg_vec.begin(), agg_vec.end());
@@ -36,7 +40,9 @@ int main() {
 
     for (int i = 0; i < agg_vec.size(); i++) {
         for (int j = 0; j < 6; j++) {
-
+            /*std::cout << " pol: " << pol_func(agg_vec[i],
+                                              st_val->get_one_parameter(j, i),
+                                              est_coef->get_coef_eq(j)) << " st: " << st_val->get_one_parameter(j, i) << std::endl;*/
             est->set_est(pol_func(agg_vec[i],
                                             st_val->get_one_parameter(j, i),
                                             est_coef->get_coef_eq(j)),
@@ -45,7 +51,8 @@ int main() {
     }
 
     est->denormalize_all_specific();
-    //est->denormalize_all();
+    // est->denormalize_all();
+    save_estimates("../../../../results/estimation/estimated_active_power.csv", *est, *agg_val);
 
     auto error_eq0 = std::make_unique<Error>(est->get_eq(0), eq_val->get_eq(0));
     auto error_eq1 = std::make_unique<Error>(est->get_eq(1), eq_val->get_eq(1));
@@ -62,5 +69,7 @@ int main() {
               << " " << error_eq3->get_rmse() << " " << error_eq4->get_rmse() << " " << error_eq5->get_rmse() << std::endl;
     std::cout << "R2: " << error_eq0->get_r2() << "  " << error_eq1->get_r2() << " " << error_eq2->get_r2()
               << " " << error_eq3->get_r2() << " " << error_eq4->get_r2() << " " << error_eq5->get_r2() << std::endl;
+
+
     return 0;
 }

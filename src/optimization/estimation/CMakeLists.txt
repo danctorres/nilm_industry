@@ -4,7 +4,7 @@ project (estimation)
 
 file(GLOB_RECURSE HEADERS
         "main.h"
-        "read_data/*.h"
+        "handle_data/*.h"
         "optimization_interface/*.h"
         "pso/*.h"
         "simulated_annealing/*.h"
@@ -17,7 +17,7 @@ file(GLOB_RECURSE HEADERS
 
 file(GLOB_RECURSE SOURCES
         "main.cpp"
-        "read_data/*.cpp"
+        "handle_data/*.cpp"
         "optimization_interface/*.cpp"
         "pso/*.cpp"
         "simulated_annealing/*.cpp"
@@ -45,7 +45,7 @@ set_target_properties(estimation PROPERTIES
 
 # Include directories for the target
 target_include_directories(estimation PUBLIC
-        read_data
+        handle_data
         optimization_interface
         pso
         simulated_annealing
