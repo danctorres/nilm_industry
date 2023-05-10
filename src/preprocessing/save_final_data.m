@@ -64,7 +64,7 @@ function [aggregate_training, equipment_training, aggregate_validation, on_off_t
     title('Validation data')
 
     % Convert to posix time format
-    aggregate.timestamp     = posixtime(table2array(aggregate(:, 1)));
+    %aggregate.timestamp     = posixtime(table2array(aggregate(:, 1)));
 
     % Split into training and validation data
     aggregate_training      = aggregate(training_index, :);
@@ -72,8 +72,10 @@ function [aggregate_training, equipment_training, aggregate_validation, on_off_t
 
     if(size(on_off, 2) == 8)
         on_off = table(on_off(:, 1), on_off(:, 2), on_off(:, 3), on_off(:, 4), on_off(:, 5), on_off(:, 6), on_off(:, 7), on_off(:, 8), 'VariableNames', {'State DPCI', 'State DPCII', 'State EFI', 'State EFII', 'State MI', 'State MII', 'State PI', 'State PII'});
+        on_off = addvars(on_off, aggregate.timestamp, 'Before', 1, 'NewVariableNames', 'Timestamp');
     elseif(size(on_off, 2) == 6)
         on_off = table(on_off(:, 1), on_off(:, 2), on_off(:, 3), on_off(:, 4), on_off(:, 5), on_off(:, 6), 'VariableNames', {'State DPCI', 'State DPCII', 'State EFI', 'State EFII', 'State PI', 'State PII'});
+        on_off = addvars(on_off, aggregate.timestamp, 'Before', 1, 'NewVariableNames', 'Timestamp');
     end
     on_off_training         = on_off(training_index, :);
     on_off_validation       = on_off(validation_index, :);
@@ -81,7 +83,7 @@ function [aggregate_training, equipment_training, aggregate_validation, on_off_t
     equipment_training      = equipment_active_pow(training_index, :);
     equipment_validation    = equipment_active_pow(validation_index, :);
 
-    if (save == true) && (size(on_off, 2) == 8)
+    if ((save == true) && (size(on_off, 2) == 8))
         file_information    = matlab.desktop.editor.getActive;
         [~, file_name, ~] = fileparts(file_information.Filename);
         writetable(aggregate_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\aggregate_training.csv'], '\'));
@@ -90,7 +92,7 @@ function [aggregate_training, equipment_training, aggregate_validation, on_off_t
         % writetable(on_off_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\on_off_validation.csv'], '\'))
         writetable(equipment_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\equipment_training.csv'], '\'));
         writetable(equipment_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\equipment_validation.csv'], '\'));
-    elseif (save == true) && (size(on_off, 2) == 6)
+    elseif ((save == true) && (size(on_off, 2) == 7))
         file_information    = matlab.desktop.editor.getActive;
         [~, file_name, ~] = fileparts(file_information.Filename);
         writetable(aggregate_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\aggregate_training.csv'], '\'));
