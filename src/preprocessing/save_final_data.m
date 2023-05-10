@@ -88,8 +88,8 @@ function [aggregate_training, equipment_training, aggregate_validation, on_off_t
         [~, file_name, ~] = fileparts(file_information.Filename);
         writetable(aggregate_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\aggregate_training.csv'], '\'));
         writetable(aggregate_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\aggregate_validation.csv'], '\'));
-        writetable(on_off_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\on_off_training.csv'], '\'))
-        % writetable(on_off_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\on_off_validation.csv'], '\'))
+        writetable(on_off_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\on_off_training.csv'], '\'));
+        writetable(on_off_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\on_off_validation.csv'], '\'));
         writetable(equipment_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\equipment_training.csv'], '\'));
         writetable(equipment_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_8_equipment\equipment_validation.csv'], '\'));
     elseif ((save == true) && (size(on_off, 2) == 7))
@@ -97,8 +97,8 @@ function [aggregate_training, equipment_training, aggregate_validation, on_off_t
         [~, file_name, ~] = fileparts(file_information.Filename);
         writetable(aggregate_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\aggregate_training.csv'], '\'));
         writetable(aggregate_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\aggregate_validation.csv'], '\'));
-        writetable(on_off_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\on_off_training.csv'], '\'))
-        % writetable(on_off_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\on_off_validation.csv'], '\'))
+        writetable(on_off_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\on_off_training.csv'], '\'));
+        writetable(on_off_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\on_off_validation.csv'], '\'));
         writetable(equipment_training, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\equipment_training.csv'], '\'));
         writetable(equipment_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), '\data\processed\data_6_equipment\equipment_validation.csv'], '\'));
     end
