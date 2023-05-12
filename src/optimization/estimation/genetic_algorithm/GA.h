@@ -42,7 +42,7 @@ public:
     std::vector<int> calculate_candidates_idx();
     std::vector<Particle> generate_offsprings(const Particle parent1, const Particle parent2);
     std::vector<Particle> crossover(const std::vector<int> &particles_idx);
-    std::vector<float> mutation(std::vector<float> &particles_position);
+    std::vector<double> mutation(std::vector<double> &particles_position);
     std::vector<Particle> elitism();
     void run();
 

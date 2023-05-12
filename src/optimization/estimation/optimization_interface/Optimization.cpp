@@ -108,7 +108,7 @@ std::vector<Particle> Optimization::get_particles() const {
 }
 
 // Returns fitness for positions
-/*float Optimization::objective_function(const std::vector<float> &pos){
+/*double Optimization::objective_function(const std::vector<double> &pos){
     return pow(position[0] + 3, 2) + sqrt(pow(position[1], 2));
 }*/
 
@@ -135,11 +135,11 @@ void Optimization::update_global_best() {
 void Optimization::initialize_positions() {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::vector<float> position;
+    std::vector<double> position;
     for (int i = 0; i < n_particles; i++){
         for (int j = 0; j < rank; j++) {
             std::uniform_real_distribution<> dis(min_pos[j], max_pos[j]);
-            position.push_back(static_cast<float> (dis(gen)));
+            position.push_back(static_cast<double> (dis(gen)));
         }
         Particle part = Particle(position);
         particles.push_back(part);
@@ -149,27 +149,27 @@ void Optimization::initialize_positions() {
 
 void Optimization::initialize_positions(std::vector<Particle> &particles) {
     for (Particle &particle : particles){
-        std::vector<float> position;
+        std::vector<double> position;
         for (int j = 0; j < rank; j++) {
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_real_distribution<> dis(min_pos[j], max_pos[j]);
-            position.push_back(static_cast<float> (dis(gen)));
+            position.push_back(static_cast<double> (dis(gen)));
         }
         particle.set_position(position);
     }
 }
 
 // Update the position of all particles with positions
-void Optimization::update_positions(std::vector<Particle> &particles, const std::vector<std::vector<float>> &new_positions) {
+void Optimization::update_positions(std::vector<Particle> &particles, const std::vector<std::vector<double>> &new_positions) {
     for (int i = 0; i < n_particles ; i++){
         particles[i].set_position(new_positions[i]);
     }
 }
 
 // Update the position of all particles with positions and fitness
-void Optimization::update_particles(std::vector<Particle> &particles, const std::vector<std::vector<float>> &pos,
-                                    const std::vector<float> &fit) {
+void Optimization::update_particles(std::vector<Particle> &particles, const std::vector<std::vector<double>> &pos,
+                                    const std::vector<double> &fit) {
     for (int i = 0; i < n_particles ; i++) {
         particles[i].set_position(pos[i]);
         particles[i].set_fitness(fit[i]);
@@ -210,7 +210,7 @@ void Optimization::initialize_optimization(std::vector<Particle> &particles) {
     initialize_global_best();
 }
 
-bool Optimization::stopping_condition(const float gb_fitness, int &stopping_counter, float &stop_condition, const int i) {
+bool Optimization::stopping_condition(const double gb_fitness, int &stopping_counter, float &stop_condition, const int i) {
     if (gb_fitness < threshold){
         return true;
     }

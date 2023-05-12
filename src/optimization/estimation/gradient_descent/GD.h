@@ -16,7 +16,7 @@ public:
     void set_step_size(const float step_size);
     float get_step_size() const;
 
-    std::vector<float> new_pos(const std::vector<float> &position);
+    std::vector<double> new_pos(const std::vector<double> &position);
     void run();
 
 private:

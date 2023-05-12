@@ -13,20 +13,20 @@ class Estimations {
 public:
     Estimations();
 
-    void set_est(const float est_eq, const int eq_idx);
-    std::vector<float> get_eq(const int eq_idx) const;
+    void set_est(const double est_eq, const int eq_idx);
+    std::vector<double> get_eq(const int eq_idx) const;
 
-    void denormalize(std::vector<float> &est_vec, float min_agg, float max_agg);
-    void denormalize_all(float min_agg, float max_agg);
-    void denormalize_minmax(std::vector<float> &est_vec, const float min, const float max);
+    void denormalize(std::vector<double> &est_vec, const double min_agg, const double max_agg);
+    void denormalize_all(const double min_agg, const double max_agg);
+    void denormalize_minmax(std::vector<double> &est_vec, const double min, const double max);
     void denormalize_all_specific();
 private:
-    std::vector<float> est_eq0;
-    std::vector<float> est_eq1;
-    std::vector<float> est_eq2;
-    std::vector<float> est_eq3;
-    std::vector<float> est_eq4;
-    std::vector<float> est_eq5;
+    std::vector<double> est_eq0;
+    std::vector<double> est_eq1;
+    std::vector<double> est_eq2;
+    std::vector<double> est_eq3;
+    std::vector<double> est_eq4;
+    std::vector<double> est_eq5;
 };
 
 

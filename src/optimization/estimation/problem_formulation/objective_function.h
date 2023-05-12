@@ -10,11 +10,11 @@
 #include <iostream>
 #include <vector>
 
-extern float agg;
+extern double agg;
 extern int act[6];
 extern const float lambda;
 extern std::vector<float> max_eq_power;
 
-float objective_function(const std::vector<float> &position);
+double objective_function(const std::vector<double> &position);
 
 #endif //DISSERTATION_NILM_OBJECTIVE_FUNCTION_H

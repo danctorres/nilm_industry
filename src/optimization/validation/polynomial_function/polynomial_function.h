@@ -9,7 +9,7 @@
 #include <iostream>
 #include <vector>
 
-double pol_func(const float agg, const int st, const std::vector<float> &coef);
+double pol_func(const float agg, const int st, const std::vector<double> &coef);
 
 
 #endif //NILM_INDUSTRY_FUNCTION_H

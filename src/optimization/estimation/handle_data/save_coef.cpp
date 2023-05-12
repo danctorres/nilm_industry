@@ -4,7 +4,7 @@
 
 #include "save_coef.h"
 
-void save_coef(const std::string name, const float *sum_est, const int *num_ON) {
+void save_coef(const std::string name, const double *sum_est, const int *num_ON) {
     std::ofstream outfile(name);
     if (outfile.is_open()) {
         outfile << "Coef 0, Coef 1, Coef 2" << "\n";

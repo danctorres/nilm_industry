@@ -21,9 +21,9 @@ public:
     float get_temperature() const;
     float get_temp_min() const;
     float get_cooling_factor() const;
-    std::vector<float> get_last_fitness() const;
+    std::vector<double> get_last_fitness() const;
 
-    float calculate_new_fitness(const std::vector<float> &new_positions);
+    double calculate_new_fitness(const std::vector<double> &new_positions);
 
     void run();
 
@@ -31,7 +31,7 @@ private:
     float temperature;
     float temp_min;
     float cooling_factor;
-    std::vector<float> last_fitness;
+    std::vector<double> last_fitness;
 };
 
 

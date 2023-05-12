@@ -24,15 +24,15 @@ public:
     void set_c2(const float c2);
     void set_w_min(const float w_min);
     void set_w_max(const float w_max);
-    void set_v_max(const std::vector<float> &v_max);
-    void set_v_max(const std::vector<float> &pos_min, const std::vector<float> &pos_max);
+    void set_v_max(const std::vector<double> &v_max);
+    void set_v_max(const std::vector<double> &pos_min, const std::vector<double> &pos_max);
     void set_pso_particles(const std::vector<PSO_Particle> &pso_particles);
 
     float get_c1() const;
     float get_c2() const;
     float get_w_min() const;
     float get_w_max() const;
-    std::vector<float> get_v_max() const;
+    std::vector<double> get_v_max() const;
     std::vector<PSO_Particle> get_pso_particles() const;
 
 
@@ -50,7 +50,7 @@ private:
     float c2;             // social constant
     float w_min;          // minimum inertia weight value
     float w_max;          // max inertia weight value
-    std::vector<float> v_max;          // max velocity
+    std::vector<double> v_max;          // max velocity
     std::vector<PSO_Particle> pso_particles;
 };
 

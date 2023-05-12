@@ -4,44 +4,44 @@
 
 #include "Error.h"
 
-void Error::set_mae(const float mae) {
+void Error::set_mae(const double mae) {
     this->mae = mae;
 }
 
-void Error::set_mse(const float mse) {
+void Error::set_mse(const double mse) {
     this->mse = mse;
 }
 
-void Error::set_rmse(const float rmse) {
+void Error::set_rmse(const double rmse) {
     this->rmse = rmse;
 }
 
-void Error::set_r2(const float r2) {
+void Error::set_r2(const double r2) {
     this->r2 = r2;
 }
 
-float Error::get_mae() const {
+double Error::get_mae() const {
     return mae;
 }
 
-float Error::get_mse() const {
+double Error::get_mse() const {
     return mse;
 }
 
-float Error::get_rmse() const {
+double Error::get_rmse() const {
     return rmse;
 }
 
-float Error::get_r2() const {
+double Error::get_r2() const {
     return r2;
 }
 
-Error::Error(const std::vector<float> &est, const std::vector<float> &actual) {
-    double mae_buff = 0.0f;
-    double mse_buff = 0.0f;
-    double r2_buff = 0.0f;
+Error::Error(const std::vector<double> &est, const std::vector<float> &actual) {
+    double mae_buff = 0.0;
+    double mse_buff = 0.0;
+    double r2_buff = 0.0;
 
-    float act_mean = std::accumulate(actual.begin(), actual.end(), 0.0) / actual.size();
+    double act_mean = std::accumulate(actual.begin(), actual.end(), 0.0) / actual.size();
 
     for (int i = 0; i < est.size(); i++) {
         //std::cout << "Actual: " << actual[i]  << " Estimated: " << est[i] << std::endl;

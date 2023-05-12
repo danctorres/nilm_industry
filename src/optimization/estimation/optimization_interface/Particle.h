@@ -11,21 +11,21 @@
 class Particle{
 public:
     Particle();
-    Particle(const std::vector<float> &position);
-    Particle(const std::vector<float> &position, const float fitness);
+    Particle(const std::vector<double> &position);
+    Particle(const std::vector<double> &position, const double fitness);
 
-    void set_position(const std::vector<float> &position);
-    void set_fitness(const float fitness);
-    void set_parameters(const std::vector<float> &position, const float fitness);
+    void set_position(const std::vector<double> &position);
+    void set_fitness(const double fitness);
+    void set_parameters(const std::vector<double> &position, const double fitness);
     void set_parameters_Particle(const Particle &particle);
 
 
-    std::vector<float> get_position() const;
-    float get_fitness() const;
+    std::vector<double> get_position() const;
+    double get_fitness() const;
 
 protected:
-    std::vector<float> position;
-    float fitness;
+    std::vector<double> position;
+    double fitness;
 };
 
 

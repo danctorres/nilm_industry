@@ -29,11 +29,11 @@ int main() {
         agg_vec = *parameters;
     }
 
-    std::unique_ptr<Estimations>  est = std::make_unique<Estimations>();
+    std::unique_ptr<Estimations> est = std::make_unique<Estimations>();
 
     // Normalize agg_vector
-    float min_agg = *std::min_element(agg_vec.begin(), agg_vec.end());
-    float max_agg = *std::max_element(agg_vec.begin(), agg_vec.end());
+    double min_agg = *std::min_element(agg_vec.begin(), agg_vec.end());
+    double max_agg = *std::max_element(agg_vec.begin(), agg_vec.end());
 
     // float max_agg = 400000.0f;
     // float min_agg = 0.0f;
@@ -73,7 +73,6 @@ int main() {
               << " " << error_eq3->get_rmse() << " " << error_eq4->get_rmse() << " " << error_eq5->get_rmse() << std::endl;
     std::cout << "R2: " << error_eq0->get_r2() << "  " << error_eq1->get_r2() << " " << error_eq2->get_r2()
               << " " << error_eq3->get_r2() << " " << error_eq4->get_r2() << " " << error_eq5->get_r2() << std::endl;
-
 
     return 0;
 }
