@@ -1,3 +1,0 @@
-/home/danctorres/nilm_industry/src/optimization/validation/build/CMakeFiles/validation.dir
-/home/danctorres/nilm_industry/src/optimization/validation/build/CMakeFiles/edit_cache.dir
-/home/danctorres/nilm_industry/src/optimization/validation/build/CMakeFiles/rebuild_cache.dir
