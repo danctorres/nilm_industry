@@ -37,11 +37,11 @@ float SA::get_cooling_factor() const {
 }
 
 
-std::vector<float> SA::get_last_fitness() const {
+std::vector<double> SA::get_last_fitness() const {
     return last_fitness;
 }
 
-float SA::calculate_new_fitness(const std::vector<float> &new_positions) {
+double SA::calculate_new_fitness(const std::vector<double> &new_positions) {
     return objective_function(new_positions);
 }
 
@@ -69,15 +69,15 @@ void SA::run() {
     std::random_device rd;
     std::mt19937 gen(rd());
     // Values need to be tuned in to the specific problem
-    std::uniform_real_distribution<> dis1(-0.2f, 0.2f);
-    std::uniform_real_distribution<> dis2(0.0f, 0.2f);
+    std::uniform_real_distribution<> dis1(-0.2, 0.2);
+    std::uniform_real_distribution<> dis2(0.0, 0.2);
 
     int stopping_counter = 0;
     float stop_condition = global_best.get_fitness();
 
     for (int i = 0; i < max_iter; i++) {
-        std::vector<float> new_position;
-        float new_fitness = 0.0f;
+        std::vector<double> new_position;
+        double new_fitness = 0.0;
         float delta = 0.0f;
         float cond = 0.0f;
         for (Particle &particle: particles) {
@@ -99,7 +99,7 @@ void SA::run() {
                 }
             }
             new_position.clear();
-            new_fitness = 0.0f;
+            new_fitness = 0.0;
         }
         update_global_best();
 

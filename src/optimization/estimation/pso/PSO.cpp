@@ -21,11 +21,11 @@ void PSO::set_w_max(const float w_max) {
     this->w_max = w_max;
 }
 
-void PSO::set_v_max(const std::vector<float> &v_max) {
+void PSO::set_v_max(const std::vector<double> &v_max) {
     this->v_max = v_max;
 }
 
-void PSO::set_v_max(const std::vector<float> &pos_min, const std::vector<float> &pos_max) {
+void PSO::set_v_max(const std::vector<double> &pos_min, const std::vector<double> &pos_max) {
     for (int i = 0; i < rank; i++) {
         this->v_max.push_back((pos_max[i] - pos_min[i]) * 0.2);
     }
@@ -51,7 +51,7 @@ float PSO::get_w_max() const {
     return w_max;
 }
 
-std::vector<float> PSO::get_v_max() const {
+std::vector<double> PSO::get_v_max() const {
     return v_max;
 }
 
@@ -60,13 +60,13 @@ std::vector<PSO_Particle> PSO::get_pso_particles() const {
 }
 
 void PSO::initialize_velocities() {
-    std::vector<float> velocity;
+    std::vector<double> velocity;
     for (PSO_Particle &pso_particle : pso_particles) {
         for (int j = 0; j < rank; j++) {
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_real_distribution<> dis(-v_max[j], v_max[j]);
-            velocity.push_back(static_cast<float> (dis(gen)));
+            velocity.push_back(static_cast<double> (dis(gen)));
         }
         pso_particle.set_velocity(velocity);
         velocity.clear();
@@ -141,8 +141,8 @@ void PSO::run() {
     for(int i = 0; i < max_iter; i++){
         w = w_max - i * ((w_max - w_min) / max_iter);
 
-        std::vector<float> new_velocity;
-        std::vector<float> new_position;
+        std::vector<double> new_velocity;
+        std::vector<double> new_position;
         for(PSO_Particle &pso_particle : pso_particles) {
             // Update particle position and velocity
             auto pos = pso_particle.get_position();             // Particles position

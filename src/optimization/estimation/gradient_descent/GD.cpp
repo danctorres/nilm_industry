@@ -13,9 +13,9 @@ float GD::get_step_size() const {
 }
 
 // Hard-coded gradient
-std::vector<float> GD::new_pos(const std::vector<float> &position) {
-    std::vector<float> new_pos;
-    std::vector<float> grad = {2 * (position[0] + 3), 1.0f};
+std::vector<double> GD::new_pos(const std::vector<double> &position) {
+    std::vector<double> new_pos;
+    std::vector<double> grad = {2 * (position[0] + 3), 1.0f};
     for (int i = 0; i < rank ; i++){
         new_pos.push_back(position[i] - step_size * grad[i]);
     }

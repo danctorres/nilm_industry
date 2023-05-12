@@ -128,7 +128,7 @@ float AC::gaussian_function(const int dim, const int gaussian_index, const float
 }
 
 Particle AC::sample_new_particle(const std::vector<int> &gaussian_index, const std::vector<float> &std_vector){
-    std::vector<float> new_position;
+    std::vector<double> new_position;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(x_min, x_max);

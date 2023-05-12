@@ -5,24 +5,24 @@
 #include "Particle.h"
 
 
-Particle::Particle() : position(), fitness(0.0f) {}
+Particle::Particle() : position(), fitness(0.0) {}
 
-Particle::Particle(const std::vector<float> &pos) : position(pos), fitness(0.0f){}
+Particle::Particle(const std::vector<double> &pos) : position(pos), fitness(0.0){}
 
-Particle::Particle(const std::vector<float> &position, const float fitness) {
+Particle::Particle(const std::vector<double> &position, const double fitness) {
     this->position = position;
     this->fitness = fitness;
 }
 
-void Particle::set_position(const std::vector<float> &position) {
+void Particle::set_position(const std::vector<double> &position) {
     this->position = position;
 }
 
-void Particle::set_fitness(const float fitness) {
+void Particle::set_fitness(const double fitness) {
     this->fitness = fitness;
 }
 
-void Particle::set_parameters(const std::vector<float> &position, const float fitness) {
+void Particle::set_parameters(const std::vector<double> &position, const double fitness) {
     this->position = std::move(position);
     this->fitness = fitness;
 }
@@ -32,10 +32,10 @@ void Particle::set_parameters_Particle(const Particle &particle) {
     this->fitness = particle.get_fitness();
 }
 
-std::vector<float> Particle::get_position() const{
+std::vector<double> Particle::get_position() const{
     return position;
 }
 
-float Particle::get_fitness() const{
+double Particle::get_fitness() const{
     return fitness;
 }

@@ -7,7 +7,7 @@
 
 PSO_Particle::PSO_Particle() : Particle(), velocity(), personal_best() {}
 
-PSO_Particle::PSO_Particle(const std::vector<float> vel) : velocity(vel), personal_best(){}
+PSO_Particle::PSO_Particle(const std::vector<double> &vel) : velocity(vel), personal_best(){}
 
 PSO_Particle::PSO_Particle(const Particle &particle) {
     this->position = particle.get_position();
@@ -18,13 +18,13 @@ PSO_Particle::PSO_Particle(const Particle &particle) {
     personal_best = *this;
 }
 
-PSO_Particle::PSO_Particle(const std::vector<float> &pos, const std::vector<float> &vel, const float fit) : Particle(pos, fit) {
+PSO_Particle::PSO_Particle(const std::vector<double> &pos, const std::vector<double> &vel, const double fit) : Particle(pos, fit) {
     this->position = position;
     this->velocity = velocity;
     this->fitness = fitness;
 }
 
-void PSO_Particle::set_velocity(const std::vector<float> &velocity) {
+void PSO_Particle::set_velocity(const std::vector<double> &velocity) {
     this->velocity = std::move(velocity);
 }
 
@@ -39,7 +39,7 @@ void PSO_Particle::update_personal_best(){
     }
 }
 
-std::vector<float> PSO_Particle::get_velocity() const {
+std::vector<double> PSO_Particle::get_velocity() const {
     return velocity;
 }
 

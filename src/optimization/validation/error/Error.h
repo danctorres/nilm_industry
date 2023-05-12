@@ -12,23 +12,23 @@
 
 class Error {
 public:
-    Error(const std::vector<float> &estimated_values, const std::vector<float> &actual_values);
+    Error(const std::vector<double> &estimated_values, const std::vector<float> &actual_values);
 
-    void set_mae(const float mae);
-    void set_mse(const float mse);
-    void set_rmse(const float rmse);
-    void set_r2(const float r2);
+    void set_mae(const double mae);
+    void set_mse(const double mse);
+    void set_rmse(const double rmse);
+    void set_r2(const double r2);
 
-    float get_mae() const;
-    float get_mse() const;
-    float get_rmse() const;
-    float get_r2() const;
+    double get_mae() const;
+    double get_mse() const;
+    double get_rmse() const;
+    double get_r2() const;
 
 private:
-    float mae;
-    float mse;
-    float rmse;
-    float r2;
+    double mae;
+    double mse;
+    double rmse;
+    double r2;
 };
 
 

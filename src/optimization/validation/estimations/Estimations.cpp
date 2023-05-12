@@ -4,7 +4,7 @@
 
 #include "Estimations.h"
 
-void Estimations::set_est(const float est_eq, const int eq_idx) {
+void Estimations::set_est(const double est_eq, const int eq_idx) {
     switch(eq_idx) {
         case 0:
             this->est_eq0.push_back(est_eq);
@@ -30,7 +30,7 @@ void Estimations::set_est(const float est_eq, const int eq_idx) {
     }
 }
 
-std::vector<float> Estimations::get_eq(const int eq_idx) const {
+std::vector<double> Estimations::get_eq(const int eq_idx) const {
     switch(eq_idx) {
         case 0:
             return est_eq0;
@@ -59,13 +59,13 @@ std::vector<float> Estimations::get_eq(const int eq_idx) const {
     }
 } */
 
-void Estimations::denormalize(std::vector<float> &est_vec, float min_agg, float max_agg) {
+void Estimations::denormalize(std::vector<double> &est_vec, const double min_agg, const double max_agg) {
     for (auto &est : est_vec) {
         est = est * (max_agg - min_agg) + min_agg;
     }
 }
 
-void Estimations::denormalize_all(float min_agg, float max_agg) {
+void Estimations::denormalize_all(const double min_agg, const double max_agg) {
     denormalize(est_eq0, min_agg, max_agg);
     denormalize(est_eq1, min_agg, max_agg);
     denormalize(est_eq2, min_agg, max_agg);
@@ -74,7 +74,7 @@ void Estimations::denormalize_all(float min_agg, float max_agg) {
     denormalize(est_eq5, min_agg, max_agg);
 }
 
-void Estimations::denormalize_minmax(std::vector<float> &est_vec, const float min, const float max) {
+void Estimations::denormalize_minmax(std::vector<double> &est_vec, const double min, const double max) {
     for (auto& elem : est_vec) {
         //std::cout << " 1 elem: " << elem << std::endl;
         if (elem != 0) {
@@ -87,12 +87,12 @@ void Estimations::denormalize_minmax(std::vector<float> &est_vec, const float mi
 }
 
 void Estimations::denormalize_all_specific() {
-    denormalize_minmax(est_eq0, 10.0f, 2000.0f);
-    denormalize_minmax(est_eq1, 10.0f, 2000.0f);
-    denormalize_minmax(est_eq2, 10.0f, 5000.0f);
-    denormalize_minmax(est_eq3, 10.0f, 10000.0f);
-    denormalize_minmax(est_eq4, 10.0f, 1000000.0f);
-    denormalize_minmax(est_eq5, 10.0f, 1000000.0f);
+    denormalize_minmax(est_eq0, 10.0, 2000.0);
+    denormalize_minmax(est_eq1, 10.0, 2000.0);
+    denormalize_minmax(est_eq2, 10.0, 5000.0);
+    denormalize_minmax(est_eq3, 10.0, 10000.0);
+    denormalize_minmax(est_eq4, 10.0, 1000000.0);
+    denormalize_minmax(est_eq5, 10.0, 1000000.0);
 }
 
 Estimations::Estimations() {}

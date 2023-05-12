@@ -11,14 +11,14 @@
 
 class Newton : public Optimization{
 public:
-    Newton(const int n_particles, const int rank, const int max_iter, const float threshold,
+    Newton(const int n_particles, const int rank, const int max_iter, const double threshold,
            std::vector<float> &min_pos, std::vector<float> &max_pos);
 
-    std::vector<float> gradient(const std::vector<float> &position);
-    std::vector<float> hessian(const std::vector<float> &position);
+    std::vector<double> gradient(const std::vector<double> &position);
+    std::vector<double> hessian(const std::vector<double> &position);
 
-    float determinant(const std::vector<float> &hess);
-    std::vector<float> step(const std::vector<float> &grad, const std::vector<float> &hess, const float det, const Particle &particle);
+    double determinant(const std::vector<double> &hess);
+    std::vector<double> step(const std::vector<double> &grad, const std::vector<double> &hess, const double det, const Particle &particle);
 
     void run();
 };

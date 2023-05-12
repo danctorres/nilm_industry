@@ -29,7 +29,7 @@ public:
     void set_threshold(const float threshold);
     void set_min_pos(const std::vector<float> &min_pos);
     void set_max_pos(const std::vector<float> &max_pos);
-    void set_global_best_parameters(const std::vector<float> &position, const float fitness);
+    void set_global_best_parameters(const std::vector<float> &position, const double fitness);
     void set_global_best(const Particle &global_best);
     void set_particles(const std::vector<Particle> &particles);
 
@@ -56,10 +56,10 @@ public:
     void initialize_positions(std::vector<Particle> &particles);
 
     // Update the position of all particles with positions
-    void update_positions(std::vector<Particle> &particles, const std::vector<std::vector<float>> &new_positions);
+    void update_positions(std::vector<Particle> &particles, const std::vector<std::vector<double>> &new_positions);
 
     // Update the position of all particles with positions and fitness
-    void update_particles(std::vector<Particle> &particles, const std::vector<std::vector<float>> &pos, const std::vector<float> &fit);
+    void update_particles(std::vector<Particle> &particles, const std::vector<std::vector<double>> &pos, const std::vector<double> &fit);
 
     // Goes through all the particles, calculates the fitness and assigns to the particle
     void calculate_set_fitness();
@@ -70,7 +70,7 @@ public:
     void initialize_optimization();
     void initialize_optimization(std::vector<Particle> &particles);
 
-    bool stopping_condition(const float gb_fitness, int &stopping_counter, float &stop_condition, const int i);
+    bool stopping_condition(const double gb_fitness, int &stopping_counter, float &stop_condition, const int i);
 
 protected:
     int n_particles;                    // number of particles

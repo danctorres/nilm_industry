@@ -14,11 +14,11 @@
 class Read_Coef : public Read {
 public:
     Read_Coef(const std::string& name_file);
-    std::vector<float> get_coef_eq(const int eq_idx) const;
+    std::vector<double> get_coef_eq(const int eq_idx) const;
 private:
-    std::vector<float> coef_0;
-    std::vector<float> coef_1;
-    std::vector<float> coef_2;
+    std::vector<double> coef_0;
+    std::vector<double> coef_1;
+    std::vector<double> coef_2;
 };
 
 #endif //DISSERTATION_NILM_READ_COEF_H

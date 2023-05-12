@@ -5,14 +5,14 @@
 #include "objective_function.h"
 
 // the quadratic objective polynomial function with quadratic penalty polynomial function weighted by a Lagrange multiplier
-float objective_function(const std::vector<float> &pos) {
-    float eq_0 = static_cast<float>(act[0]) * (pos[0] + pos[1] * agg + pos[2] * pow(agg, 2));
-    float eq_1 = static_cast<float>(act[1]) * (pos[3] + pos[4] * agg + pos[5] * pow(agg, 2));
-    float eq_2 = static_cast<float>(act[2]) * (pos[6] + pos[7] * agg + pos[8] * pow(agg, 2));
-    float eq_3 = static_cast<float>(act[3]) * (pos[9] + pos[10] * agg + pos[11] * pow(agg, 2));
-    float eq_4 = static_cast<float>(act[4]) * (pos[12] + pos[13] * agg + pos[14] * pow(agg, 2));
-    float eq_5 = static_cast<float>(act[5]) * (pos[15] + pos[16] * agg + pos[17] * pow(agg, 2));
-    float eq =  eq_0 + eq_1 + eq_2 + eq_3 + eq_4 + eq_5;
+double objective_function(const std::vector<double> &pos) {
+    double eq_0 = static_cast<float>(act[0]) * (pos[0] + pos[1] * agg + pos[2] * pow(agg, 2));
+    double eq_1 = static_cast<float>(act[1]) * (pos[3] + pos[4] * agg + pos[5] * pow(agg, 2));
+    double eq_2 = static_cast<float>(act[2]) * (pos[6] + pos[7] * agg + pos[8] * pow(agg, 2));
+    double eq_3 = static_cast<float>(act[3]) * (pos[9] + pos[10] * agg + pos[11] * pow(agg, 2));
+    double eq_4 = static_cast<float>(act[4]) * (pos[12] + pos[13] * agg + pos[14] * pow(agg, 2));
+    double eq_5 = static_cast<float>(act[5]) * (pos[15] + pos[16] * agg + pos[17] * pow(agg, 2));
+    double eq =  eq_0 + eq_1 + eq_2 + eq_3 + eq_4 + eq_5;
 
     float penalty = 0.0f;
     if( (eq_0 < 0.0f) || (eq_0 > max_eq_power[0]) ) {

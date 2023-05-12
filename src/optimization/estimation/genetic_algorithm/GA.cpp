@@ -97,7 +97,7 @@ std::vector<int> GA::selection() {
 }
 
 // Equations accordingly to "A new mutation operator for real coded genetic algorithms" by Kusum Deep Manoj Thakur
-std::vector<float> GA::mutation(std::vector<float> &particles_position) {
+std::vector<double> GA::mutation(std::vector<double> &particles_position) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0f, 1.0f);
@@ -132,8 +132,8 @@ std::vector<Particle> GA::generate_offsprings(const Particle parent1, const Part
         Bi = alpha * beta * (pow(1 - 2 * rand_num, -1 / alpha) - 1);
     }
 
-    std::vector<float> pos_off1;
-    std::vector<float> pos_off2;
+    std::vector<double> pos_off1;
+    std::vector<double> pos_off2;
 
     for (int i = 0; i < rank; i++) {
         pos_off1.push_back( (parent1.get_position()[i] + parent2.get_position()[i] + Bi * fabs(parent1.get_position()[i] - parent2.get_position()[i])) / 2);
