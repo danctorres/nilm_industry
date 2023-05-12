@@ -13,6 +13,7 @@
 extern float agg;
 extern int act[6];
 extern const float lambda;
+extern std::vector<float> max_eq_power;
 
 float objective_function(const std::vector<float> &position);
 

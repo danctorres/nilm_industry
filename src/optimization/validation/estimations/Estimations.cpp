@@ -50,22 +50,28 @@ std::vector<float> Estimations::get_eq(const int eq_idx) const {
     }
 }
 
-void Estimations::denormalize(std::vector<float> &est_vec) {
+/* void Estimations::denormalize(std::vector<float> &est_vec) {
     auto min_val = *std::min_element(est_vec.begin(), est_vec.end());
     auto max_val = *std::max_element(est_vec.begin(), est_vec.end());
 
     for (int i = 0; i < est_vec.size(); i++) {
         est_vec[i] = est_vec[i] * (max_val - min_val) + min_val;
     }
+} */
+
+void Estimations::denormalize(std::vector<float> &est_vec, float min_agg, float max_agg) {
+    for (auto &est : est_vec) {
+        est = est * (max_agg - min_agg) + min_agg;
+    }
 }
 
-void Estimations::denormalize_all() {
-    denormalize(est_eq0);
-    denormalize(est_eq1);
-    denormalize(est_eq2);
-    denormalize(est_eq3);
-    denormalize(est_eq4);
-    denormalize(est_eq5);
+void Estimations::denormalize_all(float min_agg, float max_agg) {
+    denormalize(est_eq0, min_agg, max_agg);
+    denormalize(est_eq1, min_agg, max_agg);
+    denormalize(est_eq2, min_agg, max_agg);
+    denormalize(est_eq3, min_agg, max_agg);
+    denormalize(est_eq4, min_agg, max_agg);
+    denormalize(est_eq5, min_agg, max_agg);
 }
 
 void Estimations::denormalize_minmax(std::vector<float> &est_vec, const float min, const float max) {

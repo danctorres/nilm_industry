@@ -216,7 +216,7 @@ bool Optimization::stopping_condition(const float gb_fitness, int &stopping_coun
     }
     else {
         if (stop_condition == gb_fitness) {
-            if (stopping_counter >= 2 && gb_fitness < (threshold * 10)) {
+            if (stopping_counter >= 10 && gb_fitness < (threshold * 10)) {
                 std::cout << "- Number of cycles " << i << " - " << std::endl;
                 return true;
             }

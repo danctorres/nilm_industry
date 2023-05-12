@@ -120,11 +120,11 @@ PSO::PSO(const int n_particles, const int rank, const int max_iter, const float 
     initialize_velocities();
     initialize_personal_best();
 
-    std::cout << "- Number of particles = " << n_particles << ", ";
+    /*std::cout << "- Number of particles = " << n_particles << ", ";
     std::cout << "c1 = " << c1 << ", ";
     std::cout << "c2 = " << c1 << ", ";
     std::cout << "w_min = " << w_min << ", ";
-    std::cout << "w_max = " << w_max << std::endl;
+    std::cout << "w_max = " << w_max << std::endl;*/
 
 }
 
@@ -132,7 +132,7 @@ void PSO::run() {
     // Main PSO loop
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0f, 2.0f);
+    std::uniform_real_distribution<> dis(0.0, 2.0);
     float w = 1.0f;
 
     float stop_condition = global_best.get_fitness();
@@ -150,11 +150,11 @@ void PSO::run() {
             auto pb = pso_particle.get_personal_best().get_position();   // Personal best position
             auto gb = global_best.get_position();
 
-            float r1 = dis(gen);
-            float r2 = dis(gen);
+            double r1 = dis(gen);
+            double r2 = dis(gen);
 
-            float nv = 0.0f;
-            float np = 0.0f;
+            double nv = 0.0;
+            double np = 0.0;
             for (int k = 0; k < rank; k++){
                 nv = w * vel[k] + c1 * r1 * (pb[k] - pos[k]) + c2 * r2 * (gb[k] - pos[k]);
 
@@ -184,5 +184,5 @@ void PSO::run() {
             return;
         }
     }
-    std::cout << "- Number of cycles " << max_iter << " - " << std::endl;
+    // std::cout << "- Number of cycles " << max_iter << " - " << std::endl;
 }
