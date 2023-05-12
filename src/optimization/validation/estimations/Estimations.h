@@ -16,8 +16,8 @@ public:
     void set_est(const float est_eq, const int eq_idx);
     std::vector<float> get_eq(const int eq_idx) const;
 
-    void denormalize(std::vector<float> &est_vec);
-    void denormalize_all();
+    void denormalize(std::vector<float> &est_vec, float min_agg, float max_agg);
+    void denormalize_all(float min_agg, float max_agg);
     void denormalize_minmax(std::vector<float> &est_vec, const float min, const float max);
     void denormalize_all_specific();
 private:

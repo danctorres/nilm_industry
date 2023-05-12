@@ -14,5 +14,5 @@ class Connected_layer(Layer):
 
     def back_prop(self, learning_rate: float, loss: np.ndarray) -> np.ndarray:
         self.weights -= learning_rate * np.dot(self.input.T, loss)
-        self.bias -= learning_rate * loss
-        return np.dot(loss, self.weights.T)
+        self.bias -= learning_rate * loss   # step size
+        return np.dot(loss, self.weights.T)     # dE / d ouput

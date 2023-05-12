@@ -17,4 +17,5 @@ docs/Images/*
 .idea
 
 # ignore cmake build folder
-/src/estimation/build/*
+/src/optimization/estimation/build
+/src/optimization/validation/build
