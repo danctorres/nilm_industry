@@ -26,7 +26,8 @@ class NN:
         self.epochs = epochs
 
     def train(self, inputs: np.ndarray, states: np.ndarray, aggs: np.ndarray) -> None:
-        for x in range(self.epochs):
+        print("Training network")
+        for epoch in range(self.epochs):
             for input, state, agg in zip(inputs, states, aggs):
                 # Forwards Propagation
                 for layer in self.layers:
@@ -38,6 +39,7 @@ class NN:
                     loss = layer.back_prop(self.learning_rate, loss)
 
     def estimate(self, inputs: np.ndarray):
+        print("Estimating values")
         output: np.ndarray = []
         results: np.ndarray = []
         for input in inputs:
