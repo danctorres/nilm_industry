@@ -10,4 +10,5 @@ data/processed/data_6_equipment/aggregate_training.csv filter=lfs diff=lfs merge
 data/processed/data_6_equipment/aggregate_validation.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_6_equipment/equipment_training.csv filter=lfs diff=lfs merge=lfs -text
 data/processed/data_6_equipment/equipment_validation.csv filter=lfs diff=lfs merge=lfs -text
-results/* filter=lfs diff=lfs merge=lfs -text
+results/optimization/* filter=lfs diff=lfs merge=lfs -text
+results/deep_learning/* filter=lfs diff=lfs merge=lfs -text
