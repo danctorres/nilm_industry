@@ -28,19 +28,23 @@ class NN:
 
     def train(self, inputs: np.ndarray, states: np.ndarray, aggs: np.ndarray) -> List[float]:
         print("Training network")
-        loss_values = [];
+
+        loss_array = []
+
         for epoch in range(self.epochs):
             for input, agg in zip(inputs, aggs):
                 # Forwards Propagation
                 for layer in self.layers:
                     layer_output = layer.forw_prop(input)
                     input = layer_output
-                loss_values.loss_fun(layer_output, agg, self.max_norm_eq)
                 loss = self.loss_fun_d(layer_output, agg, self.max_norm_eq)
+
+                loss_array.append(self.loss_fun(layer_output, agg, self.max_norm_eq)[0, 0])
+
                 # Backwards Propagation
                 for layer in reversed(self.layers):
                     loss = layer.back_prop(self.learning_rate, loss)
-        return loss_values
+        return loss_array
 
     def estimate(self, inputs: np.ndarray):
         print("Estimating values")

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from Activation_layer import Activation_layer
 from Connected_layer import Connected_layer
 from NN import NN
-from activation_function import activation, activation_d
+from activation_function import tanh, tanh_d
 from loss_function import loss, loss_d
 from read_csv import read_csv
 from save_csv import save_csv
@@ -31,25 +31,22 @@ def main():
     net = NN()
     net.set_learning_rate(0.1)
     net.set_layer(Connected_layer(7, 7))
-    net.set_layer(Activation_layer(activation, activation_d))
+    net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_layer(Connected_layer(7, 7))
-    net.set_layer(Activation_layer(activation, activation_d))
+    net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_layer(Connected_layer(7, 6))
-    net.set_layer(Activation_layer(activation, activation_d))
+    net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_loss(loss, loss_d)
-    net.set_epochs(100000)
+    net.set_epochs(10000)
 
     net.set_max_norm_eq(normalize(eq_max_val))
 
-    loss_values = net.train(resh_input_train, resh_sts_train, resh_agg_train)
-
-    # Plot loss values
-    plt.plot(data)
+    loss_results = net.train(resh_input_train, resh_sts_train, resh_agg_train)
+    plt.plot(range(1, len(loss_results) + 1), loss_results, '.')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Loss per epoch')
+    plt.title('Scatter Plot')
     plt.show()
-
 
     # Read data for validation
     sts_val = read_csv('../../data/processed/data_6_equipment/on_off_validation.csv')
@@ -57,8 +54,8 @@ def main():
 
     min_val = agg_val_denormalized.min()
     max_val = agg_val_denormalized.max()
-    print(min_val)
-    print(max_val)
+    # print(min_val)
+    # print(max_val)
     agg_val = normalize(agg_val_denormalized)
 
     # Format data

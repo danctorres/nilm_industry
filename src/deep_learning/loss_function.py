@@ -1,5 +1,5 @@
-import numpy as np
 import math
+import numpy as np
 
 def loss(predicted: np.ndarray, agg: np.ndarray, max_norm_eq: np.ndarray) -> np.ndarray:
     penalty = np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
