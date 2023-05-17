@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 
 class NN:
     def __init__ (self) -> None:
@@ -25,18 +26,21 @@ class NN:
     def set_epochs(self, epochs: int) -> None:
         self.epochs = epochs
 
-    def train(self, inputs: np.ndarray, states: np.ndarray, aggs: np.ndarray) -> None:
+    def train(self, inputs: np.ndarray, states: np.ndarray, aggs: np.ndarray) -> List[float]:
         print("Training network")
+        loss_values = [];
         for epoch in range(self.epochs):
-            for input, state, agg in zip(inputs, states, aggs):
+            for input, agg in zip(inputs, aggs):
                 # Forwards Propagation
                 for layer in self.layers:
                     layer_output = layer.forw_prop(input)
                     input = layer_output
-                loss = self.loss_fun_d(layer_output, state, agg, self.max_norm_eq)
+                loss_values.loss_fun(layer_output, agg, self.max_norm_eq)
+                loss = self.loss_fun_d(layer_output, agg, self.max_norm_eq)
                 # Backwards Propagation
                 for layer in reversed(self.layers):
                     loss = layer.back_prop(self.learning_rate, loss)
+        return loss_values
 
     def estimate(self, inputs: np.ndarray):
         print("Estimating values")
