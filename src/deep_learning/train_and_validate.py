@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from Activation_layer import Activation_layer
 from Connected_layer import Connected_layer
@@ -28,7 +29,7 @@ def main():
 
 
     net = NN()
-    net.set_learning_rate(0.001)
+    net.set_learning_rate(0.1)
     net.set_layer(Connected_layer(7, 7))
     net.set_layer(Activation_layer(activation, activation_d))
     net.set_layer(Connected_layer(7, 7))
@@ -40,7 +41,14 @@ def main():
 
     net.set_max_norm_eq(normalize(eq_max_val))
 
-    net.train(resh_input_train, resh_sts_train, resh_agg_train)
+    loss_values = net.train(resh_input_train, resh_sts_train, resh_agg_train)
+
+    # Plot loss values
+    plt.plot(data)
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Loss per epoch')
+    plt.show()
 
 
     # Read data for validation
