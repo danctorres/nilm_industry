@@ -9,7 +9,7 @@ class NN:
         self.layers = []
         self.max_norm_eq = []
         self.epochs = 1000
-        self.threshold = 0.1;
+        self.threshold = 0.1
 
     def set_loss(self, loss_fun: callable, loss_fun_d: callable) -> None:
         self.loss_fun = loss_fun
@@ -37,8 +37,7 @@ class NN:
         loss_Dict = {}
 
         for i in range(6):
-            loss_Dict[f"{i}"] = []
-
+            loss_Dict[i] = []
 
         for epoch in range(self.epochs):
             for input, agg in zip(inputs, aggs):
@@ -52,10 +51,9 @@ class NN:
                 for layer in reversed(self.layers):
                     loss = layer.back_prop(self.learning_rate, loss)
 
-            for index, loss_value in enumerate(self.loss_fun(layer_output, agg, self.max_norm_eq)):
-                if index not in loss_Dict:
-                    loss_Dict[index] = []
-                loss_Dict[index].append(loss_value[index])
+            for loss_value in self.loss_fun(layer_output, agg, self.max_norm_eq):
+                for index, elem in enumerate(loss_value):
+                    loss_Dict[index].append(elem)
         return loss_Dict
 
     def estimate(self, inputs: np.ndarray) -> List[np.ndarray]:
