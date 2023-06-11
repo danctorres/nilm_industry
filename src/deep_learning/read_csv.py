@@ -8,8 +8,10 @@ def read_csv(file_path: str, col_num: int = None) -> np.ndarray:
         next(reader) # Skip the first row
         if col_num is None:
             rows = [list(map(float, row[1:])) for row in reader]
+        elif col_num == 0:
+            rows = [(row[col_num]) for row in reader]
         else:
-            rows = [float(row[col_num]) for row in reader]    # Only read active power
+            rows = [float(row[col_num]) for row in reader]
     arr = np.array(rows)
 
     if col_num is not None:
