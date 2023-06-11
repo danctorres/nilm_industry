@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import Dict, List
 
 class NN:
     def __init__ (self) -> None:
@@ -9,6 +9,7 @@ class NN:
         self.layers = []
         self.max_norm_eq = []
         self.epochs = 1000
+        self.threshold = 0.1;
 
     def set_loss(self, loss_fun: callable, loss_fun_d: callable) -> None:
         self.loss_fun = loss_fun
@@ -26,10 +27,18 @@ class NN:
     def set_epochs(self, epochs: int) -> None:
         self.epochs = epochs
 
-    def train(self, inputs: np.ndarray, states: np.ndarray, aggs: np.ndarray) -> List[float]:
+    def set_threshold(self, threshold: float) -> None:
+            self.threshold = threshold
+
+    def train(self, inputs: np.ndarray, states: np.ndarray, aggs: np.ndarray): # -> Dict[List[float]]:
         print("Training network")
 
-        loss_array = []
+        loss_List = []
+        loss_Dict = {}
+
+        for i in range(6):
+            loss_Dict[f"{i}"] = []
+
 
         for epoch in range(self.epochs):
             for input, agg in zip(inputs, aggs):
@@ -39,14 +48,17 @@ class NN:
                     input = layer_output
                 loss = self.loss_fun_d(layer_output, agg, self.max_norm_eq)
 
-                loss_array.append(self.loss_fun(layer_output, agg, self.max_norm_eq)[0, 0])
-
                 # Backwards Propagation
                 for layer in reversed(self.layers):
                     loss = layer.back_prop(self.learning_rate, loss)
-        return loss_array
 
-    def estimate(self, inputs: np.ndarray):
+            for index, loss_value in enumerate(self.loss_fun(layer_output, agg, self.max_norm_eq)):
+                if index not in loss_Dict:
+                    loss_Dict[index] = []
+                loss_Dict[index].append(loss_value[index])
+        return loss_Dict
+
+    def estimate(self, inputs: np.ndarray) -> List[np.ndarray]:
         print("Estimating values")
         output: np.ndarray = []
         results: np.ndarray = []
