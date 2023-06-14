@@ -62,13 +62,13 @@ def denormalize(data: List[np.ndarray], min_val: float, max_val: float) -> np.nd
 
 def set_NN():
     net = NN()
-    net.set_learning_rate(0.0000001)
-    net.set_layer(Connected_layer(7, 7))
+    net.set_learning_rate(0.001)    # big value for the learning rate causes overshoot
+    net.set_layer(Connected_layer(7, 14))
     net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_layer(Connected_layer(7, 6))
     net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_loss(poly_4, poly_4_d)
-    net.set_epochs(100000)
+    net.set_epochs(100)
     return net
 
 def calculate_error(estimations, eq_val) -> List[float]:
