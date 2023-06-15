@@ -33,6 +33,8 @@
 double agg = 0.0;
 int act[6] = {0};
 const float lambda = 10.0f;
+
+// Values used for initializing the positions and the velocity vector of the PSO
 std::vector<float> min_coef = {-1.0f, -1.0f, -1.0f,
                                -1.0f, -1.0f, -1.0f,
                                -1.0f, -1.0f, -1.0f,
@@ -85,6 +87,7 @@ int main(int argc, char *argv[]) {
     }
     auto st_data = std::make_unique<Read_State>("../../../../data/processed/IMDELD/data_6_equipment/on_off_training.csv");
 
+    /* // Ignore normalization
     // Normalize
     float agg_max = *max_element(agg_vector.begin(), agg_vector.end());
     float agg_min = *min_element(agg_vector.begin(), agg_vector.end());
@@ -98,6 +101,7 @@ int main(int argc, char *argv[]) {
     for (auto &eq_elem: max_eq_power) {
         eq_elem = (eq_elem - agg_min) / (agg_max - agg_min);
     }
+    */
 
     // Initialize constants
     double sum_est[18] = {0.0};     // sum of estimated coefficients
@@ -105,7 +109,7 @@ int main(int argc, char *argv[]) {
 
     if (argc > 1 && std::string(argv[1]) == "--parallel") {
         std::cout << "--- Running parallel optimization with openMP ---" << std::endl;
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < agg_vector.size(); i++) {
             std::cout << "--- Estimation " << i << " ---" << std::endl;
             estimation(sum_est, num_ON, agg_vector[i], *st_data, i);
