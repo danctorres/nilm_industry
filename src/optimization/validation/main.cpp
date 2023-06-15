@@ -19,9 +19,9 @@
 
 int main() {
     std::unique_ptr<Read_Coef> est_coef = std::make_unique<Read_Coef> ("../../../../results/optimization/estimated_coef.csv");
-    std::unique_ptr<Read_Aggregate>  agg_val = std::make_unique<Read_Aggregate> ("../../../../data/processed/data_6_equipment/aggregate_validation.csv");
-    std::unique_ptr<Read_State> st_val = std::make_unique<Read_State>("../../../../data/processed/data_6_equipment/on_off_validation.csv");
-    std::unique_ptr<Read_Eq>  eq_val = std::make_unique<Read_Eq> ("../../../../data/processed/data_6_equipment/equipment_validation.csv");
+    std::unique_ptr<Read_Aggregate>  agg_val = std::make_unique<Read_Aggregate> ("../../../../data/processed/IMDELD/data_6_equipment/aggregate_validation.csv");
+    std::unique_ptr<Read_State> st_val = std::make_unique<Read_State>("../../../../data/processed/IMDELD/data_6_equipment/on_off_validation.csv");
+    std::unique_ptr<Read_Eq>  eq_val = std::make_unique<Read_Eq> ("../../../../data/processed/IMDELD/data_6_equipment/equipment_validation.csv");
 
     std::vector<float> agg_vec;
     auto agg_variant = agg_val->get_parameters ("Active power");

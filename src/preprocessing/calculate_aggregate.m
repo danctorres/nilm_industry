@@ -5,8 +5,8 @@ function [aggregate_table] = calculate_aggregate(lvdb2_table, lvdb3_table, units
 
     % file_information = matlab.desktop.editor.getActive;
     % [~, file_name, file_ext] = fileparts(file_information.Filename);
-    % lvdb2_table_path = [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\lvdb2_formated.csv'];
-    % lvdb3_table_path = [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\lvdb3_formated.csv'];    
+    % lvdb2_table_path = [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\IMDELD\lvdb2_formated.csv'];
+    % lvdb3_table_path = [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\IMDELD\lvdb3_formated.csv'];    
     % lvdb2_table = readtable(lvdb2_table_path);
     % lvdb3_table = readtable(lvdb3_table_path);
 
@@ -22,7 +22,7 @@ function [aggregate_table] = calculate_aggregate(lvdb2_table, lvdb3_table, units
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
         name_file = regexprep ( regexprep( lower(units), '....$' , ''), ' ', '_');
-        writetable(units_formated, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), ['\data\interim\aggregate_', name_file, '.csv']], '\'));
+        writetable(units_formated, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), ['\data\interim\IMDELD\aggregate_', name_file, '.csv']], '\'));
         saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\aggregate_',  name_file, '.fig']], '') );
         saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\aggregate_',  name_file, '.png']], '') );
     end

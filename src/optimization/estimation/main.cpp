@@ -78,12 +78,12 @@ void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State
 int main(int argc, char *argv[]) {
     std::vector<float> agg_vector;
     auto agg_data = std::make_unique<Read_Aggregate>(
-            "../../../../data/processed/data_6_equipment/aggregate_training.csv");   // in this format for cmake
+            "../../../../data/processed/IMDELD/data_6_equipment/aggregate_training.csv");   // in this format for cmake
     auto agg_variant = agg_data->get_parameters("Active power");
     if (auto parameters = std::get_if < std::vector < float >> (&agg_variant)) {
         agg_vector = *parameters;
     }
-    auto st_data = std::make_unique<Read_State>("../../../../data/processed/data_6_equipment/on_off_training.csv");
+    auto st_data = std::make_unique<Read_State>("../../../../data/processed/IMDELD/data_6_equipment/on_off_training.csv");
 
     // Normalize
     float agg_max = *max_element(agg_vector.begin(), agg_vector.end());

@@ -6,11 +6,11 @@ function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, s
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
     
-    % equipment_table             = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\equipment_formated.csv']);
+    % equipment_table             = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\interim\IMDELD\equipment_formated.csv']);
     if (lvdb_number == 2)
-        lvdb_original_table     = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\pelletizer-subcircuit.csv']);
+        lvdb_original_table     = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\IMDELD\pelletizer-subcircuit.csv']);
     elseif (lvdb_number == 3)
-        lvdb_original_table     = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\millingmachine-subcircuit.csv']);
+        lvdb_original_table     = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\data\raw\IMDELD\millingmachine-subcircuit.csv']);
     end
 
     lvdb_original_timestamps    = cell2mat(lvdb_original_table.timestamp);
@@ -43,6 +43,6 @@ function [lvdb_complete_table] = read_lvdb_csv(units_data, units, lvdb_number, s
     lvdb_complete_table             = table(units_data, unit_values, 'VariableNames', {'timestamp', units});
 
     if (save == true)
-        writetable(lvdb_complete_table, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), join( [join(['data\interim\', string(lvdb_number)], ''), 'formated.csv'], '_')], '\'));
+        writetable(lvdb_complete_table, join([erase(file_information.Filename,  join(['\src\preprocessing\', file_name, '.m'])), join( [join(['data\interim\IMDELD\', string(lvdb_number)], ''), 'formated.csv'], '_')], '\'));
     end
 end
