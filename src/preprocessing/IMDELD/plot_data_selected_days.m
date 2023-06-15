@@ -8,7 +8,7 @@ function [] = plot_data_selected_days(data, units, save)
     %if (nargin == 3)
     %    data = varargin{1};
     % else
-    %    data = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\data\interim\IMDELD\', string(varargin{2}), '.csv']]);
+    %    data = readtable([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), ['\data\interim\IMDELD\', string(varargin{2}), '.csv']]);
     % end
     
     dates_only = datetime(datestr(data.timestamp, 'dd-mmm-yyyy'));
@@ -37,8 +37,8 @@ function [] = plot_data_selected_days(data, units, save)
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), join(['\reports\figures\', join(erase([lower(extractBefore(string(unit_label), '[')), 'days.fig'], ' '), '_')], '')  ], ''));
-        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), join(['\reports\figures\', join(erase([lower(extractBefore(string(unit_label), '[')), 'days.png'], ' '), '_')], '')  ], ''));
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), join(['\reports\figures\', join(erase([lower(extractBefore(string(unit_label), '[')), 'days.fig'], ' '), '_')], '')  ], ''));
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), join(['\reports\figures\', join(erase([lower(extractBefore(string(unit_label), '[')), 'days.png'], ' '), '_')], '')  ], ''));
     end
 
 end

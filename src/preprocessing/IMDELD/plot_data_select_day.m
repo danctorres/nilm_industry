@@ -35,7 +35,7 @@ function [] = plot_data_select_day(data, date_index, unit, save)
     
     if (save == true)
         name_file = regexprep ( regexprep( lower(unit_label), '....$' , ''), ' ', '_');
-        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), join(['\reports\figures\', name_file, '_', string(selected_date), '.fig'], '')], '') );
-        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), join(['\reports\figures\', name_file, '_', string(selected_date), '.png'], '')], '') );
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), join(['\reports\figures\', name_file, '_', string(selected_date), '.fig'], '')], '') );
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), join(['\reports\figures\', name_file, '_', string(selected_date), '.png'], '')], '') );
     end
 end

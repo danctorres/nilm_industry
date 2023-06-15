@@ -46,7 +46,7 @@ function [output_counts_cell, output_edges_cell, output_bin_center, output_TF_ce
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\',  'histogram_power_no_outliers.fig']]);
-        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\',  'histogram_power_no_outliers.png']]);
+        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), ['\reports\figures\',  'histogram_power_no_outliers.fig']]);
+        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), ['\reports\figures\',  'histogram_power_no_outliers.png']]);
     end
 end

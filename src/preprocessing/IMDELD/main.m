@@ -149,9 +149,9 @@ checkcode(file_list(endsWith(file_list, 'm')))
 
 % Indentation tool
 % git clone github.com/davidvarga/MBeautifier into the same path level that dissertation_nilm
-mbeautify_path = [erase(file_information.Filename, ['dissertation_nilm\src\preprocessing\', file_name, file_ext]), '\MBeautifier\'];
+mbeautify_path = [erase(file_information.Filename, ['dissertation_nilm\src\preprocessing\IMDELD\', file_name, file_ext]), '\MBeautifier\'];
 cd(mbeautify_path);
-source_folder = ([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\src\preprocessing\']);
+source_folder = ([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\src\preprocessing\IMDELD\']);
 % mbeautify_path = [erase(file_information.Filename, ['\dissertation_nilm\imdeld_analysis\scripts\', file_name, file_ext]), '\MBeautifier\'];
 % cd(mbeautify_path);
 % files_names = file_list(endsWith(file_list, 'm'));

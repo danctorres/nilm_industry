@@ -16,7 +16,7 @@ function [] = histogram_equipment_original(equip_data, save)
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\',  'histogram_original_power.fig']]);
-        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\reports\figures\',  'histogram_original_power.png']]);
+        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), ['\reports\figures\',  'histogram_original_power.fig']]);
+        saveas(gcf, [erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), ['\reports\figures\',  'histogram_original_power.png']]);
     end
 end
