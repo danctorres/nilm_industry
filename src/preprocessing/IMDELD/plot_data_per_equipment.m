@@ -22,7 +22,7 @@ function [] = plot_data_per_equipment(data, unit, save)
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\dates_', string(unit), '.png']);
 
         name_file = regexprep ( regexprep( lower(unit_label), '....$' , ''), ' ', '_');
-        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), join(['\reports\figures\all_days', name_file, '_', '.fig'], '')], '') );
-        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), join(['\reports\figures\all_days', name_file, '_', '.png'], '')], '') );
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), join(['\reports\figures\all_days', name_file, '_', '.fig'], '')], '') );
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), join(['\reports\figures\all_days', name_file, '_', '.png'], '')], '') );
     end
 end

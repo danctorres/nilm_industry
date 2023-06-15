@@ -43,6 +43,6 @@ function [aggregate_data] = calculate_aggregate_all_feature(timestamp, selected_
     if save == true
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
-        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), '\reports\figures\aggregate_table.fig']), '');
+        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), '\reports\figures\aggregate_table.fig']), '');
     end
 end
