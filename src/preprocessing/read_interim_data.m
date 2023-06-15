@@ -4,5 +4,5 @@ function [output] = read_interim_data(file_name)
 
     file_information = matlab.desktop.editor.getActive;
     [~, called_file_name, ~] = fileparts(file_information.Filename);
-    output = readtable(join([erase(file_information.Filename,  join(['\src\preprocessing\', called_file_name, '.m'])), join( [join(['data\interim\', string(file_name)], '')])], '\'));
+    output = readtable(join([erase(file_information.Filename,  join(['\src\preprocessing\', called_file_name, '.m'])), join( [join(['data\interim\IMDELD\', string(file_name)], '')])], '\'));
 end

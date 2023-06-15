@@ -8,7 +8,7 @@ function [] = plot_data_selected_days(data, units, save)
     %if (nargin == 3)
     %    data = varargin{1};
     % else
-    %    data = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\data\interim\', string(varargin{2}), '.csv']]);
+    %    data = readtable([erase(file_information.Filename, ['\src\preprocessing\', file_name, file_ext]), ['\data\interim\IMDELD\', string(varargin{2}), '.csv']]);
     % end
     
     dates_only = datetime(datestr(data.timestamp, 'dd-mmm-yyyy'));

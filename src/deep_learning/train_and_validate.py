@@ -12,8 +12,8 @@ from typing import List
 
 
 def read_train_data():
-    sts_train = read_csv('../../data/processed/data_6_equipment/on_off_training.csv')
-    agg_train_denorm = read_csv('../../data/processed/data_6_equipment/aggregate_training.csv', 1)
+    sts_train = read_csv('../../data/processed/IMDELD/data_6_equipment/on_off_training.csv')
+    agg_train_denorm = read_csv('../../data/processed/IMDELD/data_6_equipment/aggregate_training.csv', 1)
 
     # Format data
     agg_train = normalize(agg_train_denorm)
