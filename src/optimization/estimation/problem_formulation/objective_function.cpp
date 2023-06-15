@@ -4,6 +4,21 @@
 
 #include "objective_function.h"
 
+
+float penalty_calculation(double eq, double max_val) {
+    if (eq < 0.0f) {
+        return fabs(eq);
+    }
+    else {
+        if (eq > max_val) {
+            return eq - max_val;
+        }
+        else {
+            return 0;
+        }
+    }
+}
+
 // the quadratic objective polynomial function with quadratic penalty polynomial function weighted by a Lagrange multiplier
 double objective_function(const std::vector<double> &pos) {
     double eq_0 = static_cast<float>(act[0]) * (pos[0] + pos[1] * agg + pos[2] * pow(agg, 2));
@@ -14,25 +29,13 @@ double objective_function(const std::vector<double> &pos) {
     double eq_5 = static_cast<float>(act[5]) * (pos[15] + pos[16] * agg + pos[17] * pow(agg, 2));
     double eq =  eq_0 + eq_1 + eq_2 + eq_3 + eq_4 + eq_5;
 
-    float penalty = 0.0f;
-    if( (eq_0 < 0.0f) || (eq_0 > max_eq_power[0]) ) {
-        penalty += 0.1f;
-    }
-    if ( (eq_1 < 0.0f) || (eq_1 > max_eq_power[1]) ) {
-        penalty += 0.1f;
-    }
-    if ( (eq_2 < 0.0f) || (eq_2 > max_eq_power[2]) ) {
-        penalty += 0.1f;
-    }
-    if ( (eq_3 < 0.0f) || (eq_3 > max_eq_power[3]) ) {
-        penalty += 0.1f;
-    }
-    if ( (eq_4 < 0.0f) || (eq_4 > max_eq_power[4]) ) {
-        penalty += 0.1f;
-    }
-    if ( (eq_5 < 0.0f) || (eq_5 > max_eq_power[5]) ) {
-        penalty += 0.1f;
-    }
+    float penalty = penalty_calculation(eq_0,  max_eq_power[0]) +
+            penalty_calculation(eq_1,  max_eq_power[1]) +
+            penalty_calculation(eq_2,  max_eq_power[2]) +
+            penalty_calculation(eq_3,  max_eq_power[3]) +
+            penalty_calculation(eq_4,  max_eq_power[4]) +
+            penalty_calculation(eq_5,  max_eq_power[5]);
+
 
     /*float penalty = log(fmax(0.0f, -act[0] * (pos[0] + pos[1] * agg + pos[2] * pow(agg, 2))) + 1) +
                     log(fmax(0.0f, -act[1] * (pos[3] + pos[4] * agg + pos[5] * pow(agg, 2))) + 1) +

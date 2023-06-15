@@ -31,6 +31,7 @@ int main() {
 
     std::unique_ptr<Estimations> est = std::make_unique<Estimations>();
 
+    /*
     // Normalize agg_vector
     double min_agg = *std::min_element(agg_vec.begin(), agg_vec.end());
     double max_agg = *std::max_element(agg_vec.begin(), agg_vec.end());
@@ -41,6 +42,7 @@ int main() {
     for (int i = 0; i < agg_vec.size(); i++) {
         agg_vec[i] = (agg_vec[i] - min_agg) / (max_agg - min_agg);
     }
+    */
 
     for (int i = 0; i < agg_vec.size(); i++) {
         for (int j = 0; j < 6; j++) {
@@ -54,8 +56,10 @@ int main() {
         }
     }
 
+    /*
     //est->denormalize_all_specific();
     est->denormalize_all(min_agg, max_agg);
+    */
     save_estimates("../../../../results/optimization/estimated_active_power.csv", *est, *agg_val);
 
     auto error_eq0 = std::make_unique<Error>(est->get_eq(0), eq_val->get_eq(0));
