@@ -1,11 +1,11 @@
-function [equip_data] = read_equipment_csv()
+function [equip_data] = read_equipment_csv(dataset_name)
     % Objective: Read dataset
     % Input: path_dataset (Optional - folder path of the nilm dataset equipment files)
     % Output: equip_data (cell array, where each cell are each equipment samples)
 
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
-    cd([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), '\data\raw\IMDELD\Equipment']);
+    cd([erase(file_information.Filename, ['\src\preprocessing\', dataset_name, '\', file_name, file_ext]), '\data\raw\', dataset_name, '\Equipment']);
     
     file_list = dir;
     file_list = {file_list.name};
