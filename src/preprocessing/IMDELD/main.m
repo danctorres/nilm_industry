@@ -9,14 +9,14 @@ close all; clear; clc;
 
 % Set path
 file_information = matlab.desktop.editor.getActive;
-[~, file_name, file_ext] = fileparts(file_information.Filename);
-cd(erase(file_information.Filename, [file_name, file_ext]));
-clearvars file_ext file_name file_information
+[file_dir, ~, ~] = fileparts(file_information.Filename);
+cd(file_dir);
+clearvars file_dir file_information
 close all; clear; clc;
 
 
 % Read the data from the equipment csv files
-equip_data = read_equipment_csv(); % read dataset equipment csv, optional input (absolute path of equipment folder)
+equip_data = read_equipment_csv('IMDELD'); % read dataset equipment csv, optional input (absolute path of equipment folder)
 
 % Identify common timestamps among equipment
 selected_equipment_index = [1, 2, 3, 4, 7, 8];
