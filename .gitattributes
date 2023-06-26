@@ -12,3 +12,4 @@ data/processed/IMDELD/data_6_equipment/equipment_training.csv filter=lfs diff=lf
 data/processed/IMDELD/data_6_equipment/equipment_validation.csv filter=lfs diff=lfs merge=lfs -text
 results/optimization/* filter=lfs diff=lfs merge=lfs -text
 results/deep_learning/* filter=lfs diff=lfs merge=lfs -text
+data/processed/HIPE/1_week/* filter=lfs diff=lfs merge=lfs -text
