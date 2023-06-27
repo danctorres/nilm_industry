@@ -104,7 +104,7 @@ def main():
 
     # print(estimations)
 
-    save_csv('../../results/deep_learning/estimated_active_power.csv', estimations, timestamp)
+    save_csv('../../results/deep_learning/IMDELD/estimated_active_power.csv', estimations, timestamp)
     print(calculate_error(estimations, eq_val))
 
 

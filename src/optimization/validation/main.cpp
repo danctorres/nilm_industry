@@ -18,7 +18,7 @@
 
 
 int main() {
-    std::unique_ptr<Read_Coef> est_coef = std::make_unique<Read_Coef> ("../../../../results/optimization/estimated_coef.csv");
+    std::unique_ptr<Read_Coef> est_coef = std::make_unique<Read_Coef> ("../../../../results/optimization/IMDELD/estimated_coef.csv");
     std::unique_ptr<Read_Aggregate>  agg_val = std::make_unique<Read_Aggregate> ("../../../../data/processed/IMDELD/data_6_equipment/aggregate_validation.csv");
     std::unique_ptr<Read_State> st_val = std::make_unique<Read_State>("../../../../data/processed/IMDELD/data_6_equipment/on_off_validation.csv");
     std::unique_ptr<Read_Eq>  eq_val = std::make_unique<Read_Eq> ("../../../../data/processed/IMDELD/data_6_equipment/equipment_validation.csv");
@@ -60,7 +60,7 @@ int main() {
     //est->denormalize_all_specific();
     est->denormalize_all(min_agg, max_agg);
     */
-    save_estimates("../../../../results/optimization/estimated_active_power.csv", *est, *agg_val);
+    save_estimates("../../../../results/optimization/IMDELD/estimated_active_power.csv", *est, *agg_val);
 
     auto error_eq0 = std::make_unique<Error>(est->get_eq(0), eq_val->get_eq(0));
     auto error_eq1 = std::make_unique<Error>(est->get_eq(1), eq_val->get_eq(1));
