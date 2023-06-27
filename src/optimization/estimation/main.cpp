@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    save_coef("../../../../results/optimization/estimated_coef.csv", sum_est, num_ON);
+    save_coef("../../../../results/optimization/IMDELD/estimated_coef.csv", sum_est, num_ON);
     return 0;
 }
 
