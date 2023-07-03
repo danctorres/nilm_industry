@@ -43,6 +43,10 @@ def step(predicted: np.ndarray, agg: np.ndarray, states: np.ndarray, max_norm_eq
             if (states[0, i] == 0 and predicted[0, i] != 0.0) or (states[0, i] != 0 and predicted[0, i] == 0.0):
                 penalty[0, i] = (8 * predicted[0, i]) ** 2
     sum_eq = np.full((1, n_equipment), np.sum(predicted, axis=1))
+    # loss_function = (agg - sum_eq) ** 2 + penalty
+    # for i in range(predicted.shape[1]):
+    #     if states[0, i] == 0:
+    #         loss_function[0, i] = (0 - predicted[0, i]) ** 2
     return (agg - sum_eq) ** 2 + penalty
 
 def step_d(predicted: np.ndarray, agg: np.ndarray, states: np.ndarray, max_norm_eq: np.ndarray, min_norm_eq: np.ndarray, n_equipment: int) -> np.ndarray:
@@ -54,5 +58,8 @@ def step_d(predicted: np.ndarray, agg: np.ndarray, states: np.ndarray, max_norm_
             if (states[0, i] == 0 and predicted[0, i] != 0.0) or (states[0, i] != 0 and predicted[0, i] == 0.0):
                 penalty[0, i] = 98 * predicted[0, i]
     sum_eq = np.full((1, n_equipment), np.sum(predicted, axis=1))
-    # print(penalty)
+    # loss_function = -2 * (agg - sum_eq) + penalty
+    # for i in range(predicted.shape[1]):
+    #     if states[0, i] == 0:
+    #         loss_function[0, i] = 2 * (0 - predicted[0, i])
     return -2 * (agg - sum_eq) + penalty

@@ -103,8 +103,7 @@ def main():
 
     print("")
     agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm = read_validation_data()
-    out = net.estimate(agg_val_norm)
-    estimations = denormalize(out, min_agg, max_agg)
+    estimations = denormalize(net.estimate(agg_val_norm), min_agg, max_agg)
 
     save_csv("../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
     print(calculate_error(estimations, eq_val))
