@@ -78,8 +78,11 @@ def main():
     input_train, states_train, agg_train, min_agg, max_agg = read_train_data()
     net = set_NN()
 
-    net.set_max_norm_eq(normalize2(np.max(read_eq_data(), axis=0), min_agg, max_agg))
-    net.set_min_norm_eq(normalize2(np.min(read_eq_data(), axis=0), min_agg, max_agg))
+    net.set_max_norm_eq(normalize2(np.max(np.array([[2000.0, 1500.0, 6000.0, 6000.0, 100000.0, 100000.0]]), axis=0), min_agg, max_agg))
+    net.set_min_norm_eq(normalize2(np.min(np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]), axis=0), min_agg, max_agg))
+
+    # net.set_max_norm_eq(normalize2(np.max(read_eq_data(), axis=0), min_agg, max_agg))
+    # net.set_min_norm_eq(normalize2(np.min(read_eq_data(), axis=0), min_agg, max_agg))
 
     loss_results = net.train(input_train, agg_train, states_train, 6)
 

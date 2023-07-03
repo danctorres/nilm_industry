@@ -114,7 +114,8 @@ int main(int argc, char *argv[]) {
             std::cout << "--- Estimation " << i << " ---" << std::endl;
             estimation(sum_est, num_ON, agg_vector[i], *st_data, i);
         }
-    } else {
+    }
+    else {
         std::cout << "--- Running sequential optimization ---" << std::endl;
         // Iterate through training data
         for (int i = 0; i < agg_vector.size(); i++) {
