@@ -28,8 +28,6 @@ for i = 1 : size(equip_data, 2)
    plot(eq_cell{i}.P_kW);
 end
 
-eq_processed_timetable = {};
-figure,
 for i = 1 : size(equip_data, 2)
     eq_buff = eq_cell{i};
     eq_buff.Properties.VariableNames{'SensorDateTime'} = 'Time';
@@ -42,7 +40,36 @@ for i = 1 : size(equip_data, 2)
         eq_buff(stopIndex : end, :) = [];
     end
 
-    eq_processed_timetable{i} = retime(timetable(eq_buff.Time, eq_buff.P_kW), eq_buff.Time(1):seconds(1):eq_buff.Time(end), 'linear');
+    eq_buff.P_kW(eq_buff.P_kW < 0.0) = 0.0;
+    if (i == 1)
+        start_time = eq_buff.Time(1);
+        end_time = eq_buff.Time(end);
+    else
+        if (start_time > eq_buff.Time(1))
+            start_time = eq_buff.Time(1);
+        end
+        if (end_time < eq_buff.Time(end))
+            end_time = eq_buff.Time(end);
+        end
+    end
+    clear stopIndex eq_buff;
+end
+
+eq_processed_timetable = {};
+for i = 1 : size(equip_data, 2)
+    eq_buff = eq_cell{i};
+    eq_buff.Properties.VariableNames{'SensorDateTime'} = 'Time';
+    eq_buff.Time = cellfun(@(x) x(1, 1:22), eq_buff.Time, 'UniformOutput', false);
+    eq_buff.Time = strrep(eq_buff.Time, '+', '.');
+    eq_buff.Time = datetime(eq_buff.Time, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
+    
+    stopIndex = find(diff(eq_buff.Time) <= 0, 1);
+    if stopIndex > 0
+        eq_buff(stopIndex : end, :) = [];
+    end
+
+    eq_buff.P_kW(eq_buff.P_kW < 0.0) = 0.0;
+    eq_processed_timetable{i} = retime(timetable(eq_buff.Time, eq_buff.P_kW), start_time:seconds(1):end_time, 'linear');
     clear stopIndex eq_buff;
 end
 
@@ -57,20 +84,22 @@ eq_processed_table.Properties.VariableNames{'Var1_7'} = 'Eq7_P_kW';
 eq_processed_table.Properties.VariableNames{'Var1_8'} = 'Eq8_P_kW';
 eq_processed_table.Properties.VariableNames{'Var1_9'} = 'Eq9_P_kW';
 eq_processed_table.Properties.VariableNames{'Var1_10'} = 'Eq10_P_kW';
-clear equip_data eq_processed_timetable eq_cell;
+%clear equip_data eq_processed_timetable eq_cell;
 
 ON_OFF_double = table2array(eq_processed_table(:, 2:end));
 ON_OFF_double(ON_OFF_double > 0) = 1;
 ON_OFF_double(ON_OFF_double < 0) = 0;
+ON_OFF_uint = uint8(ON_OFF_double);
+clear ON_OFF_double;
 
 figure,
-for i = 1 : size(ON_OFF_table, 2)
+for i = 1 : size(ON_OFF_uint, 2)
     subplot(numRows, numCols, i);
-    plot(ON_OFF_double(:, i));
+    plot(ON_OFF_uint(:, i));
 end
 
 column_names = string(eq_processed_table.Properties.VariableNames);
-ON_OFF_table = array2table(ON_OFF_double, 'VariableNames', column_names(2:end));
+ON_OFF_table = array2table(ON_OFF_uint, 'VariableNames', column_names(2:end));
 ON_OFF_table = addvars(ON_OFF_table, eq_processed_table.Time, 'Before', 1, 'NewVariableNames', 'Time');
 
 clear  numCols numRows;
@@ -78,23 +107,26 @@ clear  numCols numRows;
 
 
 %% Processed aggregate data
-agg_power_data = agg_data(:, {'SensorDateTime', 'P_kW'});
-agg_power_data.SensorDateTime = cellfun(@(x) x(1, 1:22), agg_power_data.SensorDateTime, 'UniformOutput', false);
-agg_power_data.SensorDateTime = strrep(agg_power_data.SensorDateTime, '+', '.');
-agg_power_data.SensorDateTime = datetime(agg_power_data.SensorDateTime, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
+% agg_power_data = agg_data(:, {'SensorDateTime', 'P_kW'});
+% agg_power_data.SensorDateTime = cellfun(@(x) x(1, 1:22), agg_power_data.SensorDateTime, 'UniformOutput', false);
+% agg_power_data.SensorDateTime = strrep(agg_power_data.SensorDateTime, '+', '.');
+% agg_power_data.SensorDateTime = datetime(agg_power_data.SensorDateTime, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
+% 
+% stopIndex = find(diff(agg_power_data.SensorDateTime) <= 0, 1);
+% if stopIndex > 0
+%     agg_power_data(stopIndex : end, :) = [];
+% end
+% clear stopIndex;
+% agg_interpolated_table = retime(timetable(agg_power_data.SensorDateTime, agg_power_data.P_kW), start_time:seconds(1):end_time, 'linear');
+% 
+% aggregate_table = timetable2table(synchronize(timetable(eq_processed_table.Time, eq_processed_table.Eq1_P_kW), agg_interpolated_table, 'union', 'spline'));
+% aggregate_table = removevars(aggregate_table, "Var1_1");
+% aggregate_table.Properties.VariableNames{'Var1_agg_interpolated_table'} = 'Agg_P_kW';
 
-stopIndex = find(diff(agg_power_data.SensorDateTime) <= 0, 1);
-if stopIndex > 0
-    agg_power_data(stopIndex : end, :) = [];
-end
-clear stopIndex;
-agg_interpolated_table = retime(timetable(agg_power_data.SensorDateTime, agg_power_data.P_kW), agg_power_data.SensorDateTime(1):seconds(1):agg_power_data.SensorDateTime(end), 'linear');
-
-aggregate_table = timetable2table(synchronize(timetable(eq_processed_table.Time, eq_processed_table.Eq1_P_kW), agg_interpolated_table, 'union', 'spline'));
-aggregate_table = removevars(aggregate_table, "Var1_1");
-aggregate_table.Properties.VariableNames{'Var1_agg_interpolated_table'} = 'Agg_P_kW';
-
-
+% Synthetic aggregate values = sum of equipment values
+aggregate_table = table(eq_processed_table.Time, sum(eq_processed_table{:, 2:11}, 2), 'VariableNames', {'Time', 'P_kW'});
+figure,
+plot(aggregate_table.P_kW)
 
 %% Split into training and validation data
 trainingRatio = 0.8;
