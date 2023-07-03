@@ -35,7 +35,7 @@ def read_validation_data():
     # resh_agg_val = np.reshape(agg_val, (agg_val.shape[0], 1, agg_val.shape[1]))
     input_val = np.concatenate((sts_val, normalize(agg_val_denorm)), axis = 1)
     resh_input_val = np.reshape(input_val, (input_val.shape[0], 1, input_val.shape[1]))
-    return resh_input_val, timestamp, eq_val
+    return resh_input_val, timestamp, eq_val, agg_val_denorm.min(), agg_val_denorm.max(), agg_val_denorm
 
 def normalize(data: np.ndarray) -> np.ndarray:
     min_val = data.min()
@@ -58,7 +58,7 @@ def denormalize(data: List[np.ndarray], min_val: float, max_val: float) -> np.nd
 
 def set_NN():
     net = NN()
-    net.set_learning_rate(0.001)    # big value for the learning rate causes overshoot
+    net.set_learning_rate(0.001)    # bigger value for the learning rate causes overshoot
     net.set_layer(Connected_layer(7, 10))
     net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_layer(Connected_layer(10, 6))
@@ -102,11 +102,11 @@ def main():
     plt.show()
 
     print("")
-    agg_val, timestamp, eq_val = read_validation_data()
-    out = net.estimate(agg_val)
+    agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm = read_validation_data()
+    out = net.estimate(agg_val_norm)
     estimations = denormalize(out, min_agg, max_agg)
 
-    save_csv("../../results/deep_learning/IMDELD/estimated_active_power.csv", estimations, timestamp)
+    save_csv("../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
     print(calculate_error(estimations, eq_val))
 
 
