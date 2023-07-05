@@ -81,7 +81,6 @@ def main():
     net.set_max_norm_eq(normalize2(np.array([[0.9, 9.0, 0.5, 0.5, 8.2, 0.1, 1.1, 0.9, 0.1]]), min_agg, max_agg))
     net.set_min_norm_eq(normalize2(np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]), min_agg, max_agg))
 
-    print(agg_train)
     loss_results = net.train(agg_train, 9)
 
     for key, value in loss_results.items():
