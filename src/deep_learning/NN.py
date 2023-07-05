@@ -7,8 +7,8 @@ class NN:
         self.loss_fun_d = None
         self.learning_rate = 0.1
         self.layers = []
-        self.max_norm_eq = []
-        self.min_norm_eq = []
+        self.max_norm_eq = None
+        self.min_norm_eq = None
         self.epochs = 1000
         self.threshold = 0.1
 
@@ -34,19 +34,16 @@ class NN:
     def set_threshold(self, threshold: float) -> None:
             self.threshold = threshold
 
-    def train(self, inputs: np.ndarray, aggs: np.ndarray, states: np.ndarray, n_equipment: int): # -> Dict[List[float]]:
-        loss_Dict = {}
-
-        for i in range(n_equipment):
-            loss_Dict[i] = []
-
+    def train(self, aggs: np.ndarray, n_equipment: int): # -> Dict[List[float]]:
+        loss_Dict = {f"{i}": [] for i in range(0, n_equipment + 1)}
         for epoch in range(self.epochs):
-            for input, agg, st in zip(inputs, aggs, states):
+            for idx in range(aggs.shape[0]):
+                input = aggs[idx]
                 # Forwards Propagation
                 for layer in self.layers:
                     layer_output = layer.forw_prop(input)
                     input = layer_output
-                loss = self.loss_fun_d(layer_output, agg, st, self.max_norm_eq, self.min_norm_eq, n_equipment)
+                loss = self.loss_fun_d(layer_output, aggs[idx], self.max_norm_eq, self.min_norm_eq, n_equipment)
 
                 # Backwards Propagation
                 for layer in reversed(self.layers):
@@ -54,13 +51,12 @@ class NN:
 
             print(f"Training network: {(epoch * 100) / (self.epochs - 1):.2f}% - Epoch: {epoch + 1}/{self.epochs}", end="\r")
 
-            for loss_value in self.loss_fun(layer_output, agg, st, self.max_norm_eq, self.min_norm_eq, n_equipment):
-                for index, elem in enumerate(loss_value):
-                    loss_Dict[index].append(elem)
+            for index, value in np.ndenumerate(self.loss_fun(layer_output, aggs[aggs.shape[0] - 1], self.max_norm_eq, self.min_norm_eq, n_equipment)):
+                loss_Dict[f"{index[1]}"].append(value)
         return loss_Dict
 
     def estimate(self, inputs: np.ndarray) -> List[np.ndarray]:
-        print("Estimating values")
+        print("--- Estimating values ---")
         output: np.ndarray = []
         results: np.ndarray = []
         for input in inputs:
