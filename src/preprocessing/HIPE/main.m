@@ -73,6 +73,9 @@ for i = 1 : size(equip_data, 2)
     clear stopIndex eq_buff;
 end
 
+% Remove data from first equipment since it is always OFF
+eq_processed_timetable = eq_processed_timetable(1:numel(eq_processed_timetable) ~= 1);
+
 eq_processed_table = timetable2table(synchronize(eq_processed_timetable{:}, 'union', 'spline'));
 eq_processed_table.Properties.VariableNames{'Var1_1'} = 'Eq1_P_kW';
 eq_processed_table.Properties.VariableNames{'Var1_2'} = 'Eq2_P_kW';
@@ -83,8 +86,7 @@ eq_processed_table.Properties.VariableNames{'Var1_6'} = 'Eq6_P_kW';
 eq_processed_table.Properties.VariableNames{'Var1_7'} = 'Eq7_P_kW';
 eq_processed_table.Properties.VariableNames{'Var1_8'} = 'Eq8_P_kW';
 eq_processed_table.Properties.VariableNames{'Var1_9'} = 'Eq9_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_10'} = 'Eq10_P_kW';
-%clear equip_data eq_processed_timetable eq_cell;
+clear equip_data eq_processed_timetable eq_cell start_time end_time;
 
 ON_OFF_double = table2array(eq_processed_table(:, 2:end));
 ON_OFF_double(ON_OFF_double > 0) = 1;
@@ -102,7 +104,7 @@ column_names = string(eq_processed_table.Properties.VariableNames);
 ON_OFF_table = array2table(ON_OFF_uint, 'VariableNames', column_names(2:end));
 ON_OFF_table = addvars(ON_OFF_table, eq_processed_table.Time, 'Before', 1, 'NewVariableNames', 'Time');
 
-clear  numCols numRows;
+clear  numCols numRows column_names ON_OFF_uint;
 
 
 
@@ -124,13 +126,18 @@ clear  numCols numRows;
 % aggregate_table.Properties.VariableNames{'Var1_agg_interpolated_table'} = 'Agg_P_kW';
 
 % Synthetic aggregate values = sum of equipment values
-aggregate_table = table(eq_processed_table.Time, sum(eq_processed_table{:, 2:11}, 2), 'VariableNames', {'Time', 'P_kW'});
+for i = 2:size(eq_processed_table, 2) - 1
+    agg_struct_of_tables.(sprintf('aggregate_table_%d', i)) = table(eq_processed_table.Time, sum(eq_processed_table{:, 2 : i + 1}, 2), 'VariableNames', {'Time', 'P_kW'});
+end
+clear i;
+
 figure,
-plot(aggregate_table.P_kW)
+plot(agg_struct_of_tables.aggregate_table_9.P_kW)
 
 %% Split into training and validation data
-trainingRatio = 0.8;
+trainingRatio = 0.7;
 validationRatio = 1 - trainingRatio;
+rng(42);
 
 partition = cvpartition(size(eq_processed_table, 1), 'HoldOut', validationRatio);
 trainingIndices = training(partition);
@@ -142,9 +149,13 @@ equipment_validation = eq_processed_table(validationIndices, :);
 on_off_training = ON_OFF_table(trainingIndices, :);
 on_off_validation = ON_OFF_table(validationIndices, :);
 
-aggregate_training = aggregate_table(trainingIndices, :);
-aggregate_validation = aggregate_table(validationIndices, :);
+for i = 2:size(eq_processed_table, 2) - 1
+    aggregate_table = agg_struct_of_tables.(sprintf('aggregate_table_%d', i));
+    agg_training.(sprintf('aggregate_table_%d', i)) = aggregate_table(trainingIndices, :);
+    agg_validation.(sprintf('aggregate_table_%d', i)) = aggregate_table(validationIndices, :);
+end
 
+clear trainingRatio validationRatio partition trainingIndices validationIndices aggregate_table ON_OFF_table i;
 
 %% Save data
 
@@ -154,5 +165,8 @@ writetable(equipment_training, fullfile(relativeFolderPath, 'equipment_training.
 writetable(equipment_validation, fullfile(relativeFolderPath, 'equipment_validation.csv'));
 writetable(on_off_training, fullfile(relativeFolderPath, 'on_off_training.csv'));
 writetable(on_off_validation, fullfile(relativeFolderPath, 'on_off_validation.csv'));
-writetable(aggregate_training, fullfile(relativeFolderPath, 'aggregate_training.csv'));
-writetable(aggregate_validation, fullfile(relativeFolderPath, 'aggregate_validation.csv'));
+
+for i = 2:size(eq_processed_table, 2) - 1
+    writetable(agg_training.(sprintf('aggregate_table_%d', i)), fullfile(relativeFolderPath, sprintf('agg_training_%d.csv', i)));
+    writetable(agg_validation.(sprintf('aggregate_table_%d', i)), fullfile(relativeFolderPath, sprintf('agg_validation_%d.csv', i)));
+end
