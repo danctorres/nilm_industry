@@ -167,6 +167,6 @@ writetable(on_off_training, fullfile(relativeFolderPath, 'on_off_training.csv'))
 writetable(on_off_validation, fullfile(relativeFolderPath, 'on_off_validation.csv'));
 
 for i = 2:size(eq_processed_table, 2) - 1
-    writetable(agg_training.(sprintf('aggregate_table_%d', i)), fullfile(relativeFolderPath, sprintf('agg_training_%d.csv', i)));
-    writetable(agg_validation.(sprintf('aggregate_table_%d', i)), fullfile(relativeFolderPath, sprintf('agg_validation_%d.csv', i)));
+    writetable(agg_training.(sprintf('aggregate_table_%d', i)), fullfile([relativeFolderPath, 'aggregate_training/'], sprintf('agg_training_%d.csv', i)));
+    writetable(agg_validation.(sprintf('aggregate_table_%d', i)), fullfile([relativeFolderPath, 'aggregate_validation/'], sprintf('agg_validation_%d.csv', i)));
 end
