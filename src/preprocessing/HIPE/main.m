@@ -76,23 +76,24 @@ end
 % Remove data from first equipment since it is always OFF
 eq_processed_timetable = eq_processed_timetable(1:numel(eq_processed_timetable) ~= 1);
 
-eq_processed_table = timetable2table(synchronize(eq_processed_timetable{:}, 'union', 'spline'));
-eq_processed_table.Properties.VariableNames{'Var1_1'} = 'Eq1_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_2'} = 'Eq2_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_3'} = 'Eq3_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_4'} = 'Eq4_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_5'} = 'Eq5_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_6'} = 'Eq6_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_7'} = 'Eq7_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_8'} = 'Eq8_P_kW';
-eq_processed_table.Properties.VariableNames{'Var1_9'} = 'Eq9_P_kW';
+eq_processed_table_buff = timetable2table(synchronize(eq_processed_timetable{:}, 'union', 'spline'));
+eq_processed_table = [eq_processed_table_buff(:, 1), array2table( round(table2array(eq_processed_table_buff(:, 2:end)), 4 ))];
+eq_processed_table.Properties.VariableNames{'Var1'} = 'Eq1_P_kW';
+eq_processed_table.Properties.VariableNames{'Var2'} = 'Eq2_P_kW';
+eq_processed_table.Properties.VariableNames{'Var3'} = 'Eq3_P_kW';
+eq_processed_table.Properties.VariableNames{'Var4'} = 'Eq4_P_kW';
+eq_processed_table.Properties.VariableNames{'Var5'} = 'Eq5_P_kW';
+eq_processed_table.Properties.VariableNames{'Var6'} = 'Eq6_P_kW';
+eq_processed_table.Properties.VariableNames{'Var7'} = 'Eq7_P_kW';
+eq_processed_table.Properties.VariableNames{'Var8'} = 'Eq8_P_kW';
+eq_processed_table.Properties.VariableNames{'Var9'} = 'Eq9_P_kW';
 clear equip_data eq_processed_timetable eq_cell start_time end_time;
 
 ON_OFF_double = table2array(eq_processed_table(:, 2:end));
 ON_OFF_double(ON_OFF_double > 0) = 1;
 ON_OFF_double(ON_OFF_double < 0) = 0;
 ON_OFF_uint = uint8(ON_OFF_double);
-clear ON_OFF_double;
+clear ON_OFF_double eq_processed_table_buff;
 
 figure,
 for i = 1 : size(ON_OFF_uint, 2)
@@ -129,7 +130,7 @@ clear  numCols numRows column_names ON_OFF_uint;
 for i = 2:size(eq_processed_table, 2) - 1
     agg_struct_of_tables.(sprintf('aggregate_table_%d', i)) = table(eq_processed_table.Time, sum(eq_processed_table{:, 2 : i + 1}, 2), 'VariableNames', {'Time', 'P_kW'});
 end
-clear i;
+clear i agg_buff;
 
 figure,
 plot(agg_struct_of_tables.aggregate_table_9.P_kW)
@@ -156,6 +157,7 @@ for i = 2:size(eq_processed_table, 2) - 1
 end
 
 clear trainingRatio validationRatio partition trainingIndices validationIndices aggregate_table ON_OFF_table i;
+
 
 %% Save data
 
