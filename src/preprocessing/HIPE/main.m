@@ -108,7 +108,6 @@ ON_OFF_table = addvars(ON_OFF_table, eq_processed_table.Time, 'Before', 1, 'NewV
 clear  numCols numRows column_names ON_OFF_uint;
 
 
-
 %% Processed aggregate data
 % agg_power_data = agg_data(:, {'SensorDateTime', 'P_kW'});
 % agg_power_data.SensorDateTime = cellfun(@(x) x(1, 1:22), agg_power_data.SensorDateTime, 'UniformOutput', false);
@@ -130,45 +129,68 @@ clear  numCols numRows column_names ON_OFF_uint;
 for i = 2:size(eq_processed_table, 2) - 1
     agg_struct_of_tables.(sprintf('aggregate_table_%d', i)) = table(eq_processed_table.Time, sum(eq_processed_table{:, 2 : i + 1}, 2), 'VariableNames', {'Time', 'P_kW'});
 end
-clear i agg_buff;
+clear i agg_buff agg_data;
 
 figure,
 plot(agg_struct_of_tables.aggregate_table_9.P_kW)
 
-%% Split into training and validation data
-trainingRatio = 0.7;
-validationRatio = 1 - trainingRatio;
-rng(42);
 
-partition = cvpartition(size(eq_processed_table, 1), 'HoldOut', validationRatio);
-trainingIndices = training(partition);
-validationIndices = test(partition);
-
-equipment_training = eq_processed_table(trainingIndices, :);
-equipment_validation = eq_processed_table(validationIndices, :);
-
-on_off_training = ON_OFF_table(trainingIndices, :);
-on_off_validation = ON_OFF_table(validationIndices, :);
-
-for i = 2:size(eq_processed_table, 2) - 1
-    aggregate_table = agg_struct_of_tables.(sprintf('aggregate_table_%d', i));
-    agg_training.(sprintf('aggregate_table_%d', i)) = aggregate_table(trainingIndices, :);
-    agg_validation.(sprintf('aggregate_table_%d', i)) = aggregate_table(validationIndices, :);
-end
-
-clear trainingRatio validationRatio partition trainingIndices validationIndices aggregate_table ON_OFF_table i;
-
-
-%% Save data
-
+%% Split into training and validation data and save into file
 relativeFolderPath = '../../../data/processed/HIPE/1_week/';
 
-writetable(equipment_training, fullfile(relativeFolderPath, 'equipment_training.csv'));
-writetable(equipment_validation, fullfile(relativeFolderPath, 'equipment_validation.csv'));
-writetable(on_off_training, fullfile(relativeFolderPath, 'on_off_training.csv'));
-writetable(on_off_validation, fullfile(relativeFolderPath, 'on_off_validation.csv'));
+training_ratio = 0.7;
+table_names = fieldnames(agg_struct_of_tables);
+for i = 1:size(table_names, 1)
+    timestamps      = agg_struct_of_tables.(table_names{i}).Time;
+    agg_buff        = agg_struct_of_tables.(table_names{i}).P_kW;
+    mean_aggregate  = mean(agg_buff);
+    std_aggregate   = std(agg_buff);
+    bin_edges       = mean_aggregate + [-3 * std_aggregate, -2 * std_aggregate, -1 * std_aggregate, 0, 1 * std_aggregate, 2 * std_aggregate, 3 * std_aggregate];
+    [N, ~, bin]     = histcounts(agg_buff, bin_edges);
+    buffer          = 1:1:(size(agg_buff, 1) - 1);
+    unique_bins     = intersect(buffer(N > 100), unique(bin));
+    n_samples_bin   = 1000 * training_ratio;
 
-for i = 2:size(eq_processed_table, 2) - 1
-    writetable(agg_training.(sprintf('aggregate_table_%d', i)), fullfile([relativeFolderPath, 'aggregate_training/'], sprintf('agg_training_%d.csv', i)));
-    writetable(agg_validation.(sprintf('aggregate_table_%d', i)), fullfile([relativeFolderPath, 'aggregate_validation/'], sprintf('agg_validation_%d.csv', i)));
+    for j = 1:size(unique_bins, 1)
+        bin_samples = find(bin == unique_bins(j));
+        if (n_samples_bin > size(bin_samples, 1))
+            n_samples_bin = size(bin_samples, 1);
+        end
+    end
+
+    n_samples_bin = floor(n_samples_bin * training_ratio);
+    training_index      = [];
+    validation_index    = [];
+    for j = 1:size(unique_bins, 1)
+        bin_samples             = find(bin == unique_bins(j));
+        bin_index_training      = randsample(bin_samples, n_samples_bin);
+        bin_index_validation    = randsample(setdiff(bin_samples, bin_index_training), floor(n_samples_bin * (1 - training_ratio)));
+        training_index          = [training_index; bin_index_training];
+        validation_index        = [validation_index; bin_index_validation];
+    end
+    training_index = reshape(training_index(randperm(numel(training_index))), size(training_index));
+    validation_index = reshape(validation_index(randperm(numel(validation_index))), size(validation_index));
+
+    agg_training.(sprintf('aggregate_table_%d', i + 1))             = array2table(timestamps(training_index, :), 'VariableNames', {'Time'});
+    agg_training.(sprintf('aggregate_table_%d', i + 1)).P_kW        = agg_buff(training_index, :);
+
+    agg_validation.(sprintf('aggregate_table_%d', i + 1))           = array2table(timestamps(validation_index, :), 'VariableNames', {'Time'});
+    agg_validation.(sprintf('aggregate_table_%d', i + 1)).P_kW      = agg_buff(validation_index, :);
+
+    eq_training.(sprintf('equipment_table_%d', i + 1))              = eq_processed_table(training_index, 1 : i + 1);
+    eq_validation.(sprintf('equipment_table_%d', i + 1))            = eq_processed_table(validation_index, 1 : i + 1);
+
+    st_training.(sprintf('state_table_%d', i + 1))           = ON_OFF_table(training_index, 1 : i + 1);
+    st_validation.(sprintf('state_table_%d', i + 1))         = ON_OFF_table(validation_index, 1 : i + 1);
+
+    writetable(agg_training.(sprintf('aggregate_table_%d', i + 1)), fullfile([relativeFolderPath, 'aggregate_training/'], sprintf('agg_training_%d.csv', i + 1)));
+    writetable(agg_validation.(sprintf('aggregate_table_%d', i + 1)), fullfile([relativeFolderPath, 'aggregate_validation/'], sprintf('agg_validation_%d.csv', i + 1)));
+
+    writetable(eq_training.(sprintf('equipment_table_%d', i + 1)), fullfile([relativeFolderPath, 'equipment_training/'], sprintf('eq_training_%d.csv', i + 1)));
+    writetable(eq_training.(sprintf('equipment_table_%d', i + 1)), fullfile([relativeFolderPath, 'equipment_validation/'], sprintf('eq_validation_%d.csv', i + 1)));
+
+    writetable(st_training.(sprintf('state_table_%d', i + 1)), fullfile([relativeFolderPath, 'state_training/'], sprintf('st_training_%d.csv', i + 1)));
+    writetable(st_validation.(sprintf('state_table_%d', i + 1)), fullfile([relativeFolderPath, 'state_validation/'], sprintf('st_validation_%d.csv', i + 1)));
 end
+
+clear training_index validation_index bin_index_validation bin_index_training bin_samples i j n_samples_bin unique_bins buffer N bin bin_edges std_aggregate mean_aggregate agg_buff timestamps table_names training_ratio relativeFolderPath;
