@@ -66,16 +66,17 @@ def set_NN():
     net.set_epochs(100)
     return net
 
-def calculate_error(estimations, eq_val) -> List[float]:
-    mse = [0, 0, 0, 0, 0, 0]
+def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
+    mse = np.zeros((1, n_equipment))
     for estimations_array, eq_array in zip(estimations, eq_val.tolist()):
-        mse = mse + (estimations_array - eq_array) ** 2
+        mse = mse + (estimations_array - eq_array[:n_equipment]) ** 2
     return mse / len(estimations)
 
 
 def main():
     input_train, states_train, agg_train, min_agg, max_agg = read_train_data()
-    net = set_NN()
+    n_equipment = 6
+    net = set_NN(n_equipment)
 
     net.set_max_norm_eq(normalize2(np.array([[2000.0, 1500.0, 6000.0, 6000.0, 100000.0, 100000.0]]), min_agg, max_agg))
     net.set_min_norm_eq(normalize2(np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]), min_agg, max_agg))
@@ -83,7 +84,7 @@ def main():
     # net.set_max_norm_eq(normalize2(np.max(read_eq_data(), axis=0), min_agg, max_agg))
     # net.set_min_norm_eq(normalize2(np.min(read_eq_data(), axis=0), min_agg, max_agg))
 
-    loss_results = net.train(agg_train, 6)
+    loss_results = net.train(agg_train, n_equipment)
 
     for key, value in loss_results.items():
         plt.plot(value, label=key)
@@ -98,7 +99,7 @@ def main():
     estimations = denormalize(net.estimate(normalize(agg_val_denorm)), min_agg, max_agg)
 
     save_csv("../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
-    print(calculate_error(estimations, eq_val))
+    print(calculate_error(estimations, eq_val, n_equipment))
 
 
 if __name__ == "__main__":
