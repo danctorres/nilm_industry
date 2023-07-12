@@ -38,16 +38,17 @@ class NN:
         loss_Dict = {f"{i}": [] for i in range(0, n_equipment + 1)}
         for epoch in range(self.epochs):
             for idx in range(aggs.shape[0]):
-                input = aggs[idx]
-                # Forwards Propagation
-                for layer in self.layers:
-                    layer_output = layer.forw_prop(input)
-                    input = layer_output
-                loss = self.loss_fun_d(layer_output, aggs[idx], self.max_norm_eq, self.min_norm_eq, n_equipment)
+                if aggs[idx] != 0.0:
+                    input_agg = aggs[idx]
+                    # Forwards Propagation
+                    for layer in self.layers:
+                        layer_output = layer.forw_prop(input_agg)
+                        input_agg = layer_output
+                    loss = self.loss_fun_d(layer_output, aggs[idx], self.max_norm_eq, self.min_norm_eq, n_equipment)
 
-                # Backwards Propagation
-                for layer in reversed(self.layers):
-                    loss = layer.back_prop(self.learning_rate, loss)
+                    # Backwards Propagation
+                    for layer in reversed(self.layers):
+                        loss = layer.back_prop(self.learning_rate, loss)
 
             print(f"Training network: {(epoch * 100) / (self.epochs - 1):.2f}% - Epoch: {epoch + 1}/{self.epochs}", end="\r")
 
@@ -55,11 +56,13 @@ class NN:
                 loss_Dict[f"{index[1]}"].append(value)
         return loss_Dict
 
-    def estimate(self, inputs: np.ndarray) -> List[np.ndarray]:
+    def estimate(self, inputs: np.ndarray, n_equipment: int) -> List[np.ndarray]:
         print("--- Estimating values ---")
         output: np.ndarray = []
         results: np.ndarray = []
         for input in inputs:
+            if input == 0.0:
+                results.append(np.zeros((1, n_equipment)))
             for layer in self.layers:
                 output = layer.forw_prop(input)
                 input = output

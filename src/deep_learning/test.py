@@ -6,10 +6,13 @@ from Connected_layer import Connected_layer
 from NN import NN
 from activation_function import tanh, tanh_d
 from loss_function import step, step_d
-from read_csv import read_csv
-from save_csv import save_csv
 from typing import List
 
+def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
+    mse = np.zeros((1, n_equipment))
+    for estimations_array, eq_array in zip(estimations, eq_val.tolist()):
+        mse = mse + (estimations_array - eq_array[:n_equipment]) ** 2
+    return mse / len(estimations)
 
 def set_NN():
     net = NN()
@@ -39,7 +42,7 @@ def main():
     plt.tight_layout()
     plt.show()
 
-    estimations = net.estimate(x_train)
+    estimations = net.estimate(x_train, 1)
 
     sums = []
     for inner_array in estimations:
@@ -51,6 +54,9 @@ def main():
     print(f"Sums {sums}")
     print(f"Error {sums - x_train.flatten()}")
     # assert np.all((estimations - y_train) < 0.1)
+
+    print(calculate_error(estimations, x_train, 1))
+
 
 if __name__ == "__main__":
     main()

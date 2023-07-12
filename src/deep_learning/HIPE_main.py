@@ -58,18 +58,18 @@ def read_validation_data():
 def set_NN(n_equipment: int):
     net = NN()
     net.set_learning_rate(0.1)
-    net.set_layer(Connected_layer(1, 5))
+    net.set_layer(Connected_layer(1, 9))
     net.set_layer(Activation_layer(tanh, tanh_d))
-    net.set_layer(Connected_layer(5, n_equipment))
+    net.set_layer(Connected_layer(9, n_equipment))
     net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_loss(step, step_d)
     net.set_epochs(100)
     return net
 
-def calculate_error(estimations, eq_val) -> List[float]:
-    mse = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
+    mse = np.zeros((1, n_equipment))
     for estimations_array, eq_array in zip(estimations, eq_val.tolist()):
-        mse = mse + (estimations_array - eq_array) ** 2
+        mse = mse + (estimations_array - eq_array[:n_equipment]) ** 2
     return mse / len(estimations)
 
 
@@ -79,9 +79,10 @@ def main():
 
     net = set_NN(n_equipment)
 
-    net.set_max_norm_eq(normalize2(np.array([[0.9, 9.0, 0.5, 0.5, 8.2, 0.1, 1.1, 0.9, 0.1]]), min_agg, max_agg))
-    net.set_min_norm_eq(normalize2(np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]), min_agg, max_agg))
-
+    # net.set_max_norm_eq(normalize2(np.array([[0.9, 9.0, 0.5, 0.5, 8.2, 0.1, 1.1, 0.9, 0.1]]), min_agg, max_agg))
+    # net.set_min_norm_eq(normalize2(np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]), min_agg, max_agg))
+    net.set_max_norm_eq(normalize2(np.max(read_eq_data(), axis=0).reshape(1, 9), min_agg, max_agg))
+    net.set_min_norm_eq(normalize2(np.min(read_eq_data(), axis=0).reshape(1, 9), min_agg, max_agg))
 
     loss_results = net.train(agg_train, n_equipment)
 
@@ -94,11 +95,11 @@ def main():
 
     print("")
 
-    # Validation
     agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm = read_validation_data()
-    estimations = denormalize(net.estimate(agg_val_norm), min_agg, max_agg)
+    estimations = denormalize(net.estimate(agg_val_norm, n_equipment), min_agg, max_agg)
 
     save_csv("../../results/deep_learning/HIPE/1_week/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
+    print(calculate_error(estimations, eq_val, n_equipment))
 
 
 if __name__ == "__main__":
