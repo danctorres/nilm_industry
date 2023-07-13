@@ -1,3 +1,4 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -31,12 +32,12 @@ def denormalize(data_norm: List[np.ndarray], min_val: float, max_val: float) -> 
     return data_norm
 
 def read_eq_data():
-    return read_csv("../../data/processed/HIPE/1_week/equipment_training/eq_training_3.csv")
+    return read_csv("../../data/processed/HIPE/1_week/equipment_training/eq_training_2.csv")
 
 def read_train_data():
     print("--- Reading training data ---")
-    sts_train = read_csv("../../data/processed/HIPE/1_week/state_training/st_training_3.csv")
-    agg_train_denorm = read_csv("../../data/processed/HIPE/1_week/aggregate_training/agg_training_3.csv", 1)
+    sts_train = read_csv("../../data/processed/HIPE/1_week/state_training/st_training_2.csv")
+    agg_train_denorm = read_csv("../../data/processed/HIPE/1_week/aggregate_training/agg_training_2.csv", 1)
     agg_train = normalize(agg_train_denorm)
     resh_agg_train = np.reshape(agg_train, (agg_train.shape[0], 1, agg_train.shape[1]))
     input_train = np.concatenate((sts_train, agg_train), axis=1)
@@ -46,10 +47,10 @@ def read_train_data():
 
 def read_validation_data():
     print("--- Reading validation data ---")
-    sts_val = read_csv("../../data/processed/HIPE/1_week/state_validation/st_validation_3.csv")
-    agg_val = read_csv("../../data/processed/HIPE/1_week/aggregate_validation/agg_validation_3.csv", 1)
-    timestamp = read_csv("../../data/processed/HIPE/1_week/aggregate_validation/agg_validation_3.csv", 0)
-    eq_val = read_csv("../../data/processed/HIPE/1_week/equipment_validation/eq_validation_3.csv")
+    sts_val = read_csv("../../data/processed/HIPE/1_week/state_validation/st_validation_2.csv")
+    agg_val = read_csv("../../data/processed/HIPE/1_week/aggregate_validation/agg_validation_2.csv", 1)
+    timestamp = read_csv("../../data/processed/HIPE/1_week/aggregate_validation/agg_validation_2.csv", 0)
+    eq_val = read_csv("../../data/processed/HIPE/1_week/equipment_validation/eq_validation_2.csv")
     input_val = np.concatenate((sts_val, normalize(agg_val)), axis = 1)
     resh_input_val = np.reshape(input_val, (input_val.shape[0], 1, input_val.shape[1]))
     return normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val
@@ -63,7 +64,7 @@ def set_NN(n_equipment: int):
     net.set_layer(Connected_layer(3, n_equipment))
     net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_loss(step, step_d)
-    net.set_epochs(10000)
+    net.set_epochs(1000)
     return net
 
 def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
@@ -76,7 +77,7 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
 
 def main():
     input_train, states_train, agg_train, min_agg, max_agg = read_train_data()
-    n_equipment = 3
+    n_equipment = 2
 
     net = set_NN(n_equipment)
 

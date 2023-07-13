@@ -60,11 +60,12 @@ class NN:
         print("--- Estimating values ---")
         output: np.ndarray = []
         results: np.ndarray = []
-        for input in inputs:
-            if input == 0.0:
+        for inp in inputs:
+            if inp == 0.0:
                 results.append(np.zeros((1, n_equipment)))
-            for layer in self.layers:
-                output = layer.forw_prop(input)
-                input = output
-            results.append(output)
+            else:
+                for layer in self.layers:
+                    output = layer.forw_prop(inp)
+                    inp = output
+                results.append(output)
         return results

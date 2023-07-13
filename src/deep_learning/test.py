@@ -1,3 +1,4 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,9 +18,9 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
 def set_NN():
     net = NN()
     net.set_learning_rate(0.1)
-    net.set_layer(Connected_layer(1, 3))
+    net.set_layer(Connected_layer(1, 5))
     net.set_layer(Activation_layer(tanh, tanh_d))
-    net.set_layer(Connected_layer(3, 2))
+    net.set_layer(Connected_layer(5, 2))
     net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_loss(step, step_d)
     net.set_epochs(10000)
@@ -27,7 +28,7 @@ def set_NN():
 
 def main():
     net = set_NN()
-    net.set_max_norm_eq(np.array([[1.0, 1.0]]))
+    net.set_max_norm_eq(np.array([[0.9, 0.7]]))
     net.set_min_norm_eq(np.array([[0.0, 0.0]]))
 
     x_train = np.array([[[0.2]], [[0.5]], [[0.8]], [[1]]])
