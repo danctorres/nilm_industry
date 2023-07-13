@@ -188,7 +188,7 @@ for i = 1:size(table_names, 1)
     writetable(agg_validation.(sprintf('aggregate_table_%d', i + 1)), fullfile([relativeFolderPath, 'aggregate_validation/'], sprintf('agg_validation_%d.csv', i + 1)));
 
     writetable(eq_training.(sprintf('equipment_table_%d', i + 1)), fullfile([relativeFolderPath, 'equipment_training/'], sprintf('eq_training_%d.csv', i + 1)));
-    writetable(eq_training.(sprintf('equipment_table_%d', i + 1)), fullfile([relativeFolderPath, 'equipment_validation/'], sprintf('eq_validation_%d.csv', i + 1)));
+    writetable(eq_validation.(sprintf('equipment_table_%d', i + 1)), fullfile([relativeFolderPath, 'equipment_validation/'], sprintf('eq_validation_%d.csv', i + 1)));
 
     writetable(st_training.(sprintf('state_table_%d', i + 1)), fullfile([relativeFolderPath, 'state_training/'], sprintf('st_training_%d.csv', i + 1)));
     writetable(st_validation.(sprintf('state_table_%d', i + 1)), fullfile([relativeFolderPath, 'state_validation/'], sprintf('st_validation_%d.csv', i + 1)));
