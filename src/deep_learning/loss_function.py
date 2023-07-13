@@ -25,5 +25,5 @@ def step_d(predicted: np.ndarray, agg: np.ndarray, max_norm_eq: np.ndarray, min_
     # print(f"max_norm_eq {max_norm_eq}")
     # print(f"min_norm_eq {min_norm_eq}")
     # print(f"agg - sum_eq {agg - sum_eq}")
-
+    # print(-2 * (agg - sum_eq) - penalty)
     return -2 * (agg - sum_eq) - penalty

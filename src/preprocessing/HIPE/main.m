@@ -104,8 +104,9 @@ end
 column_names = string(eq_processed_table.Properties.VariableNames);
 ON_OFF_table = array2table(ON_OFF_uint, 'VariableNames', column_names(2:end));
 ON_OFF_table = addvars(ON_OFF_table, eq_processed_table.Time, 'Before', 1, 'NewVariableNames', 'Time');
+ON_OFF_table.Properties.VariableNames = {'Time', 'Eq1_State', 'Eq2_State', 'Eq3_State', 'Eq4_State', 'Eq5_State', 'Eq6_State', 'Eq7_State', 'Eq8_State', 'Eq9_State'};
 
-clear  numCols numRows column_names ON_OFF_uint;
+clear  numCols numRows column_names ON_OFF_uint i;
 
 
 %% Processed aggregate data
@@ -177,11 +178,11 @@ for i = 1:size(table_names, 1)
     agg_validation.(sprintf('aggregate_table_%d', i + 1))           = array2table(timestamps(validation_index, :), 'VariableNames', {'Time'});
     agg_validation.(sprintf('aggregate_table_%d', i + 1)).P_kW      = agg_buff(validation_index, :);
 
-    eq_training.(sprintf('equipment_table_%d', i + 1))              = eq_processed_table(training_index, 1 : i + 1);
-    eq_validation.(sprintf('equipment_table_%d', i + 1))            = eq_processed_table(validation_index, 1 : i + 1);
+    eq_training.(sprintf('equipment_table_%d', i + 1))              = eq_processed_table(training_index, 1 : i + 2);
+    eq_validation.(sprintf('equipment_table_%d', i + 1))            = eq_processed_table(validation_index, 1 : i + 2);
 
-    st_training.(sprintf('state_table_%d', i + 1))           = ON_OFF_table(training_index, 1 : i + 1);
-    st_validation.(sprintf('state_table_%d', i + 1))         = ON_OFF_table(validation_index, 1 : i + 1);
+    st_training.(sprintf('state_table_%d', i + 1))                  = ON_OFF_table(training_index, 1 : i + 2);
+    st_validation.(sprintf('state_table_%d', i + 1))                = ON_OFF_table(validation_index, 1 : i + 2);
 
     writetable(agg_training.(sprintf('aggregate_table_%d', i + 1)), fullfile([relativeFolderPath, 'aggregate_training/'], sprintf('agg_training_%d.csv', i + 1)));
     writetable(agg_validation.(sprintf('aggregate_table_%d', i + 1)), fullfile([relativeFolderPath, 'aggregate_validation/'], sprintf('agg_validation_%d.csv', i + 1)));
