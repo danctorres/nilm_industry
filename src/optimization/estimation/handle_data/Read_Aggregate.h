@@ -23,11 +23,11 @@ public:
 private:
     std::vector<std::string> timestamp;
     std::vector<float> active_power;
-    std::vector<float> reactive_power;
-    std::vector<float> apparent_power;
-    std::vector<float> current;
-    std::vector<float> voltage;
-    std::vector<float> power_factor;
+    // std::vector<float> reactive_power;
+    // std::vector<float> apparent_power;
+    // std::vector<float> current;
+    // std::vector<float> voltage;
+    // std::vector<float> power_factor;
 };
 
 
