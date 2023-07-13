@@ -100,9 +100,11 @@ def main():
     agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm = read_validation_data()
     estimations = denormalize(net.estimate(agg_val_norm, n_equipment), min_agg, max_agg)
 
-    save_csv("../../results/deep_learning/HIPE/1_week/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
+    save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, estimations, timestamp)
     print(calculate_error(estimations, eq_val, n_equipment))
 
 
 if __name__ == "__main__":
     main()
+
+# %%
