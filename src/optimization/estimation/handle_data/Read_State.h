@@ -20,12 +20,7 @@ public:
     std::vector<std::vector<int>> get_all_parameter() const;
 
 private:
-    std::vector<int> state_0;
-    std::vector<int> state_1;
-    std::vector<int> state_2;
-    std::vector<int> state_3;
-    std::vector<int> state_4;
-    std::vector<int> state_5;
+    std::vector<std::vector<int>> states;
 };
 
 #endif //DISSERTATION_NILM_READ_STATE_H
