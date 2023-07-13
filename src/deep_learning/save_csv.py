@@ -4,9 +4,9 @@ from typing import List
 
 
 def save_csv(filename_path: str, agg_data: List[np.ndarray], eq_data: List[np.ndarray], list_timestamp: List[np.ndarray]) -> None:
-    print("Saving into file")
+    print("--- Saving into file ---")
     with open(filename_path, 'w', newline='') as file:
-        file.write("Timestamp, Aggregate_Active_Power, Estimate_0, Estimate_1, Estimate_2, Estimate_3, Estimate_4, Estimate_5\n")
+        file.write("Timestamp, Aggregate_Active_Power, Estimates\n")
         writer = csv.writer(file)
         for ag_array, eq_array, timestamp_array in zip(agg_data, eq_data, list_timestamp):
             writer.writerow(timestamp_array.flatten().tolist() + ag_array.flatten().tolist() + eq_array.flatten().tolist())
