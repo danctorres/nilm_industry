@@ -32,6 +32,7 @@ public:
     void set_global_best_parameters(const std::vector<float> &position, const double fitness);
     void set_global_best(const Particle &global_best);
     void set_particles(const std::vector<Particle> &particles);
+    void set_number_of_equipment(const int number_of_equipment);
 
     int get_n_particles() const;
     int get_rank() const;
@@ -41,6 +42,7 @@ public:
     std::vector<float> get_max_pos() const;
     Particle get_global_best() const;
     std::vector<Particle> get_particles() const;
+    int get_number_of_equipment() const;
 
     // Returns fitness for positions
     //float objective_function(const std::vector<float> &position);
@@ -81,6 +83,7 @@ protected:
     std::vector<float> max_pos;
     Particle global_best;               // global best
     std::vector<Particle> particles;
+    int number_of_equipment;
 };
 
 

@@ -75,6 +75,10 @@ void Optimization::set_particles(const std::vector<Particle> &particles) {
     this->particles = particles;
 }
 
+void Optimization::set_number_of_equipment(const int number_of_equipment) {
+    this->number_of_equipment =  number_of_equipment;
+}
+
 int Optimization::get_n_particles() const{
     return n_particles;
 }
@@ -105,6 +109,10 @@ Particle Optimization::get_global_best() const {
 
 std::vector<Particle> Optimization::get_particles() const {
     return particles;
+}
+
+int Optimization::get_number_of_equipment() const {
+    return number_of_equipment;
 }
 
 // Returns fitness for positions

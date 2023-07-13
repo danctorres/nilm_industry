@@ -35,29 +35,21 @@ int act[6] = {0};
 const float lambda = 10.0f;
 
 // Values used for initializing the positions and the velocity vector of the PSO
-std::vector<float> min_coef = {-1.0f, -1.0f, -1.0f,
-                               -1.0f, -1.0f, -1.0f,
-                               -1.0f, -1.0f, -1.0f,
-                               -1.0f, -1.0f, -1.0f,
-                               -1.0f, -1.0f, -1.0f,
-                               -1.0f, -1.0f, -1.0f};
-std::vector<float> max_coef = {1.0f, 1.0f, 1.0f,
-                               1.0f, 1.0f, 1.0f,
-                               1.0f, 1.0f, 1.0f,
-                               1.0f, 1.0f, 1.0f,
-                               1.0f, 1.0f, 1.0f,
-                               1.0f, 1.0f, 1.0f};
+std::vector<float> min_coef;
+std::vector<float> max_coef;
 std::vector<float> max_eq_power = {2000.0f, 1500.0f, 6000.0f, 6000.0f, 100000.0f, 100000.0f};
 
 
-void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State &st_data, int sample_idx) {
+void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State &st_data, int sample_idx, int number_equipment) {
     agg = agg_sample;
-    for (int j = 0; j < 6; j++) {
+
+    for (int j = 0; j < number_equipment; j++) {
         act[j] = st_data.get_one_parameter(j, sample_idx);
     }
 
     auto pso = std::make_unique<PSO>(18000, 18, 200, 0.00001,
                                      min_coef, max_coef, 2.0f, 2.0f, 0.4f, 0.9f);
+    pso->set_number_of_equipment(number_equipment);
     pso->run();
 
     /* for (auto &buff : pso->get_global_best().get_position()) {
@@ -78,6 +70,16 @@ void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State
 
 
 int main(int argc, char *argv[]) {
+    int number_equipment = 6;
+    for (int j = 0; j < number_equipment; j++) {
+        min_coef.push_back(-1.0f);
+        min_coef.push_back(-1.0f);
+        min_coef.push_back(-1.0f);
+        max_coef.push_back(1.0f);
+        max_coef.push_back(1.0f);
+        max_coef.push_back(1.0f);
+    }
+
     std::vector<float> agg_vector;
     auto agg_data = std::make_unique<Read_Aggregate>(
             "../../../../data/processed/IMDELD/data_6_equipment/aggregate_training.csv");   // in this format for cmake
@@ -113,14 +115,14 @@ int main(int argc, char *argv[]) {
         #pragma omp parallel for
         for (int i = 0; i < agg_vector.size(); i++) {
             std::cout << "--- Estimation " << i << " ---" << std::endl;
-            estimation(sum_est, num_ON, agg_vector[i], *st_data, i);
+            estimation(sum_est, num_ON, agg_vector[i], *st_data, i, number_equipment);
         }
     }
     else {
         std::cout << "--- Running sequential optimization ---" << std::endl;
         // Iterate through training data
         for (int i = 0; i < agg_vector.size(); i++) {
-            estimation(sum_est, num_ON, agg_vector[i], *st_data, i);
+            estimation(sum_est, num_ON, agg_vector[i], *st_data, i, number_equipment);
         }
     }
 
