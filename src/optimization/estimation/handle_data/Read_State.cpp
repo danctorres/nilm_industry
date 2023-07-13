@@ -21,7 +21,8 @@ std::vector<int> Read_State::get_parameters(const int eq_idx) const {
 }
 
 int Read_State::get_one_parameter(const int eq_idx, const int sample) const {
-    return states[sample][eq_idx];
+    // std::cout << states[sample][eq_idx] << std::endl;
+    return states[eq_idx][sample];
 }
 
 std::vector<std::vector<int>> Read_State::get_all_parameter() const {

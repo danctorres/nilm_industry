@@ -43,6 +43,9 @@ int main() {
         agg_vec[i] = (agg_vec[i] - min_agg) / (max_agg - min_agg);
     }
     */
+    std::vector<double> min_eq = {10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
+    std::vector<double> max_eq = {2000.0, 2000.0, 5000.0, 10000.0, 1000000.0, 1000000.0};
+    est->set_min_max_eq(min_eq, max_eq);
 
     for (int i = 0; i < agg_vec.size(); i++) {
         for (int j = 0; j < 6; j++) {
