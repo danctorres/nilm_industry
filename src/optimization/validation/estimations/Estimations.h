@@ -14,6 +14,8 @@ public:
     Estimations();
 
     void set_est(const double est_eq, const int eq_idx);
+    void set_min_max_eq(const std::vector<double> &min_eq, const std::vector<double> &max_eq);
+
     std::vector<double> get_eq(const int eq_idx) const;
 
     void denormalize(std::vector<double> &est_vec, const double min_agg, const double max_agg);
@@ -21,12 +23,9 @@ public:
     void denormalize_minmax(std::vector<double> &est_vec, const double min, const double max);
     void denormalize_all_specific();
 private:
-    std::vector<double> est_eq0;
-    std::vector<double> est_eq1;
-    std::vector<double> est_eq2;
-    std::vector<double> est_eq3;
-    std::vector<double> est_eq4;
-    std::vector<double> est_eq5;
+    std::vector<std::vector<double>> est_eq;
+    std::vector<double> min_eq;
+    std::vector<double> max_eq;
 };
 
 

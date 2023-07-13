@@ -85,9 +85,7 @@ int main(int argc, char *argv[]) {
     if (auto parameters = std::get_if < std::vector < float >> (&agg_variant)) {
         agg_vector = *parameters;
     }
-    std::cout << "Hi" << std::endl;
     auto st_data = std::make_unique<Read_State>("../../../../data/processed/IMDELD/data_6_equipment/on_off_training.csv");
-    std::cout << "Hi" << std::endl;
 
 
     /* // Ignore normalization
