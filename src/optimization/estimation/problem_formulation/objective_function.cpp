@@ -30,7 +30,7 @@ float penalty_calculation2(double eq_prediction) {
 
 float penalty_calculation3(double eq_prediction, double max_val) {
     if ( (eq_prediction < 0.0f) || (eq_prediction > max_val)) {
-        return pow(5 * eq_prediction, 2);
+        return pow(3 * eq_prediction, 2);
     }
     else {
         return 0;

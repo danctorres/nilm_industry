@@ -35,7 +35,8 @@ class NN:
             self.threshold = threshold
 
     def train(self, aggs: np.ndarray, n_equipment: int): # -> Dict[List[float]]:
-        loss_Dict = {f"{i}": [] for i in range(0, n_equipment + 1)}
+        loss_Dict = {f"{i}": [] for i in range(0, n_equipment)}
+            
         for epoch in range(self.epochs):
             for idx in range(aggs.shape[0]):
                 if aggs[idx] != 0.0:
@@ -52,8 +53,9 @@ class NN:
 
             print(f"Training network: {(epoch * 100) / (self.epochs - 1):.2f}% - Epoch: {epoch + 1}/{self.epochs}", end="\r")
 
-            for index, value in np.ndenumerate(self.loss_fun(layer_output, aggs[aggs.shape[0] - 1], self.max_norm_eq, self.min_norm_eq, n_equipment)):
-                loss_Dict[f"{index[1]}"].append(value)
+            if aggs[aggs.shape[0] - 1] != 0.0:
+                for index, value in np.ndenumerate(self.loss_fun(layer_output, aggs[aggs.shape[0] - 1], self.max_norm_eq, self.min_norm_eq, n_equipment)):
+                    loss_Dict[f"{index[0]}"].append(value)
         return loss_Dict
 
     def estimate(self, inputs: np.ndarray, n_equipment: int) -> List[np.ndarray]:

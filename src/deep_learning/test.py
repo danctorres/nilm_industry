@@ -34,15 +34,13 @@ def main():
     x_train = np.array([[[0.2]], [[0.5]], [[0.8]], [[1]]])
     loss_results = net.train(x_train, 1)
 
-    fig, axs = plt.subplots(len(loss_results), 1, figsize=(8, 6))
-    for i, (key, value) in enumerate(loss_results.items()):
-        axs[i].plot(value)
-        axs[i].set_xlabel('X-axis')
-        axs[i].set_ylabel('Y-axis')
-        axs[i].set_title(key)
-    plt.tight_layout()
+    for key, value in loss_results.items():
+        plt.plot(value, label=key)
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    plt.legend()
     plt.show()
-
+    
     estimations = net.estimate(x_train, 1)
 
     sums = []
@@ -61,3 +59,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# %%
