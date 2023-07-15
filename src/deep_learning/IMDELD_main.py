@@ -32,10 +32,10 @@ def denormalize(data_norm: List[np.ndarray], min_val: float, max_val: float) -> 
     return data_norm
 
 
-def read_eq_data(number_equipment: int):
+def read_eq_data():
     return read_csv(f"../../data/processed/IMDELD/data_6_equipment/equipment_training.csv")
 
-def read_train_data(number_equipment: int):
+def read_train_data():
     print("--- Reading training data ---")
     sts_train = read_csv(f"../../data/processed/IMDELD/data_6_equipment/on_off_training.csv")
     agg_train_denorm = read_csv(f"../../data/processed/IMDELD/data_6_equipment/aggregate_training.csv", 1)
@@ -46,7 +46,7 @@ def read_train_data(number_equipment: int):
     resh_sts_train = np.reshape(sts_train, (sts_train.shape[0], 1, sts_train.shape[1]))
     return resh_agg_train, resh_sts_train, resh_agg_train, agg_train_denorm.min(), agg_train_denorm.max()
 
-def read_validation_data(number_equipment: int):
+def read_validation_data():
     print("--- Reading validation data ---")
     sts_val = read_csv(f"../../data/processed/IMDELD/data_6_equipment/on_off_validation.csv")
     agg_val = read_csv(f"../../data/processed/IMDELD/data_6_equipment/aggregate_validation.csv", 1)
@@ -57,7 +57,7 @@ def read_validation_data(number_equipment: int):
     return normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val
 
 
-def set_NN(n_equipment: int):
+def set_NN():
     net = NN()
     net.set_learning_rate(0.001)
     net.set_layer(Connected_layer(1, 7))
@@ -79,12 +79,12 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
 def main():
     n_equipment = 6
 
-    input_train, states_train, agg_train, min_agg, max_agg = read_train_data(n_equipment)
+    input_train, states_train, agg_train, min_agg, max_agg = read_train_data()
 
-    net = set_NN(n_equipment)
+    net = set_NN()
 
-    net.set_max_norm_eq(normalize2(np.max(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
-    net.set_min_norm_eq(normalize2(np.min(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
+    net.set_max_norm_eq(normalize2(np.max(read_eq_data(), axis=0).reshape(1, n_equipment), min_agg, max_agg))
+    net.set_min_norm_eq(normalize2(np.min(read_eq_data(), axis=0).reshape(1, n_equipment), min_agg, max_agg))
 
     loss_results = net.train(agg_train, n_equipment)
 
@@ -97,7 +97,7 @@ def main():
 
     print("")
 
-    agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm = read_validation_data(n_equipment)
+    agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm = read_validation_data()
     estimations = denormalize(net.estimate(agg_val_norm, n_equipment), min_agg, max_agg)
 
     save_csv(f"../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
