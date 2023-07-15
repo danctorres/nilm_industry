@@ -10,10 +10,11 @@
 #include <iostream>
 #include <vector>
 
+const int number_equipment = 6;     // needs to be redefined
 extern double agg;
-extern int act[6];
+extern int act[number_equipment];
 extern const float lambda;
-extern std::vector<float> max_eq_power;
+// extern std::vector<float> max_eq_power;
 
 double objective_function(const std::vector<double> &position);
 

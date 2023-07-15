@@ -29,15 +29,14 @@
  * #include "problem_formulation/objective_function.h"
 */
 
-
 double agg = 0.0;
-int act[6] = {0};
-const float lambda = 10.0f;
+int act[number_equipment] = {0};
+const float lambda = 1.0f;
 
 // Values used for initializing the positions and the velocity vector of the PSO
 std::vector<float> min_coef;
 std::vector<float> max_coef;
-std::vector<float> max_eq_power = {2000.0f, 1500.0f, 6000.0f, 6000.0f, 100000.0f, 100000.0f};
+// std::vector<float> max_eq_power = {2000.0f, 1500.0f, 6000.0f, 6000.0f, 100000.0f, 100000.0f};
 
 
 void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State &st_data, int sample_idx, int number_equipment) {
@@ -58,7 +57,7 @@ void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State
     std::cout << std::endl; */
 
     // Calculations for the mean values of the coefficients
-    for (int j = 0; j < 6; j++) {
+    for (int j = 0; j < number_equipment; j++) {
         if (act[j] == 1) {
             sum_est[j * 3] += pso->get_global_best().get_position()[j * 3];
             sum_est[j * 3 + 1] += pso->get_global_best().get_position()[j * 3 + 1];
@@ -70,7 +69,8 @@ void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State
 
 
 int main(int argc, char *argv[]) {
-    int number_equipment = 6;
+    const int number_equipment = 6;
+
     for (int j = 0; j < number_equipment; j++) {
         min_coef.push_back(-1.0f);
         min_coef.push_back(-1.0f);
@@ -107,8 +107,8 @@ int main(int argc, char *argv[]) {
     */
 
     // Initialize constants
-    double sum_est[18] = {0.0};     // sum of estimated coefficients
-    int num_ON[6] = {0};                // number of ON samples
+    double sum_est[number_equipment * 3] = {0.0};     // sum of estimated coefficients
+    int num_ON[number_equipment] = {0};                // number of ON samples
 
     if (argc > 1 && std::string(argv[1]) == "--parallel") {
         std::cout << "--- Running parallel optimization with openMP ---" << std::endl;
