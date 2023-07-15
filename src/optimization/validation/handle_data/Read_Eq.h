@@ -15,13 +15,9 @@ public:
     Read_Eq(const std::string& name_file);
 
     std::vector<float> get_eq(const int eq_idx) const;
+    std::vector<std::vector<float>> get_eqs() const;
 private:
-    std::vector<float> actual_eq0;
-    std::vector<float> actual_eq1;
-    std::vector<float> actual_eq2;
-    std::vector<float> actual_eq3;
-    std::vector<float> actual_eq4;
-    std::vector<float> actual_eq5;
+    std::vector<std::vector<float>> actual_eq;
 };
 
 

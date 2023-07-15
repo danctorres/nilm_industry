@@ -34,12 +34,10 @@ int act[number_equipment] = {0};
 const float lambda = 1.0f;
 
 // Values used for initializing the positions and the velocity vector of the PSO
-std::vector<float> min_coef;
-std::vector<float> max_coef;
 // std::vector<float> max_eq_power = {2000.0f, 1500.0f, 6000.0f, 6000.0f, 100000.0f, 100000.0f};
 
 
-void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State &st_data, int sample_idx, int number_equipment) {
+void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State &st_data, int sample_idx, int number_equipment, std::vector<float> min_coef, std::vector<float> max_coef) {
     agg = agg_sample;
 
     for (int j = 0; j < number_equipment; j++) {
@@ -70,7 +68,9 @@ void estimation(double *sum_est, int *num_ON, const float agg_sample, Read_State
 
 int main(int argc, char *argv[]) {
     const int number_equipment = 6;
-
+    
+    std::vector<float> min_coef;
+    std::vector<float> max_coef;
     for (int j = 0; j < number_equipment; j++) {
         min_coef.push_back(-1.0f);
         min_coef.push_back(-1.0f);
@@ -115,18 +115,19 @@ int main(int argc, char *argv[]) {
         #pragma omp parallel for
         for (int i = 0; i < agg_vector.size(); i++) {
             std::cout << "--- Estimation " << i << " ---" << std::endl;
-            estimation(sum_est, num_ON, agg_vector[i], *st_data, i, number_equipment);
+            estimation(sum_est, num_ON, agg_vector[i], *st_data, i, number_equipment, min_coef, max_coef);
         }
     }
     else {
         std::cout << "--- Running sequential optimization ---" << std::endl;
         // Iterate through training data
         for (int i = 0; i < agg_vector.size(); i++) {
-            estimation(sum_est, num_ON, agg_vector[i], *st_data, i, number_equipment);
+            estimation(sum_est, num_ON, agg_vector[i], *st_data, i, number_equipment, min_coef, max_coef);
         }
     }
 
-    save_coef("../../../../results/optimization/IMDELD/estimated_coef.csv", sum_est, num_ON);
+    const double factor_round = std::pow(10, 7);
+    save_coef("../../../../results/optimization/IMDELD/estimated_coef.csv", sum_est, num_ON, number_equipment, factor_round);
     return 0;
 }
 
