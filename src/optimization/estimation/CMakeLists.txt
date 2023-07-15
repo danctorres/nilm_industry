@@ -3,7 +3,6 @@ cmake_minimum_required (VERSION 3.10)
 project (estimation)
 
 file(GLOB_RECURSE HEADERS
-        "main.h"
         "handle_data/*.h"
         "optimization_interface/*.h"
         "pso/*.h"
@@ -16,7 +15,8 @@ file(GLOB_RECURSE HEADERS
 )
 
 file(GLOB_RECURSE SOURCES
-        "main.cpp"
+        # "main_IMDELD.cpp"
+        "main_HIPE.cpp"
         "handle_data/*.cpp"
         "optimization_interface/*.cpp"
         "pso/*.cpp"

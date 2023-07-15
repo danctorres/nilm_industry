@@ -16,13 +16,21 @@ void save_estimates(const std::string name, const Estimations &est, const Read_A
         timestamp_vec = *parameters;
     }
     std::ofstream outfile(name);
-    if (outfile.is_open()) {
-        outfile << "Timestamp, Aggregate_Active_Power, Estimate_0, Estimate_1, Estimate_2, Estimate_3, Estimate_4, Estimate_5" << "\n";
 
+    if (outfile.is_open()) {
+        outfile << "Timestamp, Aggregate_Active_Power, Estimates" << "\n";
+
+        int number_equipment = est.get_size_equipment();
         for(int i = 0; i < agg_vec.size(); i++) {
-            outfile << timestamp_vec[i] << ", " << agg_vec[i] << ", " << est.get_eq(0)[i] << ", " << est.get_eq(1)[i] <<
-            ", " << est.get_eq(2)[i] << ", " << est.get_eq(3)[i] << ", " << est.get_eq(4)[i] << ", " << est.get_eq(5)[i]
-            << "\n";
+            outfile << timestamp_vec[i] << ", " << agg_vec[i] << ", ";
+            for(int j = 0; j < number_equipment; j++) {
+                if (j == number_equipment - 1) {
+                    outfile << est.get_eq(j)[i] << "\n";
+                }
+                else {
+                    outfile << est.get_eq(j)[i] << ", ";
+                }
+            }
         }
         outfile.close();
     }

@@ -3,7 +3,6 @@ cmake_minimum_required (VERSION 3.10)
 project (validation)
 
 file(GLOB_RECURSE HEADERS
-        "main.h"
         "error/*.h"
         "estimations/*.h"
         "polynomial_function/*.h"
@@ -12,7 +11,8 @@ file(GLOB_RECURSE HEADERS
         )
 
 file(GLOB_RECURSE SOURCES
-        "main.cpp"
+        # "main_IMDELD.cpp"
+        "main_HIPE.cpp"
         "error/*.cpp"
         "estimations/*.cpp"
         "polynomial_function/*.cpp"

@@ -68,10 +68,10 @@ std::variant<std::string, float> Read_Aggregate::get_one_parameter(const std::st
     // else if (name_parameter == "Power factor") {
     //     return power_factor[sample];
     // }
-    // else {
-    //     std::cerr << "The parameter " << name_parameter << " name not define, use valid name!" << std::endl;
-    //     throw;
-    // }
+    else {
+        std::cerr << "The parameter " << name_parameter << " name not define, use valid name!" << std::endl;
+        throw;
+    }
 }
 
 int Read_Aggregate::size() {

@@ -8,8 +8,10 @@
 Read_State::Read_State(const std::string &name_file) : Read(name_file) {
     const std::vector<std::vector<std::string>> data = this->get_data();
     for (int j = 1; j < data[1].size(); j++) {
-        std::vector<int> innerVector;
-        states.push_back(innerVector);
+        if (j - 1 >= states.size()) {
+            std::vector<int> innerVector;
+            states.push_back(innerVector);
+        }
         for (int i = 1; i < data.size() - 1; i++) {
             states[j - 1].push_back(std::stoi(data[i][j]));
         }
