@@ -136,6 +136,14 @@ figure,
 plot(agg_struct_of_tables.aggregate_table_9.P_kW)
 
 
+%% Save data before splitting
+relativeFolderPath = '../../../data/processed/HIPE/1_week/undivided/';
+writetable(ON_OFF_table, fullfile([relativeFolderPath], 'states.csv'));
+writetable(eq_processed_table, fullfile([relativeFolderPath], 'equipment.csv'));
+table_names = fieldnames(agg_struct_of_tables);
+writetable(agg_struct_of_tables.(table_names{end}), fullfile([relativeFolderPath], 'aggregate.csv'));
+
+
 %% Split into training and validation data and save into file
 relativeFolderPath = '../../../data/processed/HIPE/1_week/';
 
