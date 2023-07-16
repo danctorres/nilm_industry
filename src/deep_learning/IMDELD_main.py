@@ -6,7 +6,7 @@ from Activation_layer import Activation_layer
 from Connected_layer import Connected_layer
 from NN import NN
 from activation_function import tanh, tanh_d
-from loss_function import step, step_d
+from loss_function import loss_f, loss_f_d
 from read_csv import read_csv
 from save_csv import save_csv
 from typing import List
@@ -54,17 +54,17 @@ def read_validation_data():
     eq_val = read_csv(f"../../data/processed/IMDELD/data_6_equipment/equipment_validation.csv")
     input_val = np.concatenate((sts_val, normalize(agg_val)), axis = 1)
     resh_input_val = np.reshape(input_val, (input_val.shape[0], 1, input_val.shape[1]))
-    return normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val
+    return normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val, sts_val
 
 
 def set_NN():
     net = NN()
     net.set_learning_rate(0.001)
-    net.set_layer(Connected_layer(1, 7))
+    net.set_layer(Connected_layer(1 + 6, 7 + 1))
     net.set_layer(Activation_layer(tanh, tanh_d))
-    net.set_layer(Connected_layer(7, 6))
+    net.set_layer(Connected_layer(7 + 1, 6))
     net.set_layer(Activation_layer(tanh, tanh_d))
-    net.set_loss(step, step_d)
+    net.set_loss(loss_f, loss_f_d)
     net.set_epochs(1000)
     return net
 
@@ -86,7 +86,7 @@ def main():
     net.set_max_norm_eq(normalize2(np.max(read_eq_data(), axis=0).reshape(1, n_equipment), min_agg, max_agg))
     net.set_min_norm_eq(normalize2(np.min(read_eq_data(), axis=0).reshape(1, n_equipment), min_agg, max_agg))
 
-    loss_results = net.train(agg_train, n_equipment)
+    loss_results = net.train(agg_train, states_train, n_equipment, True)
 
     for key, value in loss_results.items():
         plt.plot(value, label=key)
@@ -97,8 +97,10 @@ def main():
 
     print("")
 
-    agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm = read_validation_data()
-    estimations = denormalize(net.estimate(agg_val_norm, n_equipment), min_agg, max_agg)
+    agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm, sts_val = read_validation_data()
+
+    data_val = np.concatenate ( (np.reshape(agg_val_norm, (agg_val_norm.shape[0], 1, 1)) , np.reshape(sts_val, (sts_val.shape[0], 1, sts_val.shape[1]))), axis = 2)
+    estimations = denormalize(net.estimate(data_val, n_equipment), min_agg, max_agg)
 
     save_csv(f"../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
     print(calculate_error(estimations, eq_val, n_equipment))

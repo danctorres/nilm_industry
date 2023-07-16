@@ -34,18 +34,21 @@ class NN:
     def set_threshold(self, threshold: float) -> None:
             self.threshold = threshold
 
-    def train(self, aggs: np.ndarray, n_equipment: int): # -> Dict[List[float]]:
+    def train(self, aggs: np.ndarray, states: np.ndarray, n_equipment: int, use_state: bool): # -> Dict[List[float]]:
         loss_Dict = {f"{i}": [] for i in range(0, n_equipment)}
             
         for epoch in range(self.epochs):
             for idx in range(aggs.shape[0]):
                 if aggs[idx] != 0.0:
-                    input_agg = aggs[idx]
+                    if (use_state):
+                        input_agg = np.concatenate((aggs[idx], states[idx]), axis=1)
+                    else:
+                        input_agg = aggs[idx]
                     # Forwards Propagation
                     for layer in self.layers:
                         layer_output = layer.forw_prop(input_agg)
                         input_agg = layer_output
-                    loss = self.loss_fun_d(layer_output, aggs[idx], self.max_norm_eq, self.min_norm_eq, n_equipment)
+                    loss = self.loss_fun_d(layer_output, aggs[idx], states[idx], self.max_norm_eq, self.min_norm_eq, n_equipment)
 
                     # Backwards Propagation
                     for layer in reversed(self.layers):
@@ -54,7 +57,7 @@ class NN:
             print(f"Training network: {(epoch * 100) / (self.epochs - 1):.2f}% - Epoch: {epoch + 1}/{self.epochs}", end="\r")
 
             if aggs[aggs.shape[0] - 1] != 0.0:
-                for index, value in np.ndenumerate(self.loss_fun(layer_output, aggs[aggs.shape[0] - 1], self.max_norm_eq, self.min_norm_eq, n_equipment)):
+                for index, value in np.ndenumerate(self.loss_fun(layer_output, aggs[aggs.shape[0] - 1], states[aggs.shape[0] - 1], self.max_norm_eq, self.min_norm_eq, n_equipment)):
                     loss_Dict[f"{index[0]}"].append(value)
         return loss_Dict
 
@@ -63,7 +66,9 @@ class NN:
         output: np.ndarray = []
         results: np.ndarray = []
         for inp in inputs:
-            if inp == 0.0:
+            if inp.ndim == 1 and inp[0] == 0.0:
+                results.append(np.zeros((1, n_equipment)))
+            elif inp.ndim == 2 and inp[0, 0] == 0.0:
                 results.append(np.zeros((1, n_equipment)))
             else:
                 for layer in self.layers:

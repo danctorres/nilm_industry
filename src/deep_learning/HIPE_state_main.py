@@ -61,9 +61,9 @@ def read_validation_data(number_equipment: int):
 def set_NN(n_equipment: int):
     net = NN()
     net.set_learning_rate(0.001)
-    net.set_layer(Connected_layer(1, n_equipment + 1))
+    net.set_layer(Connected_layer(1 + n_equipment, n_equipment + 2))
     net.set_layer(Activation_layer(tanh, tanh_d))
-    net.set_layer(Connected_layer(n_equipment + 1, n_equipment))
+    net.set_layer(Connected_layer(n_equipment + 2, n_equipment))
     net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_loss(loss_f, loss_f_d)
     net.set_epochs(1000)
@@ -92,7 +92,7 @@ def main():
     net.set_max_norm_eq(normalize2(np.max(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
     net.set_min_norm_eq(normalize2(np.min(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
 
-    loss_results = net.train(agg_train, states_train, n_equipment, False)
+    loss_results = net.train(agg_train, states_train, n_equipment, True)
 
     for key, value in loss_results.items():
         plt.plot(value, label=key)
@@ -105,7 +105,8 @@ def main():
 
     agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm, sts_val = read_validation_data(n_equipment)
              
-    estimations = denormalize(net.estimate(agg_val_norm, n_equipment), min_agg, max_agg)
+    data_val = np.concatenate ( (np.reshape(agg_val_norm, (agg_val_norm.shape[0], 1, 1)) , np.reshape(sts_val, (sts_val.shape[0], 1, sts_val.shape[1]))), axis = 2)
+    estimations = denormalize(net.estimate(data_val, n_equipment), min_agg, max_agg)
 
     save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, estimations, timestamp)
     print(calculate_error(estimations, eq_val, n_equipment))
