@@ -6,7 +6,7 @@ from Activation_layer import Activation_layer
 from Connected_layer import Connected_layer
 from NN import NN
 from activation_function import tanh, tanh_d
-from loss_function import step, step_d
+from loss_function import loss_f, loss_f_d
 from typing import List
 
 def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
@@ -18,11 +18,11 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
 def set_NN():
     net = NN()
     net.set_learning_rate(0.1)
-    net.set_layer(Connected_layer(1, 5))
+    net.set_layer(Connected_layer(3, 5))
     net.set_layer(Activation_layer(tanh, tanh_d))
     net.set_layer(Connected_layer(5, 2))
     net.set_layer(Activation_layer(tanh, tanh_d))
-    net.set_loss(step, step_d)
+    net.set_loss(loss_f, loss_f_d)
     net.set_epochs(10000)
     return net
 
@@ -32,7 +32,8 @@ def main():
     net.set_min_norm_eq(np.array([[0.0, 0.0]]))
 
     x_train = np.array([[[0.2]], [[0.5]], [[0.8]], [[1]]])
-    loss_results = net.train(x_train, 1)
+    states =  np.array([[[1.0, 1.0]], [[1.0, 1.0]], [[1.0, 1.0]], [[1.0, 1.0]]])
+    loss_results = net.train(x_train, states, 1, True)
 
     for key, value in loss_results.items():
         plt.plot(value, label=key)
@@ -40,9 +41,10 @@ def main():
     plt.ylabel('Y-axis')
     plt.legend()
     plt.show()
-    
-    estimations = net.estimate(x_train, 1)
 
+    x_val = np.concatenate((x_train, states), axis = 2)
+    estimations = net.estimate(x_val, 1)
+    print(estimations)
     sums = []
     for inner_array in estimations:
         sum_inner_array = np.sum(inner_array)
