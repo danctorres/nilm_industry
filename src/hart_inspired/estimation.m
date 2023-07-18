@@ -1,64 +1,54 @@
-function [estimation] = estimation(st_table, change_indices_table, agg)
+function [est] = estimation(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE)
+    est = [];
+    size_ALL_EVENTS_AGG_IDX = size(ALL_EVENTS_AGG_IDX, 1);
+    
+    i = 1;
+    while i < size_ALL_EVENTS_AGG_IDX
+        if ALL_EVENTS_STATE_CHANGE(i) == 1     % if an event if caused by one turn on
+            % find next event of that equipment turn off
+            eq_id_event_causing = ALL_EVENTS_EQ_ID(i);
+            next_eq_event = find (ALL_EVENTS_EQ_ID == eq_id_event_causing);
+            if ~isempty(next_eq_event) && size(next_eq_event, 1) > 1
+                next_eq_event = next_eq_event(2);
 
-    columnIndex = [];
-    eq_change = [];
-    sum_change_idx = find(abs(diff(sum(table2array(st_table(:, 2:8)), 2))) ~= 0);   % all the events
-    for i = 1:size(st_table, 2) - 2
-        for j = 1:size(sum_change_idx, 1)
-            buff = find(change_indices_table{i} == sum_change_idx(j));      % find which equipment changes at each event
-            if ~isempty(buff)
-                columnIndex(j) = buff;
-                eq_change(j) = i;
-            end
-        end
-    end
+                current_event_idx = ALL_EVENTS_AGG_IDX(i) + 1;
+                next_eq_event_idx = ALL_EVENTS_AGG_IDX(next_eq_event);
     
-    unchanged_indices = find(diff(eq_change) == 0) + 1;
-    % eq_change(unchanged_indices)
-    % sum_change_idx(unchanged_indices)
-    % agg = agg_table.P_kW;
-    % plot(agg)
+                % check other eq states
+                states_current_event = states(current_event_idx, :);
+                states_next_event = states(next_eq_event_idx, :);
     
-    estimation = {};
-    j = 0;
-    while true
-        for i = 1:size(unchanged_indices, 2)
-            if (i == 1) % first equipment change
-                % If equipment begins turn off or on
-                % estimation{eq_change(1)} = sprintf('1 -> %d: %d', sum_change_idx(i), abs( agg(sum_change_idx(i)) - agg(0) ));
-        
-            elseif (i == size(sum_change_idx, 1))
-                % If equipment end turn off or on
-                % estimation{eq_change(end)} = sprintf('%d -> %d: %d', sum_change_idx(end), size(agg, 1), abs( agg(sum_change_idx(end) - agg(end) ));
-        
-            else
-                eq_that_changes = eq_change(unchanged_indices(i));
-                interval = [sum_change_idx(unchanged_indices(i) - 1) + 1, sum_change_idx(unchanged_indices(i))];
-                if (numel(estimation) < eq_that_changes)
-                    estimation{eq_that_changes} = abs( agg(interval(2)) - agg(interval(1)) );
+                states_current_event(eq_id_event_causing) = [];
+                states_current_event(states_current_event ~= 0 & states_current_event ~= 1) = [];
+                states_next_event(eq_id_event_causing) = [];
+                states_next_event(states_next_event ~= 0 & states_next_event ~= 1) = [];
+    
+                states_equal = isequal(states_current_event, states_next_event);
+    
+                if states_equal
+                    agg_interval_power_diff = abs( agg(current_event_idx) - agg(next_eq_event_idx) );
+                    est(current_event_idx : next_eq_event_idx, eq_id_event_causing) = agg_interval_power_diff;
+    
+                    agg(current_event_idx : next_eq_event_idx - 1) = agg(current_event_idx : next_eq_event_idx - 1) - agg_interval_power_diff;
+                    states(current_event_idx, eq_id_event_causing) = 2; % give a number different from 0 or 1
+    
+                    ALL_EVENTS_AGG_IDX(i) = [];
+                    ALL_EVENTS_EQ_ID(i) = [];
+                    ALL_EVENTS_STATE_CHANGE(i) = [];
+
+                    size_ALL_EVENTS_AGG_IDX = size(ALL_EVENTS_AGG_IDX)
+                    i = 1;  % start again
                 else
-                    if isempty(estimation{eq_that_changes})
-                        estimation{eq_that_changes} = abs( agg(interval(2)) - agg(interval(1)) );
-                        % agg(interval(2) : interval(1)) = agg(interval(2) : interval(1)) - ;
-
-                        % This is wrong, and the estimated values are not
-                        % being save with reference for the interval,
-                        % really incomplete
-                    else
-                        estimation{eq_that_changes} = [ estimation{eq_that_changes} abs( agg(interval(2)) - agg(interval(1)) ) ];
-                    end
+                    i = i + 1;
                 end
+            else
+                i = i + 1;
             end
-        end
-
-        %% Delete
-        eq_change(unchanged_indices) = [];
-        unchanged_indices = find(diff(eq_change) == 0) + 1;
-        % and subtract
-        j = j + 1;
-        if isempty(unchanged_indices)
-            return;
+        else
+            i = i + 1;
         end
     end
+    figure
+    plot(agg)
 
 end
