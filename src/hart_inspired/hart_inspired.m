@@ -45,12 +45,35 @@ ALL_EVENTS_STATE_CHANGE = ALL_EVENTS_STATE_CHANGE(sorting_idx);
 
 clear diff_arr change_indices sorting_idx i;
 
-%% Save signatures
 
-% relativeFolderPath = '../../results/hart_inspired/HIPE/1_week/signatures/';
-% for i = 1:size(signatures, 2)
-%     writetable(array2table(unique(round(signatures{i}, 4)), 'VariableNames', {'P_kW'}), fullfile([relativeFolderPath], sprintf('eq_%d.csv', i)));
-% end
+%% Estimation
+estimations = [];
+estimations_round = [];
+
+estimations = estimation(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
+% estimations_round = estimation(table2array(st_table(:, 2:end)), movmean(agg_table.P_kW, 100), ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
+
+figure,
+for i = 1:size(estimations, 2)
+    subplot(round(size(estimations, 2) / 2), 2, i)
+    plot(eq_table{:, i + 1})
+    hold on
+    plot(estimations(:, i), '.')
+end
+
+
+%% Save estimations
+relativeFolderPath = '../../results/hart_inspired/HIPE/1_week/estimations/';
+
+variables_names = strings(1, size(estimations, 2));
+for i = 1:size(estimations, 2)
+    variables_names(i) = "Eq " + num2str(i);
+end
+
+estimations_table = array2table(estimations, 'VariableNames', variables_names);
+estimations_table = [table(agg_table.Time, 'VariableNames', {'Time'}), estimations_table(:, 1:end)];
+
+writetable(estimations_table, fullfile([relativeFolderPath], 'estimations.csv'));
 
 
 %% Plot
@@ -70,20 +93,4 @@ for i = 1:size(st_table, 2) - 2
     plot(i * table2array(st_table(:, i + 1)))
     hold on
 end
-
-
-%% Estimation
-estimations = [];
-estimations = estimation(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
-figure,
-for i = 1:size(estimations, 2)
-    subplot(round(size(estimations, 2) / 2), 2, i)
-    plot(eq_table{:, i + 1})
-    hold on
-    plot(estimations(:, i))
-end
-
-% check if all is correct
-
-
 
