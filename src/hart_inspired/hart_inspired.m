@@ -21,15 +21,29 @@ clear file_information file_path file_path_agg file_path_st file_path_eq;
 %% Get equipment values at events
 % signatures = {};
 change_indices_table = {};
+
+ALL_EVENTS_AGG_IDX = [];
+ALL_EVENTS_STATE_CHANGE = [];
+ALL_EVENTS_EQ_ID = [];
 for i = 2:size(st_table, 2)
     diff_arr = diff(table2array(st_table(:, i)));
     change_indices = find(diff_arr ~= 0);
 %     signatures{i - 1} = abs(table2array(agg_table(change_indices + 1, 2)) - table2array(agg_table(change_indices, 2)));
     change_indices_table{i - 1} = change_indices;
+
+
+    diff_arr(diff_arr == 0) = [];
+
+    ALL_EVENTS_AGG_IDX = [ALL_EVENTS_AGG_IDX; change_indices_table{i - 1}];
+    ALL_EVENTS_EQ_ID = [ALL_EVENTS_EQ_ID; ((i - 1) * ones(size(diff_arr, 1), 1) )];
+    ALL_EVENTS_STATE_CHANGE = [ALL_EVENTS_STATE_CHANGE; diff_arr];
 end
 
-clear diff_arr change_indices i;
+[ALL_EVENTS_AGG_IDX, sorting_idx] = sort(ALL_EVENTS_AGG_IDX);
+ALL_EVENTS_EQ_ID = ALL_EVENTS_EQ_ID(sorting_idx);
+ALL_EVENTS_STATE_CHANGE = ALL_EVENTS_STATE_CHANGE(sorting_idx);
 
+clear diff_arr change_indices sorting_idx i;
 
 %% Save signatures
 
@@ -60,9 +74,5 @@ end
 
 %% Estimation
 
-agg = agg_table.P_kW;
-
-estimations = estimation(st_table, change_indices_table, agg);
-
-
+estimations = estimation(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
 
