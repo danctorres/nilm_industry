@@ -27,7 +27,7 @@ ALL_EVENTS_STATE_CHANGE = [];
 ALL_EVENTS_EQ_ID = [];
 for i = 2:size(st_table, 2)
     diff_arr = diff(table2array(st_table(:, i)));
-    change_indices = find(diff_arr ~= 0);
+    change_indices = find(diff_arr ~= 0) + 1;
 %     signatures{i - 1} = abs(table2array(agg_table(change_indices + 1, 2)) - table2array(agg_table(change_indices, 2)));
     change_indices_table{i - 1} = change_indices;
 
@@ -73,6 +73,17 @@ end
 
 
 %% Estimation
-
+estimations = [];
 estimations = estimation(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
+figure,
+for i = 1:size(estimations, 2)
+    subplot(round(size(estimations, 2) / 2), 2, i)
+    plot(eq_table{:, i + 1})
+    hold on
+    plot(estimations(:, i))
+end
+
+% check if all is correct
+
+
 

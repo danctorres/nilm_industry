@@ -7,11 +7,11 @@ function [est] = estimation(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, A
         if ALL_EVENTS_STATE_CHANGE(i) == 1     % if an event if caused by one turn on
             % find next event of that equipment turn off
             eq_id_event_causing = ALL_EVENTS_EQ_ID(i);
-            next_eq_event = find (ALL_EVENTS_EQ_ID == eq_id_event_causing);
-            if ~isempty(next_eq_event) && size(next_eq_event, 1) > 1
-                next_eq_event = next_eq_event(2);
+            next_eq_event = find (ALL_EVENTS_EQ_ID(i + 1 : end) == eq_id_event_causing);
+            if ~isempty(next_eq_event)
+                next_eq_event = next_eq_event(1) + i;
 
-                current_event_idx = ALL_EVENTS_AGG_IDX(i) + 1;
+                current_event_idx = ALL_EVENTS_AGG_IDX(i);
                 next_eq_event_idx = ALL_EVENTS_AGG_IDX(next_eq_event);
     
                 % check other eq states
@@ -30,14 +30,14 @@ function [est] = estimation(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, A
                     est(current_event_idx : next_eq_event_idx, eq_id_event_causing) = agg_interval_power_diff;
     
                     agg(current_event_idx : next_eq_event_idx - 1) = agg(current_event_idx : next_eq_event_idx - 1) - agg_interval_power_diff;
-                    states(current_event_idx, eq_id_event_causing) = 2; % give a number different from 0 or 1
-    
-                    ALL_EVENTS_AGG_IDX(i) = [];
-                    ALL_EVENTS_EQ_ID(i) = [];
-                    ALL_EVENTS_STATE_CHANGE(i) = [];
+                    states(current_event_idx : next_eq_event_idx - 1, eq_id_event_causing) = 2; % give a number different from 0 or 1, so it is ignored
+     
+                     ALL_EVENTS_AGG_IDX(i) = [];
+                     ALL_EVENTS_EQ_ID(i) = [];
+                     ALL_EVENTS_STATE_CHANGE(i) = [];
 
-                    size_ALL_EVENTS_AGG_IDX = size(ALL_EVENTS_AGG_IDX)
-                    i = 1;  % start again
+                     size_ALL_EVENTS_AGG_IDX = size(ALL_EVENTS_AGG_IDX, 1);
+                     i = 1;
                 else
                     i = i + 1;
                 end
@@ -48,7 +48,7 @@ function [est] = estimation(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, A
             i = i + 1;
         end
     end
-    figure
-    plot(agg)
-
+    % figure
+    % plot(agg)
+    
 end
