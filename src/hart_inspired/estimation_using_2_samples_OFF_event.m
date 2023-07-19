@@ -18,18 +18,19 @@ function [est] = estimation_using_last_sample(states, agg, ALL_EVENTS_AGG_IDX, A
                 % check other eq states
                 states_current_event = states(current_event_idx, :);
                 states_next_event = states(next_eq_event_idx, :);
+                states_next_event_subract_1 = states(next_eq_event_idx - 1, :);
 
                 states_current_event(eq_id_event_causing) = [];
                 states_next_event(eq_id_event_causing) = [];
+                states_next_event_subract_1(eq_id_event_causing) = [];
 
-                states_equal = isequal(states_current_event, states_next_event);
+                states_equal_interval = isequal(states_current_event, states_next_event);
+                states_equal_event = isequal(states_next_event_subract_1, states_next_event);
 
-                agg_interval_power_diff = abs( agg(current_event_idx) - agg(next_eq_event_idx) );
-
-                est(current_event_idx : next_eq_event_idx, eq_id_event_causing) =  abs( agg(next_eq_event_idx) - agg(next_eq_event_idx - 1) );
-
-                % agg(current_event_idx : next_eq_event_idx - 1) = agg(current_event_idx : next_eq_event_idx - 1) - agg_interval_power_diff;
-                % states(current_event_idx : next_eq_event_idx - 1, eq_id_event_causing) = 0; % now consider that equipment OFF for that interval
+                if states_equal_interval && states_equal_event
+                    agg_interval_power_diff = abs( agg(current_event_idx) - agg(next_eq_event_idx) );
+                    est(current_event_idx : next_eq_event_idx, eq_id_event_causing) =  abs( agg(next_eq_event_idx) - agg(next_eq_event_idx - 1) );
+                end
             end
         end
             i = i + 1;
