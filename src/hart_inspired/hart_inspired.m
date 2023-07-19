@@ -48,17 +48,18 @@ clear diff_arr change_indices sorting_idx i;
 
 %% Estimation
 estimations = [];
-estimations_round = [];
+%estimations_round = [];
 
 estimations = estimation(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
-% estimations_round = estimation(table2array(st_table(:, 2:end)), movmean(agg_table.P_kW, 100), ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
+est_2_samples_OFF_event = estimation_using_2_samples_OFF_event(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
+%estimations_round = estimation(table2array(st_table(:, 2:end)), movmean(agg_table.P_kW, 100), ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
 
 figure,
-for i = 1:size(estimations, 2)
-    subplot(round(size(estimations, 2) / 2), 2, i)
+for i = 1:size(est_2_samples_OFF_event, 2)
+    subplot(round(size(est_2_samples_OFF_event, 2) / 2), 2, i)
     plot(eq_table{:, i + 1})
     hold on
-    plot(estimations(:, i), '.')
+    plot(est_2_samples_OFF_event(:, i), '.')
 end
 
 
