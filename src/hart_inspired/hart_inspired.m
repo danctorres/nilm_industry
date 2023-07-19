@@ -47,10 +47,10 @@ clear diff_arr change_indices sorting_idx i;
 
 
 %% Estimation
-estimations = [];
-%estimations_round = [];
+%est_ON_OFF_events = [];
+est_2_samples_OFF_event = [];
 
-estimations = estimation(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
+%est_ON_OFF_events = estimation_using_ON_OFF_events(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
 est_2_samples_OFF_event = estimation_using_2_samples_OFF_event(table2array(st_table(:, 2:end)), agg_table.P_kW, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
 %estimations_round = estimation(table2array(st_table(:, 2:end)), movmean(agg_table.P_kW, 100), ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE);
 

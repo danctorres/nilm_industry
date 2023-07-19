@@ -1,4 +1,4 @@
-function [est] = estimation(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE)
+function [est] = estimation_using_ON_OFF_events(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE)
     est = -1 * ones(size(states));  % if an estimation cannot be made, it saves the value -1 for the interval
     est = est .* states;
     size_ALL_EVENTS_AGG_IDX = size(ALL_EVENTS_AGG_IDX, 1);
@@ -31,21 +31,16 @@ function [est] = estimation(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, A
                     agg(current_event_idx : next_eq_event_idx - 1) = agg(current_event_idx : next_eq_event_idx - 1) - agg_interval_power_diff;
                     states(current_event_idx : next_eq_event_idx - 1, eq_id_event_causing) = 0; % now consider that equipment OFF for that interval
      
-                     ALL_EVENTS_AGG_IDX(i) = [];
-                     ALL_EVENTS_EQ_ID(i) = [];
-                     ALL_EVENTS_STATE_CHANGE(i) = [];
-
-                     size_ALL_EVENTS_AGG_IDX = size(ALL_EVENTS_AGG_IDX, 1);
-                     i = 1;
-                else
-                    i = i + 1;
+%                      ALL_EVENTS_AGG_IDX(i) = [];
+%                      ALL_EVENTS_EQ_ID(i) = [];
+%                      ALL_EVENTS_STATE_CHANGE(i) = [];
+% 
+%                      size_ALL_EVENTS_AGG_IDX = size(ALL_EVENTS_AGG_IDX, 1);
+%                      i = 1;
                 end
-            else
-                i = i + 1;
             end
-        else
-            i = i + 1;
         end
+         i = i + 1;
     end
     % figure
     % plot(agg)
