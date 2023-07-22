@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from Activation_layer import Activation_layer
 from Connected_layer import Connected_layer
 from NN import NN
-from activation_function import tanh, tanh_d
+from activation_function import relu, relu_d
 from loss_function import loss_f, loss_f_d
 from read_csv import read_csv
 from save_csv import save_csv
@@ -62,9 +62,9 @@ def set_NN(n_equipment: int):
     net = NN()
     net.set_learning_rate(0.001)
     net.set_layer(Connected_layer(1 + n_equipment, n_equipment + 2))
-    net.set_layer(Activation_layer(tanh, tanh_d))
+    net.set_layer(Activation_layer(relu, relu_d))
     net.set_layer(Connected_layer(n_equipment + 2, n_equipment))
-    net.set_layer(Activation_layer(tanh, tanh_d))
+    net.set_layer(Activation_layer(relu, relu_d))
     net.set_loss(loss_f, loss_f_d)
     net.set_epochs(1000)
     return net
@@ -79,10 +79,10 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--n', type=int, help='Number of equipment')
+    parser.add_argument("-n", "--number_eq", type=int, required=True, help="Number of equipment")
     args = parser.parse_args()
 
-    n_equipment = args.n
+    n_equipment = args.number_eq
     print(f"Number of equipment: {n_equipment}")
 
     input_train, states_train, agg_train, min_agg, max_agg = read_train_data(n_equipment)
@@ -96,8 +96,8 @@ def main():
 
     for key, value in loss_results.items():
         plt.plot(value, label=key)
-    plt.xlabel('X-axis')
-    plt.ylabel('Y-axis')
+    plt.xlabel("X-axis")
+    plt.ylabel("Y-axis")
     plt.legend()
     plt.show()
 

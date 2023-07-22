@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from Activation_layer import Activation_layer
 from Connected_layer import Connected_layer
 from NN import NN
-from activation_function import tanh, tanh_d
+from activation_function import relu, relu_d
 from loss_function import loss_f, loss_f_d
 from read_csv import read_csv
 from save_csv import save_csv
@@ -61,9 +61,9 @@ def set_NN():
     net = NN()
     net.set_learning_rate(0.001)
     net.set_layer(Connected_layer(1 + 6, 7 + 1))
-    net.set_layer(Activation_layer(tanh, tanh_d))
+    net.set_layer(Activation_layer(relu, relu_d))
     net.set_layer(Connected_layer(7 + 1, 6))
-    net.set_layer(Activation_layer(tanh, tanh_d))
+    net.set_layer(Activation_layer(relu, relu_d))
     net.set_loss(loss_f, loss_f_d)
     net.set_epochs(1000)
     return net
