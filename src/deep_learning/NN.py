@@ -11,6 +11,7 @@ class NN:
         self.min_norm_eq = None
         self.epochs = 1000
         self.threshold = 0.1
+        self.batch_size = 0
 
     def set_loss(self, loss_fun: callable, loss_fun_d: callable) -> None:
         self.loss_fun = loss_fun
@@ -30,6 +31,9 @@ class NN:
 
     def set_epochs(self, epochs: int) -> None:
         self.epochs = epochs
+
+    def set_batch_size(self, batch_size: int) -> None:
+        self.batch_size = batch_size
 
     def set_threshold(self, threshold: float) -> None:
             self.threshold = threshold

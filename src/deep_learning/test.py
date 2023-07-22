@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from Activation_layer import Activation_layer
 from Connected_layer import Connected_layer
 from NN import NN
-from activation_function import tanh, tanh_d
+from activation_function import relu, relu_d
 from loss_function import loss_f, loss_f_d
 from typing import List
 
@@ -17,11 +17,11 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
 
 def set_NN():
     net = NN()
-    net.set_learning_rate(0.1)
+    net.set_learning_rate(0.001)
     net.set_layer(Connected_layer(3, 5))
-    net.set_layer(Activation_layer(tanh, tanh_d))
+    net.set_layer(Activation_layer(relu, relu_d))
     net.set_layer(Connected_layer(5, 2))
-    net.set_layer(Activation_layer(tanh, tanh_d))
+    net.set_layer(Activation_layer(relu, relu_d))
     net.set_loss(loss_f, loss_f_d)
     net.set_epochs(10000)
     return net

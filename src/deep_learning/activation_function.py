@@ -1,6 +1,19 @@
 import math
 import numpy as np
 
+
+def relu(x: np.ndarray) -> np.ndarray:
+    return np.maximum(x, 0)
+
+def relu_d(x: np.ndarray) -> np.ndarray:
+    out = x
+    for index in range(x.size):
+        if x[0, index] <= 0.0:
+            out[0, index] = 0.0
+        else:
+            out[0, index] = 1.0
+    return out
+
 def tanh(x: np.ndarray) -> np.ndarray:
     return np.tanh(x)
 
@@ -11,20 +24,4 @@ def sigmoid(x: np.ndarray) -> np.ndarray:
     return 1 / (1 + math.exp(-x))
 
 def sigmoid_d(x: np.ndarray) -> np.ndarray:
-    return math.exp(-x) / (math.exp(-x) + 1) ** 2
-
-def relu(x: np.ndarray) -> np.ndarray:
-    out = x
-    for index in range(x.size):
-        if x[0, index] <= 0.0:
-            out[0, index] = 0.0
-    return out
-
-def relu_d(x: np.ndarray) -> np.ndarray:
-    out = x
-    for index in range(x.size):
-        if x[0, index] <= 0.0:
-            out[0, index] = 0.0
-        else:
-            out[0, index] = 1.0
-    return out
+    return sigmoid(x) * (1 - sigmoid(x))
