@@ -90,8 +90,8 @@ eq_processed_table.Properties.VariableNames{'Var9'} = 'Eq9_P_kW';
 clear equip_data eq_processed_timetable eq_cell start_time end_time;
 
 ON_OFF_double = table2array(eq_processed_table(:, 2:end));
-ON_OFF_double(ON_OFF_double > 0) = 1;
-ON_OFF_double(ON_OFF_double < 0) = 0;
+ON_OFF_double(ON_OFF_double >= 0.01) = 1;   % if lower than 1 W is off
+ON_OFF_double(ON_OFF_double <  0.05) = 0;
 ON_OFF_uint = uint8(ON_OFF_double);
 clear ON_OFF_double eq_processed_table_buff;
 

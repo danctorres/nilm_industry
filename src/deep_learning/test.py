@@ -2,11 +2,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Activation_layer import Activation_layer
-from Connected_layer import Connected_layer
-from NN import NN
-from activation_function import relu, relu_d
-from loss_function import loss_f, loss_f_d
+from NN_model import Activation_layer
+from NN_model import Connected_layer
+from NN_model import NN_batch
+from NN_model import activation_function
+from NN_model import loss_function
 from typing import List
 
 def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
@@ -16,23 +16,31 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
     return mse / len(estimations)
 
 def set_NN():
-    net = NN()
+    net = NN_batch.NN()
     net.set_learning_rate(0.001)
-    net.set_layer(Connected_layer(3, 5))
-    net.set_layer(Activation_layer(relu, relu_d))
-    net.set_layer(Connected_layer(5, 2))
-    net.set_layer(Activation_layer(relu, relu_d))
-    net.set_loss(loss_f, loss_f_d)
+    net.set_layer(Connected_layer.Connected_layer(3, 5))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_layer(Connected_layer.Connected_layer(5, 2))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_loss(loss_function.loss_f, loss_function.loss_f_d)
     net.set_epochs(10000)
     return net
 
 def main():
     net = set_NN()
     net.set_max_norm_eq(np.array([[0.9, 0.7]]))
-    net.set_min_norm_eq(np.array([[0.0, 0.0]]))
+    net.set_min_norm_eq(np.array([[0.01, 0.01]]))
+    net.set_batch_size(2)
 
     x_train = np.array([[[0.2]], [[0.5]], [[0.8]], [[1]]])
     states =  np.array([[[1.0, 1.0]], [[1.0, 1.0]], [[1.0, 1.0]], [[1.0, 1.0]]])
+
+    reshaped_x_train = x_train.reshape(-1, x_train.shape[-1])
+    batches_x_train =  np.array([reshaped_x_train[i:i + net.batch_size] for i in range(0, len(reshaped_x_train), net.batch_size)])
+    reshaped_states = states.reshape(-1, states.shape[-1])
+    batches_states =  np.array([reshaped_states[i:i + net.batch_size] for i in range(0, len(reshaped_states), net.batch_size)])
+
+    # loss_results = net.train(batches_x_train, batches_states, 1, True)
     loss_results = net.train(x_train, states, 1, True)
 
     for key, value in loss_results.items():
