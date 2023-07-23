@@ -2,13 +2,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Activation_layer import Activation_layer
-from Connected_layer import Connected_layer
-from NN import NN
-from activation_function import relu, relu_d
-from loss_function import loss_f, loss_f_d
-from read_csv import read_csv
-from save_csv import save_csv
+from NN_model import Activation_layer
+from NN_model import Connected_layer
+from NN_model import NN
+from NN_model import activation_function
+from NN_model import loss_function
+from data_handle import read_csv
+from data_handle import save_csv
 from typing import List
 
 
@@ -33,12 +33,12 @@ def denormalize(data_norm: List[np.ndarray], min_val: float, max_val: float) -> 
 
 
 def read_eq_data():
-    return read_csv(f"../../data/processed/IMDELD/data_6_equipment/equipment_training.csv")
+    return read_csv.read_csv(f"../../data/processed/IMDELD/data_6_equipment/equipment_training.csv")
 
 def read_train_data():
     print("--- Reading training data ---")
-    sts_train = read_csv(f"../../data/processed/IMDELD/data_6_equipment/on_off_training.csv")
-    agg_train_denorm = read_csv(f"../../data/processed/IMDELD/data_6_equipment/aggregate_training.csv", 1)
+    sts_train = read_csv.read_csv(f"../../data/processed/IMDELD/data_6_equipment/on_off_training.csv")
+    agg_train_denorm = read_csv.read_csv(f"../../data/processed/IMDELD/data_6_equipment/aggregate_training.csv", 1)
     agg_train = normalize(agg_train_denorm)
     resh_agg_train = np.reshape(agg_train, (agg_train.shape[0], 1, agg_train.shape[1]))
     input_train = np.concatenate((sts_train, agg_train), axis=1)
@@ -48,23 +48,23 @@ def read_train_data():
 
 def read_validation_data():
     print("--- Reading validation data ---")
-    sts_val = read_csv(f"../../data/processed/IMDELD/data_6_equipment/on_off_validation.csv")
-    agg_val = read_csv(f"../../data/processed/IMDELD/data_6_equipment/aggregate_validation.csv", 1)
-    timestamp = read_csv(f"../../data/processed/IMDELD/data_6_equipment/aggregate_validation.csv", 0)
-    eq_val = read_csv(f"../../data/processed/IMDELD/data_6_equipment/equipment_validation.csv")
+    sts_val = read_csv.read_csv(f"../../data/processed/IMDELD/data_6_equipment/on_off_validation.csv")
+    agg_val = read_csv.read_csv(f"../../data/processed/IMDELD/data_6_equipment/aggregate_validation.csv", 1)
+    timestamp = read_csv.read_csv(f"../../data/processed/IMDELD/data_6_equipment/aggregate_validation.csv", 0)
+    eq_val = read_csv.read_csv(f"../../data/processed/IMDELD/data_6_equipment/equipment_validation.csv")
     input_val = np.concatenate((sts_val, normalize(agg_val)), axis = 1)
     resh_input_val = np.reshape(input_val, (input_val.shape[0], 1, input_val.shape[1]))
     return normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val, sts_val
 
 
 def set_NN():
-    net = NN()
+    net = NN.NN()
     net.set_learning_rate(0.001)
-    net.set_layer(Connected_layer(1 + 6, 7 + 1))
-    net.set_layer(Activation_layer(relu, relu_d))
-    net.set_layer(Connected_layer(7 + 1, 6))
-    net.set_layer(Activation_layer(relu, relu_d))
-    net.set_loss(loss_f, loss_f_d)
+    net.set_layer(Connected_layer.Connected_layer(1 + 6, 7 + 1))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_layer(Connected_layer.Connected_layer(7 + 1, 6))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_loss(loss_function.loss_f, loss_function.loss_f_d)
     net.set_epochs(1000)
     return net
 
@@ -102,7 +102,7 @@ def main():
     data_val = np.concatenate ( (np.reshape(agg_val_norm, (agg_val_norm.shape[0], 1, 1)) , np.reshape(sts_val, (sts_val.shape[0], 1, sts_val.shape[1]))), axis = 2)
     estimations = denormalize(net.estimate(data_val, n_equipment), min_agg, max_agg)
 
-    save_csv(f"../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
+    save_csv.save_csv(f"../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
     print(calculate_error(estimations, eq_val, n_equipment))
 
 

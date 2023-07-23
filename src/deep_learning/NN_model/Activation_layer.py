@@ -1,5 +1,4 @@
 import numpy as np
-from Layer import Layer
 
 class Activation_layer():
     def __init__(self, activation: callable, activation_d: callable) -> None:

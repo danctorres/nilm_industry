@@ -10,7 +10,6 @@ class NN:
         self.max_norm_eq = None
         self.min_norm_eq = None
         self.epochs = 1000
-        self.threshold = 0.1
         self.batch_size = 0
 
     def set_loss(self, loss_fun: callable, loss_fun_d: callable) -> None:
@@ -34,9 +33,6 @@ class NN:
 
     def set_batch_size(self, batch_size: int) -> None:
         self.batch_size = batch_size
-
-    def set_threshold(self, threshold: float) -> None:
-            self.threshold = threshold
 
     def train(self, aggs: np.ndarray, states: np.ndarray, n_equipment: int, use_state: bool): # -> Dict[List[float]]:
         loss_Dict = {f"{i}": [] for i in range(0, n_equipment)}
