@@ -13,3 +13,6 @@ class Activation_layer():
 
     def back_prop(self, learning_rate: float, loss: np.ndarray) -> np.ndarray:
         return self.activation_d(self.input) * loss
+    
+    def back_prop_batch(self, learning_rate: float, loss: np.ndarray, last_batch: bool, size_mini_batch) -> np.ndarray:
+        return self.activation_d(self.input) * loss

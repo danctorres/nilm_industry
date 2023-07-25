@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from NN_model import Activation_layer
-from NN_model import Connected_layer
-from NN_model import NN
+from NN_model import Connected_layer_batch
+from NN_model import NN_batch
 from NN_model import activation_function
 from NN_model import loss_function
 from typing import List
@@ -16,11 +16,11 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
     return mse / len(estimations)
 
 def set_NN():
-    net = NN.NN()
+    net = NN_batch.NN()
     net.set_learning_rate(0.001)
-    net.set_layer(Connected_layer.Connected_layer(3, 5))
+    net.set_layer(Connected_layer_batch.Connected_layer(3, 5))
     net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
-    net.set_layer(Connected_layer.Connected_layer(5, 2))
+    net.set_layer(Connected_layer_batch.Connected_layer(5, 2))
     net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
     net.set_loss(loss_function.loss_f, loss_function.loss_f_d)
     net.set_epochs(10000)
@@ -40,8 +40,8 @@ def main():
     reshaped_states = states.reshape(-1, states.shape[-1])
     batches_states =  np.array([reshaped_states[i:i + net.batch_size] for i in range(0, len(reshaped_states), net.batch_size)])
 
-    # loss_results = net.train(batches_x_train, batches_states, 1, True)
-    loss_results = net.train(x_train, states, 1, True)
+    loss_results = net.train(batches_x_train, batches_states, 1, True)
+    # loss_results = net.train(x_train, states, 1, True)
 
     for key, value in loss_results.items():
         plt.plot(value, label=key)

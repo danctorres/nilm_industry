@@ -36,7 +36,6 @@ class NN:
 
     def train(self, aggs: np.ndarray, states: np.ndarray, n_equipment: int, use_state: bool): # -> Dict[List[float]]:
         loss_Dict = {f"{i}": [] for i in range(0, n_equipment)}
-            
         for epoch in range(self.epochs):
             for idx in range(aggs.shape[0]):
                 if aggs[idx] != 0.0:

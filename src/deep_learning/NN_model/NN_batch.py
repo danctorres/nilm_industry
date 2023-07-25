@@ -34,28 +34,28 @@ class NN:
     def set_batch_size(self, batch_size: int) -> None:
         self.batch_size = batch_size
 
-    def train(self, aggs: np.ndarray, states: np.ndarray, n_equipment: int, use_state: bool): # -> Dict[List[float]]:
+    def train(self, agg_batches: np.ndarray, states_batches: np.ndarray, n_equipment: int, use_state: bool): # -> Dict[List[float]]:
         loss_Dict = {f"{i}": [] for i in range(0, n_equipment)}
             
         for epoch in range(self.epochs):
+            for aggs, states in zip(agg_batches, states_batches):
+                aggs = np.expand_dims(aggs, axis=1)
+                states = np.expand_dims(states, axis=1)
+                for idx in range(aggs.shape[0]):
+                    if aggs[idx] != 0.0:
+                        if (use_state):
+                            input_agg = np.concatenate((aggs[idx], states[idx]), axis=1)
+                        else:
+                            input_agg = aggs[idx]
+                        # Forwards Propagation
+                        for layer in self.layers:
+                            layer_output = layer.forw_prop(input_agg)
+                            input_agg = layer_output
+                        loss = self.loss_fun_d(layer_output, aggs[idx], states[idx], self.max_norm_eq, self.min_norm_eq, n_equipment)
 
-            # Split into mini-batch
-
-            for idx in range(aggs.shape[0]):
-                if aggs[idx] != 0.0:
-                    if (use_state):
-                        input_agg = np.concatenate((aggs[idx], states[idx]), axis=1)
-                    else:
-                        input_agg = aggs[idx]
-                    # Forwards Propagation
-                    for layer in self.layers:
-                        layer_output = layer.forw_prop(input_agg)
-                        input_agg = layer_output
-                    loss = self.loss_fun_d(layer_output, aggs[idx], states[idx], self.max_norm_eq, self.min_norm_eq, n_equipment)
-
-                    # Backwards Propagation
-                    for layer in reversed(self.layers):
-                        loss = layer.back_prop(self.learning_rate, loss)
+                        # Backwards Propagation
+                        for layer in reversed(self.layers):
+                            loss = layer.back_prop_batch(self.learning_rate, loss, idx == aggs.shape[0], agg_batches.shape)
 
             print(f"Training network: {(epoch * 100) / (self.epochs - 1):.2f}% - Epoch: {epoch + 1}/{self.epochs}", end="\r")
 
