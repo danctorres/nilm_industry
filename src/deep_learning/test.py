@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from NN_model import Activation_layer
 from NN_model import Connected_layer
-from NN_model import NN_batch
+from NN_model import NN
 from NN_model import activation_function
 from NN_model import loss_function
 from typing import List
@@ -16,7 +16,7 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
     return mse / len(estimations)
 
 def set_NN():
-    net = NN_batch.NN()
+    net = NN.NN()
     net.set_learning_rate(0.001)
     net.set_layer(Connected_layer.Connected_layer(3, 5))
     net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))

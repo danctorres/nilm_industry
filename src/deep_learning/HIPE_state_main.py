@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from NN_model import Activation_layer
-from NN_model import Connected_layer
-from NN_model import NN
+from NN_model import Connected_layer_batch
+from NN_model import NN_batch
 from NN_model import activation_function
 from NN_model import loss_function
 from data_handle import read_csv
@@ -59,11 +59,11 @@ def read_validation_data(number_equipment: int):
 
 
 def set_NN(n_equipment: int):
-    net = NN.NN()
+    net = NN_batch.NN()
     net.set_learning_rate(0.001)
-    net.set_layer(Connected_layer.Connected_layer(1 + n_equipment, n_equipment + 2))
+    net.set_layer(Connected_layer_batch.Connected_layer(1 + n_equipment, n_equipment + 2))
     net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
-    net.set_layer(Connected_layer.Connected_layer(n_equipment + 2, n_equipment))
+    net.set_layer(Connected_layer_batch.Connected_layer(n_equipment + 2, n_equipment))
     net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
     net.set_loss(loss_function.loss_f, loss_function.loss_f_d)
     net.set_epochs(1000)
@@ -88,11 +88,20 @@ def main():
     input_train, states_train, agg_train, min_agg, max_agg = read_train_data(n_equipment)
 
     net = set_NN(n_equipment)
+    net.set_batch_size(4)
 
     net.set_max_norm_eq(normalize2(np.max(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
     net.set_min_norm_eq(normalize2(np.min(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
+    
+    reshaped_agg_train = agg_train.reshape(-1, agg_train.shape[-1])
+    batches_agg_train =  np.array([reshaped_agg_train[i:i + net.batch_size] for i in range(0, len(reshaped_agg_train), net.batch_size)])
 
-    loss_results = net.train(agg_train, states_train, n_equipment, True)
+    reshaped_states_train = states_train.reshape(-1, states_train.shape[-1])
+    batches_states_train =  np.array([reshaped_states_train[i:i + net.batch_size] for i in range(0, len(reshaped_states_train), net.batch_size)])
+
+    loss_results = net.train(batches_agg_train, batches_states_train, n_equipment, True)
+
+    # loss_results = net.train(agg_train, states_train, n_equipment, True)
 
     for key, value in loss_results.items():
         plt.plot(value, label=key)
