@@ -1,7 +1,8 @@
 #%%
 import argparse
 import numpy as np
-import matplotlib.pyplot as plt
+import os
+# import matplotlib.pyplot as plt
 
 from NN_model import Activation_layer
 from NN_model import Connected_layer_batch
@@ -10,27 +11,9 @@ from NN_model import activation_function
 from NN_model import loss_function
 from data_handle import read_csv
 from data_handle import save_csv
+from data_handle import read_estimations_csv
+from mixins import mixins
 from typing import List
-
-
-def normalize(data: np.ndarray) -> np.ndarray:
-    min_val = data.min()
-    max_val = data.max()
-    data_norm = np.empty(data.shape)
-    for i, value in enumerate(data):
-        data_norm[i] = (value - min_val) / (max_val - min_val)
-    return data_norm
-
-def normalize2(data: np.ndarray, min_val: float, max_val: float) -> np.ndarray:
-    data_norm = np.empty(data.shape)
-    for i, value in enumerate(data):
-        data_norm[i] = (value - min_val) / (max_val - min_val)
-    return data_norm
-
-def denormalize(data_norm: List[np.ndarray], min_val: float, max_val: float) -> np.ndarray:
-    for i, value in enumerate(data_norm):
-        data_norm[i] = np.round(value * (max_val - min_val) + min_val, 4)
-    return data_norm
 
 
 def read_eq_data(number_equipment: int):
@@ -40,7 +23,7 @@ def read_train_data(number_equipment: int):
     print("--- Reading training data ---")
     sts_train = read_csv.read_csv(f"../../data/processed/HIPE/1_week/state_training/st_training_{number_equipment}.csv")
     agg_train_denorm = read_csv.read_csv(f"../../data/processed/HIPE/1_week/aggregate_training/agg_training_{number_equipment}.csv", 1)
-    agg_train = normalize(agg_train_denorm)
+    agg_train = mixins.normalize(agg_train_denorm)
     resh_agg_train = np.reshape(agg_train, (agg_train.shape[0], 1, agg_train.shape[1]))
     input_train = np.concatenate((sts_train, agg_train), axis=1)
     resh_input_train = np.reshape(input_train, (input_train.shape[0], 1, input_train.shape[1]))
@@ -53,72 +36,73 @@ def read_validation_data(number_equipment: int):
     agg_val = read_csv.read_csv(f"../../data/processed/HIPE/1_week/aggregate_validation/agg_validation_{number_equipment}.csv", 1)
     timestamp = read_csv.read_csv(f"../../data/processed/HIPE/1_week/aggregate_validation/agg_validation_{number_equipment}.csv", 0)
     eq_val = read_csv.read_csv(f"../../data/processed/HIPE/1_week/equipment_validation/eq_validation_{number_equipment}.csv")
-    input_val = np.concatenate((sts_val, normalize(agg_val)), axis = 1)
+    input_val = np.concatenate((sts_val, mixins.normalize(agg_val)), axis = 1)
     resh_input_val = np.reshape(input_val, (input_val.shape[0], 1, input_val.shape[1]))
-    return normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val, sts_val
+    return mixins.normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val, sts_val
 
 
 def set_NN(n_equipment: int):
     net = NN_batch.NN()
     net.set_learning_rate(0.001)
     net.set_layer(Connected_layer_batch.Connected_layer(1 + n_equipment, n_equipment + 2))
-    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.tanh, activation_function.tanh_d))
     net.set_layer(Connected_layer_batch.Connected_layer(n_equipment + 2, n_equipment))
-    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.tanh, activation_function.tanh_d))
     net.set_loss(loss_function.loss_f, loss_function.loss_f_d)
     net.set_epochs(1000)
     return net
 
-def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
-    print("--- Calculation MSE ---")
-    mse = np.zeros((1, n_equipment))
-    for estimations_array, eq_array in zip(estimations, eq_val.tolist()):
-        mse = mse + (estimations_array - eq_array[:n_equipment]) ** 2
-    return np.round(mse / len(estimations), 4)
-
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--number_eq", type=int, required=True, help="Number of equipment")
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("-n", "--number_eq", type=int, required=True, help="Number of equipment")
+    # args = parser.parse_args()
+    # n_equipment = args.number_eq
 
-    n_equipment = args.number_eq
-    print(f"Number of equipment: {n_equipment}")
+    for n_equipment in range(2, 10):
+        number_runs = 50
+        batch_size = 4
+        print(f"Number of equipment: {n_equipment}")
 
-    input_train, states_train, agg_train, min_agg, max_agg = read_train_data(n_equipment)
+        input_train, states_train, agg_train, min_agg, max_agg = read_train_data(n_equipment)
+        agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm, sts_val = read_validation_data(n_equipment)
+        data_val = np.concatenate ( (np.reshape(agg_val_norm, (agg_val_norm.shape[0], 1, 1)) , np.reshape(sts_val, (sts_val.shape[0], 1, sts_val.shape[1]))), axis = 2)
 
-    net = set_NN(n_equipment)
-    net.set_batch_size(4)
 
-    net.set_max_norm_eq(normalize2(np.max(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
-    net.set_min_norm_eq(normalize2(np.min(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
-    
-    reshaped_agg_train = agg_train.reshape(-1, agg_train.shape[-1])
-    batches_agg_train =  np.array([reshaped_agg_train[i:i + net.batch_size] for i in range(0, len(reshaped_agg_train), net.batch_size)])
+        reshaped_agg_train = agg_train.reshape(-1, agg_train.shape[-1])
+        batches_agg_train = np.array([reshaped_agg_train[i:i + batch_size] for i in range(0, len(reshaped_agg_train), batch_size)])
+        reshaped_states_train = states_train.reshape(-1, states_train.shape[-1])
+        batches_states_train = np.array([reshaped_states_train[i:i + batch_size] for i in range(0, len(reshaped_states_train), batch_size)])
 
-    reshaped_states_train = states_train.reshape(-1, states_train.shape[-1])
-    batches_states_train =  np.array([reshaped_states_train[i:i + net.batch_size] for i in range(0, len(reshaped_states_train), net.batch_size)])
 
-    loss_results = net.train(batches_agg_train, batches_states_train, n_equipment, True)
+        
+        for idx in range(number_runs):
+            print(f"Current iteration {idx}")
+            net = set_NN(n_equipment)
+            net.set_batch_size = 4
+            net.set_max_norm_eq(mixins.normalize2(np.max(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
+            net.set_min_norm_eq(mixins.normalize2(np.min(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
+            loss_results = net.train(batches_agg_train, batches_states_train, n_equipment, True)
 
-    # loss_results = net.train(agg_train, states_train, n_equipment, True)
+            # for key, value in loss_results.items():
+            #     plt.plot(value, label=key)
+            # plt.xlabel("X-axis")
+            # plt.ylabel("Y-axis")
+            # plt.legend()
+            # plt.show()
+            print("")
 
-    for key, value in loss_results.items():
-        plt.plot(value, label=key)
-    plt.xlabel("X-axis")
-    plt.ylabel("Y-axis")
-    plt.legend()
-    plt.show()
+            estimations = mixins.denormalize(net.estimate(data_val, n_equipment), min_agg, max_agg)
+            new_estimations_zeros = mixins.post_estimation_zeros(estimations, sts_val, n_equipment)
+            saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv")
 
-    print("")
-
-    agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm, sts_val = read_validation_data(n_equipment)
-             
-    data_val = np.concatenate ( (np.reshape(agg_val_norm, (agg_val_norm.shape[0], 1, 1)) , np.reshape(sts_val, (sts_val.shape[0], 1, sts_val.shape[1]))), axis = 2)
-    estimations = denormalize(net.estimate(data_val, n_equipment), min_agg, max_agg)
-
-    save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, estimations, timestamp)
-    print(calculate_error(estimations, eq_val, n_equipment))
+            if idx == 0 and not os.path.exists("../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv"):
+                save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, new_estimations_zeros, timestamp)
+            else:
+                if (np.sum(mixins.calculate_error_different_zero(new_estimations_zeros, eq_val, sts_val, n_equipment)) / n_equipment) < (np.sum(mixins.calculate_error_different_zero(saved_estimations, eq_val, sts_val, n_equipment)) / n_equipment):
+                    print("--- Updating estimation ---f")
+                    save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, new_estimations_zeros, timestamp)
+            # print(calculate_error(estimations, eq_val, n_equipment))
 
 
 if __name__ == "__main__":

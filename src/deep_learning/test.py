@@ -19,9 +19,9 @@ def set_NN():
     net = NN.NN()
     net.set_learning_rate(0.001)
     net.set_layer(Connected_layer.Connected_layer(3, 5))
-    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.tanh, activation_function.tanh_d))
     net.set_layer(Connected_layer.Connected_layer(5, 2))
-    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.tanh, activation_function.tanh_d))
     net.set_loss(loss_function.loss_f, loss_function.loss_f_d)
     net.set_epochs(10000)
     return net

@@ -3,7 +3,7 @@ import numpy as np
 
 
 def read_csv(file_path: str, col_num: int = None) -> np.ndarray:
-    with open(file_path, mode = 'r', encoding = 'utf-8') as file:
+    with open(file_path, mode = "r", encoding = "utf-8") as file:
         reader = csv.reader(file)
         next(reader) # Skip the first row
         if col_num is None:
