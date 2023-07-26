@@ -69,7 +69,7 @@ class NN:
         output: np.ndarray = []
         results: np.ndarray = []
         for inp in inputs:
-            if inp.ndim == 1 and inp[0] == 0.0:
+            if inp.ndim == 1 and inp[0] == 0.0:     # if aggregate equal to zero, all equipment equal to 0
                 results.append(np.zeros((1, n_equipment)))
             elif inp.ndim == 2 and inp[0, 0] == 0.0:
                 results.append(np.zeros((1, n_equipment)))
