@@ -60,7 +60,7 @@ def main():
     # n_equipment = args.number_eq
 
     for n_equipment in range(2, 10):
-        number_runs = 50
+        number_runs = 20
         batch_size = 4
         print(f"Number of equipment: {n_equipment}")
 
@@ -96,13 +96,13 @@ def main():
             new_estimations_zeros = mixins.post_estimation_zeros(estimations, sts_val, n_equipment)
             saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv")
 
-            if idx == 0 and not os.path.exists("../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv"):
+            if idx == 0 and not os.path.exists(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv"):
+                print(mixins.calculate_error(estimations, eq_val, n_equipment))
                 save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, new_estimations_zeros, timestamp)
             else:
                 if (np.sum(mixins.calculate_error_different_zero(new_estimations_zeros, eq_val, sts_val, n_equipment)) / n_equipment) < (np.sum(mixins.calculate_error_different_zero(saved_estimations, eq_val, sts_val, n_equipment)) / n_equipment):
-                    print("--- Updating estimation ---f")
+                    print("--- Updating estimation ---")
                     save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, new_estimations_zeros, timestamp)
-            # print(calculate_error(estimations, eq_val, n_equipment))
 
 
 if __name__ == "__main__":

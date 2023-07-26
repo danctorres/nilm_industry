@@ -29,16 +29,17 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
     print(f" MSE {error}")
     return error
 
-def calculate_error_different_zero(estimations, eq_val, sts_val, n_equipment) -> List[float]:
-    # only calculate error for values different than state 0
+def calculate_error_different_zero(estimations: List, eq_val, sts_val, n_equipment: int) -> List[float]:
     mse = np.zeros((1, n_equipment))
     for estimations_array, eq_array, sts_array in zip(estimations, eq_val.tolist(), sts_val):
         for idx in range(len(sts_array)):
             if (sts_array[idx] == 1 and estimations_array[0, idx] == 0):
                 mse[0, idx] += 1
-                # change this
         mse = mse + (estimations_array - eq_array[:n_equipment]) ** 2
-    error = np.round(mse / len(estimations), 4)
+    one_num = []
+    for i in range(n_equipment):
+        one_num.append(np.sum(sts_val[:, i] == 1))
+    error = np.round([x / y for x, y in zip(mse, one_num)], 4) # change this, divide by the number of state == 1
     print(f" MSE {error}")
     return error
 
