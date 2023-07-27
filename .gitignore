@@ -21,3 +21,5 @@ docs/Images/*
 /src/optimization/validation/build
 /src/deep_learning/__pycache__
 
+# ignore pycache
+.pyc
