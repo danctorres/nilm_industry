@@ -21,7 +21,7 @@ def denormalize(data_norm: List[np.ndarray], min_val: float, max_val: float) -> 
         data_norm[i] = np.round(value * (max_val - min_val) + min_val, 4)
     return data_norm
 
-def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
+def calculate_error(estimations: List, eq_val: np.ndarray, n_equipment: int) -> List[float]:
     mse = np.zeros((1, n_equipment))
     for estimations_array, eq_array in zip(estimations, eq_val.tolist()):
         mse = mse + (estimations_array - eq_array[:n_equipment]) ** 2
@@ -29,7 +29,7 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
     print(f" MSE {error}")
     return error
 
-def calculate_error_different_zero(estimations: List, eq_val, sts_val, n_equipment: int) -> List[float]:
+def calculate_error_different_zero(estimations: List, eq_val: np.ndarray, sts_val: np.ndarray, n_equipment: int) -> List[float]:
     mse = np.zeros((1, n_equipment))
     for estimations_array, eq_array, sts_array in zip(estimations, eq_val.tolist(), sts_val):
         for idx in range(len(sts_array)):
