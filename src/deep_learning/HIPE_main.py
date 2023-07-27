@@ -1,5 +1,6 @@
 #%%
 import argparse
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -52,12 +53,11 @@ def set_NN(n_equipment: int):
 
 
 def main():
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("-n", "--number_eq", type=int, required=True, help="Number of equipment")
-    # args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n", "--number_eq", type=int, required=True, help="Number of equipment")
+    args = parser.parse_args()
 
-    # n_equipment = args.number_eq
-    n_equipment = 5
+    n_equipment = args.number_eq
     print(f"Number of equipment: {n_equipment}")
 
     input_train, states_train, agg_train, min_agg, max_agg = read_train_data(n_equipment)
@@ -86,12 +86,13 @@ def main():
         estimations = mixins.denormalize(net.estimate(agg_val_norm, n_equipment), min_agg, max_agg)
         saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv")
 
-        if idx == 0:
+        if idx == 0 and not os.path.exists(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv"):
+            print(mixins.calculate_error(estimations, eq_val, n_equipment))
             save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, estimations, timestamp)
         else:
-            if (np.sum(mixins.calculate_error(estimations, eq_val, n_equipment))) < (np.sum(mixins.calculate_error(saved_estimations, eq_val, n_equipment))):
+            if (np.sum(mixins.calculate_error_different_zero(estimations, eq_val, sts_val, n_equipment)) / n_equipment) < (np.sum(mixins.calculate_error_different_zero(saved_estimations, eq_val, sts_val, n_equipment)) / n_equipment):
+                print("--- Updating estimation ---")
                 save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, estimations, timestamp)
-
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 #%%
-import argparse
-import numpy as np
+# import argparse
 import os
+import numpy as np
 # import matplotlib.pyplot as plt
 
 from NN_model import Activation_layer
