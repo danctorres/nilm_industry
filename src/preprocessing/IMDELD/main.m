@@ -67,7 +67,7 @@ on_off_array = calculate_on_off(active_power_formated, 5, false);
 [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data);
 
 % Plot raw data for each equipment
-plot_raw_active_power(equip_data, 'active_power')
+plot_raw_active_power(equip_data, 'active_power');
 
 % For the days that have information of the 8 equipment, find how many timestamps samples are missing
 [day1, day2, interval, number_missing_samples, mean_missing_samples, median_missing_samples] = common_timestamps_metrics(common_timestamps);
