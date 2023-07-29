@@ -23,10 +23,25 @@ numCols = ceil(size(equip_data, 2) / 4);
 figure,
 clear eq_cell;
 for i = 1 : size(equip_data, 2)
-   eq_cell{i} = equip_data{i}(:, {'SensorDateTime', 'P_kW'});
-   subplot(numRows, numCols, i);
-   plot(eq_cell{i}.P_kW);
+    eq_cell{i} = equip_data{i}(:, {'SensorDateTime', 'P_kW'});
+    %subplot(numRows, numCols, i);
+
+    eq_buff = eq_cell{i};
+    eq_buff.Properties.VariableNames{'SensorDateTime'} = 'Time';
+    eq_buff.Time = cellfun(@(x) x(1, 1:22), eq_buff.Time, 'UniformOutput', false);
+    eq_buff.Time = strrep(eq_buff.Time, '+', '.');
+    eq_buff.Time = datetime(eq_buff.Time, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
+    
+    plot(eq_buff.Time, eq_cell{i}.P_kW, '.');
+    xlabel('Datestamp');
+    ylabel('Active Power [kW]');
+    title('Equipment Active Power')
+    labels_eq{i} = sprintf('Equipment %d', i);
+
+    hold on
 end
+legend(labels_eq)
+
 
 for i = 1 : size(equip_data, 2)
     eq_buff = eq_cell{i};
@@ -133,7 +148,10 @@ end
 clear i agg_buff agg_data;
 
 figure,
-plot(agg_struct_of_tables.aggregate_table_9.P_kW)
+plot(agg_struct_of_tables.aggregate_table_9.Time, agg_struct_of_tables.aggregate_table_9.P_kW, '.')
+xlabel('Datestamp');
+ylabel('Active Power [kW]');
+title('Aggregate Active Power');
 
 
 %% Save data before splitting
@@ -203,3 +221,4 @@ for i = 1:size(table_names, 1)
 end
 
 clear training_index validation_index bin_index_validation bin_index_training bin_samples i j n_samples_bin unique_bins buffer N bin bin_edges std_aggregate mean_aggregate agg_buff timestamps table_names training_ratio relativeFolderPath;
+
