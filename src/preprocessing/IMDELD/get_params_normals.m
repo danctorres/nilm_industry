@@ -10,17 +10,16 @@ function [curves, params_normal, pd, group_power_limit] = get_params_normals(siz
         for i = 1:size(peaks_index, 2) - 1
             mid_peaks_index(i) = round((peaks_index(i + 1) + peaks_index(i)) / 2);
         end
-        
+
         counts = counts_cell{j};
         bin_center_var = bin_center_cell{j};
         edges_var = edges_cell{j};
-        
+
         mid_peaks_index_interp = bin_center_var(mid_peaks_index);
 
 
         complete_edges = bin_center_var(1):bin_center_var(end);
         counts_interp = spline(bin_center_var, counts, complete_edges);
-        
 
         % figure,
         pd=[];
@@ -32,7 +31,7 @@ function [curves, params_normal, pd, group_power_limit] = get_params_normals(siz
                 group_power_limit(j, i) = {[1, bin_center_var(1, mid_peaks_index(1))]};
                 % curves(j, i) = {struct2table(allfitdist(counts_interp(1, 1:mid_peaks_index_interp(1))))};
                 % pd(j, i) = {fitdist(counts_interp(1, 1:mid_peaks_index(1))', 'Normal')};
-                
+
                 % subplot(size(peaks_index, 2), 1, i);
                 % histfit(counts_interp(1, 1:mid_peaks_index(1)))
             elseif (i == size(peaks_index, 2))
@@ -42,7 +41,7 @@ function [curves, params_normal, pd, group_power_limit] = get_params_normals(siz
                 % curves(j, i) = {struct2table(allfitdist(counts_interp(1, mid_peaks_index_interp(end):end)) )};
                 % pd(j, i) = {fitdist(counts_interp(1, mid_peaks_index(end):end)', 'Normal')};
                 % pd(j, i) = {fitdist([zeros(1, mid_peaks_index(end) - 1), counts_interp(1, mid_peaks_index(end):end)]', 'Normal')};
-                
+
 
                 % subplot(size(peaks_index, 2), 1, i);
                 % histfit(counts_interp(1, mid_peaks_index(end):end));
@@ -56,8 +55,7 @@ function [curves, params_normal, pd, group_power_limit] = get_params_normals(siz
                 % histfit(counts_interp(1, mid_peaks_index(i - 1):mid_peaks_index(i)));
             end
         end
-    end 
-    
+    end
 
     params_normal = cell(size(curves, 1), size(curves, 2));
     for i = 1:size(curves, 1)
@@ -70,7 +68,6 @@ function [curves, params_normal, pd, group_power_limit] = get_params_normals(siz
         end
     end
 
-    
     % Plot normals of each group by the value of the curves cell
 %     for j = 1:size_eq
 %         peaks_index = find(TF_cell{j} == 1);
@@ -78,7 +75,7 @@ function [curves, params_normal, pd, group_power_limit] = get_params_normals(siz
 %         for i = 1:size(peaks_index, 2) - 1
 %             mid_peaks_index(i) = round((peaks_index(i + 1) + peaks_index(i)) / 2);
 %         end
-% 
+%
 %         counts = counts_cell{j};
 %         for i = 1:size(peaks_index, 2)
 %             if (i == 1)
@@ -90,8 +87,8 @@ function [curves, params_normal, pd, group_power_limit] = get_params_normals(siz
 %                 counts_group(j, i) = {counts(1, mid_peaks_index(i - 1):mid_peaks_index(i))};
 %             end
 %         end
-%     end  
-%     
+%     end
+%
 %     for i = 1:size(params_normal, 1)
 %         figure,
 %         sgtitle(sprintf('Equipment % i', i));

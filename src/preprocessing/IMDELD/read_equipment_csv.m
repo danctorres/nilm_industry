@@ -6,17 +6,17 @@ function [equip_data] = read_equipment_csv(dataset_name)
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
     cd([erase(file_information.Filename, ['\src\preprocessing\', dataset_name, '\', file_name, file_ext]), '\data\raw\', dataset_name, '\Equipment']);
-    
+
     file_list = dir;
     file_list = {file_list.name};
     file_list = file_list(3:end); % remove . and ..
-    
+
     n_Eq = size(file_list, 2);
     equip_data = cell(1, n_Eq);
     for i = 1:n_Eq
         equip_data{i} = readtable(string(file_list(i)));
     end
-    
+
     file_information = matlab.desktop.editor.getActive;
     [~, file_name, file_ext] = fileparts(file_information.Filename);
     cd(erase(file_information.Filename, [file_name, file_ext]));

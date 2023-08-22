@@ -6,9 +6,9 @@ function [day_table_complete] = calculate_metrics_power_day(date_active_power, s
     dates_only          = datetime(datestr(date_active_power.Date, 'dd-mmm-yyyy'));
     unique_dates        = unique(dates_only);
     [~, index_dates]    = ismember(dates_only, unique_dates);
-    
+
     day_table_complete  = table(unique_dates(:), 'VariableNames', {'Date'});
-    
+
     num_samples             = zeros(1, size(unique_dates, 1));
     mean_active_power       = zeros(1, size(unique_dates, 1));
     median_active_power     = zeros(1, size(unique_dates, 1));

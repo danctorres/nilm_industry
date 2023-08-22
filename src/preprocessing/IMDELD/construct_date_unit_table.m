@@ -8,7 +8,7 @@ function [date_unit] = construct_date_unit_table(equip_data, useful_common_times
         mean_values         = grpstats(equip_data{selected_eq(i)}, 'timestamp', 'mean', 'DataVars', string(unit));
         datetime_values     = cell2mat(mean_values.timestamp);
         [sharedvals, ~]     = ismember(unique(datetime(datetime_values(:, 1:end - 3))), useful_common_timestamps);
-    
+
         date_unit.(join([ string(unit), string(selected_eq(i))], '_')) = table2array(mean_values(sharedvals, 3));
     end
 end

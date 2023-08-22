@@ -20,7 +20,8 @@ clearvars file_dir file_information
 numRows = ceil(sqrt(size(equip_data, 2)));
 numCols = ceil(size(equip_data, 2) / 4);
 
-figure,
+% Raw data
+figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
 clear eq_cell;
 for i = 1 : size(equip_data, 2)
     eq_cell{i} = equip_data{i}(:, {'SensorDateTime', 'P_kW'});
@@ -33,14 +34,30 @@ for i = 1 : size(equip_data, 2)
     eq_buff.Time = datetime(eq_buff.Time, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
     
     plot(eq_buff.Time, eq_cell{i}.P_kW, '.');
-    xlabel('Datestamp');
-    ylabel('Active Power [kW]');
-    title('Equipment Active Power')
+    %xlabel('Datestamp', 'FontSize', 20);
+    %ylabel('Active Power [kW]', 'FontSize', 13);
+    %title('Equipment Active Power', 'FontSize', 20)
+    %title(sprintf('Equipment %d', i), 'FontSize', 20)
     labels_eq{i} = sprintf('Equipment %d', i);
-
     hold on
 end
+hold off;
 legend(labels_eq)
+xlabel('Datestamp', 'FontSize', 20);
+ylabel('Active Power [kW]', 'FontSize', 13);
+xticklabels = get(gca, 'xticklabels');
+set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
+yticklabels = get(gca, 'YTick');
+set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
+
+
+% for i = 1 : size(equip_data, 2)
+%     buff = equip_data{i}.SensorDateTime;
+%     buff = cellfun(@(x) x(1, 1:22), buff, 'UniformOutput', false);
+% %     buff_Time = datetime(buff(1, 1:22), 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
+%     buff_Time = size(unique(datetime(buff, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS")), 1);
+%     n_uniques(i, :) = buff_Time;
+% end
 
 
 for i = 1 : size(equip_data, 2)
@@ -51,6 +68,7 @@ for i = 1 : size(equip_data, 2)
     eq_buff.Time = datetime(eq_buff.Time, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
     
     stopIndex = find(diff(eq_buff.Time) <= 0, 1);
+    consecutive(i) = table2array(eq_buff(stopIndex, 1));
     if stopIndex > 0
         eq_buff(stopIndex : end, :) = [];
     end
@@ -84,7 +102,7 @@ for i = 1 : size(equip_data, 2)
     end
 
     eq_buff.P_kW(eq_buff.P_kW < 0.0) = 0.0;
-    eq_processed_timetable{i} = retime(timetable(eq_buff.Time, eq_buff.P_kW), start_time:seconds(1):end_time, 'linear');
+    eq_processed_timetable{i} = retime(timetable(eq_buff.Time, movmean(eq_buff.P_kW, 1)), start_time:seconds(1):end_time, 'linear');  % Apply mov mean sliding window, size 1
     clear stopIndex eq_buff;
 end
 
@@ -102,7 +120,7 @@ eq_processed_table.Properties.VariableNames{'Var6'} = 'Eq6_P_kW';
 eq_processed_table.Properties.VariableNames{'Var7'} = 'Eq7_P_kW';
 eq_processed_table.Properties.VariableNames{'Var8'} = 'Eq8_P_kW';
 eq_processed_table.Properties.VariableNames{'Var9'} = 'Eq9_P_kW';
-clear equip_data eq_processed_timetable eq_cell start_time end_time;
+% clear equip_data eq_processed_timetable eq_cell start_time end_time;
 
 ON_OFF_double = table2array(eq_processed_table(:, 2:end));
 ON_OFF_double(ON_OFF_double > 0.00) = 1;
@@ -110,48 +128,37 @@ ON_OFF_double(ON_OFF_double <=  0.00) = 0;
 ON_OFF_uint = uint8(ON_OFF_double);
 clear ON_OFF_double eq_processed_table_buff;
 
-figure,
-for i = 1 : size(ON_OFF_uint, 2)
-    subplot(numRows, numCols, i);
-    plot(ON_OFF_uint(:, i));
-end
-
 column_names = string(eq_processed_table.Properties.VariableNames);
 ON_OFF_table = array2table(ON_OFF_uint, 'VariableNames', column_names(2:end));
 ON_OFF_table = addvars(ON_OFF_table, eq_processed_table.Time, 'Before', 1, 'NewVariableNames', 'Time');
 ON_OFF_table.Properties.VariableNames = {'Time', 'Eq1_State', 'Eq2_State', 'Eq3_State', 'Eq4_State', 'Eq5_State', 'Eq6_State', 'Eq7_State', 'Eq8_State', 'Eq9_State'};
 
-clear  numCols numRows column_names ON_OFF_uint i;
+% clear  numCols numRows column_names ON_OFF_uint i;
 
 
 %% Processed aggregate data
-% agg_power_data = agg_data(:, {'SensorDateTime', 'P_kW'});
-% agg_power_data.SensorDateTime = cellfun(@(x) x(1, 1:22), agg_power_data.SensorDateTime, 'UniformOutput', false);
-% agg_power_data.SensorDateTime = strrep(agg_power_data.SensorDateTime, '+', '.');
-% agg_power_data.SensorDateTime = datetime(agg_power_data.SensorDateTime, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
-% 
-% stopIndex = find(diff(agg_power_data.SensorDateTime) <= 0, 1);
-% if stopIndex > 0
-%     agg_power_data(stopIndex : end, :) = [];
-% end
-% clear stopIndex;
-% agg_interpolated_table = retime(timetable(agg_power_data.SensorDateTime, agg_power_data.P_kW), start_time:seconds(1):end_time, 'linear');
-% 
-% aggregate_table = timetable2table(synchronize(timetable(eq_processed_table.Time, eq_processed_table.Eq1_P_kW), agg_interpolated_table, 'union', 'spline'));
-% aggregate_table = removevars(aggregate_table, "Var1_1");
-% aggregate_table.Properties.VariableNames{'Var1_agg_interpolated_table'} = 'Agg_P_kW';
+agg_power_data = agg_data(:, {'SensorDateTime', 'P_kW'});
+agg_power_data.SensorDateTime = cellfun(@(x) x(1, 1:22), agg_power_data.SensorDateTime, 'UniformOutput', false);
+agg_power_data.SensorDateTime = strrep(agg_power_data.SensorDateTime, '+', '.');
+agg_power_data.SensorDateTime = datetime(agg_power_data.SensorDateTime, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
+
+stopIndex = find(diff(agg_power_data.SensorDateTime) <= 0, 1);
+if stopIndex > 0
+    agg_power_data(stopIndex : end, :) = [];
+end
+clear stopIndex;
+agg_interpolated_table = retime(timetable(agg_power_data.SensorDateTime, agg_power_data.P_kW), start_time:seconds(1):end_time, 'linear');
+
+aggregate_table = timetable2table(synchronize(timetable(eq_processed_table.Time, eq_processed_table.Eq1_P_kW), agg_interpolated_table, 'union', 'spline'));
+aggregate_table = removevars(aggregate_table, "Var1_1");
+aggregate_table.Properties.VariableNames{'Var1_agg_interpolated_table'} = 'P_kW';
+
 
 % Synthetic aggregate values = sum of equipment values
 for i = 2:size(eq_processed_table, 2) - 1
     agg_struct_of_tables.(sprintf('aggregate_table_%d', i)) = table(eq_processed_table.Time, sum(eq_processed_table{:, 2 : i + 1}, 2), 'VariableNames', {'Time', 'P_kW'});
 end
 clear i agg_buff agg_data;
-
-figure,
-plot(agg_struct_of_tables.aggregate_table_9.Time, agg_struct_of_tables.aggregate_table_9.P_kW, '.')
-xlabel('Datestamp');
-ylabel('Active Power [kW]');
-title('Aggregate Active Power');
 
 
 %% Save data before splitting
@@ -221,4 +228,136 @@ for i = 1:size(table_names, 1)
 end
 
 clear training_index validation_index bin_index_validation bin_index_training bin_samples i j n_samples_bin unique_bins buffer N bin bin_edges std_aggregate mean_aggregate agg_buff timestamps table_names training_ratio relativeFolderPath;
+
+
+%% Calculate correlation matrix
+for i = 2:size(eq_processed_table, 2) 
+    % correlationCoefficient(i - 1) = corrcoef(eq_processed_table.(i), agg_struct_of_tables.aggregate_table_9.P_kW);
+    buff = corrcoef(eq_processed_table.(i), aggregate_table.P_kW);
+    correlationCoefficient(i - 1) = buff(1, 2);
+end
+
+%% Find where the samples stop being consecutive
+for i = 1:size(consecutive, 2)
+    consecutive(i) = corrcoef(eq_processed_table.(i), agg_struct_of_tables.aggregate_table_9.P_kW);
+end
+
+
+%% Plot
+figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+%sgtitle('Equipment States', 'FontSize', 20);
+for i = 1 : size(ON_OFF_uint, 2)
+    subplot(3, 3, i);
+    plot(ON_OFF_uint(:, i));
+    title(sprintf('Equipment %d', i + 1), 'FontSize', 20);
+    xlabel('Sample Index', 'FontSize', 20);
+    ylabel('State [ON/OFF]', 'FontSize', 20);
+    xticklabels = get(gca, 'XTick');
+    set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
+    yticklabels = get(gca, 'YTick');
+    set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
+end
+
+figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+plot(aggregate_table.Time, aggregate_table.P_kW, '.')
+xlabel('Datestamp', 'FontSize', 20);
+ylabel('Active Power [kW]', 'FontSize', 20);
+%title('Aggregate Active Power', 'FontSize', 20);
+xticklabels = get(gca, 'xticklabels');
+set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
+yticklabels = get(gca, 'YTick');
+set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
+
+figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+plot(agg_struct_of_tables.aggregate_table_9.Time, agg_struct_of_tables.aggregate_table_9.P_kW, '.')
+xlabel('Datestamp', 'FontSize', 20);
+ylabel('Active Power [kW]', 'FontSize', 20);
+%title('Aggregate Active Power', 'FontSize', 20);
+xticklabels = get(gca, 'xticklabels');
+set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
+yticklabels = get(gca, 'YTick');
+set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
+
+figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+%sgtitle('Equipment Active Power', 'FontSize', 20);
+counter = 1;
+for i = 2:size(eq_processed_table, 2)
+    plot(eq_processed_table{:, i}, '.');
+    hold on,
+    labels_eq{counter} = sprintf('Equipment %d', i);
+    counter = counter + 1;
+end
+hold off;
+xlabel('Sample Index', 'FontSize', 20);
+ylabel('Active Power [kW]', 'FontSize', 20);
+xticklabels = get(gca, 'XTick');
+set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
+yticklabels = get(gca, 'YTick');
+set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
+legend(labels_eq, 'FontSize', 20);
+
+figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+%sgtitle('Equipment Active Power', 'FontSize', 20);
+for i = 2:size(eq_processed_table, 2)
+    subplot(3, 3, i - 1)
+    plot(eq_processed_table{:, i}, '.');
+    title(sprintf('Equipment %d', i));
+    xlabel('Sample Index', 'FontSize', 20);
+    ylabel('Active Power [kW]', 'FontSize', 20);
+    xticklabels = get(gca, 'XTick');
+    set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
+    yticklabels = get(gca, 'YTick');
+    set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
+end
+
+
+%% Read and plot training and validation data
+file_information = matlab.desktop.editor.getActive;
+[file_dir, ~, ~] = fileparts(file_information.Filename);
+
+for i = 2:9
+    figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+    agg_training = readmatrix(join(["\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\data\processed\HIPE\1_week\aggregate_training\agg_training_", i,".csv"], ""));
+    plot (agg_training, '.'),
+    xlabel('Sample Index', 'FontSize', 20);
+    ylabel('Active Power [kW]', 'FontSize', 20);
+    title('Aggregate Active Power', 'FontSize', 20);
+end
+
+for i = 2:9
+    figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+    agg_validation = readmatrix(join(["\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\data\processed\HIPE\1_week\aggregate_validation\agg_validation_", i,".csv"], ""));
+    plot (agg_validation, '.'),
+    xlabel('Sample Index', 'FontSize', 20);
+    ylabel('Active Power [kW]', 'FontSize', 20);
+    title('Aggregate Active Power', 'FontSize', 20);
+end
+
+
+for i = 2:9
+    figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+    eq_validation = readmatrix(join(["\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\data\processed\HIPE\1_week\equipment_validation\eq_validation_", i,".csv"], ""));
+    plot (eq_validation, '.'),
+    xlabel('Sample Index', 'FontSize', 20);
+    ylabel('Active Power [kW]', 'FontSize', 20);
+    title('Equipment Active Power', 'FontSize', 20);
+end
+
+for i = 2:9
+    figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+    on_off_training = readmatrix(join(["\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\data\processed\HIPE\1_week\state_training\st_training_", i,".csv"], ""));
+    plot (on_off_training),
+    xlabel('Sample Index', 'FontSize', 20);
+    ylabel('State [ON/OFF]', 'FontSize', 20);
+    title('Equipment State', 'FontSize', 20);
+end
+
+for i = 2:9
+    figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
+    on_off_validation = readmatrix(join(["\\wsl.localhost\ubuntu\home\dtorres\dissertation_nilm\data\processed\HIPE\1_week\state_validation\st_validation_", i,".csv"], ""));
+    plot (on_off_validation),
+    xlabel('Sample Index', 'FontSize', 20);
+    ylabel('State [ON/OFF]', 'FontSize', 20);
+    title('Equipment State', 'FontSize', 20);
+end
 

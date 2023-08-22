@@ -1,4 +1,7 @@
+# Created by danctorres
+
 import numpy as np
+import math
 from typing import List
 
 
@@ -11,6 +14,14 @@ def normalize(data: np.ndarray) -> np.ndarray:
     return data_norm
 
 def normalize2(data: np.ndarray, min_val: float, max_val: float) -> np.ndarray:
+    data_norm = np.empty(data.shape)
+    for i, value in enumerate(data):
+        data_norm[i] = (value - min_val) / (max_val - min_val)
+    return data_norm
+
+def normalize_pi(data: np.ndarray) -> np.ndarray:
+    min_val = -math.pi
+    max_val = math.pi
     data_norm = np.empty(data.shape)
     for i, value in enumerate(data):
         data_norm[i] = (value - min_val) / (max_val - min_val)

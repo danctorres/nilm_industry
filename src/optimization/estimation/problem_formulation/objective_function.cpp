@@ -44,7 +44,7 @@ double objective_function(const std::vector<double> &pos) {
     float penalty = 0.0f;
 
     for (int i = 0; i < pos.size(); i++) {
-        eq_pred[i] = static_cast<float>(act[i]) * (pos[i] + pos[i + 1] * agg + pos[i + 2] * pow(agg, 2));
+        eq_pred[i] = static_cast<float>(act[i]) * (pos[i] + pos[i + 1] * agg + pos[i + 2] * pow(agg, 2) + pos[i + 3] * pow(agg, 3));
         eq_pred_sum += eq_pred[i];
         penalty += penalty_calculation2(eq_pred[i]);
     }

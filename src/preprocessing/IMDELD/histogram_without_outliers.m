@@ -42,7 +42,7 @@ function [output_counts_cell, output_edges_cell, output_bin_center, output_TF_ce
         text(0.99*xL(2), 0.99*yL(2), sprintf('Number of peaks: %i', size(TF(TF ~= 0), 2)), 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top')
         hold off
     end
-    
+
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);

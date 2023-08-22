@@ -1,3 +1,7 @@
+# Created by danctorres
+
+from NN_model import fourier_mapping
+from mixins import mixins
 import numpy as np
 from typing import List
 
@@ -34,19 +38,22 @@ class NN:
     def set_batch_size(self, batch_size: int) -> None:
         self.batch_size = batch_size
 
-    def train(self, agg_batches: np.ndarray, states_batches: np.ndarray, n_equipment: int, use_state: bool): # -> Dict[List[float]]:
+    def train(self, agg_batches: np.ndarray, states_batches: np.ndarray, n_equipment: int, use_state: bool, use_mapping: bool): # -> Dict[List[float]]:
         loss_Dict = {f"{i}": [] for i in range(0, n_equipment)}
-            
+
         for epoch in range(self.epochs):
             for aggs, states in zip(agg_batches, states_batches):
                 aggs = np.expand_dims(aggs, axis=1)
                 states = np.expand_dims(states, axis=1)
                 for idx in range(aggs.shape[0]):
                     if aggs[idx] != 0.0:
-                        if (use_state):
-                            input_agg = np.concatenate((aggs[idx], states[idx]), axis=1)
+                        if (use_mapping):
+                            input_agg = fourier_mapping.mapping(mixins.normalize_pi(aggs[idx]), 8)
                         else:
-                            input_agg = aggs[idx]
+                            if (use_state):
+                                input_agg = np.concatenate((aggs[idx], states[idx]), axis=1)
+                            else:
+                                input_agg = aggs[idx]
                         # Forwards Propagation
                         for layer in self.layers:
                             layer_output = layer.forw_prop(input_agg)
@@ -60,11 +67,12 @@ class NN:
             print(f"Training network: {(epoch * 100) / (self.epochs - 1):.2f}% - Epoch: {epoch + 1}/{self.epochs}", end="\r")
 
             if aggs[aggs.shape[0] - 1] != 0.0:
-                for index, value in np.ndenumerate(self.loss_fun(layer_output, aggs[aggs.shape[0] - 1], states[aggs.shape[0] - 1], self.max_norm_eq, self.min_norm_eq, n_equipment)):
-                    loss_Dict[f"{index[0]}"].append(value)
+                for eq_idx in range(0, n_equipment - 9):
+                    for index, value in np.ndenumerate(self.loss_fun(layer_output, aggs[eq_idx], states[eq_idx], self.max_norm_eq, self.min_norm_eq, n_equipment)):
+                        loss_Dict[f"{index[eq_idx]}"].append(value)
         return loss_Dict
 
-    def estimate(self, inputs: np.ndarray, n_equipment: int) -> List[np.ndarray]:
+    def estimate(self, inputs: np.ndarray, n_equipment: int, use_mapping: bool) -> List[np.ndarray]:
         print("--- Estimating values ---")
         output: np.ndarray = []
         results: np.ndarray = []
@@ -74,6 +82,8 @@ class NN:
             elif inp.ndim == 2 and inp[0, 0] == 0.0:
                 results.append(np.zeros((1, n_equipment)))
             else:
+                if(use_mapping):
+                    inp = fourier_mapping.mapping(inp, 8)
                 for layer in self.layers:
                     output = layer.forw_prop(inp)
                     inp = output

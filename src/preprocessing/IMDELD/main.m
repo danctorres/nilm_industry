@@ -43,7 +43,7 @@ date_voltage            = rmmissing(date_voltage);
 
 % Interpolate the active power values to obtain a complete set of data the choosen days
 metric_power_table      = calculate_metrics_power_day(date_active_power, selected_equipment_index);
-                
+
 active_power_formated   = interpolate_equipment_data(date_active_power, 'active_power', metric_power_table, selected_equipment_index, false);
 reactive_power_formated = interpolate_equipment_data(date_reactive_power, 'reactive_power', metric_power_table, selected_equipment_index, false);
 apparent_power_formated = interpolate_equipment_data(date_apparent_power, 'apparent_power', metric_power_table, selected_equipment_index, false);
@@ -58,7 +58,7 @@ aggregate_formated_table = calculate_aggregate_all_feature(active_power_formated
 on_off_array = calculate_on_off(active_power_formated, 5, false);
 
 % Save final data
-[aggregate_training, equipment_training, on_off_training, aggregate_testing, on_off_testing] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, true);
+[aggregate_training, equipment_training, on_off_training, aggregate_validation, equipment_validation, on_off_validation] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, true);
 
 
 
@@ -119,10 +119,7 @@ power_factor = calculate_PF(active_power_formated, apparent_power_formated, sele
 
 aggregate_correlation = calculate_corr(aggregate_formated_table);
 
-
-
 corr = calculate_corr_aggregate_eq(aggregate_formated_table, active_power_formated);
-
 
 % Histogram states for ON / OFF
 [counts_cell, edges_cell, bin_center_cell, TF_cell] = histogram_without_outliers(active_power_formated, 2000, true, false);
@@ -158,4 +155,3 @@ source_folder = ([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\sr
 % for i = 1:size(files_names, 2)
 %     MBeautify.formatFile([erase(mbeautify_path, '\MBeautifier\'), '\dissertation_nilm\imdeld_analysis\scripts\', files_names{i}]);
 % end
- 

@@ -10,6 +10,6 @@
 #include <iostream>
 #include <string>
 
-void save_coef(const std::string name, const double *sum_est, const int *num_ON, const int number_equipment, const double factor_round);
+void save_coef(const std::string name, const double *new_coef, const int *num_ON, const int number_equipment, const double factor_round);
 
 #endif //NILM_INDUSTRY_SAVE_COEF_H

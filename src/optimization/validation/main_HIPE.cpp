@@ -7,13 +7,13 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "handle_data/Read_Coef.h"
+#include "../estimation/handle_data/Read_Coef.h"
 #include "../estimation/handle_data/Read_Aggregate.h"
 #include "../estimation/handle_data/Read_State.h"
 #include "handle_data/Read_Eq.h"
-#include "polynomial_function/polynomial_function.h"
+#include "../estimation/error/Error.h"
+#include "../estimation/polynomial_function/polynomial_function.h"
 #include "estimations/Estimations.h"
-#include "error/Error.h"
 #include "handle_data/save_estimates.h"
 
 
@@ -23,8 +23,6 @@ int main() {
     std::unique_ptr<Read_Aggregate> agg_val = std::make_unique<Read_Aggregate> ("../../../../data/processed/HIPE/1_week/aggregate_validation/agg_validation_" + std::to_string(number_equipment) + ".csv");
     std::unique_ptr<Read_State> st_val = std::make_unique<Read_State>("../../../../data/processed/HIPE/1_week/state_validation/st_validation_" + std::to_string(number_equipment) + ".csv");
     std::unique_ptr<Read_Eq> eq_val = std::make_unique<Read_Eq> ("../../../../data/processed/HIPE/1_week/equipment_validation/eq_validation_" + std::to_string(number_equipment) + ".csv");
-
-
 
     std::vector<float> agg_vec;
     auto agg_variant = agg_val->get_parameters ("Active power");

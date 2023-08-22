@@ -12,7 +12,7 @@ function [] = histogram_equipment_original(equip_data, save)
         xlabel('Power [W]')
         ylabel('Number of samples')
     end
-    
+
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
