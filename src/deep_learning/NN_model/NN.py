@@ -1,3 +1,5 @@
+# Created by danctorres
+
 import numpy as np
 from typing import List
 
@@ -58,6 +60,8 @@ class NN:
             if aggs[aggs.shape[0] - 1] != 0.0:
                 for index, value in np.ndenumerate(self.loss_fun(layer_output, aggs[aggs.shape[0] - 1], states[aggs.shape[0] - 1], self.max_norm_eq, self.min_norm_eq, n_equipment)):
                     loss_Dict[f"{index[0]}"].append(value)
+
+            #self.learning_rate *= 0.01 ** (epoch / self.epochs)
         return loss_Dict
 
     def estimate(self, inputs: np.ndarray, n_equipment: int) -> List[np.ndarray]:

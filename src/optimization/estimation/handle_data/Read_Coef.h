@@ -19,6 +19,7 @@ private:
     std::vector<double> coef_0;
     std::vector<double> coef_1;
     std::vector<double> coef_2;
+    std::vector<double> coef_3;
 };
 
 #endif //DISSERTATION_NILM_READ_COEF_H

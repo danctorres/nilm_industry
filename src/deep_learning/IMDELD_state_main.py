@@ -1,18 +1,20 @@
+# Created by danctorres
+
 #%%
 import os
+from typing import List
 import numpy as np
 # import matplotlib.pyplot as plt
 
 from NN_model import Activation_layer
-from NN_model import Connected_layer
-from NN_model import NN
+from NN_model import Connected_layer_batch
+from NN_model import NN_batch
 from NN_model import activation_function
 from NN_model import loss_function
 from data_handle import read_csv
 from data_handle import save_csv
 from data_handle import read_estimations_csv
 from mixins import mixins
-from typing import List
 
 
 def read_eq_data():
@@ -41,11 +43,11 @@ def read_validation_data():
 
 
 def set_NN():
-    net = NN.NN()
+    net = NN_batch.NN()
     net.set_learning_rate(0.001)
-    net.set_layer(Connected_layer.Connected_layer(1 + 6, 7 + 1))
-    net.set_layer(Activation_layer.Activation_layer(activation_function.tanh, activation_function.tanh_d))
-    net.set_layer(Connected_layer.Connected_layer(7 + 1, 6))
+    net.set_layer(Connected_layer_batch.Connected_layer(1 + 6, 7 + 1))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
+    net.set_layer(Connected_layer_batch.Connected_layer(7 + 1, 6))
     net.set_layer(Activation_layer.Activation_layer(activation_function.tanh, activation_function.tanh_d))
     net.set_loss(loss_function.loss_f, loss_function.loss_f_d)
     net.set_epochs(1000)
@@ -61,18 +63,29 @@ def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
 
 def main():
     n_equipment = 6
+    number_runs = 50
+    batch_size = 4
+    old_loss = float('inf')
 
     input_train, states_train, agg_train, min_agg, max_agg = read_train_data()
     agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm, sts_val = read_validation_data()
     data_val = np.concatenate ( (np.reshape(agg_val_norm, (agg_val_norm.shape[0], 1, 1)) , np.reshape(sts_val, (sts_val.shape[0], 1, sts_val.shape[1]))), axis = 2)
 
-    for idx in range(20):
+    reshaped_agg_train = agg_train.reshape(-1, agg_train.shape[-1])
+    batches_agg_train = np.array([reshaped_agg_train[i:i + batch_size] for i in range(0, len(reshaped_agg_train), batch_size)])
+    reshaped_states_train = states_train.reshape(-1, states_train.shape[-1])
+    batches_states_train = np.array([reshaped_states_train[i:i + batch_size] for i in range(0, len(reshaped_states_train), batch_size)])
+
+    for idx in range(number_runs):
+        print(f"Current iteration {idx}")
         net = set_NN()
+        net.set_batch_size = 4
 
         net.set_max_norm_eq(mixins.normalize2(np.max(read_eq_data(), axis=0).reshape(1, n_equipment), min_agg, max_agg))
         net.set_min_norm_eq(mixins.normalize2(np.min(read_eq_data(), axis=0).reshape(1, n_equipment), min_agg, max_agg))
 
-        loss_results = net.train(agg_train, states_train, n_equipment, True)
+        loss_results = net.train(batches_agg_train, batches_states_train, n_equipment, True, False)
+        # loss_results = net.train(agg_train, states_train, n_equipment, True)
 
         # for key, value in loss_results.items():
         #     plt.plot(value, label=key)
@@ -80,21 +93,21 @@ def main():
         # plt.ylabel('Y-axis')
         # plt.legend()
         # plt.show()
+        sum_loss = sum(value[-1] for value in loss_results.values())
+        print("")
 
-        # print("")
-
-
-        estimations = mixins.denormalize(net.estimate(data_val, n_equipment), min_agg, max_agg)
+        estimations = mixins.denormalize(net.estimate(data_val, n_equipment, False), min_agg, max_agg)
         new_estimations_zeros = mixins.post_estimation_zeros(estimations, sts_val, n_equipment)
-        saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv")
-
-        if idx == 0 and not os.path.exists("../../results/deep_learning/IMDELD/estimated_active_power.csv"):
+        if idx == 0 and not os.path.exists(f"../../results/deep_learning/IMDELD/states/estimated_active_power_{n_equipment}.csv"):
             print(mixins.calculate_error(new_estimations_zeros, eq_val, n_equipment))
-            save_csv.save_csv("../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, new_estimations_zeros, timestamp)
+            save_csv.save_csv(f"../../results/deep_learning/IMDELD/states/estimated_active_power_{n_equipment}.csv", agg_val_denorm, new_estimations_zeros, timestamp)
         else:
-            if (np.sum(mixins.calculate_error_different_zero(new_estimations_zeros, eq_val, sts_val, n_equipment)) / n_equipment) < (np.sum(mixins.calculate_error_different_zero(saved_estimations, eq_val, sts_val, n_equipment)) / n_equipment):
+            saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/IMDELD/states/estimated_active_power_{n_equipment}.csv")
+            #if (np.sum(mixins.calculate_error_different_zero(new_estimations_zeros, eq_val, sts_val, n_equipment)) / n_equipment) < (np.sum(mixins.calculate_error_different_zero(saved_estimations, eq_val, sts_val, n_equipment)) / n_equipment):
+            if (sum_loss < old_loss):
                 print("--- Updating estimation ---")
-                save_csv.save_csv("../../results/deep_learning/IMDELD/estimated_active_power.csv", agg_val_denorm, new_estimations_zeros, timestamp)
+                save_csv.save_csv(f"../../results/deep_learning/IMDELD/states/estimated_active_power_{n_equipment}.csv", agg_val_denorm, new_estimations_zeros, timestamp)
+        old_loss = sum_loss
 
 
 if __name__ == "__main__":

@@ -13,15 +13,20 @@ function [on_off_array] = calculate_on_off(data, group_power_limit, save)
         equipment_formated_array = table2array(data(:, i + 1));
         on_off_array(:, i) = equipment_formated_array > lower_limit;
     end
-    
+
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
-    sgtitle('Equipment ON/OFF states')
+    %sgtitle('Equipment States', 'FontSize', 20);
+    eq_index = [1, 2, 3, 4, 7, 8];
     for i = 1:size(data, 2) - 1
         subplot((size(data, 2) - 1)/ 2, 2, i)
         plot(on_off_array(:, i))
-        xlabel('Samples')
-        ylabel('State [ON/OFF]')
-        title(sprintf('Equipment %i', i))
+        xlabel('Sample Index', 'FontSize', 20);
+        ylabel('State [OFF/ON]', 'FontSize', 20);
+        title(sprintf('Equipment %i', eq_index(i)), 'FontSize', 20)
+        xticklabels = get(gca, 'XTick');
+        set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
+        yticklabels = get(gca, 'YTick');
+        set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
     end
 
     if save == true

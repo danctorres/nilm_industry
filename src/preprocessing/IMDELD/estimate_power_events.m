@@ -1,7 +1,7 @@
 function [power_events_cell] = estimate_power_events(aggregate_table, on_off_array)
     % Objective: estimate the power of each equipment at the events
     % Input: aggregate_table and on_off_arrayon_off_array
-    % Output: power_events_cell 
+    % Output: power_events_cell
 
     aggregate_array = table2array(aggregate_table(:, 2));
     events_index = false(size(on_off_array, 1), size(on_off_array, 2));
@@ -17,7 +17,7 @@ function [power_events_cell] = estimate_power_events(aggregate_table, on_off_arr
         % power_events_cell_clean = rmoutliers(cell2mat(power_events_cell(:, i)), 'mean', 'ThresholdFactor', 3);
         % histogram(power_events_cell_clean, 100)
         % histogram(power_events_cell{i}, 100);
-    
+
         ylabel('Active Power [W]')
         title(sprintf('Equipment %i', i))
         hold on

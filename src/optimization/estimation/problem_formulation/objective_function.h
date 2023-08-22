@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 
-const int number_equipment = 2;     // needs to be redefined
+const int number_equipment = 9;     // needs to be redefined
 extern double agg;
 extern int act[number_equipment];
 extern const float lambda;

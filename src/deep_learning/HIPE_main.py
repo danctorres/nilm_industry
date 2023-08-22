@@ -1,8 +1,11 @@
+# Created by danctorres
+
 #%%
 import argparse
 import os
+# from typing import List
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from NN_model import Activation_layer
 from NN_model import Connected_layer
@@ -13,7 +16,6 @@ from data_handle import read_csv
 from data_handle import save_csv
 from data_handle import read_estimations_csv
 from mixins import mixins
-from typing import List
 
 
 def read_eq_data(number_equipment: int):
@@ -44,7 +46,7 @@ def set_NN(n_equipment: int):
     net = NN.NN()
     net.set_learning_rate(0.001)
     net.set_layer(Connected_layer.Connected_layer(1, n_equipment + 1))
-    net.set_layer(Activation_layer.Activation_layer(activation_function.tanh, activation_function.tanh_d))
+    net.set_layer(Activation_layer.Activation_layer(activation_function.relu, activation_function.relu_d))
     net.set_layer(Connected_layer.Connected_layer(n_equipment + 1, n_equipment))
     net.set_layer(Activation_layer.Activation_layer(activation_function.tanh, activation_function.tanh_d))
     net.set_loss(loss_function.loss_f, loss_function.loss_f_d)
@@ -62,6 +64,7 @@ def main():
 
     input_train, states_train, agg_train, min_agg, max_agg = read_train_data(n_equipment)
 
+    old_loss = float('inf')
     number_runs = 20
     for idx in range(number_runs):
         print(f"Current iteration {idx}")
@@ -70,29 +73,30 @@ def main():
         net.set_max_norm_eq(mixins.normalize2(np.max(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
         net.set_min_norm_eq(mixins.normalize2(np.min(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
 
-        loss_results = net.train(agg_train, states_train, n_equipment, False)
-
-        for key, value in loss_results.items():
-            plt.plot(value, label=key)
-        plt.xlabel("X-axis")
-        plt.ylabel("Y-axis")
-        plt.legend()
-        plt.show()
-
+        loss_results = net.train(agg_train, states_train, n_equipment, False, False)
+        # for key, value in loss_results.items():
+        #     plt.plot(value, label=key)
+        # plt.xlabel("X-axis")
+        # plt.ylabel("Y-axis")
+        # plt.legend()
+        # plt.show()
+        sum_loss = sum(value[-1] for value in loss_results.values())
         print("")
 
         agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm, sts_val = read_validation_data(n_equipment)
-                
-        estimations = mixins.denormalize(net.estimate(agg_val_norm, n_equipment), min_agg, max_agg)
-        saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv")
+
+        estimations = mixins.denormalize(net.estimate(agg_val_norm, n_equipment, False), min_agg, max_agg)
+        # saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv")
 
         if idx == 0 and not os.path.exists(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv"):
             print(mixins.calculate_error(estimations, eq_val, n_equipment))
             save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, estimations, timestamp)
         else:
-            if (np.sum(mixins.calculate_error_different_zero(estimations, eq_val, sts_val, n_equipment)) / n_equipment) < (np.sum(mixins.calculate_error_different_zero(saved_estimations, eq_val, sts_val, n_equipment)) / n_equipment):
+            # if (np.sum(mixins.calculate_error_different_zero(estimations, eq_val, sts_val, n_equipment)) / n_equipment) < (np.sum(mixins.calculate_error_different_zero(saved_estimations, eq_val, sts_val, n_equipment)) / n_equipment):
+            if (sum_loss < old_loss):
                 print("--- Updating estimation ---")
                 save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/estimated_active_power_{n_equipment}.csv", agg_val_denorm, estimations, timestamp)
+        old_loss = sum_loss
 
 if __name__ == "__main__":
     main()

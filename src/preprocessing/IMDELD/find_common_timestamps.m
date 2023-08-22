@@ -8,7 +8,7 @@ function [common_timestamps] = find_common_timestamps(equip_data, eq_index)
         datetime_values = cell2mat(unique(equip_data{eq_index(i)}.timestamp));
         all_dates = cat(1, all_dates, datetime(datetime_values(:, 1:end - 3)));
     end
-    
+
     [unique_values, ~, counts]  = unique(all_dates);
     unique_counts               = unique(counts);
     [N, ~]                      = histcounts(counts', [unique_counts', max(unique_counts) + 1]);

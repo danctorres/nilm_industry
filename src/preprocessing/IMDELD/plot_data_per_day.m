@@ -5,7 +5,7 @@ function [] = plot_data_per_day(data, save)
 
     dates_only = datetime(datestr(data.Date, 'dd-mmm-yyyy'));
     unique_dates = unique(dates_only);
-    
+
     figure('units', 'normalized', 'outerposition', [0, 0, 1, 1])
     for i = 1:size(unique_dates, 1)
         legend_string = strings(1, size(data, 2) - 1);
@@ -24,11 +24,11 @@ function [] = plot_data_per_day(data, save)
         ylabel('Active Power [W]')
         hold off;
     end
-    
+
     if (save == true)
         file_information = matlab.desktop.editor.getActive;
         [~, file_name, file_ext] = fileparts(file_information.Filename);
- 
+
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_common_original.fig']);
         saveas(gcf, [erase(file_information.Filename, ['\scripts\', file_name, file_ext]), '\results\images\subplots_common_original.png']);
     end

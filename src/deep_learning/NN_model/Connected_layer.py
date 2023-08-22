@@ -1,3 +1,5 @@
+# Created by danctorres
+
 import numpy as np
 from NN_model import Layer
 

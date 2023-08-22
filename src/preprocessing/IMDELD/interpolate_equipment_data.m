@@ -5,13 +5,16 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
 
     dates_only      = datetime(datestr(date_unit_table.Date, 'dd-mmm-yyyy'));
     unique_dates    = unique(dates_only);
-    
-    % Define the points used for interpolation
-    dates_to_remove             = table2array(metrics(mean(table2array(metrics(:, 4:2:size(metrics, 2))), 2) < 10, 1));     % Remove useless dates, dates with a mean smaller than 10
 
-    filtered_dates_and_unit     = date_unit_table(~ismember(dates_only, dates_to_remove), :); 
+    % Define the points used for interpolation
+    dates_to_remove             = table2array(metrics(mean(table2array(metrics(:, 4:2:size(metrics, 2))), 2) < 10, 1));     % Remove useless dates, the days with a mean smaller than 10
+
+    filtered_dates_and_unit     = date_unit_table(~ismember(dates_only, dates_to_remove), :);
     filtered_unique_dates       = unique_dates(~ismember(unique_dates, dates_to_remove), :);
-    
+
+    filtered_dates_and_unit     = date_unit_table(~ismember(dates_only, dates_to_remove), :);
+    filtered_unique_dates       = unique_dates(~ismember(unique_dates, dates_to_remove), :);
+
     dates_complete = [];
     for i = 1:size(filtered_unique_dates, 1)
         date_year       = year(filtered_unique_dates(i));
@@ -21,27 +24,34 @@ function [units_formated] = interpolate_equipment_data(date_unit_table, unit_nam
         dates_complete  = cat(1, dates_complete, posixtime(datetime(date_year, date_month, date_day, 0, 0, seconds))');
         clear date_year date_month date_day seconds;
     end
-    
+
     date_dataset                = posixtime(filtered_dates_and_unit.Date);
     [~, index_date_dataset, ~]  = intersect(dates_complete, date_dataset);
-    
+
     % Spline interpolation, using a cubic spline, alternatives: csaps / pchip
     unit_complete = zeros(size(dates_complete, 1), size(date_unit_table, 2) - 1);
     for i = 1:size(date_unit_table, 2) - 1
-        [filtered_unit_no_outliers, TFrm]               = rmoutliers(filtered_dates_and_unit{:, i+1}, 'mean', 'ThresholdFactor', 3);      % remove outliers
-        unit_complete(index_date_dataset(~TFrm), i)     = filtered_unit_no_outliers;
-        [diff, index_diff]                              = setdiff(dates_complete, date_dataset(~TFrm));
-        unit_complete(index_diff, i)                    = spline(date_dataset(~TFrm), filtered_unit_no_outliers, diff);
+        % [filtered_unit_no_outliers, TFrm]               = rmoutliers(filtered_dates_and_unit{:, i+1}, 'mean', 'ThresholdFactor', 2);      % remove outliers
+        % [filtered_unit_no_outliers, TFrm]                = rmoutliers(filtered_dates_and_unit{:, i+1}, 'grubbs');
+        % unit_complete(index_date_dataset(~TFrm), i)     = filtered_unit_no_outliers;
+        % [diff, index_diff]                              = setdiff(dates_complete, date_dataset(~TFrm));
+        % unit_complete(index_diff, i)                    = spline(date_dataset(~TFrm), filtered_unit_no_outliers, diff);
+
+        filtered_unit_no_outliers                       = movmean(filtered_dates_and_unit{:, i+1}, 1500);
+        unit_complete(index_date_dataset(:), i)         = filtered_unit_no_outliers;
+        [diff, index_diff]                              = setdiff(dates_complete, date_dataset(:));
+        unit_complete(index_diff, i)                    = spline(date_dataset(:), filtered_unit_no_outliers, diff);
+
         unit_complete (unit_complete < 0) = 0;          % remove values smaller than zero, negative consumption not possible
         clear filtered_unit_no_outliers TFrm diff index_diff;
     end
-    
+
     units_formated = table(datetime(datenum(1970, 1, 1) + dates_complete / 86400, 'ConvertFrom', 'datenum'), 'VariableNames', {'timestamp'});
     for i = 1:size(unit_complete, 2)
         units_formated.(join( [string(unit_name), sprintf('%i', selected_equipment_index(i))], '_')) = unit_complete(:, i);
     end
     clear unit_complete;
-    
+
     % Save to file
     if (save == true)
         file_information = matlab.desktop.editor.getActive;

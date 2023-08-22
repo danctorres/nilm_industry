@@ -6,5 +6,5 @@
 
 double pol_func(const float agg, const int st, const std::vector<double> &coef) {
     // std::cout << "st " << st << " agg " << agg << " coef[0] " << coef[0] << " coef[1] " << coef[1] << " coef[2] " << coef[2] << std::endl;
-    return st * (coef[0] + coef[1] * agg + coef[2] * pow(agg, 2));
+    return st * (coef[0] + coef[1] * agg + coef[2] * pow(agg, 2) + coef[3] * pow(agg, 3));
 }

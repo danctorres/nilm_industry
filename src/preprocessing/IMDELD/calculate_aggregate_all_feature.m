@@ -1,5 +1,4 @@
 function [aggregate_data] = calculate_aggregate_all_feature(timestamp, selected_equipment_index, save)
-       
     active_pow      = read_lvdb_csv(timestamp, 'active_power', 2, false);
     reactive_pow    = read_lvdb_csv(timestamp, 'reactive_power', 2, false);
     apparent_pow    = read_lvdb_csv(timestamp, 'apparent_power', 2, false);

@@ -1,3 +1,5 @@
+# Created by danctorres
+
 import numpy as np
 
 
@@ -10,7 +12,7 @@ def loss_f(predicted: np.ndarray, agg: np.ndarray, state: np.ndarray, max_norm_e
     sum_eq = np.full((1, n_equipment), np.sum(predicted * state, axis=1))
     loss = (agg - sum_eq) ** 2 + penalty
     return loss
- 
+
 def loss_f_d(predicted: np.ndarray, agg: np.ndarray, state: np.ndarray, max_norm_eq: np.ndarray, min_norm_eq: np.ndarray, n_equipment: int) -> np.ndarray:
     penalty = np.zeros((1, predicted.shape[1]))
     for i in range(predicted.shape[1]):

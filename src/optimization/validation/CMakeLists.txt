@@ -3,21 +3,21 @@ cmake_minimum_required (VERSION 3.10)
 project (validation)
 
 file(GLOB_RECURSE HEADERS
-        "error/*.h"
         "estimations/*.h"
-        "polynomial_function/*.h"
+        "../estimation/polynomial_function/*.h"
         "handle_data/*.h"
         "../estimation/handle_data/*.h"
+        "../estimation/error/*.h"
         )
 
 file(GLOB_RECURSE SOURCES
-        # "main_IMDELD.cpp"
-        "main_HIPE.cpp"
-        "error/*.cpp"
+        "main_IMDELD.cpp"
+        #"main_HIPE.cpp"
         "estimations/*.cpp"
-        "polynomial_function/*.cpp"
+        "../estimation/polynomial_function/*.cpp"
         "handle_data/*.cpp"
         "../estimation/handle_data/*.cpp"
+        "../estimation/error/*.cpp"
         )
 
 # Define the executable target
@@ -37,9 +37,8 @@ set_target_properties(validation PROPERTIES
 # Include directories for the target
 target_include_directories(validation PUBLIC
         handle_data
-        error
         estimations
-        polynomial_function
+        ../estimation/polynomial_function
         ../estimation/handle_data/
         )
 

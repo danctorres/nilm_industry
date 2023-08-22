@@ -12,11 +12,13 @@ file(GLOB_RECURSE HEADERS
         "gradient_descent/*.h"
         "newton/*.h"
         "problem_formulation/*.h"
+        "error/*.h"
+        "polynomial_function/*.h"
 )
 
 file(GLOB_RECURSE SOURCES
-        # "main_IMDELD.cpp"
-        "main_HIPE.cpp"
+        "main_IMDELD.cpp"
+        #"main_HIPE.cpp"
         "handle_data/*.cpp"
         "optimization_interface/*.cpp"
         "pso/*.cpp"
@@ -26,6 +28,8 @@ file(GLOB_RECURSE SOURCES
         "gradient_descent/*.cpp"
         "newton/*.cpp"
         "problem_formulation/*.cpp"
+        "error/*.cpp"
+        "polynomial_function/*.cpp"
 )
 
 # Define the executable target
@@ -54,6 +58,8 @@ target_include_directories(estimation PUBLIC
         gradient_descent
         newton
         problem_formulation
+        error
+        polynomial_function
 )
 
 #target_link_libraries(estimation ${OpenCL_LIBRARIES})

@@ -7,13 +7,13 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "handle_data/Read_Coef.h"
+#include "../estimation/handle_data/Read_Coef.h"
 #include "../estimation/handle_data/Read_Aggregate.h"
 #include "../estimation/handle_data/Read_State.h"
 #include "handle_data/Read_Eq.h"
-#include "polynomial_function/polynomial_function.h"
+#include "../estimation/error/Error.h"
+#include "../estimation/polynomial_function/polynomial_function.h"
 #include "estimations/Estimations.h"
-#include "error/Error.h"
 #include "handle_data/save_estimates.h"
 
 

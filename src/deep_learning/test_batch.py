@@ -1,4 +1,7 @@
+# Created by danctorres
+
 #%%
+from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -7,7 +10,6 @@ from NN_model import Connected_layer_batch
 from NN_model import NN_batch
 from NN_model import activation_function
 from NN_model import loss_function
-from typing import List
 
 def calculate_error(estimations, eq_val, n_equipment) -> List[float]:
     mse = np.zeros((1, n_equipment))
@@ -51,7 +53,7 @@ def main():
     plt.show()
 
     x_val = np.concatenate((x_train, states), axis = 2)
-    estimations = net.estimate(x_val, 1)
+    estimations = net.estimate(x_val, 1, False)
     print(estimations)
     sums = []
     for inner_array in estimations:
