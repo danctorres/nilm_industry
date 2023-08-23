@@ -86,6 +86,10 @@ function [aggregate_training, equipment_training, on_off_training, aggregate_val
     if ((save == true) && (size(on_off, 2) == 8))
         file_information    = matlab.desktop.editor.getActive;
         [~, file_name, ~] = fileparts(file_information.Filename);
+        writetable(aggregate(:, 1:2), join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_8_equipment\aggregate.csv'], '\'));
+        writetable(on_off, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_8_equipment\on_off.csv'], '\'));
+        writetable(equipment_active_pow, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_8_equipment\on_off.csv'], '\'));
+
         writetable(aggregate_training, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_8_equipment\aggregate_training.csv'], '\'));
         writetable(aggregate_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD', file_name, '.m'])), '\data\processed\IMDELD\data_8_equipment\aggregate_validation.csv'], '\'));
         writetable(on_off_training, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_8_equipment\on_off_training.csv'], '\'));
@@ -95,6 +99,10 @@ function [aggregate_training, equipment_training, on_off_training, aggregate_val
     elseif ((save == true) && (size(on_off, 2) == 7))
         file_information    = matlab.desktop.editor.getActive;
         [~, file_name, ~] = fileparts(file_information.Filename);
+        writetable(aggregate(:, 1:2), join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_6_equipment\aggregate.csv'], '\'));
+        writetable(on_off, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_6_equipment\on_off.csv'], '\'));
+        writetable(equipment_active_pow, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_6_equipment\on_off.csv'], '\'));
+
         writetable(aggregate_training, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_6_equipment\aggregate_training.csv'], '\'));
         writetable(aggregate_validation, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_6_equipment\aggregate_validation.csv'], '\'));
         writetable(on_off_training, join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', file_name, '.m'])), '\data\processed\IMDELD\data_6_equipment\on_off_training.csv'], '\'));
