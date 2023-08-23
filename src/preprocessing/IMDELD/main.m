@@ -61,7 +61,6 @@ on_off_array = calculate_on_off(active_power_formated, 5, false);
 [aggregate_training, equipment_training, on_off_training, aggregate_validation, equipment_validation, on_off_validation] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, true);
 
 
-
 %-------------------------- VISUALIZATION CODE --------------------------%
 % Analyze the original data, active power, to find how many samples are not unique
 [number_samples, unique_samples, not_unique_samples, nan_samples, array_start, array_end] = number_non_unique(equip_data);
