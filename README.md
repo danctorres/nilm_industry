@@ -3,9 +3,6 @@ Table of Contents
 
 * [Description](#description)
 * [Directory Structure](#directory-structure)
-* [Software Flowchart](#software-flowchart)
-* [How to Set Up](#how-to-set-up)
-* [How to Use](#how-to-use)
 * [Relevant Resources](#relevant-resources)
 * [Licensing](#licensing)
 ---
@@ -13,101 +10,37 @@ Table of Contents
 
 Description
 ------
-[Multivariate Functional Matrix Factorization with Ensemble of Numerical and Metaheuristic Optimization and Online Kalman Filtering](https://github.com/danctorres/nilm_disseration) is an innovative algorithm for NILM, developed for my master's degree dissertation in Electrical and Computer Engineering at the [University of Coimbra](https://www.uc.pt/).
-
-My dissertation titled "Low-Frequency Unsupervised Non-Intrusive Load Monitoring for Industrial Loads" focuses on developing a novel NILM algorithm to assist the industrial sector in the reduction of its energy demand. The algorithm performs source separation and could be used by any factory with a [SCADA system](https://en.wikipedia.org/wiki/SCADA), since it does not require data about the individual equipment consumption.
-
-
-The proposed algorithm, uses the aggregate data and the ON/OFF equipment information from the SCADA system as training data to model each equipment by a polynomial function, the training is offline. The functions are estimated with numerical and metaheuristic optimization algorithms. In the online part of the algorithm, the functions are constantly updated as new measurements arrived by Kalman filtering.
-The algorithm was developed and validated using the IMDELD dataset, which required preprocessing.
+Two novel methods were developed to perform Unsupervised Low-Frequency NILM for Industrial Loads, formulated for my master's degree dissertation in Electrical and Computer Engineering at the [University of Coimbra](https://www.uc.pt/).
+The requirements defined the algorithms as unsupervised, non-event-based, compliant with low-frequency aggregate active power samples and continuously varying equipment.
+The first algorithm uses polynomial functions, estimated through optimization algorithms, to model the active power consumption of the individual loads as a function of the aggregate active power (EMUPF).
+The second algorithm consists of an unsupervised neural network (UNN) that estimates the active power of the equipment based on the optimization of an objective function instead of solving a classification problem with labelled data.
+The UNN algorithm was trained and tested with two sets of inputs, aggregate active power and equipment state samples, and aggregate active power samples passed through a Fourier feature mapping.
+The High-resolution Industrial Production Energy (HIPE) and the Industrial Machines Dataset for Electrical Load Disaggregation (IMDELD) datasets were preprocessed and used to train and validate the algorithms.
 
 
 Directory Structure
 ------
     .
-    ├── build                   # Compiled files
     ├── data
-    │   ├── raw                 # Imdeld dataset
+    │   ├── raw                 # Original dataset
     │   ├── interim             # Intermediate data
-    │   └── processed           # Final dataset for modeling
-    ├── docs                    # Documentation files
-    ├── reports					
-    │   └── figures             # Generated figures to be used in reporting 
+    │   └── processed           # Preprocessed data
+    ├── docs                    # Documentation and report files
+    ├── results                 # Results from the methods developed
     ├── src                     # Source files
-    │   ├── preprocessing       # Analysis, cleaning and transforming of data into suitable format for algorithm
-    │   ├── estimation          # Estimate values of W
-    │   ├── kalman              # Kalman filter to estimate state
-    │   ├── main
-    │   ├── optimizer           # Optimization algorithms (estimating the coefficients of the functions in the W matrix)
-    │   └── ui                  # Code to display the results and performance metrics
-    ├── test                    # Automated tests
-    ├── tools                   # Tools and utilities
+    │   ├── deep_learning       # UNN method code developed in Python
+    │   ├── hart_inspired       # Simple Hart inspired method developed in MATLAB
+    │   ├── optimization        # EMUPF method developed in C++
+    │   ├── preprocessing       # MATLAB code for the preprocessing of the datasets
+    │   └── validation          # MATLAB code for the validation of the methods' results
     ├── LICENSE
     └── README.md
 
 
-Software Flowchart
-------
-```mermaid
-flowchart TD
-    pre-processing-- Input trainning data -->estimation
-    subgraph Offline - modeling stage
-    optimizer-- Optimization algorithms -->estimation
-    end
-    subgraph Online - predictions stage
-    kalman-- Updated W -->main
-    main:::someclass-- Current W and selected features -->kalman
-    classDef someclass fill:#A64D79
-    main -- Measurements and estimates --> history
-    main --> ui
-    history --> ui
-    history --> pattern
-    pattern --> ui
-    ui -->  estimates[/Output: Equipment power estimate/]
-    estimation -- Estimated W --> main
-    end
-    start((start)) --> dataset
-    dataset[/Input: dataset/] -- raw data --> pre-processing
-    measurements[/Input: measurements/]-- Aggregate features and equipment states -->main
-    inputs[/Input: User options/] --> ui
-```
-  
-
-How to Set Up
-------
-1. Clone nilm repo into your home directory:
-``` bash
-cd ~
-git clone https://github.com/danctorres/nilm_industry.git
-```
-2. Download the training and validation data
-``` bash
-git lfs pull
-```
-3. Run cmake and executable
-``` bash
-cd /nilm_industry/src/estimation
-mkdir build
-cd build
-cmake ..
-make
-./estimation
-```
-[Optional] Download the imdeld dataset from IEEEDataPort into the data/raw folder to run pre-processing MATLAB scripts.
-``` bash
-cd ~/nilm_industry/data/raw/
-download https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
-```
-
-
-How to Use
-------
-> ToDo
-
-
 Relevant resources
 ------
-Imdeld dataset: https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
+* IMDELD dataset: https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
+* HIPE dataset: https://www.energystatusdata.kit.edu/hipe.php
 
 Licensing
 ------
