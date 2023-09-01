@@ -1,4 +1,4 @@
- figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]);
+figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]);
 plot(table2array(aggregate_formated_table(:, "active_power")), '.')
 %title("Aggregate Active Power", 'FontSize', 20);
 xlabel('Sample Index', 'FontSize', 20);
@@ -82,4 +82,3 @@ xticklabels = get(gca, 'XTick');
 set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
 yticklabels = get(gca, 'YTick');
 set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
-

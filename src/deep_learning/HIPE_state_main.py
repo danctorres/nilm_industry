@@ -43,6 +43,17 @@ def read_validation_data(number_equipment: int):
     return mixins.normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val, sts_val
 
 
+def read_undivided_data():
+    print("--- Reading all agg data ---")
+    sts_val = read_csv.read_csv(f"../../data/processed/HIPE/1_week/undivided/states.csv")
+    agg_val = read_csv.read_csv(f"../../data/processed/HIPE/1_week/undivided/aggregate.csv", 1)
+    timestamp = read_csv.read_csv(f"../../data/processed/HIPE/1_week/undivided/aggregate.csv", 0)
+    eq_val = read_csv.read_csv(f"../../data/processed/HIPE/1_week/undivided/equipment.csv")
+    input_val = np.concatenate((sts_val, mixins.normalize(agg_val)), axis = 1)
+    resh_input_val = np.reshape(input_val, (input_val.shape[0], 1, input_val.shape[1]))
+    return mixins.normalize(agg_val), timestamp, eq_val, agg_val.min(), agg_val.max(), agg_val, sts_val
+
+
 def set_NN(n_equipment: int):
     net = NN_batch.NN()
     net.set_learning_rate(0.001)
@@ -61,8 +72,8 @@ def main():
     # args = parser.parse_args()
     # n_equipment = args.number_eq
 
-    for n_equipment in range(2, 10):
-        number_runs = 50
+    for n_equipment in range(9, 10):
+        number_runs = 100
         batch_size = 4
         old_loss = float('inf')
 
@@ -77,7 +88,12 @@ def main():
         batches_agg_train = np.array([reshaped_agg_train[i:i + batch_size] for i in range(0, len(reshaped_agg_train), batch_size)])
         reshaped_states_train = states_train.reshape(-1, states_train.shape[-1])
         batches_states_train = np.array([reshaped_states_train[i:i + batch_size] for i in range(0, len(reshaped_states_train), batch_size)])
-
+        
+        
+        net_best = set_NN(n_equipment)
+        net_best.set_batch_size = 4
+        net_best.set_max_norm_eq(mixins.normalize2(np.max(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
+        net_best.set_min_norm_eq(mixins.normalize2(np.min(read_eq_data(n_equipment), axis=0).reshape(1, n_equipment), min_agg, max_agg))
 
         for idx in range(number_runs):
             print(f"Current iteration {idx}")
@@ -99,16 +115,24 @@ def main():
             estimations = mixins.denormalize(net.estimate(data_val, n_equipment, False), min_agg, max_agg)
             new_estimations_zeros = mixins.post_estimation_zeros(estimations, sts_val, n_equipment)
 
-            if idx == 0 and not os.path.exists(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power_{n_equipment}.csv"):
+            if idx == 0 and not os.path.exists(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power_{n_equipment}_9.csv"):
+                net_best = net
                 print(mixins.calculate_error(new_estimations_zeros, eq_val, n_equipment))
-                save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power_{n_equipment}.csv", agg_val_denorm, new_estimations_zeros, timestamp)
+                save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power_{n_equipment}_9.csv", agg_val_denorm, new_estimations_zeros, timestamp)
             else:
-                saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power_{n_equipment}.csv")
+                saved_estimations = read_estimations_csv.read_estimations_csv(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power_{n_equipment}_9.csv")
                 # if (np.sum(mixins.calculate_error_different_zero(new_estimations_zeros, eq_val, sts_val, n_equipment)) / n_equipment) < (np.sum(mixins.calculate_error_different_zero(saved_estimations, eq_val, sts_val, n_equipment)) / n_equipment):
                 if (sum_loss < old_loss):
                     print("--- Updating estimation ---")
-                    save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power_{n_equipment}.csv", agg_val_denorm, new_estimations_zeros, timestamp)
+                    net_best = net
+                    save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power_{n_equipment}_9.csv", agg_val_denorm, new_estimations_zeros, timestamp)
             old_loss = sum_loss
+
+    agg_val_norm, timestamp, eq_val, min_agg, max_agg, agg_val_denorm, sts_val = read_undivided_data()
+    data_val = np.concatenate ( (np.reshape(agg_val_norm, (agg_val_norm.shape[0], 1, 1)) , np.reshape(sts_val, (sts_val.shape[0], 1, sts_val.shape[1]))), axis = 2)
+    estimations = mixins.denormalize(net_best.estimate(data_val, n_equipment, False), min_agg, max_agg)
+    save_csv.save_csv(f"../../results/deep_learning/HIPE/1_week/states/estimated_active_power.csv", agg_val_denorm, estimations, timestamp)
+
 
 
 if __name__ == "__main__":
