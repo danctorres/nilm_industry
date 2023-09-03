@@ -38,12 +38,12 @@ function [] = plot_raw_active_power(raw_eq_cell, units)
         %subplot(size(raw_eq_cell, 2) / 2, 2, i)
         subplot(3, 2, counter)
         plot(date_datetime, eq_data.(units), '.');
-        xlabel('Datestamp', 'FontSize', 20);
-        ylabel('Active Power [W]', 'FontSize', 20);
+        xlabel('Datestamp', 'FontSize', 15);
+        ylabel('Active Power [W]', 'FontSize', 15);
         xticklabels = get(gca, 'xticklabels');
-        set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
+        set(gca, 'xticklabels', xticklabels, 'FontSize', 15);
         yticklabels = get(gca, 'YTick');
-        set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
+        set(gca, 'yticklabels', yticklabels, 'FontSize', 15);
         title(sprintf('Equipment %d', i), 'FontSize', 20);
         counter = counter + 1;
     end
