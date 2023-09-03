@@ -25,7 +25,7 @@ figure('units', 'normalized', 'outerposition', [0, 0, 1, 1]),
 clear eq_cell;
 for i = 1 : size(equip_data, 2)
     eq_cell{i} = equip_data{i}(:, {'SensorDateTime', 'P_kW'});
-    %subplot(numRows, numCols, i);
+    subplot(numRows, numCols, i);
 
     eq_buff = eq_cell{i};
     eq_buff.Properties.VariableNames{'SensorDateTime'} = 'Time';
@@ -34,12 +34,12 @@ for i = 1 : size(equip_data, 2)
     eq_buff.Time = datetime(eq_buff.Time, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
     
     plot(eq_buff.Time, eq_cell{i}.P_kW, '.');
-    %xlabel('Datestamp', 'FontSize', 20);
-    %ylabel('Active Power [kW]', 'FontSize', 13);
-    %title('Equipment Active Power', 'FontSize', 20)
-    %title(sprintf('Equipment %d', i), 'FontSize', 20)
-    labels_eq{i} = sprintf('Equipment %d', i);
-    hold on
+    xlabel('Datestamp', 'FontSize', 20);
+    ylabel('Active Power [kW]', 'FontSize', 13);
+    title('Equipment Active Power', 'FontSize', 20)
+    title(sprintf('Equipment %d', i), 'FontSize', 20)
+%     labels_eq{i} = sprintf('Equipment %d', i);
+%     hold on
 end
 hold off;
 legend(labels_eq)
@@ -48,7 +48,7 @@ ylabel('Active Power [kW]', 'FontSize', 13);
 xticklabels = get(gca, 'xticklabels');
 set(gca, 'xticklabels', xticklabels, 'FontSize', 20);
 yticklabels = get(gca, 'YTick');
-set(gca, 'yticklabels', yticklabels, 'FontSize', 20);
+set(gca, 'yticklabels', yticklabels, 'FontSize', 15);
 
 
 % for i = 1 : size(equip_data, 2)

@@ -58,7 +58,7 @@ aggregate_formated_table = calculate_aggregate_all_feature(active_power_formated
 on_off_array = calculate_on_off(active_power_formated, 5, false);
 
 % Save final data
-[aggregate_training, equipment_training, on_off_training, aggregate_validation, equipment_validation, on_off_validation] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, true);
+[aggregate_training, equipment_training, on_off_training, aggregate_validation, equipment_validation, on_off_validation] = save_final_data(aggregate_formated_table, on_off_array, active_power_formated, 0.7, false);
 
 
 %-------------------------- VISUALIZATION CODE --------------------------%
