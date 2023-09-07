@@ -43,7 +43,7 @@ def main():
     batches_states =  np.array([reshaped_states[i:i + net.batch_size] for i in range(0, len(reshaped_states), net.batch_size)])
 
     # loss_results = net.train(batches_x_train, batches_states, 1, True, False)
-    loss_results = net.train(x_train, states, 1, True, False)
+    loss_results = net.train(x_train, states, 1, True)
 
     for key, value in loss_results.items():
         plt.plot(value, label=key)
@@ -53,7 +53,7 @@ def main():
     plt.show()
 
     x_val = np.concatenate((x_train, states), axis = 2)
-    estimations = net.estimate(x_val, 1, False)
+    estimations = net.estimate(x_val, 1)
     print(estimations)
     sums = []
     for inner_array in estimations:

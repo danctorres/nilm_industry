@@ -42,7 +42,7 @@ def main():
     reshaped_states = states.reshape(-1, states.shape[-1])
     batches_states =  np.array([reshaped_states[i:i + net.batch_size] for i in range(0, len(reshaped_states), net.batch_size)])
 
-    loss_results = net.train(batches_x_train, batches_states, 1, True)
+    loss_results = net.train(batches_x_train, batches_states, 1, True, False)
     # loss_results = net.train(x_train, states, 1, True)
 
     for key, value in loss_results.items():
