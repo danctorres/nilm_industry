@@ -38,6 +38,12 @@ function [] = plot_raw_active_power(raw_eq_cell, units)
         %subplot(size(raw_eq_cell, 2) / 2, 2, i)
         subplot(3, 2, counter)
         plot(date_datetime, eq_data.(units), '.');
+
+        % aux = eq_data.(units);
+        % histogram(aux(aux > 0));
+        % ylabel('Number of samples', 'FontSize', 15);
+        % xlabel('Active Power [W]', 'FontSize', 15);
+
         xlabel('Datestamp', 'FontSize', 15);
         ylabel('Active Power [W]', 'FontSize', 15);
         xticklabels = get(gca, 'xticklabels');

@@ -34,12 +34,17 @@ for i = 1 : size(equip_data, 2)
     eq_buff.Time = datetime(eq_buff.Time, 'InputFormat',"yyyy-MM-dd'T'HH:mm:ss.SS");
     
     plot(eq_buff.Time, eq_cell{i}.P_kW, '.');
+    % aux = eq_cell{i}.P_kW;
+    % histogram(aux(aux > 0.0));
+    % xlabel('Active Power [kW]', 'FontSize', 13);
+    % ylabel('Number of samples', 'FontSize', 13);
+
     xlabel('Datestamp', 'FontSize', 20);
     ylabel('Active Power [kW]', 'FontSize', 13);
-    title('Equipment Active Power', 'FontSize', 20)
+    % title('Equipment Active Power', 'FontSize', 20)
     title(sprintf('Equipment %d', i), 'FontSize', 20)
-%     labels_eq{i} = sprintf('Equipment %d', i);
-%     hold on
+    % labels_eq{i} = sprintf('Equipment %d', i);
+    % hold on
 end
 hold off;
 legend(labels_eq)
