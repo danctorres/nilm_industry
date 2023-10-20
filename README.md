@@ -44,4 +44,4 @@ Relevant resources
 Licensing
 ------
 Copyright © 2023 [Daniel Torres](https://github.com/danctorres).<br />
-This project is [MIT](https://github.com/danctorres/nilm_disseration/blob/main/LICENSE) licensed.
+This project is [CC BY-NC-SA](https://github.com/danctorres/nilm_disseration/blob/main/LICENSE) licensed.
