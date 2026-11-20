@@ -17,8 +17,7 @@ docs/Images/*
 .idea
 
 # ignore cmake build folder
-/src/optimization/estimation/build
-/src/optimization/validation/build
+build/
 /src/deep_learning/__pycache__
 
 # ignore pycache
