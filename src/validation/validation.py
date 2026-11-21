@@ -5,7 +5,7 @@
 Every estimate file results/<method>/<DATASET>/<N>.csv is paired with the ground truth
 data/processed/<DATASET>/<N>/equipment_validation.csv; the oracle-state baseline estimates the whole recording and is
 scored on the same validation rows. Prints, per file, the errors per machine and of the reconstructed aggregate (the
-sum of the machine estimates against the measured aggregate)."""
+sum of the machine estimates against the measured aggregate). Negative estimates are scored as 0 for every method."""
 
 import argparse
 from pathlib import Path
@@ -49,7 +49,7 @@ def errors(truth: pd.DataFrame, est: pd.DataFrame, w_to_kw: bool, name: str) -> 
     estimate 1..M. Returns the per-machine errors and the aggregate-reconstruction errors."""
     if not truth.iloc[:, 0].astype(str).tolist() == est.iloc[:, 0].astype(str).tolist():
         raise SystemExit(f"{name}: the timestamps of the estimates and the ground truth differ")
-    true_vals, est_vals = truth.iloc[:, 1:], est.iloc[:, 2:]
+    true_vals, est_vals = truth.iloc[:, 1:], est.iloc[:, 2:].clip(lower=0)  # every method scored without negatives
     if est_vals.shape[1] != true_vals.shape[1]:
         raise SystemExit(f"{name}: {est_vals.shape[1]} estimate columns for {true_vals.shape[1]} machines")
     per_machine = metrics(true_vals, est_vals, w_to_kw)
