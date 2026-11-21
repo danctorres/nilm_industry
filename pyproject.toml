@@ -1,0 +1,20 @@
+[project]
+name = "nilm-industry"
+version = "0.1.0"
+description = "Unsupervised low-frequency NILM for industrial loads"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2,<3",
+    "pandas>=2.2",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.17"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "NPY"]
