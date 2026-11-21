@@ -20,6 +20,8 @@ The second algorithm consists of an unsupervised neural network (UNN) that estim
 The HIPE and the IMDELD datasets were preprocessed and used to train and validate the algorithms.
 A third method was added after the dissertation: Gaussian allocation models each machine's power while ON as an independent Gaussian, fits the means and variances from the aggregate and the on/off states alone, and gives each machine its posterior mean.
 
+Every method takes each machine's on/off state as an input, and here those states come from the per-machine meters. The methods therefore split the aggregate among machines known to be ON, which is easier than unsupervised NILM, where the states must be found from the aggregate too. See [Methodology notes](#methodology-notes) for what each method can and cannot tell apart.
+
 
 Directory Structure
 ------
@@ -68,9 +70,9 @@ The Python code runs with [uv](https://docs.astral.sh/uv/): `uv run` creates the
 2. Preprocess: `uv run src/preprocessing/imdeld.py` (add `--equipment 1,2,3,4,5,6,7,8` for the 8-machine set) and `uv run src/preprocessing/hipe.py`.
 3. EMUPF (CMake >= 3.20, C++20 compiler, GCC 13 tested, OpenMP optional): `cmake -S src/optimization -B build && cmake --build build -j && ctest --test-dir build`; then run `estimate` / `validate` as described in [src/optimization/README.md](src/optimization/README.md).
 4. UNN: `uv run src/deep_learning/main.py --dataset {hipe,imdeld} --mode {plain,state} --machines N [--runs R] [--epochs E] [--seed S]`. Output: `results/deep_learning/<mode>/<DATASET>/<N>.csv`.
-5. Gaussian allocation: `uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N`. It trains on every unsplit sample outside the validation split, which needs no per-machine power. It assumes the machines switch independently and warns when two switch together, as on IMDELD, where no method can tell their power apart. Output: `results/allocation/<DATASET>/<N>.csv`.
+5. Gaussian allocation: `uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N`. It trains on the training split, the same rows as EMUPF and UNN. It assumes the machines switch independently and warns when two switch together, as on IMDELD, where no method can tell their power apart. Output: `results/allocation/<DATASET>/<N>.csv`.
 6. Hart-inspired baseline: `uv run src/hart_inspired/hart_inspired.py --dataset hipe --machines 9`. It runs on the unsplit tables and uses the true on/off states, so it is an oracle reference, not an unsupervised method. Output: `results/hart_inspired/<DATASET>/<N>.csv`.
-7. Validation: `uv run src/validation/validation.py [--plots DIR]`. It pairs every `results/<method>/<DATASET>/<N>.csv` with `data/processed/<DATASET>/<N>/equipment_validation.csv`; the Hart-inspired baseline is scored on the same validation rows of its whole-recording estimates.
+7. Validation: `uv run src/validation/validation.py [--plots DIR]`. It pairs every `results/<method>/<DATASET>/<N>.csv` with `data/processed/<DATASET>/<N>/equipment_validation.csv`; the Hart-inspired baseline is scored on the same validation rows of its whole-recording estimates, with the share of ON samples it could estimate. Three baselines that see only the aggregate and the states are scored next to every set: zero, the aggregate split equally among the ON machines, and split in proportion to each machine's mean power fitted to the training split. The output ends with one line per method: MAE over all machines and the pooled NDE.
 
 The preprocessing, baseline and validation were ported from MATLAB; the MATLAB versions used in the dissertation are in the git history.
 
@@ -81,7 +83,27 @@ Methodology notes
 * HIPE timestamps are in UTC, so the week runs on through the end of summer time on 29 Oct 2017.
 * The HIPE training/validation aggregate is the synthetic sum of the selected machines, not the main meter.
 * On/off thresholds: flat 5 W for IMDELD; > 0 after spline fitting for HIPE.
-* The train/validation split takes the same number of samples (at most 700) from each aggregate bin and splits each bin 70/30 with a fixed seed.
+* The train/validation split holds out whole blocks of time, 30% of them drawn with a fixed seed: hours for HIPE (one week only, idle at the weekend), days for IMDELD. Validation scores every row of its blocks; training draws the same number of rows (at most 490) from each aggregate bin of the other blocks, six bins of one standard deviation, the outer two open-ended so training includes the peaks. Rows near a block edge are left out (300 s for HIPE, longer than its largest gap between raw samples; 750 s for IMDELD, half the smoothing window), so the two sides share no raw samples.
+* UNN with `--mode state` is not identifiable: with the states as input, any split of the aggregate among the ON machines minimises its loss, so its estimates change with the seed. On HIPE/9, seeds 0 to 2 give MAE 0.053 ± 0.005 kW in state mode and 0.036 ± 0.001 kW in plain mode. On IMDELD/6 both modes change with the seed (plain: 25 ± 6 kW, against 20.5 kW for the zero baseline), so report UNN over several seeds.
+* EMUPF fitted sample by sample solves one equation in `4 x machines` unknowns per sample and averages the solutions (see [src/optimization/README.md](src/optimization/README.md#limitation-of-the-method)); `estimate --joint` fits one well-posed objective and is the version to compare.
+* On IMDELD the machines switch on and off together (state correlations 0.93 to 1.00), so no method that relies on the states can tell their power apart; compare against the baselines before reading anything into the IMDELD numbers.
+* The IMDELD aggregate is a real meter and carries 2 to 3% of load from unmetered equipment, which the methods must assign to some machine.
+
+Validation MAE in kW over all machines, from `validation.py` after the steps above (UNN `--seed 0`, EMUPF `--seed 1`):
+
+| Method | HIPE, 9 | IMDELD, 6 | IMDELD, 8 |
+|---|---|---|---|
+| Gaussian allocation | 0.013 | 39.0 | 31.6 |
+| UNN plain | 0.035 | 17.7 | 23.5 |
+| UNN state | 0.051 | 27.1 | 27.5 |
+| EMUPF per sample | 0.043 | 23.5 | 19.1 |
+| EMUPF `--joint` | 0.033 | 19.4 | 20.7 |
+| Hart-inspired (estimates 17%, 10%, 15% of the ON samples) | 0.047 | 20.5 | 20.0 |
+| Baseline: zero | 0.047 | 20.5 | 20.0 |
+| Baseline: equal split | 0.034 | 24.7 | 18.8 |
+| Baseline: proportional | 0.030 | 39.4 | 33.5 |
+
+On HIPE, Gaussian allocation beats every baseline for every machine count from 2 to 9; in 5 of those 8 sets no other method beats the proportional baseline. On IMDELD no method beats the baselines reliably, and the best result changes with the UNN seed.
 
 
 Development
