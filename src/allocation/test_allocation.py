@@ -29,16 +29,15 @@ one = posterior(np.array([0.31]), np.array([[1.0]]), np.array([0.3]), np.array([
 assert np.isclose(one.item(), 0.31, rtol=0, atol=1e-12), one
 assert np.abs(est - p).mean() < 0.5 * np.abs(s * fit_mu - p).mean()
 
-# end to end: trains on the unsplit rows outside the validation split, estimates the validation rows
+# end to end: trains on the training split, estimates the validation rows
 with tempfile.TemporaryDirectory() as name:
     d = Path(name) / "HIPE" / "3"
     d.mkdir(parents=True)
     ts = pd.date_range("2017-10-23", periods=len(a), freq="s").strftime("%d-%b-%Y %H:%M:%S")
     cols = {f"Eq{j}_State": s[:, j].astype(int) for j in range(3)}
-    pd.DataFrame({"timestamp": ts, "active_power": a}).to_csv(d / "aggregate.csv", index=False)
-    pd.DataFrame({"timestamp": ts, **cols}).to_csv(d / "states.csv", index=False)
-    pd.DataFrame({"timestamp": ts[:100], "active_power": a[:100]}).to_csv(d / "aggregate_validation.csv", index=False)
-    pd.DataFrame({"timestamp": ts, **cols}).iloc[:100].to_csv(d / "states_validation.csv", index=False)
+    for split, rows in (("training", slice(100, None)), ("validation", slice(100))):
+        pd.DataFrame({"timestamp": ts, "active_power": a})[rows].to_csv(d / f"aggregate_{split}.csv", index=False)
+        pd.DataFrame({"timestamp": ts, **cols})[rows].to_csv(d / f"states_{split}.csv", index=False)
     main(["--dataset", "hipe", "--machines", "3", "--data-root", name, "--results-root", name])
     out = pd.read_csv(Path(name) / "HIPE" / "3.csv")
     assert list(out.columns) == ["timestamp", "active_power", "Estimate_0", "Estimate_1", "Estimate_2"]

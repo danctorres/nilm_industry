@@ -1,7 +1,7 @@
 """Gaussian allocation: each machine draws an independent Gaussian power while ON, and the aggregate is the sum over
 the ON machines. The means and variances are fitted by EM from the aggregate and the on/off states alone, and each
 machine's estimate is its posterior mean given the aggregate, so the estimates of the ON machines add up to it.
-Trains on every unsplit sample outside the validation split, which needs no per-machine power.
+Trains on the training split, the same rows as the other methods.
 
 Example: python3 src/allocation/allocation.py --dataset hipe --machines 9
 """
@@ -58,21 +58,20 @@ def main(argv=None) -> None:
     a = p.parse_args(argv)
     d = a.data_root / a.dataset.upper() / str(a.machines)
 
-    agg = pd.read_csv(d / "aggregate.csv", usecols=[0, 1])
-    states = pd.read_csv(d / "states.csv").iloc[:, 1:].to_numpy(float)
+    agg = pd.read_csv(d / "aggregate_training.csv", usecols=[0, 1])
+    states = pd.read_csv(d / "states_training.csv")
     val = pd.read_csv(d / "aggregate_validation.csv", usecols=[0, 1])
-    val_states = pd.read_csv(d / "states_validation.csv").iloc[:, 1:].to_numpy(float)
-    if states.shape[1] != a.machines or val_states.shape[1] != a.machines:
-        raise SystemExit(f"expected {a.machines} machine columns in {d}")
-    train = ~agg.iloc[:, 0].isin(val.iloc[:, 0]).to_numpy()
-    if (~train).sum() != len(val):
-        raise SystemExit(f"the validation timestamps in {d} do not all match aggregate.csv once")
+    val_states = pd.read_csv(d / "states_validation.csv")
+    for x, y in ((agg, states), (val, val_states)):
+        if y.shape[1] - 1 != a.machines or not x.iloc[:, 0].equals(y.iloc[:, 0]):
+            raise SystemExit(f"expected {a.machines} machine columns and the aggregate's timestamps in {d}")
+    states, val_states = states.iloc[:, 1:].to_numpy(float), val_states.iloc[:, 1:].to_numpy(float)
     power = agg.iloc[:, 1].to_numpy()
-    scale = np.abs(power[train]).max() or 1.0
+    scale = np.abs(power).max() or 1.0
 
-    if pairs := collinear(states[train]):
+    if pairs := collinear(states):
         print(f"warning: machine pairs {pairs} switch on and off together, so how their power splits is a guess")
-    mu, var = fit(power[train] / scale, states[train])
+    mu, var = fit(power / scale, states)
     for j in range(a.machines):
         print(f"machine {j}: mean {mu[j] * scale:.4g}, sd {np.sqrt(var[j]) * scale:.4g} while ON")
     est = np.maximum(posterior(val.iloc[:, 1].to_numpy() / scale, val_states, mu, var)[0], 0.0) * scale
