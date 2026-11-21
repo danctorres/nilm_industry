@@ -3,9 +3,9 @@
     python3 src/validation/validation.py [--data-root DIR] [--results-root DIR] [--plots DIR]
 
 Every estimate file results/<method>/<DATASET>/<N>.csv is paired with the ground truth
-data/processed/<DATASET>/<N>/equipment_validation.csv (equipment.csv for the oracle-state baseline, which runs on the
-unsplit tables). Prints, per file, the errors per machine and of the reconstructed aggregate (the sum of the machine
-estimates against the measured aggregate)."""
+data/processed/<DATASET>/<N>/equipment_validation.csv; the oracle-state baseline estimates the whole recording and is
+scored on the same validation rows. Prints, per file, the errors per machine and of the reconstructed aggregate (the
+sum of the machine estimates against the measured aggregate)."""
 
 import argparse
 from pathlib import Path
@@ -96,12 +96,11 @@ def main(argv=None) -> None:
     for est_path in files:
         dataset, n = est_path.parent.name, est_path.stem
         method = est_path.parent.parent.relative_to(a.results_root).as_posix()  # e.g. deep_learning/state
-        oracle = method == "hart_inspired"
-        truth_path = a.data_root / dataset / n / ("equipment.csv" if oracle else "equipment_validation.csv")
+        truth_path = a.data_root / dataset / n / "equipment_validation.csv"
         w_to_kw = dataset == "IMDELD"  # IMDELD is in W, shown in kW
         truth, est = read_csv(truth_path), read_csv(est_path)
-        if oracle:
-            est = est.fillna(0)  # NaN means no estimate was possible, scored as 0
+        if method == "hart_inspired":  # NaN means no estimate was possible, scored as 0
+            est = est.set_index(est.columns[0]).loc[truth.iloc[:, 0]].reset_index().fillna(0)
         label = f"{method} {dataset}, {n} machines"
         per_machine, aggregate = errors(truth, est, w_to_kw, f"{est_path} against {truth_path}")
         print(f"\n{label}, per machine (MAE, MSE, RMSE in kW):\n{per_machine.to_string(index=False)}")

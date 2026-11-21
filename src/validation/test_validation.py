@@ -29,12 +29,12 @@ except SystemExit:
     pass
 
 # end to end: every results/<method>/<DATASET>/<N>.csv, at any depth, is paired with the ground truth for N machines;
-# estimates written with ", " separators, the oracle-state baseline against the unsplit table with NaN scored as 0
+# estimates written with ", " separators; the oracle-state baseline scored on the validation rows of its whole-recording
+# estimates (the extra row of 99s is left out), NaN scored as 0
 with tempfile.TemporaryDirectory() as name:
     d = Path(name)
     (d / "data/HIPE/2").mkdir(parents=True)
     truth.to_csv(d / "data/HIPE/2/equipment_validation.csv", index=False)
-    truth.to_csv(d / "data/HIPE/2/equipment.csv", index=False)
     rows = "".join(
         f"{t}, {a}, {e0}, {e1}\n"
         for t, a, e0, e1 in zip(ts, [1.0, 3.0, 4.0], [1.5, 2.0, 3.0], [0.0, 1.0, 1.0], strict=True)
@@ -45,7 +45,7 @@ with tempfile.TemporaryDirectory() as name:
     (d / "results/optimization/HIPE/coef_2.csv").write_text("Coef 0, Coef 1, Coef 2, Coef 3\n1, 2, 3, 4\n")
     (d / "results/hart_inspired/HIPE").mkdir(parents=True)
     (d / "results/hart_inspired/HIPE/2.csv").write_text(
-        f"timestamp,active_power,E0,E1\n{ts[0]},1,1,0\n{ts[1]},3,2,NaN\n{ts[2]},4,3,1\n"
+        f"timestamp,active_power,E0,E1\n24-Oct-2017 09:59:59,99,99,99\n{ts[0]},1,1,0\n{ts[1]},3,2,NaN\n{ts[2]},4,3,1\n"
     )
     printed = io.StringIO()
     with contextlib.redirect_stdout(printed):
@@ -54,7 +54,8 @@ with tempfile.TemporaryDirectory() as name:
     for label in ["optimization HIPE, 2 machines", "deep_learning/plain HIPE, 2 machines"]:
         assert f"{label}, per machine" in text, text
     assert "hart_inspired HIPE, 2 machines, per machine" in text and "coef" not in text, text
-    assert "NaN" not in text.split("hart_inspired")[1], text  # the oracle's missing estimates are scored as 0
+    hart = text.split("hart_inspired")[1]
+    assert "NaN" not in hart and "0.333333" in hart, text  # Eq3: 0, 1 (from NaN), 1 against 0, 1, 1
     assert (d / "plots/deep_learning_plain_HIPE_2.png").stat().st_size > 0
     assert (d / "plots/optimization_HIPE_2.png").stat().st_size > 0
 
