@@ -24,11 +24,12 @@ def read_csv(path: Path):
 def load(root: Path, dataset: str, n: int, split: str):
     """Timestamps, aggregate (rows, 1), states (rows, n), equipment power (rows, n)."""
     paths = [root / dataset.upper() / str(n) / f"{name}_{split}.csv" for name in ("aggregate", "states", "equipment")]
-    timestamps, agg = read_csv(paths[0])
+    (timestamps, agg), (st_times, states), (eq_times, eq) = (read_csv(path) for path in paths)
     agg = agg[:, :1]  # active power, further columns are not used
-    states, eq = read_csv(paths[1])[1], read_csv(paths[2])[1]
     if states.shape != (len(agg), n) or eq.shape != (len(agg), n):
         raise SystemExit(f"expected {len(agg)} rows and {n} machine columns in {paths[1]} and {paths[2]}")
+    if not timestamps == st_times == eq_times:
+        raise SystemExit(f"the timestamps of {', '.join(map(str, paths))} differ")
     states[agg[:, 0] == 0] = 0  # a zero aggregate means every machine is off
     return timestamps, agg, states, eq
 
