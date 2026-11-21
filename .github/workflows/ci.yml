@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.4.0  # setup-uv publishes no moving major tag
-      - run: for t in src/*/test_*.py; do echo "== $t"; uv run --locked "$t"; done
+      - run: for t in src/*/test_*.py; do echo "== $t"; uv run --locked python -W error "$t"; done
   lint:
     runs-on: ubuntu-24.04
     steps:
