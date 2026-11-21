@@ -1,25 +1,18 @@
-# ignore OriginalDataset folder
+# raw datasets
 data/raw/*
 
-# ignore imdeld_analysis images folder
-reports/figures/*
-
-# ignore images folder
-docs/Images/*
-
-# ignore all asv files
+# MATLAB autosave
 *.asv
 
-# ignore .vscode
+# editors / IDEs
 .vscode
-
-# ignore clion
 .idea
 
-# ignore cmake build folder
+# build output
 build/
-/src/deep_learning/__pycache__
 
-# ignore pycache
-.pyc
-*__pycache__*
+# python
+.venv/
+venv/
+*.pyc
+__pycache__/
