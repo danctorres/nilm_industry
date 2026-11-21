@@ -47,7 +47,7 @@ Neither dataset is redistributed here. Obtain the raw data under each dataset's 
 * IMDELD, Industrial Machines Dataset for Electrical Load Disaggregation (Martins et al.), IEEE DataPort: https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
   Expected: `data/raw/IMDELD/Equipment/*.csv` (eight machines, columns `timestamp, active_power, reactive_power, apparent_power, current, voltage`), `data/raw/IMDELD/pelletizer-subcircuit.csv`, `data/raw/IMDELD/millingmachine-subcircuit.csv`.
 * HIPE, High-resolution Industrial Production Energy dataset (Bischof et al.), KIT: https://www.energystatusdata.kit.edu/hipe.php
-  Expected: `data/raw/HIPE/Equipment/*.csv`, the ten one-week machine files (`SensorDateTime`, `P_kW`); the first one alphabetically is always off and is dropped.
+  `uv run src/preprocessing/fetch_hipe.py` downloads the one-week release (109 MB, checksum verified) and unpacks its ten machine files into `data/raw/HIPE/Equipment` (`SensorDateTime`, `P_kW`, ...); the first one alphabetically is always off and is dropped.
 
 Processed layout, the same for both datasets: `data/processed/<DATASET>/<N>/{aggregate,states,equipment}_{training,validation}.csv`, N the number of machines.
 Every file starts with a `timestamp` column; the aggregate's power column is `active_power`, then one column per machine. HIPE is in kW, IMDELD in W.
@@ -59,7 +59,7 @@ Reproduce
 ------
 The Python code runs with [uv](https://docs.astral.sh/uv/): `uv run` creates the environment from `uv.lock` on first use. Every Python folder has a self-check, e.g. `uv run src/validation/test_validation.py`.
 
-1. Get the raw data (see Datasets).
+1. Get the raw data: `uv run src/preprocessing/fetch_hipe.py` for HIPE, IMDELD by hand (see Datasets).
 2. Preprocess: `uv run src/preprocessing/imdeld.py` (add `--equipment 1,2,3,4,5,6,7,8` for the 8-machine set) and `uv run src/preprocessing/hipe.py`.
 3. EMUPF (CMake >= 3.20, C++20 compiler, GCC 13 tested, OpenMP optional): `cmake -S src/optimization -B build && cmake --build build -j && ctest --test-dir build`; then run `estimate` / `validate` as described in [src/optimization/README.md](src/optimization/README.md).
 4. UNN: `uv run src/deep_learning/main.py --dataset {hipe,imdeld} --mode {plain,state,fourier} --machines N [--runs R] [--epochs E] [--seed S]`. Output: `results/deep_learning/<mode>/<DATASET>/<N>.csv`.
