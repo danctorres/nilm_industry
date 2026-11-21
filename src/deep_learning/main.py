@@ -87,20 +87,19 @@ def main() -> None:
     if a.runs < 1:
         p.error("--runs must be at least 1")
 
-    _, agg_tr, st_tr, eq_tr = load(a.data_root, a.dataset, a.machines, "training")
+    _, agg_tr, st_tr, _ = load(a.data_root, a.dataset, a.machines, "training")
     ts, agg_val, st_val, eq_val = load(a.data_root, a.dataset, a.machines, "validation")
 
     # Scales come from the training split only. The input is min-max normalised; the target and the
     # estimates share one pure scale, so estimates adding up to agg / hi add up to agg in physical units.
     lo, hi = agg_tr.min(), agg_tr.max()
     x_tr, x_val = inputs(a.mode, (agg_tr - lo) / (hi - lo), st_tr), inputs(a.mode, (agg_val - lo) / (hi - lo), st_val)
-    p_min = eq_tr.min(axis=0, keepdims=True) / hi
 
     rng = np.random.default_rng(a.seed)
     best, best_loss = None, np.inf
     for run in range(a.runs):
         net = build(a.mode, a.machines, rng)
-        run_loss = net.train(x_tr, agg_tr / hi, st_tr, p_min, a.epochs)
+        run_loss = net.train(x_tr, agg_tr / hi, st_tr, a.epochs)
         print(f"run {run}: mean epoch loss {run_loss:.6g}")
         if best is None or run_loss < best_loss:
             best, best_loss = net, run_loss
