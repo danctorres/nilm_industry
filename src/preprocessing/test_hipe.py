@@ -13,7 +13,7 @@ rng = np.random.default_rng(0)
 
 
 def stamps(seconds, whole):
-    """HIPE SensorDateTime strings: 7-digit fraction, or whole seconds (which hipe.py reads as .02 s)."""
+    """HIPE SensorDateTime strings in local summer time: 7-digit fraction, or whole seconds."""
     t = T0 + pd.to_timedelta(seconds, unit="s")
     return np.where(whole, t.strftime("%Y-%m-%dT%H:%M:%S+02:00"), t.strftime("%Y-%m-%dT%H:%M:%S.%f0+02:00"))
 
@@ -34,11 +34,11 @@ def random_power(n):
 def write_raw(folder):
     folder.mkdir(parents=True)
     machines = {}
-    # machine 1: always 0 but sets start_time (00:00:00 -> .02 s) and end_time (7300 s -> 7300.02 s)
+    # machine 1: always 0 but sets start_time (0 s) and end_time (7300 s)
     t = np.concatenate([[0], random_times(0, 7300, True), [7300]])
     machines[1] = t, np.zeros(len(t)), True
     # machine 3: fixed first and last two samples for the extrapolation check, negative powers in between
-    t = np.concatenate([[5.1234567, 7.6299999], random_times(8, 7000, False), [7000.5, 7001.5]])
+    t = np.concatenate([[5.25, 7.75], random_times(8, 7000, False), [7000.5, 7001.5]])
     p = rng.uniform(-0.5, 5, len(t))
     p[[0, 1, -2, -1]] = [1.0, 2.0, 3.0, 2.5]
     machines[3] = t, p, False
@@ -46,11 +46,11 @@ def write_raw(folder):
     t = random_times(3, 7200, True)
     t[-20] = t[-21] - 1
     machines[4] = t, random_power(len(t)), True
-    # machine 5: 5e-05 kW from 8.02 to 11.02 s, on grid points (8.02 s after a sample of another value): the
+    # machine 5: 5e-05 kW from 8 to 11 s, on grid points (8 s after a sample of another value): the
     # interpolation must return it exactly, and MATLAB rounds it to 1e-04 where numpy's round gives 0
-    t = np.concatenate([random_times(3, 7.5, False), [8.02, 9.02, 10.02, 11.02], random_times(11.5, 7150, False)])
+    t = np.concatenate([random_times(3, 7.5, False), [8, 9, 10, 11], random_times(11.5, 7150, False)])
     p = random_power(len(t))
-    p[np.isin(t, [8.02, 9.02, 10.02, 11.02])] = 5e-05
+    p[np.isin(t, [8, 9, 10, 11])] = 5e-05
     machines[5] = t, p, False
     for k in [2, 6, 7, 8, 9, 10]:
         whole = k in (2, 7, 9)
@@ -77,13 +77,15 @@ with tempfile.TemporaryDirectory() as name:
     main(["--raw", str(tmp / "raw"), "--out", str(tmp / "out")])
     out = tmp / "out"
 
-    # timestamps: 2-digit fraction, cut before the drop, negative power clipped
+    # timestamps: UTC, cut before the drop, negative power clipped, and no cut where summer time ends
+    dst = pd.DataFrame({"SensorDateTime": ["2017-10-29T02:59:59+02:00", "2017-10-29T02:00:00+01:00"], "P_kW": 1.0})
+    assert list(read_machine(dst)[0]) == [np.datetime64("2017-10-29T00:59:59"), np.datetime64("2017-10-29T01:00:00")]
     raw4 = pd.read_csv(tmp / "raw" / "Equipment" / "machine_04.csv")
     t4, p4 = read_machine(raw4)
     assert len(t4) == len(raw4) - 21 and (np.diff(t4) > np.timedelta64(0, "s")).all()
     raw3 = pd.read_csv(tmp / "raw" / "Equipment" / "machine_03.csv")
     t3, p3 = read_machine(raw3)
-    assert t3[0] == np.datetime64("2017-10-23T00:00:05.12") and t3[1] == np.datetime64("2017-10-23T00:00:07.62")
+    assert t3[0] == np.datetime64("2017-10-22T22:00:05.25") and t3[1] == np.datetime64("2017-10-22T22:00:07.75")
     assert (raw3.P_kW < 0).any() and np.array_equal(p3, np.maximum(raw3.P_kW, 0))
 
     # layout and headers
@@ -101,20 +103,20 @@ with tempfile.TemporaryDirectory() as name:
     for f, cols in expected.items():
         assert list(read[f].columns) == cols, f
 
-    # 1 s grid from start_time (machine 1, .02 s) to end_time (machine 1, 7300.02 s), written as MATLAB displays it
+    # 1 s grid from start_time (machine 1, 0 s) to end_time (machine 1, 7300 s) in UTC, written as MATLAB displays it
     eq, st = process(tmp / "raw" / "Equipment")
-    assert len(eq) == 7301 and eq.timestamp.iloc[0] == pd.Timestamp("2017-10-23 00:00:00.02")
+    assert len(eq) == 7301 and eq.timestamp.iloc[0] == pd.Timestamp("2017-10-22 22:00:00")
     assert (eq.timestamp.diff().iloc[1:] == pd.Timedelta(1, "s")).all()
     equipment, states, aggregate = (read[f"9/{f}.csv"] for f in ["equipment", "states", "aggregate"])
-    assert equipment.timestamp.iloc[0] == "23-Oct-2017 00:00:00"
-    assert equipment.timestamp.iloc[-1] == "23-Oct-2017 02:01:40"
+    assert equipment.timestamp.iloc[0] == "22-Oct-2017 22:00:00"
+    assert equipment.timestamp.iloc[-1] == "23-Oct-2017 00:01:40"
     assert (states.timestamp == equipment.timestamp).all() and (aggregate.timestamp == equipment.timestamp).all()
     assert np.array_equal(equipment[eq_cols], eq[eq_cols])
 
-    # machine 3 is extrapolated linearly (not clamped) from its first two samples (5.12 s, 1 kW), (7.62 s, 2 kW):
-    # 1 + (0.02 + k - 5.12) * 0.4 for k = 0..5, and from its last two (7000.5 s, 3 kW), (7001.5 s, 2.5 kW) to 7300.02 s
-    assert list(equipment.Eq3_P_kW[:6]) == [-1.04, -0.64, -0.24, 0.16, 0.56, 0.96]
-    assert equipment.Eq3_P_kW.iloc[-1] == -146.76  # 2.5 - 0.5 * (7300.02 - 7001.5)
+    # machine 3 is extrapolated linearly (not clamped) from its first two samples (5.25 s, 1 kW), (7.75 s, 2 kW):
+    # 1 + (k - 5.25) * 0.4 for k = 0..5, and from its last two (7000.5 s, 3 kW), (7001.5 s, 2.5 kW) to 7300 s
+    assert list(equipment.Eq3_P_kW[:6]) == [-1.1, -0.7, -0.3, 0.1, 0.5, 0.9]
+    assert equipment.Eq3_P_kW.iloc[-1] == -146.75  # 2.5 - 0.5 * (7300 - 7001.5)
     assert list(states.Eq3_State[:6]) == [0, 0, 0, 1, 1, 1]
 
     # MATLAB rounding to 4 decimals, states are power > 0 on the rounded values

@@ -60,8 +60,10 @@ def construct_date_unit_table(means: list[pd.Series], t: np.ndarray) -> tuple[np
 
 def smooth_and_fill(x: np.ndarray, y: np.ndarray, xq: np.ndarray) -> np.ndarray:
     """The movmean + spline step of interpolate_equipment_data and read_lvdb_csv: y (samples at the sorted seconds x,
-    a subset of xq) smoothed over its samples, kept where there is a sample, spline elsewhere, negatives set to 0."""
-    y = movmean(y, SMOOTHING_WINDOW)
+    a subset of xq) smoothed over its samples, kept where there is a sample, spline elsewhere, negatives set to 0.
+    The smoothing restarts after every gap longer than its window, so it never mixes days weeks apart."""
+    gaps = np.flatnonzero(np.diff(x) > SMOOTHING_WINDOW) + 1
+    y = np.concatenate([movmean(part, SMOOTHING_WINDOW) for part in np.split(y, gaps)])
     present = np.isin(xq, x)
     out = np.empty(len(xq))
     out[present] = y
@@ -73,7 +75,7 @@ def smooth_and_fill(x: np.ndarray, y: np.ndarray, xq: np.ndarray) -> np.ndarray:
 def interpolate_equipment_data(t: np.ndarray, power: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """calculate_metrics_power_day + interpolate_equipment_data: drop the days whose MATLAB-rounded daily medians
     average under 10 W over the machines, then give every machine a value at every second of the kept days.
-    The smoothing runs over the kept samples of all days in a row, so its window crosses day boundaries."""
+    The smoothing runs over the kept samples of consecutive kept days in a row, so its window crosses midnight."""
     day = np.floor(t / 86400)
     medians = matlab_round(pd.DataFrame(power).groupby(day).median())
     days = medians.index[medians.mean(axis=1) >= 10].to_numpy()

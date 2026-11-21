@@ -91,10 +91,12 @@ def check_hand_computed(raw: Path, equipment: pd.DataFrame, t: np.ndarray, machi
     rows = per_second[np.isin(np.floor(per_second.index / 86400), np.floor(t[[0, -1]] / 86400))]
     x, y = rows.index.to_numpy(), rows.iloc[:, 0].to_numpy()
     j = np.searchsorted(x, t[86399], side="right") - 1  # last sample of the first day
-    assert x[j + 749] > t[86399]  # its window reaches into the next kept day
-    assert np.isclose(equipment.active_power_1[t == x[j]].item(), y[j - 750 : j + 750].mean(), rtol=1e-9)
-    smoothed = pd.Series(y).rolling(1500, center=True, min_periods=1).mean().to_numpy()
-    assert np.isclose(smoothed[j], y[j - 750 : j + 750].mean())
+    assert x[j + 1] - x[j] > 1500  # the next kept day is days later: the window stops at the gap
+    assert np.isclose(equipment.active_power_1[t == x[j]].item(), y[j - 750 : j + 1].mean(), rtol=1e-9)
+    run = np.cumsum(np.diff(x, prepend=x[0]) > 1500)
+    smoothed = pd.Series(y).groupby(run).transform(lambda r: r.rolling(1500, center=True, min_periods=1).mean())
+    smoothed = smoothed.to_numpy()
+    assert np.isclose(smoothed[j], y[j - 750 : j + 1].mean())
     missing = np.setdiff1d(t, x)
     assert missing[0] == t[0]
     interpolated = make_interp_spline(x, smoothed)  # not-a-knot cubic, as MATLAB spline

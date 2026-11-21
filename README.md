@@ -77,7 +77,8 @@ The preprocessing, baseline and validation were ported from MATLAB; the MATLAB v
 
 Methodology notes
 ------
-* IMDELD signals are smoothed with a 25-minute moving mean; HIPE is not smoothed.
+* IMDELD signals are smoothed with a 25-minute moving mean that restarts after gaps between kept days; HIPE is not smoothed.
+* HIPE timestamps are in UTC, so the week runs on through the end of summer time on 29 Oct 2017.
 * The HIPE training/validation aggregate is the synthetic sum of the selected machines, not the main meter.
 * On/off thresholds: flat 5 W for IMDELD; > 0 after spline fitting for HIPE.
 * The train/validation split takes the same number of samples (at most 700) from each aggregate bin and splits each bin 70/30 with a fixed seed.

@@ -21,11 +21,11 @@ SECOND = np.timedelta64(1, "s")
 
 
 def read_machine(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
-    """Time and power of one machine (main.m, first loop). The timestamp keeps its first 22 characters with '+' read
-    as '.', so '...T00:00:00.1234567+02:00' gives .12 s and '...T00:00:00+02:00' gives .02 s. The series is cut at its
-    first non-increasing timestamp, the sample before the drop included (Time(stopIndex:end) = []), and negative
-    power is set to 0."""
-    time = pd.to_datetime(df.SensorDateTime.str[:22].str.replace("+", ".", regex=False), format="%Y-%m-%dT%H:%M:%S.%f")
+    """Time in UTC and power of one machine (main.m, first loop). The offset is applied, so the week runs on through
+    the switch from +02:00 to +01:00 (main.m dropped it and cut the week there). The series is cut at its first
+    non-increasing timestamp, the sample before the drop included (Time(stopIndex:end) = []), and negative power is
+    set to 0."""
+    time = pd.to_datetime(df.SensorDateTime, utc=True, format="ISO8601").dt.tz_localize(None)
     time, power = time.to_numpy(), df.P_kW.to_numpy(dtype=float)
     stop = np.flatnonzero(np.diff(time) <= 0 * SECOND)
     n = stop[0] if stop.size else len(time)
