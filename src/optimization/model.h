@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <limits>
 #include <span>
 #include <vector>
 
@@ -82,25 +81,6 @@ inline std::vector<double> average_on(std::span<const std::vector<double>> posit
         if (count[j] != 0)
             for (std::size_t k = 0; k < kCoefs; ++k) mean[j * kCoefs + k] /= count[j];
     return mean;
-}
-
-struct Metrics {
-    double mae, mse, rmse, r2;  // r2 is NaN when the actual values have no variance
-};
-
-inline Metrics metrics(std::span<const double> est, std::span<const double> actual) {
-    const auto n = static_cast<double>(actual.size());
-    double mean = 0.0;
-    for (double a : actual) mean += a / n;
-    double abs_err = 0.0, sq_err = 0.0, sq_tot = 0.0;
-    for (std::size_t i = 0; i < actual.size(); ++i) {
-        const double e = actual[i] - est[i];
-        abs_err += std::abs(e);
-        sq_err += e * e;
-        sq_tot += (actual[i] - mean) * (actual[i] - mean);
-    }
-    const double r2 = sq_tot > 0.0 ? 1.0 - sq_err / sq_tot : std::numeric_limits<double>::quiet_NaN();
-    return {abs_err / n, sq_err / n, std::sqrt(sq_err / n), r2};
 }
 
 }  // namespace nilm

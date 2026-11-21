@@ -45,19 +45,6 @@ TEST_CASE("objective") {
     CHECK(objective(neg, {0.0, first}, 0.0) == approx(1.0));
 }
 
-// perfect prediction, a hand-computed case, constant actual
-TEST_CASE("metrics") {
-    const std::vector<double> a = {1, 2, 3}, flat = {2, 2, 2};
-    CHECK(metrics(a, a).r2 == approx(1.0));
-    CHECK(metrics(a, a).mae == approx(0.0));
-    const Metrics m = metrics(flat, a);  // errors -1, 0, 1 against actual 1, 2, 3
-    CHECK(m.mae == approx(2.0 / 3));
-    CHECK(m.mse == approx(2.0 / 3));
-    CHECK(m.rmse == approx(std::sqrt(2.0 / 3)));
-    CHECK(m.r2 == approx(0.0));
-    CHECK(std::isnan(metrics(a, flat).r2));
-}
-
 // coefficients fitted on agg/scale reproduce scale * q(agg/scale) in physical units
 TEST_CASE("scaling") {
     const std::vector<double> q = {0.1, 0.2, 0.3, 0.4};

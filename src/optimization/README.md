@@ -31,7 +31,7 @@ objective as a black box. Algorithm-specific constants are the defaults of each
 `Params` struct in its header; the CLI exposes only the shared knobs, and every
 run prints the full parameter set it used.
 
-Other files: `model.h` (polynomial, objective, metrics), `io.h` (CSV, dataset,
+Other files: `model.h` (polynomial, objective), `io.h` (CSV, dataset,
 results), `estimate.cpp`, `validate.cpp`, `tests.cpp`.
 
 ## Build and test
@@ -54,7 +54,6 @@ OMP_NUM_THREADS=8 build/estimate \
 build/validate \
     data/processed/IMDELD/6/aggregate_validation.csv \
     data/processed/IMDELD/6/states_validation.csv \
-    data/processed/IMDELD/6/equipment_validation.csv \
     results/optimization/IMDELD/coef_6.csv \
     results/optimization/IMDELD/6.csv
 ```
