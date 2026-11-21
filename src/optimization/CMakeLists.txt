@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.20...3.31)
 project(nilm_optimization LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -13,6 +13,13 @@ endif()
 
 find_package(OpenMP)
 
+include(FetchContent)
+FetchContent_Declare(doctest
+  URL https://github.com/doctest/doctest/archive/refs/tags/v2.5.3.tar.gz
+  URL_HASH SHA256=174ebc4e769928959614789c5b4e9c3d0a0f81a62bb608756b127bfebfb21331)
+FetchContent_MakeAvailable(doctest)
+include(${DOCTEST_CMAKE_HELPER})
+
 foreach(exe estimate validate tests)
   add_executable(${exe} ${exe}.cpp)
   if(OpenMP_CXX_FOUND)
@@ -20,5 +27,7 @@ foreach(exe estimate validate tests)
   endif()
 endforeach()
 
+target_link_libraries(tests PRIVATE doctest::doctest_with_main)
+
 enable_testing()
-add_test(NAME tests COMMAND tests)
+doctest_discover_tests(tests)

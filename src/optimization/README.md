@@ -40,6 +40,8 @@ results), `estimate.cpp`, `validate.cpp`, `tests.cpp`.
 cmake -S src/optimization -B build && cmake --build build -j && ctest --test-dir build
 ```
 
+The first configure downloads [doctest](https://github.com/doctest/doctest) for `tests.cpp`.
+
 ## Run
 
 ```sh
