@@ -1,24 +1,31 @@
-function [aggregate_data] = calculate_aggregate_all_feature(timestamp, selected_equipment_index, save)
-    active_pow      = read_lvdb_csv(timestamp, 'active_power', 2, false);
-    reactive_pow    = read_lvdb_csv(timestamp, 'reactive_power', 2, false);
-    apparent_pow    = read_lvdb_csv(timestamp, 'apparent_power', 2, false);
-    curr            = read_lvdb_csv(timestamp, 'current', 2, false);
-    volt            = read_lvdb_csv(timestamp, 'voltage', 2, false);
+function [aggregate_data] = calculate_aggregate_all_feature(raw_dir, timestamp, selected_equipment_index, smoothing_window)
+    % Objective: Aggregate features at the given timestamps: LVDB-2, plus LVDB-3 when machines 5 and 6 (milling machines) are selected
+    % Input: raw_dir (folder with the LVDB csv files), timestamp, selected_equipment_index, smoothing_window (movmean window in samples)
+    % Output: aggregate_data (table: timestamp, active, reactive and apparent power, current, voltage, power factor)
+
+    lvdb2 = fullfile(raw_dir, 'pelletizer-subcircuit.csv');
+    lvdb3 = fullfile(raw_dir, 'millingmachine-subcircuit.csv');
+
+    active_pow      = read_lvdb_csv(lvdb2, timestamp, 'active_power', smoothing_window);
+    reactive_pow    = read_lvdb_csv(lvdb2, timestamp, 'reactive_power', smoothing_window);
+    apparent_pow    = read_lvdb_csv(lvdb2, timestamp, 'apparent_power', smoothing_window);
+    curr            = read_lvdb_csv(lvdb2, timestamp, 'current', smoothing_window);
+    volt            = read_lvdb_csv(lvdb2, timestamp, 'voltage', smoothing_window);
 
     if (any(ismember(selected_equipment_index, 5) == 1) && any(ismember(selected_equipment_index, 6) == 1))
-        buff_table = read_lvdb_csv(timestamp, 'active_power', 3, false);
+        buff_table = read_lvdb_csv(lvdb3, timestamp, 'active_power', smoothing_window);
         active_pow.('active_power')         = active_pow.('active_power') + buff_table.('active_power');
         clear buff_table;
-        buff_table = read_lvdb_csv(timestamp, 'reactive_power', 3, false);
+        buff_table = read_lvdb_csv(lvdb3, timestamp, 'reactive_power', smoothing_window);
         reactive_pow.('reactive_power')     = reactive_pow.('reactive_power') + buff_table.('reactive_power');
         clear buff_table;
-        buff_table = read_lvdb_csv(timestamp, 'apparent_power', 3, false);
+        buff_table = read_lvdb_csv(lvdb3, timestamp, 'apparent_power', smoothing_window);
         apparent_pow.('apparent_power')     = apparent_pow.('apparent_power') + buff_table.('apparent_power');
         clear buff_table;
-        buff_table = read_lvdb_csv(timestamp, 'current', 3, false);
+        buff_table = read_lvdb_csv(lvdb3, timestamp, 'current', smoothing_window);
         curr.('current')                    = curr.('current') + buff_table.('current');
         clear buff_table;
-        buff_table = read_lvdb_csv(timestamp, 'voltage', 3, false);
+        buff_table = read_lvdb_csv(lvdb3, timestamp, 'voltage', smoothing_window);
         volt.('voltage')                    = volt.('voltage') + buff_table.('voltage');
         clear buff_table;
     end
@@ -37,11 +44,5 @@ function [aggregate_data] = calculate_aggregate_all_feature(timestamp, selected_
         title(regexprep(unit_names(i), '_', ' '))
         xlabel('samples')
         ylabel(strrep(aggregate_data.Properties.VariableNames(i), '_', ' '));
-    end
-
-    if save == true
-        file_information = matlab.desktop.editor.getActive;
-        [~, file_name, file_ext] = fileparts(file_information.Filename);
-        saveas(gcf, join([erase(file_information.Filename, ['\src\preprocessing\IMDELD\', file_name, file_ext]), '\reports\figures\aggregate_table.fig']), '');
     end
 end

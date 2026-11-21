@@ -1,8 +1,0 @@
-function [output] = read_interim_data(file_name)
-    % Function to easily read data from interim
-    % Input file name in interim
-
-    file_information = matlab.desktop.editor.getActive;
-    [~, called_file_name, ~] = fileparts(file_information.Filename);
-    output = readtable(join([erase(file_information.Filename,  join(['\src\preprocessing\IMDELD\', called_file_name, '.m'])), join( [join(['data\interim\IMDELD\', string(file_name)], '')])], '\'));
-end
