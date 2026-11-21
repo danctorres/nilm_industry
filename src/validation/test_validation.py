@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from validation import errors, main, metrics
+from validation import baselines, errors, main, metrics
 
 # metrics: hand-computed errors -1, 0, 1 against true 1, 2, 3
 m = metrics([1, 2, 3], [2, 2, 2], False).iloc[0]
@@ -19,9 +19,9 @@ assert np.isnan(metrics([0, 0], [0, 0], False).iloc[0]["R2"])  # a machine never
 ts = ["24-Oct-2017 10:00:00", "24-Oct-2017 10:00:01", "24-Oct-2017 10:00:02"]
 truth = pd.DataFrame({"Time": ts, "Eq2_P_kW": [1.0, 2.0, 3.0], "Eq3_P_kW": [0.0, 1.0, 1.0]})
 est = pd.DataFrame({"Timestamp": ts, "Aggregate": [1.0, 3.0, 4.0], "E0": [1.0, 2.0, 3.0], "E1": [0.0, 1.0, 1.0]})
-per_machine, aggregate = errors(truth, est, False, "exact")
+per_machine, aggregate, pooled = errors(truth, est, False, "exact")
 assert list(per_machine["machine"]) == ["Eq2_P_kW", "Eq3_P_kW"] and np.allclose(per_machine["MAE"], 0)
-assert np.allclose(aggregate["MAE"], 0)
+assert np.allclose(aggregate["MAE"], 0) and pooled["MAE"] == 0
 try:
     errors(truth, est.assign(Timestamp=ts[::-1]), False, "shuffled")
     raise AssertionError("timestamps that differ must be rejected")
@@ -35,6 +35,11 @@ with tempfile.TemporaryDirectory() as name:
     d = Path(name)
     (d / "data/HIPE/2").mkdir(parents=True)
     truth.to_csv(d / "data/HIPE/2/equipment_validation.csv", index=False)
+    for split in ["training", "validation"]:
+        agg_split = pd.DataFrame({"Time": ts, "active_power": [1.0, 3.0, 4.0]})
+        agg_split.to_csv(d / f"data/HIPE/2/aggregate_{split}.csv", index=False)
+        states_split = pd.DataFrame({"Time": ts, "Eq2_State": 1, "Eq3_State": [0, 1, 1]})
+        states_split.to_csv(d / f"data/HIPE/2/states_{split}.csv", index=False)
     rows = "".join(
         f"{t}, {a}, {e0}, {e1}\n"
         for t, a, e0, e1 in zip(ts, [1.0, 3.0, 4.0], [1.5, 2.0, 3.0], [0.0, 1.0, 1.0], strict=True)
@@ -54,8 +59,16 @@ with tempfile.TemporaryDirectory() as name:
     for label in ["optimization HIPE, 2 machines", "deep_learning/plain HIPE, 2 machines"]:
         assert f"{label}, per machine" in text, text
     assert "hart_inspired HIPE, 2 machines, per machine" in text and "coef" not in text, text
-    hart = text.split("hart_inspired")[1]
+    hart = text.split("hart_inspired HIPE, 2 machines, per machine")[1].split("\n\n")[0]
     assert "NaN" not in hart and "0.333333" in hart, text  # Eq3: 0, 1 (from NaN), 1 against 0, 1, 1
+    assert "hart_inspired HIPE, 2 machines: an estimate for 80% of the ON samples" in text, text  # 4 of 5
+    assert "Summary over all machines" in text and "baseline/proportional" in text.split("Summary")[1], text
+
+    # baselines from the aggregate and the states: zero, equal split, proportional to the NNLS means (1, 2.5)
+    base = dict(baselines(d / "data/HIPE/2"))
+    assert (base["baseline/zero"].iloc[:, 2:] == 0).all().all()
+    assert np.allclose(base["baseline/equal"].iloc[:, 2:], [[1, 0], [1.5, 1.5], [2, 2]])
+    assert np.allclose(base["baseline/proportional"].iloc[:, 2:], [[1, 0], [3 / 3.5, 7.5 / 3.5], [4 / 3.5, 10 / 3.5]])
     assert (d / "plots/deep_learning_plain_HIPE_2.png").stat().st_size > 0
     assert (d / "plots/optimization_HIPE_2.png").stat().st_size > 0
 
