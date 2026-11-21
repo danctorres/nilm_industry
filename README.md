@@ -47,7 +47,10 @@ Datasets
 Neither dataset is redistributed here. Obtain the raw data under each dataset's own terms and place it in `data/raw`; the preprocessing scripts generate everything else (see [Reproduce](#reproduce)).
 
 * IMDELD, Industrial Machines Dataset for Electrical Load Disaggregation (Martins et al.), IEEE DataPort: https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
-  Expected: `data/raw/IMDELD/Equipment/*.csv` (eight machines, columns `timestamp, active_power, reactive_power, apparent_power, current, voltage`), `data/raw/IMDELD/pelletizer-subcircuit.csv`, `data/raw/IMDELD/millingmachine-subcircuit.csv`.
+  Downloading needs a free IEEE account. From the dataset's file list:
+  * the zip with all appliances (`Appliances.zip`): unpack its eight machine files into `data/raw/IMDELD/Equipment`;
+  * "Pelletizer SubCircuit", the aggregate meter: save it as `data/raw/IMDELD/pelletizer-subcircuit.csv`;
+  * "Milling Machines SubCircuit", only for the 8-machine set: save it as `data/raw/IMDELD/millingmachine-subcircuit.csv`.
 * HIPE, High-resolution Industrial Production Energy dataset (Bischof et al.), KIT: https://www.energystatusdata.kit.edu/hipe.php
   `uv run src/preprocessing/fetch_hipe.py` downloads the one-week release (109 MB, checksum verified) and unpacks its ten machine files into `data/raw/HIPE/Equipment` (`SensorDateTime`, `P_kW`, ...); the first one alphabetically is always off and is dropped.
 
