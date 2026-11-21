@@ -1,8 +1,13 @@
-function [est] = estimation_using_last_sample(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE)
+function [est] = estimation_using_2_samples_OFF_event(states, agg, ALL_EVENTS_AGG_IDX, ALL_EVENTS_EQ_ID, ALL_EVENTS_STATE_CHANGE)
+    % Objective: for each ON event followed by an OFF event of the same machine, with no other machine changing state,
+    %            estimate the machine power over that interval as the aggregate step at the OFF event (2 samples)
+    % Input: states (true on/off states, samples x machines), agg (aggregate power), events sorted by sample index
+    % Output: est (samples x machines; 0 when OFF, NaN when ON but no estimate could be made)
+
     est = -1 * ones(size(states));  % if an estimation cannot be made, it saves the value -1 for the interval
     est = est .* states;
     size_ALL_EVENTS_AGG_IDX = size(ALL_EVENTS_AGG_IDX, 1);
-    
+
     i = 1;
     while i < size_ALL_EVENTS_AGG_IDX
         if ALL_EVENTS_STATE_CHANGE(i) == 1     % if an event if caused by one turn on
@@ -14,7 +19,7 @@ function [est] = estimation_using_last_sample(states, agg, ALL_EVENTS_AGG_IDX, A
 
                 current_event_idx = ALL_EVENTS_AGG_IDX(i);
                 next_eq_event_idx = ALL_EVENTS_AGG_IDX(next_eq_event);
-    
+
                 % check other eq states
                 states_current_event = states(current_event_idx, :);
                 states_next_event = states(next_eq_event_idx, :);
@@ -28,14 +33,11 @@ function [est] = estimation_using_last_sample(states, agg, ALL_EVENTS_AGG_IDX, A
                 states_equal_event = isequal(states_next_event_subract_1, states_next_event);
 
                 if states_equal_interval && states_equal_event
-                    agg_interval_power_diff = abs( agg(current_event_idx) - agg(next_eq_event_idx) );
                     est(current_event_idx : next_eq_event_idx, eq_id_event_causing) =  abs( agg(next_eq_event_idx) - agg(next_eq_event_idx - 1) );
                 end
             end
         end
-            i = i + 1;
+        i = i + 1;
     end
-    % figure
-    % plot(agg)
     est(est == -1) = nan;
 end
