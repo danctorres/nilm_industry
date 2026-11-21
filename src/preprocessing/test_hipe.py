@@ -71,8 +71,8 @@ def files(out):
     return {str(f.relative_to(out)): f.read_bytes() for f in sorted(out.rglob("*.csv"))}
 
 
-with tempfile.TemporaryDirectory() as tmp:
-    tmp = Path(tmp)
+with tempfile.TemporaryDirectory() as name:
+    tmp = Path(name)
     machines = write_raw(tmp / "raw" / "Equipment")
     main(["--raw", str(tmp / "raw"), "--out", str(tmp / "out")])
     out = tmp / "out"
@@ -90,15 +90,15 @@ with tempfile.TemporaryDirectory() as tmp:
     eq_cols = [f"Eq{k}_P_kW" for k in range(2, 11)]
     st_cols = [f"Eq{k}_State" for k in range(2, 11)]
     expected = {
-        "undivided/states.csv": ["Time"] + st_cols,
-        "undivided/equipment.csv": ["Time"] + eq_cols,
+        "undivided/states.csv": ["Time", *st_cols],
+        "undivided/equipment.csv": ["Time", *eq_cols],
         "undivided/aggregate.csv": ["Time", "P_kW"],
     }
     for n in range(2, 10):
         for s in ["training", "validation"]:
             expected[f"aggregate_{s}/agg_{s}_{n}.csv"] = ["Time", "P_kW"]
-            expected[f"equipment_{s}/eq_{s}_{n}.csv"] = ["Time"] + eq_cols[:n]
-            expected[f"state_{s}/st_{s}_{n}.csv"] = ["Time"] + st_cols[:n]
+            expected[f"equipment_{s}/eq_{s}_{n}.csv"] = ["Time", *eq_cols[:n]]
+            expected[f"state_{s}/st_{s}_{n}.csv"] = ["Time", *st_cols[:n]]
     written = files(out)
     assert set(written) == set(expected), set(written) ^ set(expected)
     read = {f: pd.read_csv(out / f) for f in expected}

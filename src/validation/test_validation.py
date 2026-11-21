@@ -29,8 +29,8 @@ except SystemExit:
     pass
 
 # end to end: estimates written with ", " separators are paired with the ground truth by machine count
-with tempfile.TemporaryDirectory() as d:
-    d = Path(d)
+with tempfile.TemporaryDirectory() as name:
+    d = Path(name)
     (d / "data/HIPE/1_week/equipment_validation").mkdir(parents=True)
     truth.to_csv(d / "data/HIPE/1_week/equipment_validation/eq_validation_2.csv", index=False)
     out = d / "results/optimization/HIPE/1_week"

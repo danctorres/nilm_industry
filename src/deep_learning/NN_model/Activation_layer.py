@@ -15,7 +15,7 @@ def tanh_d(x: np.ndarray) -> np.ndarray:
     return 1.0 - np.tanh(x) ** 2
 
 
-class Activation_layer:
+class ActivationLayer:
     def __init__(self, f, f_d) -> None:
         self.f, self.f_d = f, f_d
 
@@ -23,5 +23,5 @@ class Activation_layer:
         self.input = x
         return self.f(x)
 
-    def back_prop(self, learning_rate: float, grad: np.ndarray) -> np.ndarray:
+    def back_prop(self, _learning_rate: float, grad: np.ndarray) -> np.ndarray:
         return self.f_d(self.input) * grad

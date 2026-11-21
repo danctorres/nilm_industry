@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from matplotlib.figure import Figure
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -57,14 +58,10 @@ def errors(truth: pd.DataFrame, est: pd.DataFrame, w_to_kw: bool, name: str) -> 
 
 def plot(path: Path, title: str, truth: pd.DataFrame, est: pd.DataFrame, unit: str) -> None:
     """True against estimated power of every machine, one subplot each."""
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
     n = truth.shape[1] - 1
     cols = int(np.ceil(np.sqrt(n)))
-    fig, axes = plt.subplots(int(np.ceil(n / cols)), cols, figsize=(5 * cols, 3.5 * np.ceil(n / cols)), squeeze=False)
+    fig = Figure(figsize=(5 * cols, 3.5 * np.ceil(n / cols)))
+    axes = fig.subplots(int(np.ceil(n / cols)), cols, squeeze=False)
     for i, ax in enumerate(axes.flat):
         if i >= n:
             ax.axis("off")
@@ -79,7 +76,6 @@ def plot(path: Path, title: str, truth: pd.DataFrame, est: pd.DataFrame, unit: s
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=100)
-    plt.close(fig)
 
 
 def main(argv=None) -> None:

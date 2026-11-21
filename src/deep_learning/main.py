@@ -10,8 +10,8 @@ import csv
 from pathlib import Path
 
 import numpy as np
-from NN_model.Activation_layer import Activation_layer, relu, relu_d, tanh_d
-from NN_model.Connected_layer import Connected_layer
+from NN_model.Activation_layer import ActivationLayer, relu, relu_d, tanh_d
+from NN_model.Connected_layer import ConnectedLayer
 from NN_model.NN import NN
 
 REPO = Path(__file__).resolve().parents[2]
@@ -27,7 +27,7 @@ def features(x: np.ndarray) -> np.ndarray:
 
 def read_csv(path: Path):
     """First column as strings (timestamps), the other columns as a float array."""
-    with open(path, newline="") as f:
+    with path.open(newline="") as f:
         rows = list(csv.reader(f))[1:]
     return [r[0] for r in rows], np.array([[float(v) for v in r[1:]] for r in rows])
 
@@ -65,17 +65,17 @@ def build(mode: str, n: int, rng: np.random.Generator) -> NN:
     n_in, hidden = {"plain": (1, n + 1), "state": (1 + n, n + 2), "fourier": (2 * K, 20)}[mode]
     return NN(
         [
-            Connected_layer(n_in, hidden, rng),
-            Activation_layer(relu, relu_d),
-            Connected_layer(hidden, n, rng),
-            Activation_layer(np.tanh, tanh_d),
+            ConnectedLayer(n_in, hidden, rng),
+            ActivationLayer(relu, relu_d),
+            ConnectedLayer(hidden, n, rng),
+            ActivationLayer(np.tanh, tanh_d),
         ]
     )
 
 
 def save(path: Path, timestamps, agg: np.ndarray, est: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w") as f:
+    with path.open("w") as f:
         f.write(
             ", ".join(["Timestamp", "Aggregate_Active_Power"] + [f"Estimate_{j}" for j in range(est.shape[1])]) + "\n"
         )

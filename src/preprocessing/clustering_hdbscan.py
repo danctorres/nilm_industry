@@ -11,23 +11,21 @@ import numpy as np
 INTERIM = Path(__file__).resolve().parents[2] / "data" / "interim" / "IMDELD"
 
 
-def read_file(file_path: str) -> list[dict[str, str]]:
+def read_file(file_path: Path) -> list[dict[str, str]]:
     """Reads contents of csv file and save it to list of dictionaries"""
-    with open(file_path, encoding="utf-8") as csv_file:
-        dic = list(csv.DictReader(csv_file))
-    return dic
+    with file_path.open(encoding="utf-8") as csv_file:
+        return list(csv.DictReader(csv_file))
 
 
 def clustering(points):
     clusterer = hdbscan.HDBSCAN()
     clusterer.fit(points)
-    labels = clusterer.labels_
-    return labels
+    return clusterer.labels_
 
 
 def main() -> None:
     file_path = INTERIM / "equipment_formated.csv"
-    lst_dic_csv = read_file(f"{file_path}")
+    lst_dic_csv = read_file(file_path)
     list_keys = list(lst_dic_csv[0].keys())
     list_keys.remove("timestamp")
 

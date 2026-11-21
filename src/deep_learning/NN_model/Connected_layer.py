@@ -3,7 +3,7 @@
 import numpy as np
 
 
-class Connected_layer:
+class ConnectedLayer:
     def __init__(self, size_in: int, size_out: int, rng: np.random.Generator) -> None:
         self.weights = rng.uniform(-1.0, 1.0, (size_in, size_out))
         self.bias = rng.uniform(-1.0, 1.0, (1, size_out))

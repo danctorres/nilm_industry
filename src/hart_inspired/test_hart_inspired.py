@@ -70,8 +70,8 @@ assert list(sample) == [1, 2, 4, 5, 6, 8, 11, 11, 12, 13, 14, 15]
 assert list(machine) == [0, 1, 1, 0, 2, 3, 2, 3, 0, 4, 0, 0]
 assert list(change) == [1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, 1]
 
-with tempfile.TemporaryDirectory() as tmp:
-    tmp = Path(tmp)
+with tempfile.TemporaryDirectory() as name:
+    tmp = Path(name)
     time = (pd.Timestamp("2017-10-23") + pd.to_timedelta(np.arange(16), unit="s")).strftime("%d-%b-%Y %H:%M:%S")
     names = ["Eq2", "Eq3", "Eq4", "Eq5", "Eq6"]
     pd.DataFrame({"Time": time, "P_kW": agg}).to_csv(tmp / "aggregate.csv", index=False)
