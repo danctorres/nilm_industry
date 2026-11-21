@@ -1,12 +1,12 @@
-function estimated = read_results_csv(struct_files)
-    base_dir = {struct_files.folder};
-    base_dir = base_dir(1);
-    list_files = {struct_files.name};
-    list_files = list_files(3:end);
+function tables = read_results_csv(pattern)
+    % Objective: read every csv file matching pattern (wildcards allowed), in alphabetical file order
+    % Input: pattern (e.g. fullfile(results_dir, 'estimated_active_power*.csv'))
+    % Output: tables (cell array, one table per file)
 
-    n_csv = size(list_files, 2);
-    estimated = cell(1, n_csv);
-    for i = 1:n_csv
-        estimated{i} = readtable(join ([base_dir{1}, '\', string(list_files(i))], '' ));
+    files = dir(pattern);
+    assert(~isempty(files), 'No file matches %s', pattern);
+    tables = cell(1, numel(files));
+    for i = 1:numel(files)
+        tables{i} = readtable(fullfile(files(i).folder, files(i).name));
     end
 end
