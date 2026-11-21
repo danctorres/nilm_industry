@@ -7,6 +7,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from corrupt_states import corrupt
+from corrupt_states import main as corrupt_main
 
 from validation import baselines, errors, main, metrics
 
@@ -71,5 +73,20 @@ with tempfile.TemporaryDirectory() as name:
     assert np.allclose(base["baseline/proportional"].iloc[:, 2:], [[1, 0], [3 / 3.5, 7.5 / 3.5], [4 / 3.5, 10 / 3.5]])
     assert (d / "plots/deep_learning_plain_HIPE_2.png").stat().st_size > 0
     assert (d / "plots/optimization_HIPE_2.png").stat().st_size > 0
+
+    # corrupted states: a 1 s lag reads each state one sample earlier (the first keeps its own), the rest linked
+    states_split.to_csv(d / "data/HIPE/2/states.csv", index=False)
+    corrupt_main(
+        ["--dataset", "hipe", "--machines", "2", "--lag", "1", "--data-root", str(d / "data"), "--out", str(d / "lag")]
+    )
+    lagged = pd.read_csv(d / "lag/HIPE/2/states_validation.csv")
+    assert lagged.iloc[:, 1:].to_numpy().tolist() == [[1, 0], [1, 0], [1, 1]] and list(lagged.Time) == ts
+    assert (d / "lag/HIPE/2/aggregate_training.csv").is_symlink()
+
+# flips change about that share of the entries
+many = pd.DataFrame(
+    {"Time": pd.date_range("2017-10-23", periods=20000, freq="s").strftime("%d-%b-%Y %H:%M:%S"), "s": 0}
+)
+assert 0.09 < corrupt(many, 0, 0.1, np.random.default_rng(0)).s.mean() < 0.11
 
 print("ok")
