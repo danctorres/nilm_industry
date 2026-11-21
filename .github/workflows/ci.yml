@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - run: cmake -S src/optimization -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake -S src/optimization -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
       - run: cmake --build build -j
       - run: ctest --test-dir build --output-on-failure
   sanitize:
