@@ -8,6 +8,13 @@ jobs:
       - run: cmake -S src/optimization -B build -DCMAKE_BUILD_TYPE=Release
       - run: cmake --build build -j
       - run: ctest --test-dir build --output-on-failure
+  sanitize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: cmake -S src/optimization -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
+      - run: cmake --build build -j
+      - run: ctest --test-dir build --output-on-failure
   python:
     runs-on: ubuntu-24.04
     steps:
