@@ -1,7 +1,11 @@
 """Self-check of the network and its loss: python3 src/deep_learning/test_nn.py"""
 
+import tempfile
+from pathlib import Path
+
 import numpy as np
-from main import build, inputs
+import pandas as pd
+from main import build, inputs, main
 from nn import loss, loss_d
 
 rng = np.random.default_rng(0)
@@ -28,4 +32,28 @@ net.learning_rate = 0.01
 print(f"loss {net.train(x, t, s, 500):.2e}")
 gap = np.abs(np.sum(net.estimate(x) * s, axis=1, keepdims=True) - t).max()
 assert gap < 0.02, gap
-print(f"ok, largest |sum of estimates - aggregate| = {gap:.4f}")
+print(f"largest |sum of estimates - aggregate| = {gap:.4f}")
+
+# end to end: reads the split files, writes one estimate per machine for every validation row, OFF machines 0
+with tempfile.TemporaryDirectory() as name:
+    d = Path(name) / "HIPE" / "3"
+    d.mkdir(parents=True)
+    ts = pd.date_range("2017-10-23", periods=40, freq="s").strftime("%d-%b-%Y %H:%M:%S")
+    for split, rows in (("training", slice(10, None)), ("validation", slice(10))):
+        pd.DataFrame({"timestamp": ts, "active_power": t[:, 0]})[rows].to_csv(d / f"aggregate_{split}.csv", index=False)
+        pd.DataFrame({"timestamp": ts, **dict(enumerate(s.T))})[rows].to_csv(d / f"states_{split}.csv", index=False)
+        pd.DataFrame({"timestamp": ts, **dict(enumerate((s * [0.2, 0.3, 0.4]).T))})[rows].to_csv(
+            d / f"equipment_{split}.csv", index=False
+        )
+    argv = ["--dataset", "hipe", "--mode", "plain", "--machines", "3", "--runs", "1", "--epochs", "2"]
+    main([*argv, "--data-root", name, "--results-root", name])
+    out = pd.read_csv(Path(name) / "plain" / "HIPE" / "3.csv")
+    assert list(out.columns) == ["Timestamp", "Aggregate_Active_Power", "Estimate_0", "Estimate_1", "Estimate_2"]
+    assert list(out.Timestamp) == list(ts[:10]) and (out.iloc[:, 2:].to_numpy()[s[:10] == 0] == 0).all()
+    pd.read_csv(d / "states_validation.csv")[::-1].to_csv(d / "states_validation.csv", index=False)
+    try:
+        main([*argv, "--data-root", name, "--results-root", name])
+        raise AssertionError("timestamps that differ must be rejected")
+    except SystemExit:
+        pass
+print("ok")

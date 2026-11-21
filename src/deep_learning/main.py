@@ -5,33 +5,26 @@ Example: python3 src/deep_learning/main.py --dataset hipe --mode state --machine
 """
 
 import argparse
-import csv
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from nn import NN, ActivationLayer, ConnectedLayer, relu, relu_d, tanh_d
 
 REPO = Path(__file__).resolve().parents[2]
 
 
-def read_csv(path: Path):
-    """First column as strings (timestamps), the other columns as a float array."""
-    with path.open(newline="") as f:
-        rows = list(csv.reader(f))[1:]
-    return [r[0] for r in rows], np.array([[float(v) for v in r[1:]] for r in rows])
-
-
 def load(root: Path, dataset: str, n: int, split: str):
     """Timestamps, aggregate (rows, 1), states (rows, n), equipment power (rows, n)."""
     paths = [root / dataset.upper() / str(n) / f"{name}_{split}.csv" for name in ("aggregate", "states", "equipment")]
-    (timestamps, agg), (st_times, states), (eq_times, eq) = (read_csv(path) for path in paths)
-    agg = agg[:, :1]  # active power, further columns are not used
-    if states.shape != (len(agg), n) or eq.shape != (len(agg), n):
+    agg, states, eq = (pd.read_csv(path) for path in paths)
+    if states.shape != (len(agg), n + 1) or eq.shape != (len(agg), n + 1):
         raise SystemExit(f"expected {len(agg)} rows and {n} machine columns in {paths[1]} and {paths[2]}")
-    if not timestamps == st_times == eq_times:
+    if not (agg.iloc[:, 0].equals(states.iloc[:, 0]) and agg.iloc[:, 0].equals(eq.iloc[:, 0])):
         raise SystemExit(f"the timestamps of {', '.join(map(str, paths))} differ")
-    states[agg[:, 0] == 0] = 0  # a zero aggregate means every machine is off
-    return timestamps, agg, states, eq
+    power, states = agg.iloc[:, 1:2].to_numpy(float), states.iloc[:, 1:].to_numpy(float)
+    states[power[:, 0] == 0] = 0  # a zero aggregate means every machine is off
+    return agg.iloc[:, 0], power, states, eq.iloc[:, 1:].to_numpy(float)
 
 
 def inputs(mode: str, x: np.ndarray, states: np.ndarray) -> np.ndarray:
@@ -50,17 +43,15 @@ def build(mode: str, n: int, rng: np.random.Generator) -> NN:
     )
 
 
-def save(path: Path, timestamps, agg: np.ndarray, est: np.ndarray) -> None:
+def save(path: Path, timestamps: pd.Series, agg: np.ndarray, est: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w") as f:
-        f.write(
-            ", ".join(["Timestamp", "Aggregate_Active_Power"] + [f"Estimate_{j}" for j in range(est.shape[1])]) + "\n"
-        )
-        for ts, a, row in zip(timestamps, agg[:, 0].tolist(), est.tolist(), strict=True):
-            f.write(", ".join([ts, str(a)] + [str(v) for v in row]) + "\n")
+    out = pd.DataFrame(est, columns=[f"Estimate_{j}" for j in range(est.shape[1])])
+    out.insert(0, "Aggregate_Active_Power", agg[:, 0])
+    out.insert(0, "Timestamp", timestamps.to_numpy())
+    out.to_csv(path, index=False)
 
 
-def main() -> None:
+def main(argv=None) -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--dataset", choices=["hipe", "imdeld"], required=True)
     p.add_argument("--mode", choices=["plain", "state"], required=True)
@@ -72,7 +63,7 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
     p.add_argument("--results-root", type=Path, default=REPO / "results" / "deep_learning")
-    a = p.parse_args()
+    a = p.parse_args(argv)
     if a.runs < 1:
         p.error("--runs must be at least 1")
 
