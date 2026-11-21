@@ -71,13 +71,11 @@ def main(argv=None):
 
     eq, st = process(a.raw / "Equipment")
     sums = np.cumsum(eq.iloc[:, 1:].to_numpy(), axis=1)  # column n - 1: sum of the first n machines, added in order
-    every = a.out / str(sums.shape[1])  # the unsplit tables only for all machines, for hart_inspired.py
-    write_csv(st, every / "states.csv")
-    write_csv(eq, every / "equipment.csv")
-    write_csv(pd.DataFrame({"timestamp": eq.timestamp, "active_power": sums[:, -1]}), every / "aggregate.csv")
-
     for n in range(2, sums.shape[1] + 1):
         agg = pd.DataFrame({"timestamp": eq.timestamp, "active_power": sums[:, n - 1]})
+        write_csv(agg, a.out / str(n) / "aggregate.csv")
+        write_csv(eq.iloc[:, : n + 1], a.out / str(n) / "equipment.csv")
+        write_csv(st.iloc[:, : n + 1], a.out / str(n) / "states.csv")
         training, validation = split_train_validation(agg.active_power, TRAINING_RATIO, rng)
         for split, rows in (("training", training), ("validation", validation)):
             write_csv(agg.iloc[rows], a.out / str(n) / f"aggregate_{split}.csv")

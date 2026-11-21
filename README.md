@@ -49,10 +49,10 @@ Neither dataset is redistributed here. Obtain the raw data under each dataset's 
 * HIPE, High-resolution Industrial Production Energy dataset (Bischof et al.), KIT: https://www.energystatusdata.kit.edu/hipe.php
   `uv run src/preprocessing/fetch_hipe.py` downloads the one-week release (109 MB, checksum verified) and unpacks its ten machine files into `data/raw/HIPE/Equipment` (`SensorDateTime`, `P_kW`, ...); the first one alphabetically is always off and is dropped.
 
-Processed layout, the same for both datasets: `data/processed/<DATASET>/<N>/{aggregate,states,equipment}_{training,validation}.csv`, N the number of machines.
+Processed layout, the same for both datasets: `data/processed/<DATASET>/<N>/{aggregate,states,equipment}{,_training,_validation}.csv`, N the number of machines; the files without a suffix are the unsplit tables.
 Every file starts with a `timestamp` column; the aggregate's power column is `active_power`, then one column per machine. HIPE is in kW, IMDELD in W.
-* IMDELD: N = 6 is machines 1, 2, 3, 4, 7 and 8 in alphabetical file order, N = 8 all of them. Each folder also has the unsplit `aggregate.csv`, `states.csv` and `equipment.csv`.
-* HIPE: N = 2..9 is the first N machines, the aggregate their synthetic sum. The unsplit tables are written only to `HIPE/9`.
+* IMDELD: N = 6 is machines 1, 2, 3, 4, 7 and 8 in alphabetical file order, N = 8 all of them.
+* HIPE: N = 2..9 is the first N machines, the aggregate their synthetic sum.
 
 
 Reproduce
@@ -71,7 +71,7 @@ The preprocessing, baseline and validation were ported from MATLAB; the MATLAB v
 
 Methodology notes
 ------
-* Ground truth is smoothed with a 25-minute moving mean.
+* IMDELD signals are smoothed with a 25-minute moving mean; HIPE is not smoothed.
 * The HIPE training/validation aggregate is the synthetic sum of the selected machines, not the main meter.
 * On/off thresholds: flat 5 W for IMDELD; > 0 after spline fitting for HIPE.
 * The train/validation split takes the same number of samples (at most 700) from each aggregate bin and splits each bin 70/30 with a fixed seed.

@@ -89,16 +89,12 @@ with tempfile.TemporaryDirectory() as name:
     # layout and headers
     eq_cols = [f"Eq{k}_P_kW" for k in range(2, 11)]
     st_cols = [f"Eq{k}_State" for k in range(2, 11)]
-    expected = {  # the unsplit tables only for all nine machines
-        "9/states.csv": ["timestamp", *st_cols],
-        "9/equipment.csv": ["timestamp", *eq_cols],
-        "9/aggregate.csv": ["timestamp", "active_power"],
-    }
+    expected = {}
     for n in range(2, 10):
-        for s in ["training", "validation"]:
-            expected[f"{n}/aggregate_{s}.csv"] = ["timestamp", "active_power"]
-            expected[f"{n}/equipment_{s}.csv"] = ["timestamp", *eq_cols[:n]]
-            expected[f"{n}/states_{s}.csv"] = ["timestamp", *st_cols[:n]]
+        for s in ["", "_training", "_validation"]:
+            expected[f"{n}/aggregate{s}.csv"] = ["timestamp", "active_power"]
+            expected[f"{n}/equipment{s}.csv"] = ["timestamp", *eq_cols[:n]]
+            expected[f"{n}/states{s}.csv"] = ["timestamp", *st_cols[:n]]
     written = files(out)
     assert set(written) == set(expected), set(written) ^ set(expected)
     read = {f: pd.read_csv(out / f) for f in expected}
@@ -131,6 +127,7 @@ with tempfile.TemporaryDirectory() as name:
     # splits: disjoint, 70/30, rows aligned with the unsplit tables
     row = {t: i for i, t in enumerate(equipment.timestamp)}
     for n in range(2, 10):
+        assert np.allclose(read[f"{n}/aggregate.csv"].active_power, values[:, :n].sum(axis=1), rtol=0, atol=1e-9)
         tr, val = (read[f"{n}/aggregate_{s}.csv"] for s in ["training", "validation"])
         assert (
             len(val) and not set(tr.timestamp) & set(val.timestamp) and 0.41 < len(val) / len(tr) < 0.44

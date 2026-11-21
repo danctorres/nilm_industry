@@ -1,6 +1,6 @@
 """Hart-inspired oracle-state baseline, port of src/hart_inspired/hart_inspired.m: estimates each machine's power from
 the step in the aggregate at its OFF event. It reads the TRUE on/off states, so it is an oracle-state reference, not an
-unsupervised NILM method. It runs on the unsplit tables, which hipe.py writes only for all machines.
+unsupervised NILM method. It runs on the unsplit tables.
 Output: timestamp, active_power (the aggregate), then one estimate per machine, NaN where none was made.
 
 Example: python3 src/hart_inspired/hart_inspired.py --dataset hipe --machines 9
