@@ -86,25 +86,25 @@ Methodology notes
 * The train/validation split holds out whole blocks of time, 30% of them drawn with a fixed seed: hours for HIPE (one week only, idle at the weekend), days for IMDELD. Validation scores every row of its blocks; training draws the same number of rows (at most 490) from each aggregate bin of the other blocks, six bins of one standard deviation, the outer two open-ended so training includes the peaks. Rows near a block edge are left out (300 s for HIPE, longer than its largest gap between raw samples; 750 s for IMDELD, half the smoothing window), so the two sides share no raw samples.
 * UNN with `--mode state` is not identifiable: with the states as input, any split of the aggregate among the ON machines minimises its loss, so its estimates change with the seed. On HIPE/9, seeds 0 to 2 give MAE 0.053 ± 0.005 kW in state mode and 0.036 ± 0.001 kW in plain mode. On IMDELD/6 both modes change with the seed (plain: 25 ± 6 kW, against 20.5 kW for the zero baseline), so report UNN over several seeds.
 * EMUPF fitted sample by sample solves one equation in `4 x machines` unknowns per sample and averages the solutions (see [src/optimization/README.md](src/optimization/README.md#limitation-of-the-method)); `estimate --joint` fits one well-posed objective and is the version to compare.
-* On IMDELD the machines switch on and off together (state correlations 0.93 to 1.00), so no method that relies on the states can tell their power apart; compare against the baselines before reading anything into the IMDELD numbers.
+* On IMDELD the machines switch on and off together (state correlations 0.93 to 1.00), and 96% of the samples have every machine ON or every machine OFF, so no method that relies on the states can tell their power apart, and grouping the machines that switch together leaves one group; compare against the baselines before reading anything into the IMDELD numbers.
 * The IMDELD aggregate is a real meter and carries 2 to 3% of load from unmetered equipment, which the methods must assign to some machine.
+* The methods need exact states. `uv run src/validation/corrupt_states.py --dataset hipe --machines N (--lag S | --flip P) --out DIR` writes a copy of a set with every state reported S seconds late or each entry flipped with probability P; run the methods and the validation with `--data-root DIR`. Averaged over HIPE 2 to 9, Gaussian allocation's MAE grows from 10.5 W with the true states to 11.2 W with a 10 s lag, 27.5 W with a 60 s lag and 20.9 W with 1% of the entries flipped, against 31.2 W for the proportional baseline with the true states. With a 60 s lag it beats the best baseline, given the same states, in 4 of the 8 sets.
 
-Validation MAE in kW over all machines, from `validation.py` after the steps above (UNN `--seed 0`, EMUPF `--seed 1`):
+Validation MAE in kW over all machines from `validation.py`, mean ± standard deviation over three splits (preprocessing `--seed 1`, the default, then 2 and 3; UNN `--seed 0`, EMUPF `--seed 1`):
 
 | Method | HIPE, 9 | IMDELD, 6 | IMDELD, 8 |
 |---|---|---|---|
-| Gaussian allocation | 0.013 | 39.0 | 31.6 |
-| UNN plain | 0.035 | 17.7 | 23.5 |
-| UNN state | 0.051 | 27.1 | 27.5 |
-| EMUPF per sample | 0.043 | 23.5 | 19.1 |
-| EMUPF `--joint` | 0.033 | 19.4 | 20.7 |
-| Hart-inspired (estimates 17%, 10%, 15% of the ON samples) | 0.047 | 20.5 | 20.0 |
-| Baseline: zero | 0.047 | 20.5 | 20.0 |
-| Baseline: equal split | 0.034 | 24.7 | 18.8 |
-| Baseline: proportional | 0.030 | 39.4 | 33.5 |
+| Gaussian allocation | 0.021 ± 0.014 | 37.6 ± 1.5 | 31.7 ± 3.2 |
+| UNN plain | 0.039 ± 0.019 | 20.9 ± 2.9 | 22.8 ± 0.8 |
+| UNN state | 0.055 ± 0.015 | 26.6 ± 1.9 | 24.3 ± 3.4 |
+| EMUPF per sample | 0.047 ± 0.014 | 22.9 ± 0.8 | 18.6 ± 0.4 |
+| EMUPF `--joint` | 0.043 ± 0.022 | 19.4 ± 1.9 | 17.3 ± 3.5 |
+| Hart-inspired (estimates 7 to 17% of the ON samples) | 0.055 ± 0.016 | 19.9 ± 0.8 | 20.4 ± 0.4 |
+| Baseline: zero | 0.055 ± 0.016 | 19.9 ± 0.8 | 20.4 ± 0.4 |
+| Baseline: equal split | 0.039 ± 0.016 | 24.1 ± 1.0 | 19.0 ± 0.2 |
+| Baseline: proportional | 0.036 ± 0.012 | 37.4 ± 2.2 | 32.5 ± 3.5 |
 
-On HIPE, Gaussian allocation beats every baseline for every machine count from 2 to 9; in 5 of those 8 sets no other method beats the proportional baseline. On IMDELD no method beats the baselines reliably, and the best result changes with the UNN seed.
-
+The spread is mostly the split: which hours or days are held out. On HIPE, Gaussian allocation beats the best baseline in all 24 pairs of machine count (2 to 9) and split; UNN plain does in 5, UNN state and EMUPF `--joint` in 3, EMUPF per sample in none. On IMDELD, EMUPF `--joint` beats the best baseline in 4 of the 6 pairs, by less than the spread between splits, and the best method changes with the split.
 
 Development
 ------
