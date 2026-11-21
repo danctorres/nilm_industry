@@ -1,7 +1,6 @@
 # Created by danctorres
 
 import numpy as np
-
 from NN_model.loss_function import loss, loss_d
 
 
@@ -20,7 +19,7 @@ class NN:
         """Per-sample SGD, returns the mean training loss after the last epoch."""
         for _ in range(epochs):
             for i in range(len(x)):
-                grad = loss_d(self.estimate(x[i:i + 1]), t[i:i + 1], s[i:i + 1], p_min)
+                grad = loss_d(self.estimate(x[i : i + 1]), t[i : i + 1], s[i : i + 1], p_min)
                 for layer in reversed(self.layers):
                     grad = layer.back_prop(self.learning_rate, grad)
         return float(np.mean(loss(self.estimate(x), t, s, p_min)))

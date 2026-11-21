@@ -13,11 +13,11 @@ def loss(p: np.ndarray, t: np.ndarray, s: np.ndarray, p_min: np.ndarray) -> np.n
     """Loss of each sample, shape (n,)."""
     residual = t[:, 0] - np.sum(s * p, axis=1)
     below = np.maximum(p_min - p, 0.0)
-    return residual ** 2 + np.sum(s * 27.0 * below ** 3, axis=1)
+    return residual**2 + np.sum(s * 27.0 * below**3, axis=1)
 
 
 def loss_d(p: np.ndarray, t: np.ndarray, s: np.ndarray, p_min: np.ndarray) -> np.ndarray:
     """dL/dp, shape (n, N). Zero for OFF machines."""
     residual = t - np.sum(s * p, axis=1, keepdims=True)
     below = np.maximum(p_min - p, 0.0)
-    return s * (-2.0 * residual - 81.0 * below ** 2)
+    return s * (-2.0 * residual - 81.0 * below**2)

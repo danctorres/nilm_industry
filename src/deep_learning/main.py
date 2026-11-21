@@ -10,7 +10,6 @@ import csv
 from pathlib import Path
 
 import numpy as np
-
 from NN_model.Activation_layer import Activation_layer, relu, relu_d, tanh_d
 from NN_model.Connected_layer import Connected_layer
 from NN_model.NN import NN
@@ -37,8 +36,11 @@ def load(root: Path, dataset: str, n: int, split: str):
     """Timestamps, aggregate (rows, 1), states (rows, n), equipment power (rows, n)."""
     if dataset == "hipe":
         d = root / "HIPE" / "1_week"
-        paths = [d / f"aggregate_{split}" / f"agg_{split}_{n}.csv", d / f"state_{split}" / f"st_{split}_{n}.csv",
-                 d / f"equipment_{split}" / f"eq_{split}_{n}.csv"]
+        paths = [
+            d / f"aggregate_{split}" / f"agg_{split}_{n}.csv",
+            d / f"state_{split}" / f"st_{split}_{n}.csv",
+            d / f"equipment_{split}" / f"eq_{split}_{n}.csv",
+        ]
     else:
         d = root / "IMDELD" / f"data_{n}_equipment"
         paths = [d / f"aggregate_{split}.csv", d / f"on_off_{split}.csv", d / f"equipment_{split}.csv"]
@@ -61,15 +63,23 @@ def inputs(mode: str, x: np.ndarray, states: np.ndarray) -> np.ndarray:
 
 def build(mode: str, n: int, rng: np.random.Generator) -> NN:
     n_in, hidden = {"plain": (1, n + 1), "state": (1 + n, n + 2), "fourier": (2 * K, 20)}[mode]
-    return NN([Connected_layer(n_in, hidden, rng), Activation_layer(relu, relu_d),
-               Connected_layer(hidden, n, rng), Activation_layer(np.tanh, tanh_d)])
+    return NN(
+        [
+            Connected_layer(n_in, hidden, rng),
+            Activation_layer(relu, relu_d),
+            Connected_layer(hidden, n, rng),
+            Activation_layer(np.tanh, tanh_d),
+        ]
+    )
 
 
 def save(path: Path, timestamps, agg: np.ndarray, est: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
-        f.write(", ".join(["Timestamp", "Aggregate_Active_Power"] + [f"Estimate_{j}" for j in range(est.shape[1])]) + "\n")
-        for ts, a, row in zip(timestamps, agg[:, 0].tolist(), est.tolist()):
+        f.write(
+            ", ".join(["Timestamp", "Aggregate_Active_Power"] + [f"Estimate_{j}" for j in range(est.shape[1])]) + "\n"
+        )
+        for ts, a, row in zip(timestamps, agg[:, 0].tolist(), est.tolist(), strict=True):
             f.write(", ".join([ts, str(a)] + [str(v) for v in row]) + "\n")
 
 
@@ -78,7 +88,9 @@ def main() -> None:
     p.add_argument("--dataset", choices=["hipe", "imdeld"], required=True)
     p.add_argument("--mode", choices=["plain", "state", "fourier"], required=True)
     p.add_argument("--machines", type=int, required=True)
-    p.add_argument("--runs", type=int, default=5, help="networks trained from different initial weights, the lowest loss wins")
+    p.add_argument(
+        "--runs", type=int, default=5, help="networks trained from different initial weights, the lowest loss wins"
+    )
     p.add_argument("--epochs", type=int, default=1000)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
@@ -109,7 +121,11 @@ def main() -> None:
         print(f"machine {j}: MAE {np.mean(np.abs(err[:, j])):.4g}, RMSE {np.sqrt(np.mean(err[:, j] ** 2)):.4g}")
 
     out = a.results_root / ("HIPE/1_week" if a.dataset == "hipe" else "IMDELD")
-    out = out / {"plain": "", "state": "states", "fourier": "fourier"}[a.mode] / f"estimated_active_power_{a.machines}.csv"
+    out = (
+        out
+        / {"plain": "", "state": "states", "fourier": "fourier"}[a.mode]
+        / f"estimated_active_power_{a.machines}.csv"
+    )
     save(out, ts, agg_val, est)
     print(f"saved {out}")
 

@@ -2,7 +2,6 @@
 """Self-check of the network and its loss: python3 src/deep_learning/test_nn.py"""
 
 import numpy as np
-
 from main import build, inputs
 from NN_model.loss_function import loss, loss_d
 
