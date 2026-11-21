@@ -12,14 +12,6 @@ import numpy as np
 from nn import NN, ActivationLayer, ConnectedLayer, relu, relu_d, tanh_d
 
 REPO = Path(__file__).resolve().parents[2]
-K = 8  # Fourier frequencies
-
-
-def features(x: np.ndarray) -> np.ndarray:
-    """Fourier features of x (n, 1) in [0, 1]: sin and cos of pi k x for k = 1..K, shape (n, 2K).
-    Half periods keep the map one-to-one on [0, 1], so the lowest and highest aggregate stay distinct."""
-    angle = np.pi * x * np.arange(1, K + 1)
-    return np.hstack([np.sin(angle), np.cos(angle)])
 
 
 def read_csv(path: Path):
@@ -42,15 +34,11 @@ def load(root: Path, dataset: str, n: int, split: str):
 
 
 def inputs(mode: str, x: np.ndarray, states: np.ndarray) -> np.ndarray:
-    if mode == "state":
-        return np.hstack([x, states])
-    if mode == "fourier":
-        return features(x)
-    return x
+    return np.hstack([x, states]) if mode == "state" else x
 
 
 def build(mode: str, n: int, rng: np.random.Generator) -> NN:
-    n_in, hidden = {"plain": (1, n + 1), "state": (1 + n, n + 2), "fourier": (2 * K, 20)}[mode]
+    n_in, hidden = {"plain": (1, n + 1), "state": (1 + n, n + 2)}[mode]
     return NN(
         [
             ConnectedLayer(n_in, hidden, rng),
@@ -74,7 +62,7 @@ def save(path: Path, timestamps, agg: np.ndarray, est: np.ndarray) -> None:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--dataset", choices=["hipe", "imdeld"], required=True)
-    p.add_argument("--mode", choices=["plain", "state", "fourier"], required=True)
+    p.add_argument("--mode", choices=["plain", "state"], required=True)
     p.add_argument("--machines", type=int, required=True)
     p.add_argument(
         "--runs", type=int, default=5, help="networks trained from different initial weights, the lowest loss wins"
