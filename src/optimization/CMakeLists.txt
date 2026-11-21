@@ -22,10 +22,11 @@ include(${DOCTEST_CMAKE_HELPER})
 
 foreach(exe estimate validate tests)
   add_executable(${exe} ${exe}.cpp)
-  if(OpenMP_CXX_FOUND)
-    target_link_libraries(${exe} PRIVATE OpenMP::OpenMP_CXX)
-  endif()
 endforeach()
+
+if(OpenMP_CXX_FOUND)
+  target_link_libraries(estimate PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 target_link_libraries(tests PRIVATE doctest::doctest_with_main)
 
