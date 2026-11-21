@@ -32,3 +32,11 @@ target_link_libraries(tests PRIVATE doctest::doctest_with_main)
 
 enable_testing()
 doctest_discover_tests(tests)
+
+# estimate, then validate on its coefficients, on a tiny set: both must exit 0
+set(td ${CMAKE_CURRENT_SOURCE_DIR}/testdata)
+add_test(NAME end_to_end_estimate
+         COMMAND estimate ${td}/aggregate.csv ${td}/states.csv coef.csv --cycles 1 --iters 20 --seed 1)
+add_test(NAME end_to_end_validate COMMAND validate ${td}/aggregate.csv ${td}/states.csv coef.csv estimates.csv)
+set_tests_properties(end_to_end_estimate PROPERTIES FIXTURES_SETUP coef)
+set_tests_properties(end_to_end_validate PROPERTIES FIXTURES_REQUIRED coef)
