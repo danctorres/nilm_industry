@@ -47,19 +47,20 @@ The first configure downloads [doctest](https://github.com/doctest/doctest) for 
 ```sh
 # IMDELD, 6 machines. OMP_NUM_THREADS controls parallelism.
 OMP_NUM_THREADS=8 build/estimate \
-    data/processed/IMDELD/data_6_equipment/aggregate_training.csv \
-    data/processed/IMDELD/data_6_equipment/on_off_training.csv \
-    results/optimization/IMDELD/estimated_coef_6.csv
+    data/processed/IMDELD/6/aggregate_training.csv \
+    data/processed/IMDELD/6/states_training.csv \
+    results/optimization/IMDELD/coef_6.csv
 
 build/validate \
-    data/processed/IMDELD/data_6_equipment/aggregate_validation.csv \
-    data/processed/IMDELD/data_6_equipment/on_off_validation.csv \
-    data/processed/IMDELD/data_6_equipment/equipment_validation.csv \
-    results/optimization/IMDELD/estimated_coef_6.csv \
-    results/optimization/IMDELD/estimated_active_power_6.csv
+    data/processed/IMDELD/6/aggregate_validation.csv \
+    data/processed/IMDELD/6/states_validation.csv \
+    data/processed/IMDELD/6/equipment_validation.csv \
+    results/optimization/IMDELD/coef_6.csv \
+    results/optimization/IMDELD/6.csv
 ```
 
-HIPE uses the same commands with `data/processed/HIPE/1_week/{aggregate,state,equipment}_*/..._N.csv`.
+HIPE uses the same commands with `HIPE/<N>` in place of `IMDELD/6`. Keep the estimates at
+`results/optimization/<DATASET>/<N>.csv` so `src/validation/validation.py` finds them.
 
 `estimate` options: `--algorithm pso` (default), `--joint` (one optimisation of
 the mean per-sample objective over all samples, no averaging), `--cycles 5`, `--particles N`

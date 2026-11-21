@@ -73,18 +73,19 @@ assert list(change) == [1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, 1]
 with tempfile.TemporaryDirectory() as name:
     tmp = Path(name)
     time = (pd.Timestamp("2017-10-23") + pd.to_timedelta(np.arange(16), unit="s")).strftime("%d-%b-%Y %H:%M:%S")
-    names = ["Eq2", "Eq3", "Eq4", "Eq5", "Eq6"]
-    pd.DataFrame({"Time": time, "P_kW": agg}).to_csv(tmp / "aggregate.csv", index=False)
-    pd.DataFrame({"Time": time, **{f"{c}_State": states[:, j] for j, c in enumerate(names)}}).to_csv(
-        tmp / "states.csv", index=False
+    data = tmp / "data" / "HIPE" / "5"
+    data.mkdir(parents=True)
+    pd.DataFrame({"timestamp": time, "active_power": agg}).to_csv(data / "aggregate.csv", index=False)
+    pd.DataFrame({"timestamp": time, **{f"Eq{j}_State": states[:, j] for j in range(5)}}).to_csv(
+        data / "states.csv", index=False
     )
-    main(["--data", str(tmp), "--out", str(tmp / "out" / "estimations.csv")])
-    text = (tmp / "out" / "estimations.csv").read_text()
-    out = pd.read_csv(tmp / "out" / "estimations.csv")
+    main(["--dataset", "hipe", "--machines", "5", "--data-root", str(tmp / "data"), "--results-root", str(tmp)])
+    text = (tmp / "HIPE" / "5.csv").read_text()
+    out = pd.read_csv(tmp / "HIPE" / "5.csv")
 
-assert text.splitlines()[0] == "Time,P_kW,Eq2_P_kW,Eq3_P_kW,Eq4_P_kW,Eq5_P_kW,Eq6_P_kW"
+assert text.splitlines()[0] == "timestamp,active_power,Estimate_0,Estimate_1,Estimate_2,Estimate_3,Estimate_4"
 assert text.splitlines()[1] == "23-Oct-2017 00:00:00,5.0,0.0,0.0,0.0,0.0,NaN"
-assert list(out.Time) == list(time) and np.array_equal(out.P_kW, agg)
+assert list(out.timestamp) == list(time) and np.array_equal(out.active_power, agg)
 assert np.array_equal(out.iloc[:, 2:].to_numpy(), expected, equal_nan=True)
 
 print("ok")

@@ -3,7 +3,7 @@
 
 import numpy as np
 from main import build, inputs
-from NN_model.loss_function import loss, loss_d
+from nn import loss, loss_d
 
 rng = np.random.default_rng(0)
 

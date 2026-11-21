@@ -1,2 +1,0 @@
-results/optimization/IMDELD/estimated_active_power.csv filter=lfs diff=lfs merge=lfs -text
-results/deep_learning/HIPE/1_week/estimated_active_power.csv filter=lfs diff=lfs merge=lfs -text

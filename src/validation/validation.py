@@ -2,9 +2,10 @@
 
     python3 src/validation/validation.py [--data-root DIR] [--results-root DIR] [--plots DIR]
 
-Every estimate file estimated_active_power_<N>.csv is paired with the ground truth for N machines; runs without
-estimate files are skipped. Prints, per run, the errors per machine and of the reconstructed aggregate (the sum of the
-machine estimates against the measured aggregate)."""
+Every estimate file results/<method>/<DATASET>/<N>.csv is paired with the ground truth
+data/processed/<DATASET>/<N>/equipment_validation.csv (equipment.csv for the oracle-state baseline, which runs on the
+unsplit tables). Prints, per file, the errors per machine and of the reconstructed aggregate (the sum of the machine
+estimates against the measured aggregate)."""
 
 import argparse
 from pathlib import Path
@@ -14,6 +15,7 @@ import pandas as pd
 from matplotlib.figure import Figure
 
 REPO = Path(__file__).resolve().parents[2]
+DATASETS = ("HIPE", "IMDELD")
 
 
 def read_csv(path: Path) -> pd.DataFrame:
@@ -85,55 +87,27 @@ def main(argv=None) -> None:
     p.add_argument("--plots", type=Path, help="also save true-against-estimated plots as PNG files in this folder")
     a = p.parse_args(argv)
 
-    hipe, imdeld = a.data_root / "HIPE" / "1_week", a.data_root / "IMDELD"
-    opt, dl = a.results_root / "optimization", a.results_root / "deep_learning"
-
-    def hipe_truth(n: int) -> Path:
-        return hipe / "equipment_validation" / f"eq_validation_{n}.csv"
-
-    def imdeld_truth(n: int) -> Path:
-        return imdeld / f"data_{n}_equipment" / "equipment_validation.csv"
-
-    # label, folder with estimated_active_power_<N>.csv, ground truth for N machines, values in W (shown in kW)
-    runs = [
-        ("EMUPF HIPE", opt / "HIPE" / "1_week", hipe_truth, False),
-        ("EMUPF IMDELD", opt / "IMDELD", imdeld_truth, True),
-        ("UNN states HIPE", dl / "HIPE" / "1_week" / "states", hipe_truth, False),
-        ("UNN Fourier HIPE", dl / "HIPE" / "1_week" / "fourier", hipe_truth, False),
-        ("UNN states IMDELD", dl / "IMDELD" / "states", imdeld_truth, True),
-        ("UNN Fourier IMDELD", dl / "IMDELD" / "fourier", imdeld_truth, True),
-    ]
-    pairs = []
-    for label, folder, truth, w_to_kw in runs:
-        files = [f for f in folder.glob("estimated_active_power_*.csv") if f.stem.rsplit("_", 1)[1].isdigit()]
-        files.sort(key=lambda f: int(f.stem.rsplit("_", 1)[1]))
-        if not files:
-            print(f"skipped {label}: no estimated_active_power_<N>.csv in {folder}")
-        for f in files:
-            n = int(f.stem.rsplit("_", 1)[1])
-            pairs.append((label, f"{n} machines", truth(n), f, w_to_kw))
-    # The oracle-state baseline (hart_inspired.py) reads the true states of the whole HIPE week
-    oracle = a.results_root / "hart_inspired" / "HIPE" / "1_week" / "estimations" / "estimations.csv"
-    if oracle.exists():
-        pairs.append(("Oracle-state baseline HIPE", "whole week", hipe / "undivided" / "equipment.csv", oracle, False))
-    else:
-        print(f"skipped Oracle-state baseline HIPE: no {oracle}")
-
-    for label, what, truth_path, est_path, w_to_kw in pairs:
+    files = sorted(
+        (f for f in a.results_root.rglob("*.csv") if f.stem.isdigit() and f.parent.name in DATASETS),
+        key=lambda f: (f.parent, int(f.stem)),
+    )
+    if not files:
+        print(f"no <method>/<DATASET>/<N>.csv in {a.results_root}")
+    for est_path in files:
+        dataset, n = est_path.parent.name, est_path.stem
+        method = est_path.parent.parent.relative_to(a.results_root).as_posix()  # e.g. deep_learning/state
+        oracle = method == "hart_inspired"
+        truth_path = a.data_root / dataset / n / ("equipment.csv" if oracle else "equipment_validation.csv")
+        w_to_kw = dataset == "IMDELD"  # IMDELD is in W, shown in kW
         truth, est = read_csv(truth_path), read_csv(est_path)
-        if label.startswith("Oracle"):
-            est = est.fillna(0)  # NaN means no estimate was possible, scored as 0 kW
+        if oracle:
+            est = est.fillna(0)  # NaN means no estimate was possible, scored as 0
+        label = f"{method} {dataset}, {n} machines"
         per_machine, aggregate = errors(truth, est, w_to_kw, f"{est_path} against {truth_path}")
-        print(f"\n{label}, {what}, per machine (MAE, MSE, RMSE in kW):\n{per_machine.to_string(index=False)}")
-        print(f"{label}, {what}, aggregate reconstruction:\n{aggregate.to_string(index=False)}")
+        print(f"\n{label}, per machine (MAE, MSE, RMSE in kW):\n{per_machine.to_string(index=False)}")
+        print(f"{label}, aggregate reconstruction:\n{aggregate.to_string(index=False)}")
         if a.plots:
-            plot(
-                a.plots / f"{label.replace(' ', '_')}_{what.replace(' ', '_')}.png",
-                f"{label}, {what}",
-                truth,
-                est,
-                "W" if w_to_kw else "kW",
-            )
+            plot(a.plots / f"{method.replace('/', '_')}_{dataset}_{n}.png", label, truth, est, "W" if w_to_kw else "kW")
 
 
 if __name__ == "__main__":

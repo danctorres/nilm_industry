@@ -28,25 +28,34 @@ try:
 except SystemExit:
     pass
 
-# end to end: estimates written with ", " separators are paired with the ground truth by machine count
+# end to end: every results/<method>/<DATASET>/<N>.csv, at any depth, is paired with the ground truth for N machines;
+# estimates written with ", " separators, the oracle-state baseline against the unsplit table with NaN scored as 0
 with tempfile.TemporaryDirectory() as name:
     d = Path(name)
-    (d / "data/HIPE/1_week/equipment_validation").mkdir(parents=True)
-    truth.to_csv(d / "data/HIPE/1_week/equipment_validation/eq_validation_2.csv", index=False)
-    out = d / "results/optimization/HIPE/1_week"
-    out.mkdir(parents=True)
-    (out / "estimated_active_power_2.csv").write_text(
-        "Timestamp, Aggregate_Active_Power, Estimate_0, Estimate_1\n"
-        + "".join(
-            f"{t}, {a}, {e0}, {e1}\n"
-            for t, a, e0, e1 in zip(ts, [1.0, 3.0, 4.0], [1.5, 2.0, 3.0], [0.0, 1.0, 1.0], strict=True)
-        )
+    (d / "data/HIPE/2").mkdir(parents=True)
+    truth.to_csv(d / "data/HIPE/2/equipment_validation.csv", index=False)
+    truth.to_csv(d / "data/HIPE/2/equipment.csv", index=False)
+    rows = "".join(
+        f"{t}, {a}, {e0}, {e1}\n"
+        for t, a, e0, e1 in zip(ts, [1.0, 3.0, 4.0], [1.5, 2.0, 3.0], [0.0, 1.0, 1.0], strict=True)
+    )
+    for method in ["optimization", "deep_learning/plain"]:
+        (d / "results" / method / "HIPE").mkdir(parents=True)
+        (d / "results" / method / "HIPE/2.csv").write_text("Timestamp, Aggregate_Active_Power, E0, E1\n" + rows)
+    (d / "results/optimization/HIPE/coef_2.csv").write_text("Coef 0, Coef 1, Coef 2, Coef 3\n1, 2, 3, 4\n")
+    (d / "results/hart_inspired/HIPE").mkdir(parents=True)
+    (d / "results/hart_inspired/HIPE/2.csv").write_text(
+        f"timestamp,active_power,E0,E1\n{ts[0]},1,1,0\n{ts[1]},3,2,NaN\n{ts[2]},4,3,1\n"
     )
     printed = io.StringIO()
     with contextlib.redirect_stdout(printed):
         main(["--data-root", str(d / "data"), "--results-root", str(d / "results"), "--plots", str(d / "plots")])
     text = printed.getvalue()
-    assert "EMUPF HIPE, 2 machines" in text and "skipped EMUPF IMDELD" in text, text
-    assert (d / "plots/EMUPF_HIPE_2_machines.png").stat().st_size > 0
+    for label in ["optimization HIPE, 2 machines", "deep_learning/plain HIPE, 2 machines"]:
+        assert f"{label}, per machine" in text, text
+    assert "hart_inspired HIPE, 2 machines, per machine" in text and "coef" not in text, text
+    assert "NaN" not in text.split("hart_inspired")[1], text  # the oracle's missing estimates are scored as 0
+    assert (d / "plots/deep_learning_plain_HIPE_2.png").stat().st_size > 0
+    assert (d / "plots/optimization_HIPE_2.png").stat().st_size > 0
 
 print("ok")

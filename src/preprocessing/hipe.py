@@ -1,5 +1,5 @@
 """HIPE preprocessing, port of src/preprocessing/HIPE/main.m: turns the raw HIPE one-week machine files into
-data/processed/HIPE/1_week.
+data/processed/HIPE/<N>, N the number of machines summed into the aggregate.
 
 Example: python3 src/preprocessing/hipe.py [--raw DIR] [--out DIR] [--seed 1]
 """
@@ -45,16 +45,16 @@ def interp1_extrap(x: np.ndarray, xp: np.ndarray, fp: np.ndarray) -> np.ndarray:
 
 
 def process(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """main.m up to 'Save data before splitting': equipment power (Time, Eq<k>_P_kW) and states (Time, Eq<k>_State)
-    of machines 2..M on start_time:seconds(1):end_time, the span of every machine, machine 1 included.
-    retime(..., 'linear') uses its default EndValues 'extrap', so outside its own time range a machine is linearly
-    extrapolated. Every machine is on the same grid, so synchronize(..., 'union', 'spline') only puts them side by
-    side."""
+    """main.m up to 'Save data before splitting': equipment power (timestamp, Eq<k>_P_kW) and states
+    (timestamp, Eq<k>_State) of machines 2..M on start_time:seconds(1):end_time, the span of every machine, machine 1
+    included. retime(..., 'linear') uses its default EndValues 'extrap', so outside its own time range a machine is
+    linearly extrapolated. Every machine is on the same grid, so synchronize(..., 'union', 'spline') only puts them
+    side by side."""
     machines = [read_machine(df) for df in read_equipment_csv(folder)]
     start, end = min(t[0] for t, _ in machines), max(t[-1] for t, _ in machines)
     grid = start + np.arange((end - start) // SECOND + 1) * SECOND
     x = (grid - start) / SECOND
-    eq, st = pd.DataFrame({"Time": grid}), pd.DataFrame({"Time": grid})
+    eq, st = pd.DataFrame({"timestamp": grid}), pd.DataFrame({"timestamp": grid})
     for k in range(2, len(machines) + 1):  # machine 1 is always OFF; columns keep the original equipment numbers
         t, p = machines[k - 1]
         eq[f"Eq{k}_P_kW"] = matlab_round(interp1_extrap(x, (t - start) / SECOND, p), 4)
@@ -65,24 +65,25 @@ def process(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw", type=Path, default=REPO / "data" / "raw" / "HIPE")
-    parser.add_argument("--out", type=Path, default=REPO / "data" / "processed" / "HIPE" / "1_week")
+    parser.add_argument("--out", type=Path, default=REPO / "data" / "processed" / "HIPE")
     parser.add_argument("--seed", type=int, default=1)
     a = parser.parse_args(argv)
     rng = np.random.default_rng(a.seed)  # one stream for every split, as rng(1) in main.m
 
     eq, st = process(a.raw / "Equipment")
     sums = np.cumsum(eq.iloc[:, 1:].to_numpy(), axis=1)  # column n - 1: sum of the first n machines, added in order
-    write_csv(st, a.out / "undivided" / "states.csv")
-    write_csv(eq, a.out / "undivided" / "equipment.csv")
-    write_csv(pd.DataFrame({"Time": eq.Time, "P_kW": sums[:, -1]}), a.out / "undivided" / "aggregate.csv")
+    every = a.out / str(sums.shape[1])  # the unsplit tables only for all machines, for hart_inspired.py
+    write_csv(st, every / "states.csv")
+    write_csv(eq, every / "equipment.csv")
+    write_csv(pd.DataFrame({"timestamp": eq.timestamp, "active_power": sums[:, -1]}), every / "aggregate.csv")
 
     for n in range(2, sums.shape[1] + 1):
-        agg = pd.DataFrame({"Time": eq.Time, "P_kW": sums[:, n - 1]})
-        training, validation = split_train_validation(agg.P_kW, TRAINING_RATIO, rng)
+        agg = pd.DataFrame({"timestamp": eq.timestamp, "active_power": sums[:, n - 1]})
+        training, validation = split_train_validation(agg.active_power, TRAINING_RATIO, rng)
         for split, rows in (("training", training), ("validation", validation)):
-            write_csv(agg.iloc[rows], a.out / f"aggregate_{split}" / f"agg_{split}_{n}.csv")
-            write_csv(eq.iloc[rows, : n + 1], a.out / f"equipment_{split}" / f"eq_{split}_{n}.csv")
-            write_csv(st.iloc[rows, : n + 1], a.out / f"state_{split}" / f"st_{split}_{n}.csv")
+            write_csv(agg.iloc[rows], a.out / str(n) / f"aggregate_{split}.csv")
+            write_csv(eq.iloc[rows, : n + 1], a.out / str(n) / f"equipment_{split}.csv")
+            write_csv(st.iloc[rows, : n + 1], a.out / str(n) / f"states_{split}.csv")
 
 
 if __name__ == "__main__":

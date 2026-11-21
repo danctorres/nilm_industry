@@ -1,5 +1,6 @@
-# raw datasets
-data/raw/*
+# inputs and generated outputs, see README
+/data/
+/results/
 
 # MATLAB autosave
 *.asv

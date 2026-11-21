@@ -23,12 +23,11 @@ The HIPE and the IMDELD datasets were preprocessed and used to train and validat
 Directory Structure
 ------
     .
-    ├── data
-    │   ├── raw                 # Original datasets (not versioned, obtain separately)
-    │   ├── interim             # Intermediate data
-    │   └── processed           # Preprocessed data (see Datasets)
+    ├── data                    # Not versioned
+    │   ├── raw                 # Original datasets, obtain separately (see Datasets)
+    │   └── processed           # Written by src/preprocessing (see Datasets)
     ├── docs                    # Documentation and report files
-    ├── results                 # Results from the methods developed
+    ├── results                 # Not versioned, written by the methods: <method>/<DATASET>/<N>.csv
     ├── src                     # Source files
     │   ├── deep_learning       # UNN method developed in Python
     │   ├── hart_inspired       # Hart-inspired baseline developed in Python
@@ -43,17 +42,17 @@ Directory Structure
 
 Datasets
 ------
-Neither dataset is redistributed here. Obtain the raw data under each dataset's own terms and place it in `data/raw`.
-The processed CSVs in `data/processed` are Git LFS pointers or outputs of older code; regenerate them with the preprocessing scripts (see [Reproduce](#reproduce)).
+Neither dataset is redistributed here. Obtain the raw data under each dataset's own terms and place it in `data/raw`; the preprocessing scripts generate everything else (see [Reproduce](#reproduce)).
 
 * IMDELD, Industrial Machines Dataset for Electrical Load Disaggregation (Martins et al.), IEEE DataPort: https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation
   Expected: `data/raw/IMDELD/Equipment/*.csv` (eight machines, columns `timestamp, active_power, reactive_power, apparent_power, current, voltage`), `data/raw/IMDELD/pelletizer-subcircuit.csv`, `data/raw/IMDELD/millingmachine-subcircuit.csv`.
 * HIPE, High-resolution Industrial Production Energy dataset (Bischof et al.), KIT: https://www.energystatusdata.kit.edu/hipe.php
   Expected: `data/raw/HIPE/Equipment/*.csv`, the ten one-week machine files (`SensorDateTime`, `P_kW`); the first one alphabetically is always off and is dropped.
 
-Processed layout:
-* `data/processed/IMDELD/data_{6,8}_equipment/{aggregate,on_off,equipment}_{training,validation}.csv` (the 6-machine set is machines 1, 2, 3, 4, 7 and 8 in alphabetical file order)
-* `data/processed/HIPE/1_week/{aggregate,state,equipment}_{training,validation}/..._N.csv`
+Processed layout, the same for both datasets: `data/processed/<DATASET>/<N>/{aggregate,states,equipment}_{training,validation}.csv`, N the number of machines.
+Every file starts with a `timestamp` column; the aggregate's power column is `active_power`, then one column per machine. HIPE is in kW, IMDELD in W.
+* IMDELD: N = 6 is machines 1, 2, 3, 4, 7 and 8 in alphabetical file order, N = 8 all of them. Each folder also has the unsplit `aggregate.csv`, `states.csv` and `equipment.csv`.
+* HIPE: N = 2..9 is the first N machines, the aggregate their synthetic sum. The unsplit tables are written only to `HIPE/9`.
 
 
 Reproduce
@@ -63,9 +62,9 @@ The Python code runs with [uv](https://docs.astral.sh/uv/): `uv run` creates the
 1. Get the raw data (see Datasets).
 2. Preprocess: `uv run src/preprocessing/imdeld.py` (add `--equipment 1,2,3,4,5,6,7,8` for the 8-machine set) and `uv run src/preprocessing/hipe.py`.
 3. EMUPF (CMake >= 3.20, C++20 compiler, GCC 13 tested, OpenMP optional): `cmake -S src/optimization -B build && cmake --build build -j && ctest --test-dir build`; then run `estimate` / `validate` as described in [src/optimization/README.md](src/optimization/README.md).
-4. UNN: `uv run src/deep_learning/main.py --dataset {hipe,imdeld} --mode {plain,state,fourier} --machines N [--runs R] [--epochs E] [--seed S]`. Output: `results/deep_learning/<DATASET>/[1_week/]{,fourier/,states/}estimated_active_power_<N>.csv`.
-5. Hart-inspired baseline: `uv run src/hart_inspired/hart_inspired.py`. It uses the true on/off states, so it is an oracle reference, not an unsupervised method.
-6. Validation: `uv run src/validation/validation.py [--plots DIR]`. It pairs every `estimated_active_power_<N>.csv` with the ground truth for N machines and skips methods that have no results yet.
+4. UNN: `uv run src/deep_learning/main.py --dataset {hipe,imdeld} --mode {plain,state,fourier} --machines N [--runs R] [--epochs E] [--seed S]`. Output: `results/deep_learning/<mode>/<DATASET>/<N>.csv`.
+5. Hart-inspired baseline: `uv run src/hart_inspired/hart_inspired.py --dataset hipe --machines 9`. It runs on the unsplit tables and uses the true on/off states, so it is an oracle reference, not an unsupervised method. Output: `results/hart_inspired/<DATASET>/<N>.csv`.
+6. Validation: `uv run src/validation/validation.py [--plots DIR]`. It pairs every `results/<method>/<DATASET>/<N>.csv` with `data/processed/<DATASET>/<N>/equipment_validation.csv` (`equipment.csv` for the Hart-inspired baseline).
 
 The preprocessing, baseline and validation were ported from MATLAB; the MATLAB versions used in the dissertation are in the git history.
 

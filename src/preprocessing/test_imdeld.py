@@ -67,7 +67,7 @@ def check_split(out: Path) -> None:
     counts = np.histogram(agg, edges)[0]
     n_bin = min(1000 * 0.7, counts[counts > 100].min())
     for split, share in [("training", 0.7), ("validation", 0.3)]:
-        tables = [pd.read_csv(out / f"{name}_{split}.csv") for name in ["aggregate", "on_off", "equipment"]]
+        tables = [pd.read_csv(out / f"{name}_{split}.csv") for name in ["aggregate", "states", "equipment"]]
         assert all(tables[0].iloc[:, 0].equals(t.iloc[:, 0]) for t in tables)
         per_bin = np.histogram(tables[0].active_power, edges)[0]
         assert list(per_bin) == [int(np.floor(n_bin * share)) * (c > 100) for c in counts]
@@ -108,10 +108,10 @@ def main() -> None:
         make_raw(raw, ["good", "short", "idle", "good"])
         imdeld.main(["--raw", str(raw), "--out", str(out)])
         imdeld.main(["--raw", str(raw), "--out", str(out), "--equipment", "1,2,3,4,5,6,7,8"])
-        six, eight = out / "data_6_equipment", out / "data_8_equipment"
+        six, eight = out / "6", out / "8"
 
         # layout and headers
-        names = ["aggregate", "on_off", "equipment"]
+        names = ["aggregate", "states", "equipment"]
         files = [f"{n}{s}.csv" for n in names for s in ["", "_training", "_validation"]]
         assert sorted(p.name for p in six.iterdir()) == sorted(files)
         machines = [1, 2, 3, 4, 7, 8]
@@ -120,7 +120,7 @@ def main() -> None:
         for s in ["_training", "_validation"]:
             assert header(six / f"aggregate{s}.csv") == ["timestamp", *imdeld.UNITS, "power_factor"]
         for s in ["", "_training", "_validation"]:
-            assert header(six / f"on_off{s}.csv") == ["Timestamp", *states]
+            assert header(six / f"states{s}.csv") == ["timestamp", *states]
             assert header(six / f"equipment{s}.csv") == ["timestamp", *[f"active_power_{k}" for k in machines]]
         assert (six / "aggregate.csv").read_text().split("\n")[1].startswith("21-Feb-2018 00:00:00,")
         some = np.array([0, 86399, 86400 * 40 + 3723, 86400 * 400 + 7], dtype=float) + 1519171200
@@ -129,13 +129,13 @@ def main() -> None:
         )
 
         # kept days: the short and the idle day are gone, the others have every second
-        equipment, on_off = pd.read_csv(six / "equipment.csv"), pd.read_csv(six / "on_off.csv")
+        equipment, on_off = pd.read_csv(six / "equipment.csv"), pd.read_csv(six / "states.csv")
         when = pd.to_datetime(equipment.timestamp, format=TIME_FORMAT)
         days = when.dt.normalize().value_counts().sort_index().to_dict()
         assert days == {START: 86400, START + pd.Timedelta(days=3): 86400}
         assert (when.diff().dropna() != pd.Timedelta(seconds=1)).sum() == 1
         a6 = pd.read_csv(six / "aggregate.csv")
-        assert equipment.timestamp.equals(on_off.Timestamp) and equipment.timestamp.equals(a6.timestamp)
+        assert equipment.timestamp.equals(on_off.timestamp) and equipment.timestamp.equals(a6.timestamp)
         assert (equipment.iloc[:, 1:] >= 0).all().all() and (a6.active_power >= 0).all()
         assert (pd.read_csv(six / "aggregate_training.csv").iloc[:, 1:6] >= 0).all().all()
         assert np.array_equal(on_off.iloc[:, 1:].to_numpy(), (equipment.iloc[:, 1:].to_numpy() > 5).astype(int))
@@ -148,7 +148,7 @@ def main() -> None:
         assert pd.read_csv(six / "aggregate_training.csv").timestamp.equals(drawn)
 
         # all eight machines: LVDB-3 added to LVDB-2, unit by unit
-        assert pd.read_csv(eight / "on_off.csv").columns[-4:-2].tolist() == ["State MI", "State MII"]
+        assert pd.read_csv(eight / "states.csv").columns[-4:-2].tolist() == ["State MI", "State MII"]
         t = seconds(when)
         lvdb3 = imdeld.read_lvdb_csv(raw / "millingmachine-subcircuit.csv", t)
         assert lvdb3.active_power.mean() > 1000

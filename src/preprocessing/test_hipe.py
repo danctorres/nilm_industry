@@ -89,16 +89,16 @@ with tempfile.TemporaryDirectory() as name:
     # layout and headers
     eq_cols = [f"Eq{k}_P_kW" for k in range(2, 11)]
     st_cols = [f"Eq{k}_State" for k in range(2, 11)]
-    expected = {
-        "undivided/states.csv": ["Time", *st_cols],
-        "undivided/equipment.csv": ["Time", *eq_cols],
-        "undivided/aggregate.csv": ["Time", "P_kW"],
+    expected = {  # the unsplit tables only for all nine machines
+        "9/states.csv": ["timestamp", *st_cols],
+        "9/equipment.csv": ["timestamp", *eq_cols],
+        "9/aggregate.csv": ["timestamp", "active_power"],
     }
     for n in range(2, 10):
         for s in ["training", "validation"]:
-            expected[f"aggregate_{s}/agg_{s}_{n}.csv"] = ["Time", "P_kW"]
-            expected[f"equipment_{s}/eq_{s}_{n}.csv"] = ["Time", *eq_cols[:n]]
-            expected[f"state_{s}/st_{s}_{n}.csv"] = ["Time", *st_cols[:n]]
+            expected[f"{n}/aggregate_{s}.csv"] = ["timestamp", "active_power"]
+            expected[f"{n}/equipment_{s}.csv"] = ["timestamp", *eq_cols[:n]]
+            expected[f"{n}/states_{s}.csv"] = ["timestamp", *st_cols[:n]]
     written = files(out)
     assert set(written) == set(expected), set(written) ^ set(expected)
     read = {f: pd.read_csv(out / f) for f in expected}
@@ -107,11 +107,12 @@ with tempfile.TemporaryDirectory() as name:
 
     # 1 s grid from start_time (machine 1, .02 s) to end_time (machine 1, 7300.02 s), written as MATLAB displays it
     eq, st = process(tmp / "raw" / "Equipment")
-    assert len(eq) == 7301 and eq.Time.iloc[0] == pd.Timestamp("2017-10-23 00:00:00.02")
-    assert (eq.Time.diff().iloc[1:] == pd.Timedelta(1, "s")).all()
-    equipment, states, aggregate = (read[f"undivided/{f}.csv"] for f in ["equipment", "states", "aggregate"])
-    assert equipment.Time.iloc[0] == "23-Oct-2017 00:00:00" and equipment.Time.iloc[-1] == "23-Oct-2017 02:01:40"
-    assert (states.Time == equipment.Time).all() and (aggregate.Time == equipment.Time).all()
+    assert len(eq) == 7301 and eq.timestamp.iloc[0] == pd.Timestamp("2017-10-23 00:00:00.02")
+    assert (eq.timestamp.diff().iloc[1:] == pd.Timedelta(1, "s")).all()
+    equipment, states, aggregate = (read[f"9/{f}.csv"] for f in ["equipment", "states", "aggregate"])
+    assert equipment.timestamp.iloc[0] == "23-Oct-2017 00:00:00"
+    assert equipment.timestamp.iloc[-1] == "23-Oct-2017 02:01:40"
+    assert (states.timestamp == equipment.timestamp).all() and (aggregate.timestamp == equipment.timestamp).all()
     assert np.array_equal(equipment[eq_cols], eq[eq_cols])
 
     # machine 3 is extrapolated linearly (not clamped) from its first two samples (5.12 s, 1 kW), (7.62 s, 2 kW):
@@ -125,29 +126,29 @@ with tempfile.TemporaryDirectory() as name:
     values = equipment[eq_cols].to_numpy()
     assert np.array_equal(matlab_round(values, 4), values)
     assert np.array_equal(states[st_cols].to_numpy(), (values > 0).astype(int))
-    assert np.allclose(aggregate.P_kW, values.sum(axis=1), rtol=0, atol=1e-9)
+    assert np.allclose(aggregate.active_power, values.sum(axis=1), rtol=0, atol=1e-9)
 
-    # splits: disjoint, 70/30, rows aligned with the undivided tables
-    row = {t: i for i, t in enumerate(equipment.Time)}
+    # splits: disjoint, 70/30, rows aligned with the unsplit tables
+    row = {t: i for i, t in enumerate(equipment.timestamp)}
     for n in range(2, 10):
-        tr, val = (read[f"aggregate_{s}/agg_{s}_{n}.csv"] for s in ["training", "validation"])
+        tr, val = (read[f"{n}/aggregate_{s}.csv"] for s in ["training", "validation"])
         assert (
-            len(val) and not set(tr.Time) & set(val.Time) and 0.41 < len(val) / len(tr) < 0.44
+            len(val) and not set(tr.timestamp) & set(val.timestamp) and 0.41 < len(val) / len(tr) < 0.44
         )  # floor(0.3 n) / floor(0.7 n)
         for s, agg in (("training", tr), ("validation", val)):
-            rows = [row[t] for t in agg.Time]
-            assert (read[f"equipment_{s}/eq_{s}_{n}.csv"].Time == agg.Time).all()
-            assert (read[f"state_{s}/st_{s}_{n}.csv"].Time == agg.Time).all()
-            assert np.array_equal(read[f"equipment_{s}/eq_{s}_{n}.csv"][eq_cols[:n]], values[rows, :n])
-            assert np.array_equal(read[f"state_{s}/st_{s}_{n}.csv"][st_cols[:n]], states[st_cols[:n]].to_numpy()[rows])
-            assert np.allclose(agg.P_kW, values[rows, :n].sum(axis=1), rtol=0, atol=1e-9)
+            rows = [row[t] for t in agg.timestamp]
+            eq_split, st_split = read[f"{n}/equipment_{s}.csv"], read[f"{n}/states_{s}.csv"]
+            assert (eq_split.timestamp == agg.timestamp).all() and (st_split.timestamp == agg.timestamp).all()
+            assert np.array_equal(eq_split[eq_cols[:n]], values[rows, :n])
+            assert np.array_equal(st_split[st_cols[:n]], states[st_cols[:n]].to_numpy()[rows])
+            assert np.allclose(agg.active_power, values[rows, :n].sum(axis=1), rtol=0, atol=1e-9)
 
     # determinism: same seed, same files; another seed, other splits
     main(["--raw", str(tmp / "raw"), "--out", str(tmp / "same")])
     main(["--raw", str(tmp / "raw"), "--out", str(tmp / "other"), "--seed", "2"])
     assert files(tmp / "same") == written
     other = files(tmp / "other")
-    assert other["undivided/equipment.csv"] == written["undivided/equipment.csv"]
-    assert other["aggregate_training/agg_training_2.csv"] != written["aggregate_training/agg_training_2.csv"]
+    assert other["9/equipment.csv"] == written["9/equipment.csv"]
+    assert other["2/aggregate_training.csv"] != written["2/aggregate_training.csv"]
 
 print("ok")

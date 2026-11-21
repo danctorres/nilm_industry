@@ -1,8 +1,9 @@
 """Hart-inspired oracle-state baseline, port of src/hart_inspired/hart_inspired.m: estimates each machine's power from
 the step in the aggregate at its OFF event. It reads the TRUE on/off states, so it is an oracle-state reference, not an
-unsupervised NILM method. Output: Time, P_kW (the aggregate), then one estimate per machine, NaN where none was made.
+unsupervised NILM method. It runs on the unsplit tables, which hipe.py writes only for all machines.
+Output: timestamp, active_power (the aggregate), then one estimate per machine, NaN where none was made.
 
-Example: python3 src/hart_inspired/hart_inspired.py [--data DIR] [--out FILE]
+Example: python3 src/hart_inspired/hart_inspired.py --dataset hipe --machines 9
 """
 
 import argparse
@@ -47,21 +48,20 @@ def estimate(states: np.ndarray, agg: np.ndarray, sample, machine, change) -> np
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data", type=Path, default=REPO / "data" / "processed" / "HIPE" / "1_week" / "undivided")
-    parser.add_argument(
-        "--out",
-        type=Path,
-        default=REPO / "results" / "hart_inspired" / "HIPE" / "1_week" / "estimations" / "estimations.csv",
-    )
+    parser.add_argument("--dataset", choices=["hipe", "imdeld"], required=True)
+    parser.add_argument("--machines", type=int, required=True)
+    parser.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
+    parser.add_argument("--results-root", type=Path, default=REPO / "results" / "hart_inspired")
     a = parser.parse_args(argv)
+    data = a.data_root / a.dataset.upper() / str(a.machines)
+    out = a.results_root / a.dataset.upper() / f"{a.machines}.csv"
 
-    agg = pd.read_csv(a.data / "aggregate.csv", dtype={"Time": str})
-    st = pd.read_csv(a.data / "states.csv", dtype={"Time": str})
-    states = st.iloc[:, 1:].to_numpy()
-    est = estimate(states, agg.P_kW.to_numpy(), *events(states))
-    names = [c.replace("_State", "_P_kW") for c in st.columns[1:]]
-    a.out.parent.mkdir(parents=True, exist_ok=True)
-    pd.concat([agg, pd.DataFrame(est, columns=names)], axis=1).to_csv(a.out, index=False, na_rep="NaN")
+    agg = pd.read_csv(data / "aggregate.csv", dtype={"timestamp": str})
+    states = pd.read_csv(data / "states.csv").iloc[:, 1:].to_numpy()
+    est = estimate(states, agg.active_power.to_numpy(), *events(states))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    names = [f"Estimate_{j}" for j in range(states.shape[1])]
+    pd.concat([agg, pd.DataFrame(est, columns=names)], axis=1).to_csv(out, index=False, na_rep="NaN")
 
 
 if __name__ == "__main__":

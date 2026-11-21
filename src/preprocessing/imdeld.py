@@ -1,4 +1,5 @@
-"""IMDELD preprocessing, port of the MATLAB main.m: raw IMDELD files to data/processed/IMDELD/data_<N>_equipment.
+"""IMDELD preprocessing, port of the MATLAB main.m: raw IMDELD files to data/processed/IMDELD/<N>, N the number of
+selected machines.
 python3 src/preprocessing/imdeld.py [--equipment 1,2,3,4,7,8] [--raw DIR] [--out DIR] [--seed 1]"""
 
 import argparse
@@ -113,9 +114,9 @@ def save_final_data(
     training / validation rows (in the split's shuffled order) written to out."""
     training, validation = split_train_validation(aggregate.active_power, TRAINING_RATIO, rng)
     write_csv(aggregate.iloc[:, :2], out / "aggregate.csv")
-    write_csv(on_off, out / "on_off.csv")
+    write_csv(on_off, out / "states.csv")
     write_csv(equipment, out / "equipment.csv")
-    for name, table in [("aggregate", aggregate), ("on_off", on_off), ("equipment", equipment)]:
+    for name, table in [("aggregate", aggregate), ("states", on_off), ("equipment", equipment)]:
         write_csv(table.iloc[training], out / f"{name}_training.csv")
         write_csv(table.iloc[validation], out / f"{name}_validation.csv")
 
@@ -148,8 +149,8 @@ def main(argv: list[str] | None = None) -> None:
     aggregate = calculate_aggregate_all_feature(a.raw, t, selected)
     aggregate.insert(0, "timestamp", timestamp)
     on_off = pd.DataFrame((power > ON_THRESHOLD_W).astype(int), columns=[STATE_NAMES[k - 1] for k in selected])
-    on_off.insert(0, "Timestamp", timestamp)
-    save_final_data(aggregate, on_off, equipment, rng, a.out / f"data_{len(selected)}_equipment")
+    on_off.insert(0, "timestamp", timestamp)
+    save_final_data(aggregate, on_off, equipment, rng, a.out / str(len(selected)))
 
 
 if __name__ == "__main__":

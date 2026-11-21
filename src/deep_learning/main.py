@@ -10,9 +10,7 @@ import csv
 from pathlib import Path
 
 import numpy as np
-from NN_model.Activation_layer import ActivationLayer, relu, relu_d, tanh_d
-from NN_model.Connected_layer import ConnectedLayer
-from NN_model.NN import NN
+from nn import NN, ActivationLayer, ConnectedLayer, relu, relu_d, tanh_d
 
 REPO = Path(__file__).resolve().parents[2]
 K = 8  # Fourier frequencies
@@ -34,16 +32,7 @@ def read_csv(path: Path):
 
 def load(root: Path, dataset: str, n: int, split: str):
     """Timestamps, aggregate (rows, 1), states (rows, n), equipment power (rows, n)."""
-    if dataset == "hipe":
-        d = root / "HIPE" / "1_week"
-        paths = [
-            d / f"aggregate_{split}" / f"agg_{split}_{n}.csv",
-            d / f"state_{split}" / f"st_{split}_{n}.csv",
-            d / f"equipment_{split}" / f"eq_{split}_{n}.csv",
-        ]
-    else:
-        d = root / "IMDELD" / f"data_{n}_equipment"
-        paths = [d / f"aggregate_{split}.csv", d / f"on_off_{split}.csv", d / f"equipment_{split}.csv"]
+    paths = [root / dataset.upper() / str(n) / f"{name}_{split}.csv" for name in ("aggregate", "states", "equipment")]
     timestamps, agg = read_csv(paths[0])
     agg = agg[:, :1]  # active power, further columns are not used
     states, eq = read_csv(paths[1])[1], read_csv(paths[2])[1]
@@ -122,12 +111,7 @@ def main() -> None:
     for j in range(a.machines):
         print(f"machine {j}: MAE {np.mean(np.abs(err[:, j])):.4g}, RMSE {np.sqrt(np.mean(err[:, j] ** 2)):.4g}")
 
-    out = a.results_root / ("HIPE/1_week" if a.dataset == "hipe" else "IMDELD")
-    out = (
-        out
-        / {"plain": "", "state": "states", "fourier": "fourier"}[a.mode]
-        / f"estimated_active_power_{a.machines}.csv"
-    )
+    out = a.results_root / a.mode / a.dataset.upper() / f"{a.machines}.csv"
     save(out, ts, agg_val, est)
     print(f"saved {out}")
 
