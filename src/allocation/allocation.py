@@ -33,7 +33,7 @@ def fit(a: np.ndarray, s: np.ndarray, iters: int = 500) -> tuple[np.ndarray, np.
     var = nnls(s, (a - s @ mu) ** 2)[0] + FLOOR
     for _ in range(iters):
         mean, spread = posterior(a, s, mu, var)
-        new_mu = mean.sum(axis=0) / count
+        new_mu = np.maximum(mean.sum(axis=0) / count, 0.0)
         var = np.maximum((s * (spread + (mean - new_mu) ** 2)).sum(axis=0) / count, FLOOR)
         converged = np.abs(new_mu - mu).max() < 1e-9
         mu = new_mu
