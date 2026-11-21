@@ -49,7 +49,7 @@ def process(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     included. retime(..., 'linear') uses its default EndValues 'extrap', so outside its own time range a machine is
     linearly extrapolated. Every machine is on the same grid, so synchronize(..., 'union', 'spline') only puts them
     side by side."""
-    machines = [read_machine(df) for df in read_equipment_csv(folder)]
+    machines = [read_machine(df) for df in read_equipment_csv(folder, ["SensorDateTime", "P_kW"])]
     start, end = min(t[0] for t, _ in machines), max(t[-1] for t, _ in machines)
     grid = start + np.arange((end - start) // SECOND + 1) * SECOND
     x = (grid - start) / SECOND

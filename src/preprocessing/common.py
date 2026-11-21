@@ -12,12 +12,12 @@ TIME_FORMAT = "%d-%b-%Y %H:%M:%S"  # MATLAB's default datetime display, used in 
 _CLOCK = np.array([f"{s // 3600:02d}:{s // 60 % 60:02d}:{s % 60:02d}" for s in range(86400)])
 
 
-def read_equipment_csv(folder: Path) -> list[pd.DataFrame]:
+def read_equipment_csv(folder: Path, usecols: list[str] | None = None) -> list[pd.DataFrame]:
     """One table per machine CSV in folder, in alphabetical file order: machine k is the k-th file."""
     files = sorted(Path(folder).glob("*.csv"))
     if not files:
         raise SystemExit(f"no csv files in {folder}")
-    return [pd.read_csv(f) for f in files]
+    return [pd.read_csv(f, usecols=usecols) for f in files]
 
 
 def movmean(x, k: int) -> np.ndarray:
