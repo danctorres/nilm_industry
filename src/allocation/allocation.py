@@ -19,7 +19,7 @@ FLOOR = 1e-6  # variance floor on the aggregate scaled to [0, 1], so the posteri
 
 def posterior(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Mean and variance of every machine's power given the aggregate a (T,) and the 0/1 states s (T, n); 0 when OFF."""
-    total = s @ var + FLOOR
+    total = np.maximum(s @ var, FLOOR)  # var is floored already: this only guards the rows with every machine OFF
     shift = (a - s @ mu) / total
     return s * (mu + var * shift[:, None]), s * (var - var**2 / total[:, None])
 
@@ -45,7 +45,7 @@ def fit(a: np.ndarray, s: np.ndarray, iters: int = 500) -> tuple[np.ndarray, np.
 def collinear(s: np.ndarray, threshold: float = 0.9) -> list[tuple[int, int]]:
     """Pairs of machines whose on/off states correlate above threshold: the aggregate cannot tell their power apart."""
     with np.errstate(divide="ignore", invalid="ignore"):  # a machine always ON or always OFF has no correlation
-        corr = np.corrcoef(s.T)
+        corr = np.atleast_2d(np.corrcoef(s.T))  # a 0-d array for one machine
     return [(int(i), int(j)) for i, j in zip(*np.nonzero(np.triu(corr > threshold, 1)), strict=True)]
 
 
@@ -65,6 +65,8 @@ def main(argv=None) -> None:
     if states.shape[1] != a.machines or val_states.shape[1] != a.machines:
         raise SystemExit(f"expected {a.machines} machine columns in {d}")
     train = ~agg.iloc[:, 0].isin(val.iloc[:, 0]).to_numpy()
+    if (~train).sum() != len(val):
+        raise SystemExit(f"the validation timestamps in {d} do not all match aggregate.csv once")
     power = agg.iloc[:, 1].to_numpy()
     scale = np.abs(power[train]).max() or 1.0
 

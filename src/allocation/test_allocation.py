@@ -19,11 +19,14 @@ assert np.allclose(fit_mu, mu, rtol=0.01), fit_mu
 assert np.allclose(np.sqrt(fit_var), sd, rtol=0.1), np.sqrt(fit_var)
 
 # independent machines raise no warning; a machine that copies another's states does
-assert collinear(s) == [] and collinear(np.c_[s, s[:, 1]]) == [(1, 3)]
+assert collinear(s) == [] and collinear(np.c_[s, s[:, 1]]) == [(1, 3)] and collinear(s[:, :1]) == []
 
 # the ON estimates add up to the aggregate, OFF machines are 0, and the steady machines keep their mean
 est = posterior(a, s, fit_mu, fit_var)[0]
 assert np.allclose(est.sum(axis=1), a, atol=1e-3) and (est[s == 0] == 0).all()
+# exactly, even for a machine at the variance floor
+one = posterior(np.array([0.31]), np.array([[1.0]]), np.array([0.3]), np.array([1e-6]))[0]
+assert np.isclose(one.item(), 0.31, rtol=0, atol=1e-12), one
 assert np.abs(est - p).mean() < 0.5 * np.abs(s * fit_mu - p).mean()
 
 # end to end: trains on the unsplit rows outside the validation split, estimates the validation rows
