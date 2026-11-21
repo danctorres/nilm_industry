@@ -1,4 +1,3 @@
-// Unit tests. Run: ctest --test-dir build, or ./tests for doctest's options (-tc=csv, -s, --help).
 // Test case names must not contain ";" (CMake splits them when registering with ctest).
 #include <doctest/doctest.h>
 

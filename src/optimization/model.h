@@ -25,18 +25,15 @@ inline std::span<const double> coefs_of(std::span<const double> all, std::size_t
     return all.subspan(machine * kCoefs, kCoefs);
 }
 
-// One aggregate sample with the machines' on/off states.
 struct Sample {
     double agg;
     std::span<const int> on;
 };
 
-// Estimated power of machine j for a sample; a machine that is off draws nothing.
 inline double estimate(std::span<const double> coefs, std::size_t j, const Sample& s) {
     return s.on[j] != 0 ? poly(coefs_of(coefs, j), s.agg) : 0.0;
 }
 
-// Sum of all machine estimates for a sample.
 inline double reconstruct(std::span<const double> coefs, const Sample& s) {
     double sum = 0.0;
     for (std::size_t j = 0; j < s.on.size(); ++j) sum += estimate(coefs, j, s);
@@ -56,7 +53,6 @@ inline double objective(std::span<const double> coefs, const Sample& s, double l
     return r * r + lambda * penalty;
 }
 
-// Largest absolute aggregate, or 1 when all are zero.
 inline double scale_of(std::span<const double> aggregate) {
     double s = 0.0;
     for (double a : aggregate) s = std::max(s, std::abs(a));
@@ -70,8 +66,6 @@ inline std::vector<double> unscale(std::vector<double> coefs, double scale) {
     return coefs;
 }
 
-// Mean of each machine's coefficients over the samples in which it was on.
-// Samples with an empty position are skipped; a machine never on keeps zeros.
 inline std::vector<double> average_on(std::span<const std::vector<double>> positions,
                                       std::span<const std::vector<int>> states, std::size_t machines) {
     std::vector<double> mean(machines * kCoefs, 0.0);

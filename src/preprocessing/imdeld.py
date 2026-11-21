@@ -66,7 +66,7 @@ def smooth_and_fill(x: np.ndarray, y: np.ndarray, xq: np.ndarray) -> np.ndarray:
     out = np.empty(len(xq))
     out[present] = y
     out[~present] = spline(x, y, xq[~present])
-    out[out < 0] = 0  # negative consumption not possible
+    out[out < 0] = 0
     return out
 
 
@@ -122,7 +122,6 @@ def save_final_data(
 
 
 def main(argv: list[str] | None = None) -> None:
-    """main.m"""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--equipment", default="1,2,3,4,7,8", help="machine numbers, 1..8 in alphabetical file order")
     p.add_argument("--raw", type=Path, default=REPO / "data" / "raw" / "IMDELD")

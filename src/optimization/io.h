@@ -1,5 +1,4 @@
 #pragma once
-// CSV input and output for the EMUPF datasets and results.
 #include <cctype>
 #include <charconv>
 #include <cmath>
@@ -132,7 +131,6 @@ inline void write_coefs(const std::filesystem::path& path, std::span<const doubl
     }
 }
 
-// Estimates file: timestamp, aggregate, then one estimated power column per machine.
 inline void write_estimates(const std::filesystem::path& path, const Dataset& d,
                             std::span<const std::vector<double>> est /* [machine][sample] */) {
     auto out = open_out(path);

@@ -16,7 +16,6 @@ from common import REPO, matlab_round, read_equipment_csv, split_train_validatio
 # spline synchronisation and rounding to 4 decimals
 ON_THRESHOLD_KW = 0
 TRAINING_RATIO = 0.7  # share of each adaptive bin used for training, the rest for validation
-# The aggregate written for N machines is the synthetic sum of those N machines, not the measured MainTerminal power.
 
 SECOND = np.timedelta64(1, "s")
 

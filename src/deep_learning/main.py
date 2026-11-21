@@ -1,4 +1,3 @@
-# Created by danctorres
 """Unsupervised NILM: a neural network splits the aggregate active power into one estimate per machine,
 trained only to make the estimates of the ON machines add up to the aggregate.
 

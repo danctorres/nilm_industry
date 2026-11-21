@@ -1,4 +1,3 @@
-# Created by danctorres
 """Self-check of the network and its loss: python3 src/deep_learning/test_nn.py"""
 
 import numpy as np

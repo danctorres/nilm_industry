@@ -5,8 +5,6 @@
 // over all samples and converted back to physical units. This repeats for
 // --cycles random restarts and keeps the coefficient set with the lowest
 // reconstruction MAE, also against a coefficient file that already exists.
-// With --joint there is one optimisation of the mean per-sample objective over
-// all samples instead, and no averaging.
 #include <algorithm>
 #include <charconv>
 #include <chrono>
@@ -42,9 +40,9 @@ using Params =
 struct Options {
     std::filesystem::path aggregate, states, out;
     std::string_view algorithm = "pso";
-    bool joint = false;  // one optimisation over all samples instead of one per sample
+    bool joint = false;
     int cycles = 5;
-    int particles = 0;  // population, archive, chains or starts; 0 = the algorithm's default
+    int particles = 0;
     int iters = 200;
     double threshold = 1e-5;  // on the normalised objective
     double bound = 1.0;       // coefficients are confined to [-bound, bound], in normalised units
@@ -186,9 +184,6 @@ struct Fit {
     double mean_fitness = 0.0, mean_iterations = 0.0, mean_evaluations = 0.0;  // over the optimised samples
 };
 
-// One pass over the dataset: one optimisation per sample on the normalised
-// aggregate, then the mean of each machine's coefficients over the samples in
-// which it was on, converted back to physical units.
 Fit fit(const nilm::Dataset& d, double scale, const Options& o, const Params& params, std::uint64_t seed) {
     const std::size_t machines = d.machines();
     const std::size_t dim = machines * nilm::kCoefs;

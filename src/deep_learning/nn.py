@@ -1,4 +1,3 @@
-# Created by danctorres
 """Fully connected network trained with per-sample SGD on the sum-constraint loss: the estimates of the machines
 that are ON must add up to the aggregate, and an ON machine estimated below its lowest training power is penalised.
     L = (t - sum_j s_j p_j)^2 + sum_j s_j 27 max(p_min_j - p_j, 0)^3

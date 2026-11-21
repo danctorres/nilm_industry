@@ -1,6 +1,4 @@
 #pragma once
-// Pieces shared by all optimizers: result type, stopping rule, random numbers,
-// finite-difference derivatives and a small SPD linear solver.
 // Every optimizer has the signature
 //     Result algo(F&& f, std::span<const double> lo, std::span<const double> hi, const Params& p, std::uint64_t seed)
 // where f is a callable taking std::span<const double>. Positions stay inside
@@ -65,7 +63,6 @@ inline void clamp_to(std::vector<double>& x, std::span<const double> lo, std::sp
     for (std::size_t k = 0; k < x.size(); ++k) x[k] = std::clamp(x[k], lo[k], hi[k]);
 }
 
-// Central-difference gradient with per-dimension step h.
 template <Objective F>
 std::vector<double> gradient(F& f, std::vector<double> x, std::span<const double> h) {
     std::vector<double> g(x.size());
