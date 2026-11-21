@@ -26,7 +26,7 @@ Directory Structure
     │   ├── raw                 # Original datasets (not versioned, obtain separately)
     │   ├── interim             # Intermediate data
     │   └── processed           # Preprocessed data (see Datasets)
-    ├── docs                    # Dissertation (CC BY-NC-SA, see docs/LICENSE)
+    ├── docs                    # Documentation and report files
     ├── results                 # Results from the methods developed
     ├── src                     # Source files
     │   ├── deep_learning       # UNN method developed in Python
@@ -34,7 +34,7 @@ Directory Structure
     │   ├── optimization        # EMUPF method developed in C++
     │   ├── preprocessing       # MATLAB code for the preprocessing of the datasets
     │   └── validation          # MATLAB code for the validation of the methods' results
-    ├── LICENSE                 # MIT (code)
+    ├── LICENSE
     └── README.md
 
 
@@ -74,4 +74,4 @@ Methodology notes
 Licensing
 ------
 Copyright © 2023 [Daniel Torres](https://github.com/danctorres).<br />
-Code is [MIT](LICENSE) licensed. The dissertation and figures in `docs/` are [CC BY-NC-SA 4.0](docs/LICENSE) licensed. The datasets keep their own terms.
+This project is [CC BY-NC-SA 4.0](LICENSE) licensed. The datasets keep their own terms.
