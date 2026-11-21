@@ -96,6 +96,8 @@ def main() -> None:
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
     p.add_argument("--results-root", type=Path, default=REPO / "results" / "deep_learning")
     a = p.parse_args()
+    if a.runs < 1:
+        p.error("--runs must be at least 1")
 
     _, agg_tr, st_tr, eq_tr = load(a.data_root, a.dataset, a.machines, "training")
     ts, agg_val, st_val, eq_val = load(a.data_root, a.dataset, a.machines, "validation")
