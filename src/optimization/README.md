@@ -67,7 +67,7 @@ the mean per-sample objective over all samples, no averaging), `--cycles 5`, `--
 (population for pso and ga, archive for aco, chains for sa, starts for gd and
 newton; default is each algorithm's own), `--iters 200`, `--threshold 1e-5`
 (on the normalised objective), `--bound 1` (coefficient box, normalised units),
-`--lambda 1` (negative-power penalty weight), `--seed N` (reproducible runs,
+`--lambda 1` (negative-power penalty weight: each negative estimate p adds `lambda * (2.5 p)^2`), `--seed N` (reproducible runs,
 independent of the thread count). Each cycle prints the reconstruction MAE in
 physical units, how many samples were optimised, the mean final fitness, mean
 iterations and mean objective evaluations of the per-sample optimisations, and

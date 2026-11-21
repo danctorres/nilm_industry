@@ -25,6 +25,8 @@ int main(int argc, char** argv) try {
     if (equipment.rows.size() != d.size())
         throw std::runtime_error(
             std::format("{} has {} rows, states have {}", argv[3], equipment.rows.size(), d.size()));
+    if (equipment.text_column(0) != d.timestamps)
+        throw std::runtime_error(std::format("the timestamps of {} and {} differ", argv[3], argv[1]));
     if (equipment.header.size() != m + 1)
         throw std::runtime_error(
             std::format("{} holds {} machines, states hold {}", argv[3], equipment.header.size() - 1, m));

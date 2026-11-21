@@ -96,6 +96,9 @@ inline Dataset load_dataset(const std::filesystem::path& aggregate_csv, const st
     if (st.header.size() < 2)
         throw std::runtime_error("expected timestamp and one column per machine in " + states_csv.string());
     Dataset d{agg.text_column(0), agg.column(1), {}};
+    if (d.timestamps != st.text_column(0))
+        throw std::runtime_error(
+            std::format("the timestamps of {} and {} differ", aggregate_csv.string(), states_csv.string()));
     for (const auto& row : st.rows) {
         std::vector<int> on;
         for (std::size_t c = 1; c < row.size(); ++c) on.push_back(to_double(row[c]) != 0.0 ? 1 : 0);

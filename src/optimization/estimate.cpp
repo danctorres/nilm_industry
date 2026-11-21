@@ -95,6 +95,7 @@ Options parse(int argc, char** argv) {
     }
     if (!(o.bound > 0)) throw std::runtime_error("--bound must be positive");
     if (o.cycles < 1 || o.iters < 1) throw std::runtime_error("--cycles and --iters must be at least 1");
+    if (o.particles < 0) throw std::runtime_error("--particles cannot be negative");
     return o;
 }
 

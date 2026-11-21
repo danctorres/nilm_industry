@@ -13,7 +13,7 @@ struct GaParams {
     int tournament = 2;           // candidates per tournament
     double alpha = 2.0;           // double Pareto shape: smaller means heavier tails
     double beta = 0.5;            // double Pareto scale
-    double p_mutation = 0.1;      // per-variable mutation probability
+    double p_mutation = 0.005;    // per-variable mutation probability (Deep & Thakur)
     double mutation_index = 0.5;  // power mutation index: smaller means smaller moves
     int elite = 1;                // best individuals copied unchanged
 };

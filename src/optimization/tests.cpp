@@ -147,6 +147,8 @@ TEST_CASE("csv") {
     CHECK(d.aggregate[1] == approx(2.5));
     CHECK(d.states[0] == std::vector<int>{1, 0});
     CHECK(d.states[1] == std::vector<int>{1, 1});
+    std::ofstream(dir / "shifted.csv") << "Timestamp,m0,m1\n24-Oct-2017 10:34:09,1,0\n24-Oct-2017 10:34:10,1,1\n";
+    CHECK_THROWS_AS(load_dataset(dir / "agg.csv", dir / "shifted.csv"), std::runtime_error);
 
     const std::vector<double> c = {1.0, 2.0, 3.0, 4.0, 0.5, 0.0, 0.0, 0.0};
     write_coefs(dir / "coef.csv", c);
