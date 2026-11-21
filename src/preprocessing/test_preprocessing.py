@@ -29,7 +29,9 @@ assert np.array_equal(tr, tr2) and np.array_equal(val, val2)
 assert len(val) == 6 * 900 and np.array_equal(val, np.sort(val))  # 6 of 20 blocks, 50 s off each edge
 assert np.abs(t[tr][:, None] - t[val][None, :]).min() >= 100
 others = ~np.isin(t // 1000, t[val] // 1000) & (t % 1000 >= 50) & (t % 1000 < 950)
-counts, edges = np.histogram(agg[others], agg[others].mean() + np.arange(-3, 4) * agg[others].std(ddof=1))
-assert list(np.histogram(agg[tr], edges)[0]) == [min(490, counts[counts > 100].min()) * (c > 100) for c in counts]
+edges = agg[others].mean() + np.arange(-2, 3) * agg[others].std(ddof=1)  # the outer bins are open-ended
+counts, per_bin = (np.bincount(np.searchsorted(edges, x, side="right"), minlength=6) for x in (agg[others], agg[tr]))
+assert list(per_bin) == [min(490, counts[counts > 100].min()) * (c > 100) for c in counts]
+assert agg[tr].max() > agg[others].mean() + 3 * agg[others].std(ddof=1)  # the peaks are drawn too
 
 print("ok")

@@ -58,8 +58,9 @@ def split_train_validation(t, agg, block: float, gap: float, rng: np.random.Gene
     distribution. Rows within `gap` seconds of a block edge belong to neither side, so every training row is at least
     2 * gap away from every validation row. Training draws the same number of rows (at most TRAINING_PER_BIN) from
     every aggregate bin of the other blocks (adaptive binning, MATLAB split_train_validation): six bins of one
-    standard deviation around the mean, those with more than 100 rows. Returns 0-based row indices, training
-    shuffled and validation in time order."""
+    standard deviation around the mean, those with more than 100 rows. The two outer bins are open-ended (MATLAB's
+    stopped at 3 standard deviations), so training sees the peaks that validation scores. Returns 0-based row
+    indices, training shuffled and validation in time order."""
     t, agg = np.asarray(t, dtype=float), np.asarray(agg, dtype=float)
     block_of = np.floor(t / block)
     usable = (t - block_of * block >= gap) & ((block_of + 1) * block - t > gap)
@@ -69,10 +70,9 @@ def split_train_validation(t, agg, block: float, gap: float, rng: np.random.Gene
 
     candidates = np.flatnonzero(usable & ~in_validation)
     a = agg[candidates]
-    edges = a.mean() + np.arange(-3, 4) * a.std(ddof=1)  # MATLAB std divides by n - 1
-    counts, _ = np.histogram(a, edges)  # like histcounts: [a, b) bins, the last one [a, b]
-    bin_of = np.searchsorted(edges, a, side="right") - 1
-    bin_of[a == edges[-1]] = len(edges) - 2
+    edges = a.mean() + np.arange(-2, 3) * a.std(ddof=1)  # inner edges; MATLAB std divides by n - 1
+    bin_of = np.searchsorted(edges, a, side="right")  # [a, b) bins, the first and last open-ended
+    counts = np.bincount(bin_of, minlength=len(edges) + 1)
     bins = np.flatnonzero(counts > 100)
     if bins.size == 0:
         raise ValueError("split_train_validation: no aggregate bin of the training blocks has more than 100 rows")

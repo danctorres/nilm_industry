@@ -76,9 +76,11 @@ def check_split(out: Path) -> None:
     agg = pd.read_csv(out / "aggregate.csv")
     t = seconds(pd.to_datetime(agg.timestamp, format=TIME_FORMAT))
     a = agg.active_power[~np.isin(t // 86400, days) & (t % 86400 >= 750) & (t % 86400 < 86400 - 750)]
-    edges = a.mean() + np.arange(-3, 4) * a.std(ddof=1)
-    counts = np.histogram(a, edges)[0]
-    per_bin = np.histogram(tables["training"][0].active_power, edges)[0]
+    edges = a.mean() + np.arange(-2, 3) * a.std(ddof=1)  # the outer bins are open-ended
+    counts, per_bin = (
+        np.bincount(np.searchsorted(edges, x, side="right"), minlength=6)
+        for x in (a, tables["training"][0].active_power)
+    )
     assert list(per_bin) == [min(490, counts[counts > 100].min()) * (c > 100) for c in counts]
 
 
