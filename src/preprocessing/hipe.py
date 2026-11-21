@@ -9,13 +9,14 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from common import REPO, matlab_round, read_equipment_csv, split_train_validation, write_csv
+from common import REPO, matlab_round, read_equipment_csv, seconds, split_train_validation, write_csv
 
 # Methodology choices (values as used in the dissertation)
 # a machine is ON when its power is > 0 kW, after clipping negatives, linear resampling to 1 s,
 # spline synchronisation and rounding to 4 decimals
 ON_THRESHOLD_KW = 0
-TRAINING_RATIO = 0.7  # share of each adaptive bin used for training, the rest for validation
+BLOCK_S = 3600  # validation holds out whole hours
+GAP_S = 300  # left out at every block edge, longer than the largest gap between raw samples (178 s)
 
 SECOND = np.timedelta64(1, "s")
 
@@ -70,13 +71,14 @@ def main(argv=None):
     rng = np.random.default_rng(a.seed)  # one stream for every split, as rng(1) in main.m
 
     eq, st = process(a.raw / "Equipment")
+    t = seconds(eq.timestamp)
     sums = np.cumsum(eq.iloc[:, 1:].to_numpy(), axis=1)  # column n - 1: sum of the first n machines, added in order
     for n in range(2, sums.shape[1] + 1):
         agg = pd.DataFrame({"timestamp": eq.timestamp, "active_power": sums[:, n - 1]})
         write_csv(agg, a.out / str(n) / "aggregate.csv")
         write_csv(eq.iloc[:, : n + 1], a.out / str(n) / "equipment.csv")
         write_csv(st.iloc[:, : n + 1], a.out / str(n) / "states.csv")
-        training, validation = split_train_validation(agg.active_power, TRAINING_RATIO, rng)
+        training, validation = split_train_validation(t, agg.active_power, BLOCK_S, GAP_S, rng)
         for split, rows in (("training", training), ("validation", validation)):
             write_csv(agg.iloc[rows], a.out / str(n) / f"aggregate_{split}.csv")
             write_csv(eq.iloc[rows, : n + 1], a.out / str(n) / f"equipment_{split}.csv")

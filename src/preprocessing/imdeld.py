@@ -13,7 +13,8 @@ from common import REPO, matlab_round, movmean, seconds, spline, split_train_val
 ON_THRESHOLD_W = 5  # a machine is ON when its active power is > 5 W, one flat threshold for every machine
 # movmean window in samples (1 s each, so 25 minutes) applied to machine and LVDB signals before spline interpolation
 SMOOTHING_WINDOW = 1500
-TRAINING_RATIO = 0.7  # share of each adaptive bin used for training, the rest for validation
+BLOCK_S = 86400  # validation holds out whole days
+GAP_S = SMOOTHING_WINDOW // 2  # left out at every day edge: no smoothing window spans both sides
 
 UNITS = ["active_power", "reactive_power", "apparent_power", "current", "voltage"]
 STATE_NAMES = ["State DPCI", "State DPCII", "State EFI", "State EFII", "State MI", "State MII", "State PI", "State PII"]
@@ -112,9 +113,10 @@ def calculate_aggregate_all_feature(raw: Path, t: np.ndarray, selected: list[int
 def save_final_data(
     aggregate: pd.DataFrame, on_off: pd.DataFrame, equipment: pd.DataFrame, rng: np.random.Generator, out: Path
 ) -> None:
-    """save_final_data: adaptive-binning split of the aggregate active power, the full tables and their
-    training / validation rows (in the split's shuffled order) written to out."""
-    training, validation = split_train_validation(aggregate.active_power, TRAINING_RATIO, rng)
+    """save_final_data: time-block split of the aggregate, the full tables and their training rows (shuffled) and
+    validation rows (in time order) written to out."""
+    t = seconds(aggregate.timestamp)
+    training, validation = split_train_validation(t, aggregate.active_power, BLOCK_S, GAP_S, rng)
     write_csv(aggregate.iloc[:, :2], out / "aggregate.csv")
     write_csv(on_off, out / "states.csv")
     write_csv(equipment, out / "equipment.csv")

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from common import matlab_round
+from common import TIME_FORMAT, matlab_round
 from hipe import main, process, read_machine
 
 T0 = pd.Timestamp("2017-10-23")
@@ -126,14 +126,14 @@ with tempfile.TemporaryDirectory() as name:
     assert np.array_equal(states[st_cols].to_numpy(), (values > 0).astype(int))
     assert np.allclose(aggregate.active_power, values.sum(axis=1), rtol=0, atol=1e-9)
 
-    # splits: disjoint, 70/30, rows aligned with the unsplit tables
+    # splits: one of the two whole hours minus 300 s at each end for validation, training 600 s away, rows aligned
     row = {t: i for i, t in enumerate(equipment.timestamp)}
     for n in range(2, 10):
         assert np.allclose(read[f"{n}/aggregate.csv"].active_power, values[:, :n].sum(axis=1), rtol=0, atol=1e-9)
         tr, val = (read[f"{n}/aggregate_{s}.csv"] for s in ["training", "validation"])
-        assert (
-            len(val) and not set(tr.timestamp) & set(val.timestamp) and 0.41 < len(val) / len(tr) < 0.44
-        )  # floor(0.3 n) / floor(0.7 n)
+        assert len(val) == 3000 and len(tr)
+        t_tr, t_val = (pd.to_datetime(x.timestamp, format=TIME_FORMAT).to_numpy() for x in (tr, val))
+        assert np.abs(t_tr[:, None] - t_val[None, :]).min() >= np.timedelta64(600, "s")
         for s, agg in (("training", tr), ("validation", val)):
             rows = [row[t] for t in agg.timestamp]
             eq_split, st_split = read[f"{n}/equipment_{s}.csv"], read[f"{n}/states_{s}.csv"]

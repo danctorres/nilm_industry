@@ -9,6 +9,8 @@ from scipy.interpolate import CubicSpline
 
 REPO = Path(__file__).resolve().parents[2]
 TIME_FORMAT = "%d-%b-%Y %H:%M:%S"  # MATLAB's default datetime display, used in every processed file
+VALIDATION_SHARE = 0.3  # share of the time blocks held out for validation
+TRAINING_PER_BIN = 490  # training rows drawn from every aggregate bin, as floor(700 * 0.7) before the block split
 _CLOCK = np.array([f"{s // 3600:02d}:{s // 60 % 60:02d}:{s % 60:02d}" for s in range(86400)])
 
 
@@ -50,29 +52,33 @@ def seconds(t: pd.Series) -> np.ndarray:
     return (pd.to_datetime(t) - pd.Timestamp(0)).dt.total_seconds().to_numpy()
 
 
-def split_train_validation(agg, ratio: float, rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
-    """Adaptive binning split (MATLAB split_train_validation). The aggregate is cut into six bins of one standard
-    deviation around its mean; from every bin with more than 100 samples the same budget n_bin is drawn:
-    floor(n_bin * ratio) for training and floor(n_bin * (1 - ratio)) for validation, without overlap.
-    n_bin is the smallest kept bin, capped at 1000 * ratio. Returns shuffled 0-based row indices."""
-    agg = np.asarray(agg, dtype=float)
-    edges = agg.mean() + np.arange(-3, 4) * agg.std(ddof=1)  # MATLAB std divides by n - 1
-    counts, _ = np.histogram(agg, edges)  # like histcounts: [a, b) bins, the last one [a, b]
-    bin_of = np.searchsorted(edges, agg, side="right") - 1
-    bin_of[agg == edges[-1]] = len(edges) - 2
+def split_train_validation(t, agg, block: float, gap: float, rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
+    """Time-block split. The recording (t in seconds) is cut into blocks of `block` seconds, and VALIDATION_SHARE of
+    them, drawn at random, are validation: every row in them is scored, so validation follows the recording's own
+    distribution. Rows within `gap` seconds of a block edge belong to neither side, so every training row is at least
+    2 * gap away from every validation row. Training draws the same number of rows (at most TRAINING_PER_BIN) from
+    every aggregate bin of the other blocks (adaptive binning, MATLAB split_train_validation): six bins of one
+    standard deviation around the mean, those with more than 100 rows. Returns 0-based row indices, training
+    shuffled and validation in time order."""
+    t, agg = np.asarray(t, dtype=float), np.asarray(agg, dtype=float)
+    block_of = np.floor(t / block)
+    usable = (t - block_of * block >= gap) & ((block_of + 1) * block - t > gap)
+    blocks = np.unique(block_of[usable])
+    chosen = rng.choice(blocks, max(1, round(VALIDATION_SHARE * len(blocks))), replace=False)
+    in_validation = np.isin(block_of, chosen)
+
+    candidates = np.flatnonzero(usable & ~in_validation)
+    a = agg[candidates]
+    edges = a.mean() + np.arange(-3, 4) * a.std(ddof=1)  # MATLAB std divides by n - 1
+    counts, _ = np.histogram(a, edges)  # like histcounts: [a, b) bins, the last one [a, b]
+    bin_of = np.searchsorted(edges, a, side="right") - 1
+    bin_of[a == edges[-1]] = len(edges) - 2
     bins = np.flatnonzero(counts > 100)
     if bins.size == 0:
-        raise ValueError("split_train_validation: no aggregate bin has more than 100 samples")
-    n_bin = min(1000 * ratio, counts[bins].min())
-    n_training, n_validation = int(np.floor(n_bin * ratio)), int(np.floor(n_bin * (1 - ratio)))
-
-    training, validation = [], []
-    for b in bins:
-        samples = np.flatnonzero(bin_of == b)
-        bin_training = rng.choice(samples, n_training, replace=False)
-        training.append(bin_training)
-        validation.append(rng.choice(np.setdiff1d(samples, bin_training), n_validation, replace=False))
-    return rng.permutation(np.concatenate(training)), rng.permutation(np.concatenate(validation))
+        raise ValueError("split_train_validation: no aggregate bin of the training blocks has more than 100 rows")
+    n = min(TRAINING_PER_BIN, counts[bins].min())
+    training = np.concatenate([rng.choice(candidates[bin_of == b], n, replace=False) for b in bins])
+    return rng.permutation(training), np.flatnonzero(usable & in_validation)
 
 
 def time_strings(t) -> np.ndarray:

@@ -61,20 +61,25 @@ def header(path: Path) -> list[str]:
 
 
 def check_split(out: Path) -> None:
-    """Disjoint, same rows in the three tables, floor(n_bin * 0.7) / floor(n_bin * 0.3) rows from every bin over 100."""
-    agg = pd.read_csv(out / "aggregate.csv").active_power.to_numpy()
-    edges = agg.mean() + np.arange(-3, 4) * agg.std(ddof=1)
-    counts = np.histogram(agg, edges)[0]
-    n_bin = min(1000 * 0.7, counts[counts > 100].min())
-    for split, share in [("training", 0.7), ("validation", 0.3)]:
-        tables = [pd.read_csv(out / f"{name}_{split}.csv") for name in ["aggregate", "states", "equipment"]]
-        assert all(tables[0].iloc[:, 0].equals(t.iloc[:, 0]) for t in tables)
-        per_bin = np.histogram(tables[0].active_power, edges)[0]
-        assert list(per_bin) == [int(np.floor(n_bin * share)) * (c > 100) for c in counts]
-    training, validation = (
-        pd.read_csv(out / f"aggregate_{split}.csv").timestamp for split in ["training", "validation"]
-    )
-    assert not set(training) & set(validation)
+    """Same rows in the three tables; validation is every row of whole days but their first and last 750 s, training is
+    at least 1500 s away and draws the same number of rows from every bin over 100 rows of the other days."""
+    tables = {}
+    for split in ["training", "validation"]:
+        tables[split] = [pd.read_csv(out / f"{name}_{split}.csv") for name in ["aggregate", "states", "equipment"]]
+        assert all(tables[split][0].iloc[:, 0].equals(t.iloc[:, 0]) for t in tables[split])
+    t_tr, t_val = (seconds(pd.to_datetime(tables[s][0].timestamp, format=TIME_FORMAT)) for s in tables)
+    days = np.unique(t_val // 86400)
+    assert len(t_val) == len(days) * (86400 - 1500) and np.array_equal(t_val, np.sort(t_val))
+    i = np.clip(np.searchsorted(t_val, t_tr), 1, len(t_val) - 1)
+    assert np.minimum(np.abs(t_tr - t_val[i - 1]), np.abs(t_tr - t_val[i])).min() >= 1500
+
+    agg = pd.read_csv(out / "aggregate.csv")
+    t = seconds(pd.to_datetime(agg.timestamp, format=TIME_FORMAT))
+    a = agg.active_power[~np.isin(t // 86400, days) & (t % 86400 >= 750) & (t % 86400 < 86400 - 750)]
+    edges = a.mean() + np.arange(-3, 4) * a.std(ddof=1)
+    counts = np.histogram(a, edges)[0]
+    per_bin = np.histogram(tables["training"][0].active_power, edges)[0]
+    assert list(per_bin) == [min(490, counts[counts > 100].min()) * (c > 100) for c in counts]
 
 
 def check_hand_computed(raw: Path, equipment: pd.DataFrame, t: np.ndarray, machines: list[int]) -> None:
@@ -142,10 +147,10 @@ def main() -> None:
         assert (pd.read_csv(six / "aggregate_training.csv").iloc[:, 1:6] >= 0).all().all()
         assert np.array_equal(on_off.iloc[:, 1:].to_numpy(), (equipment.iloc[:, 1:].to_numpy() > 5).astype(int))
 
-        # split: per-bin budget, disjoint, rows in the order drawn by a fresh default_rng(seed)
+        # split: whole days, edges left out, per-bin budget, rows in the order drawn by a fresh default_rng(seed)
         check_split(six)
         check_split(eight)
-        training = split_train_validation(a6.active_power, 0.7, np.random.default_rng(1))[0]
+        training = split_train_validation(seconds(when), a6.active_power, 86400, 750, np.random.default_rng(1))[0]
         drawn = a6.timestamp.iloc[training].reset_index(drop=True)
         assert pd.read_csv(six / "aggregate_training.csv").timestamp.equals(drawn)
 

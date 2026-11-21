@@ -19,15 +19,17 @@ assert list(matlab_round(np.array([0.5, 1.5, 2.5, -2.5]))) == [1, 2, 3, -3]
 
 assert list(seconds(pd.Series(pd.to_datetime(["1970-01-01 00:00:01", "2018-02-21 00:00:00"])))) == [1, 1519171200]
 
-# split: per kept bin floor(n_bin * 0.7) training and floor(n_bin * 0.3) validation, disjoint, reproducible
-agg = np.random.default_rng(5).normal(100, 10, 5000)
-tr, val = split_train_validation(agg, 0.7, np.random.default_rng(1))
-tr2, val2 = split_train_validation(agg, 0.7, np.random.default_rng(1))
+# split: whole blocks minus their edges for validation, training at least 2 * gap away from them, the same number of
+# rows from every kept bin of the other blocks, reproducible
+t = np.arange(20000.0)
+agg = np.random.default_rng(5).normal(100, 10, len(t))
+tr, val = split_train_validation(t, agg, 1000, 50, np.random.default_rng(1))
+tr2, val2 = split_train_validation(t, agg, 1000, 50, np.random.default_rng(1))
 assert np.array_equal(tr, tr2) and np.array_equal(val, val2)
-assert not set(tr) & set(val)
-counts, _ = np.histogram(agg, agg.mean() + np.arange(-3, 4) * agg.std(ddof=1))
-kept = counts[counts > 100]
-n_bin = min(700, kept.min())
-assert len(tr) == len(kept) * int(np.floor(n_bin * 0.7)) and len(val) == len(kept) * int(np.floor(n_bin * 0.3))
+assert len(val) == 6 * 900 and np.array_equal(val, np.sort(val))  # 6 of 20 blocks, 50 s off each edge
+assert np.abs(t[tr][:, None] - t[val][None, :]).min() >= 100
+others = ~np.isin(t // 1000, t[val] // 1000) & (t % 1000 >= 50) & (t % 1000 < 950)
+counts, edges = np.histogram(agg[others], agg[others].mean() + np.arange(-3, 4) * agg[others].std(ddof=1))
+assert list(np.histogram(agg[tr], edges)[0]) == [min(490, counts[counts > 100].min()) * (c > 100) for c in counts]
 
 print("ok")
