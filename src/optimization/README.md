@@ -1,4 +1,4 @@
-# EMUPF estimation (C++20)
+# EMUPF estimation
 
 Models each machine's active power as a cubic polynomial of the aggregate active
 power, switched by the machine's on/off state. Every training sample with at
@@ -59,7 +59,8 @@ build/validate \
 
 HIPE uses the same commands with `data/processed/HIPE/1_week/{aggregate,state,equipment}_*/..._N.csv`.
 
-`estimate` options: `--algorithm pso` (default), `--cycles 5`, `--particles N`
+`estimate` options: `--algorithm pso` (default), `--joint` (one optimisation of
+the mean per-sample objective over all samples, no averaging), `--cycles 5`, `--particles N`
 (population for pso and ga, archive for aco, chains for sa, starts for gd and
 newton; default is each algorithm's own), `--iters 200`, `--threshold 1e-5`
 (on the normalised objective), `--bound 1` (coefficient box, normalised units),
@@ -89,5 +90,5 @@ per-sample problem is also convex, which is why Newton solves it in one step.
 The algorithm comparison therefore says more about convergence speed on an
 under-determined quadratic than about model quality. On the synthetic data the
 averaged coefficients still reconstruct the aggregate about six times better
-than predicting zero. A joint objective over all samples, fitted once, would be
-the natural next experiment and a stronger baseline.
+than predicting zero. `estimate --joint` fits one objective over all samples
+instead, which is well-posed and gives the stronger baseline to compare against.

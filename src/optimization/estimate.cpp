@@ -5,6 +5,8 @@
 // over all samples and converted back to physical units. This repeats for
 // --cycles random restarts and keeps the coefficient set with the lowest
 // reconstruction MAE, also against a coefficient file that already exists.
+// With --joint there is one optimisation of the mean per-sample objective over
+// all samples instead, and no averaging.
 #include <algorithm>
 #include <charconv>
 #include <chrono>
@@ -39,6 +41,7 @@ using Params = std::variant<nilm::PsoParams, nilm::GaParams, nilm::SaParams, nil
 struct Options {
     std::filesystem::path aggregate, states, out;
     std::string_view algorithm = "pso";
+    bool joint = false;  // one optimisation over all samples instead of one per sample
     int cycles = 5;
     int particles = 0;  // population, archive, chains or starts; 0 = the algorithm's default
     int iters = 200;
@@ -50,8 +53,9 @@ struct Options {
 
 constexpr std::string_view kUsage =
     "usage: estimate <aggregate.csv> <states.csv> <out_coef.csv>\n"
-    "  [--algorithm pso|ga|sa|aco|gd|newton] [--cycles N=5] [--particles N] [--iters N=200]\n"
+    "  [--algorithm pso|ga|sa|aco|gd|newton] [--joint] [--cycles N=5] [--particles N] [--iters N=200]\n"
     "  [--threshold X=1e-5] [--bound X=1] [--lambda X=1] [--seed N]\n"
+    "--joint fits one objective (the mean of the per-sample objectives) over all samples.\n"
     "--particles is the population (pso, ga), archive (aco), chains (sa) or starts (gd, newton);\n"
     "omitted or 0 uses the algorithm's default. Set OMP_NUM_THREADS to control parallelism.\n";
 
@@ -70,6 +74,11 @@ Options parse(int argc, char** argv) {
     o.states = args[1];
     o.out = args[2];
     for (std::size_t i = 3; i < args.size(); i += 2) {
+        if (args[i] == "--joint") {
+            o.joint = true;
+            --i;
+            continue;
+        }
         if (i + 1 >= args.size()) throw std::runtime_error(std::format("missing value for {}\n{}", args[i], kUsage));
         const auto flag = args[i], v = args[i + 1];
         if (flag == "--algorithm") o.algorithm = v;
@@ -196,6 +205,32 @@ Fit fit(const nilm::Dataset& d, double scale, const Options& o, const Params& pa
     return r;
 }
 
+// One optimisation of the mean per-sample objective over all samples with at
+// least one machine on; the result is the coefficient set itself.
+Fit fit_joint(const nilm::Dataset& d, double scale, const Options& o, const Params& params, std::uint64_t seed) {
+    const std::size_t dim = d.machines() * nilm::kCoefs;
+    const std::vector<double> lo(dim, -o.bound), hi(dim, o.bound);
+    std::vector<nilm::Sample> samples;
+    for (std::size_t i = 0; i < d.size(); ++i)
+        if (std::ranges::any_of(d.states[i], [](int on) { return on != 0; })) samples.push_back({d.aggregate[i] / scale, d.states[i]});
+
+    Fit r{std::vector<double>(dim, 0.0), samples.size()};
+    if (samples.empty()) return r;
+    std::uint64_t evaluations = 0;
+    auto f = [&](std::span<const double> c) {
+        ++evaluations;
+        double sum = 0.0;
+        for (const auto& s : samples) sum += nilm::objective(c, s, o.lambda);
+        return sum / static_cast<double>(samples.size());
+    };
+    const nilm::Result best = std::visit([&](const auto& p) { return run(f, lo, hi, p, seed); }, params);
+    r.mean_fitness = best.fitness;
+    r.mean_iterations = best.iterations;
+    r.mean_evaluations = static_cast<double>(evaluations);
+    r.coefs = nilm::unscale(best.position, scale);
+    return r;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) try {
@@ -207,8 +242,9 @@ int main(int argc, char** argv) try {
 #ifdef _OPENMP
     threads = omp_get_max_threads();
 #endif
-    std::cout << std::format("{} samples, {} machines, aggregate scale {}, bound {}, lambda {}, {} thread(s), seed {}\n{}\n", d.size(),
-                             d.machines(), scale, o.bound, o.lambda, threads, o.seed, std::visit([](const auto& p) { return describe(p); }, params));
+    std::cout << std::format("{} samples, {} machines, aggregate scale {}, bound {}, lambda {}, {} fit, {} thread(s), seed {}\n{}\n", d.size(),
+                             d.machines(), scale, o.bound, o.lambda, o.joint ? "joint" : "per-sample", o.joint ? 1 : threads, o.seed,
+                             std::visit([](const auto& p) { return describe(p); }, params));
     for (std::size_t j = 0; j < d.machines(); ++j)
         if (std::ranges::none_of(d.states, [j](const auto& on) { return on[j] != 0; }))
             std::cerr << std::format("warning: machine {} is never on, its coefficients stay 0\n", j);
@@ -224,12 +260,14 @@ int main(int argc, char** argv) try {
     }
     for (int c = 0; c < o.cycles; ++c) {
         const auto t0 = std::chrono::steady_clock::now();
-        const Fit r = fit(d, scale, o, params, o.seed + static_cast<std::uint64_t>(c) * d.size());
+        const auto cycle_seed = o.seed + static_cast<std::uint64_t>(c) * d.size();
+        const Fit r = o.joint ? fit_joint(d, scale, o, params, cycle_seed) : fit(d, scale, o, params, cycle_seed);
         const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         const double mae = reconstruction_mae(d, r.coefs);
         const bool better = mae < best_mae;
-        std::cout << std::format("cycle {}: MAE {:.6g}  samples optimised {}  mean fitness {:.3g}  mean iterations {:.1f}  mean evaluations {:.0f}  {:.1f}s{}\n",
-                                 c, mae, r.optimised, r.mean_fitness, r.mean_iterations, r.mean_evaluations, seconds, better ? "  -> saved" : "");
+        std::cout << std::format("cycle {}: MAE {:.6g}  samples used {}  {}fitness {:.3g}  {}iterations {:.1f}  {}evaluations {:.0f}  {:.1f}s{}\n",
+                                 c, mae, r.optimised, o.joint ? "" : "mean ", r.mean_fitness, o.joint ? "" : "mean ", r.mean_iterations,
+                                 o.joint ? "" : "mean ", r.mean_evaluations, seconds, better ? "  -> saved" : "");
         if (better) {
             nilm::write_coefs(o.out, r.coefs);
             best_mae = mae;
