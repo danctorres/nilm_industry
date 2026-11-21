@@ -42,6 +42,13 @@ def fit(a: np.ndarray, s: np.ndarray, iters: int = 500) -> tuple[np.ndarray, np.
     return mu, var
 
 
+def collinear(s: np.ndarray, threshold: float = 0.9) -> list[tuple[int, int]]:
+    """Pairs of machines whose on/off states correlate above threshold: the aggregate cannot tell their power apart."""
+    with np.errstate(divide="ignore", invalid="ignore"):  # a machine always ON or always OFF has no correlation
+        corr = np.corrcoef(s.T)
+    return [(int(i), int(j)) for i, j in zip(*np.nonzero(np.triu(corr > threshold, 1)), strict=True)]
+
+
 def main(argv=None) -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--dataset", choices=["hipe", "imdeld"], required=True)
@@ -61,6 +68,8 @@ def main(argv=None) -> None:
     power = agg.iloc[:, 1].to_numpy()
     scale = np.abs(power[train]).max() or 1.0
 
+    if pairs := collinear(states[train]):
+        print(f"warning: machine pairs {pairs} switch on and off together, so how their power splits is a guess")
     mu, var = fit(power[train] / scale, states[train])
     for j in range(a.machines):
         print(f"machine {j}: mean {mu[j] * scale:.4g}, sd {np.sqrt(var[j]) * scale:.4g} while ON")

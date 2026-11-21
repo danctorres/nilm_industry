@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from allocation import fit, main, posterior
+from allocation import collinear, fit, main, posterior
 
 # three machines with known means and spreads: EM recovers them from the aggregate and states alone
 rng = np.random.default_rng(0)
@@ -17,6 +17,9 @@ a = p.sum(axis=1)
 fit_mu, fit_var = fit(a, s)
 assert np.allclose(fit_mu, mu, rtol=0.01), fit_mu
 assert np.allclose(np.sqrt(fit_var), sd, rtol=0.1), np.sqrt(fit_var)
+
+# independent machines raise no warning; a machine that copies another's states does
+assert collinear(s) == [] and collinear(np.c_[s, s[:, 1]]) == [(1, 3)]
 
 # the ON estimates add up to the aggregate, OFF machines are 0, and the steady machines keep their mean
 est = posterior(a, s, fit_mu, fit_var)[0]
