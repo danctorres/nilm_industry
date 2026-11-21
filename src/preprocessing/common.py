@@ -23,17 +23,9 @@ def read_equipment_csv(folder: Path, usecols: list[str] | None = None) -> list[p
 
 
 def movmean(x, k: int) -> np.ndarray:
-    """MATLAB movmean(x, k): mean over k samples centred on each one (k // 2 before, k - k // 2 - 1 after),
-    the window shrinking at both ends."""
-    x = np.asarray(x, dtype=float)
-    if np.isnan(x).any():
-        raise ValueError("movmean: NaN in the input; drop missing values first")
-    n = len(x)
-    c = np.concatenate([[0.0], np.cumsum(x)])
-    i = np.arange(n)
-    lo = np.maximum(i - k // 2, 0)
-    hi = np.minimum(i + (k - k // 2 - 1) + 1, n)
-    return (c[hi] - c[lo]) / (hi - lo)
+    """MATLAB movmean(x, k) of data without NaN: mean over k samples centred on each one (k // 2 before,
+    k - k // 2 - 1 after), the window shrinking at both ends."""
+    return pd.Series(x, dtype=float).rolling(k, center=True, min_periods=1).mean().to_numpy()
 
 
 def spline(x, y, xq) -> np.ndarray:
