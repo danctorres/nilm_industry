@@ -2,19 +2,26 @@
 
 import numpy as np
 
-class Activation_layer():
-    def __init__(self, activation: callable, activation_d: callable) -> None:
-        super().__init__()
-        self.activation = activation
-        self.activation_d = activation_d
 
-    def forw_prop(self, input: np.ndarray) ->np.ndarray:
-        self.input = input
-        self.output = self.activation(input)
-        return self.output
+def relu(x: np.ndarray) -> np.ndarray:
+    return np.maximum(x, 0.0)
 
-    def back_prop(self, learning_rate: float, loss: np.ndarray) -> np.ndarray:
-        return self.activation_d(self.input) * loss
 
-    def back_prop_batch(self, learning_rate: float, loss: np.ndarray, last_batch: bool, size_mini_batch) -> np.ndarray:
-        return self.activation_d(self.input) * loss
+def relu_d(x: np.ndarray) -> np.ndarray:
+    return (x > 0.0).astype(float)
+
+
+def tanh_d(x: np.ndarray) -> np.ndarray:
+    return 1.0 - np.tanh(x) ** 2
+
+
+class Activation_layer:
+    def __init__(self, f, f_d) -> None:
+        self.f, self.f_d = f, f_d
+
+    def forw_prop(self, x: np.ndarray) -> np.ndarray:
+        self.input = x
+        return self.f(x)
+
+    def back_prop(self, learning_rate: float, grad: np.ndarray) -> np.ndarray:
+        return self.f_d(self.input) * grad
