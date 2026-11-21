@@ -16,7 +16,6 @@ SMOOTHING_WINDOW = 1500
 BLOCK_S = 86400  # validation holds out whole days
 GAP_S = SMOOTHING_WINDOW // 2  # left out at every day edge: no smoothing window spans both sides
 
-UNITS = ["active_power", "reactive_power", "apparent_power", "current", "voltage"]
 STATE_NAMES = ["State DPCI", "State DPCII", "State EFI", "State EFII", "State MI", "State MII", "State PI", "State PII"]
 
 
@@ -86,27 +85,22 @@ def interpolate_equipment_data(t: np.ndarray, power: np.ndarray) -> tuple[np.nda
     return full, np.column_stack([smooth_and_fill(t, p, full) for p in power.T])
 
 
-def read_lvdb_csv(path: Path, t: np.ndarray) -> pd.DataFrame:
-    """read_lvdb_csv for every unit of one LVDB file, read once: per unit, the samples at the seconds t without NaN,
-    averaged per second, smoothed and filled at every second of t."""
-    lvdb = pd.read_csv(path)
+def read_lvdb_csv(path: Path, t: np.ndarray) -> np.ndarray:
+    """read_lvdb_csv for the active power of one LVDB file: the samples at the seconds t without NaN, averaged per
+    second, smoothed and filled at every second of t."""
+    lvdb = pd.read_csv(path, usecols=["timestamp", "active_power"])
     s = read_timestamps(lvdb.timestamp)
     shared = np.isin(s, t)
-    lvdb, s = lvdb[shared], s[shared]
-    out = {}
-    for unit in UNITS:
-        m = lvdb[unit].groupby(s).mean().dropna()
-        out[unit] = smooth_and_fill(m.index.to_numpy(), m.to_numpy(), t)
-    return pd.DataFrame(out)
+    m = lvdb.active_power[shared].groupby(s[shared]).mean().dropna()
+    return smooth_and_fill(m.index.to_numpy(), m.to_numpy(), t)
 
 
-def calculate_aggregate_all_feature(raw: Path, t: np.ndarray, selected: list[int]) -> pd.DataFrame:
-    """calculate_aggregate_all_feature + calculate_PF: LVDB-2 (pelletizer subcircuit), plus LVDB-3 (milling machine
-    subcircuit) unit by unit when machines 5 and 6 are both selected, and the power factor of the sum."""
+def calculate_aggregate(raw: Path, t: np.ndarray, selected: list[int]) -> np.ndarray:
+    """calculate_aggregate_all_feature for the active power, the only unit the methods use: LVDB-2 (pelletizer
+    subcircuit), plus LVDB-3 (milling machine subcircuit) when machines 5 and 6 are both selected."""
     aggregate = read_lvdb_csv(raw / "pelletizer-subcircuit.csv", t)
     if 5 in selected and 6 in selected:
-        aggregate += read_lvdb_csv(raw / "millingmachine-subcircuit.csv", t)
-    aggregate["power_factor"] = aggregate.active_power / aggregate.apparent_power
+        aggregate = aggregate + read_lvdb_csv(raw / "millingmachine-subcircuit.csv", t)
     return aggregate
 
 
@@ -117,7 +111,7 @@ def save_final_data(
     validation rows (in time order) written to out."""
     t = seconds(aggregate.timestamp)
     training, validation = split_train_validation(t, aggregate.active_power, BLOCK_S, GAP_S, rng)
-    write_csv(aggregate.iloc[:, :2], out / "aggregate.csv")
+    write_csv(aggregate, out / "aggregate.csv")
     write_csv(on_off, out / "states.csv")
     write_csv(equipment, out / "equipment.csv")
     for name, table in [("aggregate", aggregate), ("states", on_off), ("equipment", equipment)]:
@@ -149,8 +143,7 @@ def main(argv: list[str] | None = None) -> None:
 
     equipment = pd.DataFrame(power, columns=[f"active_power_{k}" for k in selected])
     equipment.insert(0, "timestamp", timestamp)
-    aggregate = calculate_aggregate_all_feature(a.raw, t, selected)
-    aggregate.insert(0, "timestamp", timestamp)
+    aggregate = pd.DataFrame({"timestamp": timestamp, "active_power": calculate_aggregate(a.raw, t, selected)})
     on_off = pd.DataFrame((power > ON_THRESHOLD_W).astype(int), columns=[STATE_NAMES[k - 1] for k in selected])
     on_off.insert(0, "timestamp", timestamp)
     save_final_data(aggregate, on_off, equipment, rng, a.out / str(len(selected)))

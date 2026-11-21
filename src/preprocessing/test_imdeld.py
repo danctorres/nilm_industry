@@ -20,6 +20,7 @@ FILES = [
     "pelletizer-II",
 ]
 START = pd.Timestamp("2018-02-21")
+UNITS = ["active_power", "reactive_power", "apparent_power", "current", "voltage"]  # the raw columns
 
 
 def make_raw(raw: Path, days: list[str], seed: int = 0) -> None:
@@ -45,7 +46,7 @@ def make_raw(raw: Path, days: list[str], seed: int = 0) -> None:
         rows = np.sort(np.concatenate([rows, rng.choice(rows, 200)]))  # duplicated seconds
         values = p[rows] * np.array([[1], [0.6], [1.2], [0.01], [0.0]]) + np.array([[0], [0], [0], [0], [220]])
         values = np.round(values * (1 + 0.01 * rng.standard_normal(values.shape)))  # whole units: writes 3x faster
-        df = pd.DataFrame(dict(zip(imdeld.UNITS, values, strict=True)), dtype="Int64")
+        df = pd.DataFrame(dict(zip(UNITS, values, strict=True)), dtype="Int64")
         df.insert(0, "timestamp", stamps[rows])
         df.iloc[rng.choice(len(df), 100), 1:] = pd.NA  # written as empty fields, read back as NaN
         df.to_csv(path, index=False)
@@ -125,10 +126,8 @@ def main() -> None:
         assert sorted(p.name for p in six.iterdir()) == sorted(files)
         machines = [1, 2, 3, 4, 7, 8]
         states = ["State DPCI", "State DPCII", "State EFI", "State EFII", "State PI", "State PII"]
-        assert header(six / "aggregate.csv") == ["timestamp", "active_power"]
-        for s in ["_training", "_validation"]:
-            assert header(six / f"aggregate{s}.csv") == ["timestamp", *imdeld.UNITS, "power_factor"]
         for s in ["", "_training", "_validation"]:
+            assert header(six / f"aggregate{s}.csv") == ["timestamp", "active_power"]
             assert header(six / f"states{s}.csv") == ["timestamp", *states]
             assert header(six / f"equipment{s}.csv") == ["timestamp", *[f"active_power_{k}" for k in machines]]
         assert (six / "aggregate.csv").read_text().split("\n")[1].startswith("21-Feb-2018 00:00:00,")
@@ -146,7 +145,7 @@ def main() -> None:
         a6 = pd.read_csv(six / "aggregate.csv")
         assert equipment.timestamp.equals(on_off.timestamp) and equipment.timestamp.equals(a6.timestamp)
         assert (equipment.iloc[:, 1:] >= 0).all().all() and (a6.active_power >= 0).all()
-        assert (pd.read_csv(six / "aggregate_training.csv").iloc[:, 1:6] >= 0).all().all()
+        assert (pd.read_csv(six / "aggregate_training.csv").active_power >= 0).all()
         assert np.array_equal(on_off.iloc[:, 1:].to_numpy(), (equipment.iloc[:, 1:].to_numpy() > 5).astype(int))
 
         # split: whole days, edges left out, per-bin budget, rows in the order drawn by a fresh default_rng(seed)
@@ -160,8 +159,8 @@ def main() -> None:
         assert pd.read_csv(eight / "states.csv").columns[-4:-2].tolist() == ["State MI", "State MII"]
         t = seconds(when)
         lvdb3 = imdeld.read_lvdb_csv(raw / "millingmachine-subcircuit.csv", t)
-        assert lvdb3.active_power.mean() > 1000
-        assert np.allclose(pd.read_csv(eight / "aggregate.csv").active_power - a6.active_power, lvdb3.active_power)
+        assert lvdb3.mean() > 1000
+        assert np.allclose(pd.read_csv(eight / "aggregate.csv").active_power - a6.active_power, lvdb3)
 
         check_hand_computed(raw, equipment, t, machines)
     print("ok")
