@@ -18,6 +18,7 @@ The requirements defined the methods as unsupervised, non-event-based, compliant
 The first technique uses polynomial functions, estimated through optimization algorithms, to model the active power consumption of the individual loads as a function of the aggregate active power (EMUPF).
 The second algorithm consists of an unsupervised neural network (UNN) that estimates the active power of the equipment based on the optimization of an objective function instead of solving a classification problem with labelled data.
 The HIPE and the IMDELD datasets were preprocessed and used to train and validate the algorithms.
+A third method was added after the dissertation: Gaussian allocation models each machine's power while ON as an independent Gaussian, fits the means and variances from the aggregate and the on/off states alone, and gives each machine its posterior mean.
 
 
 Directory Structure
@@ -29,6 +30,7 @@ Directory Structure
     ├── docs                    # Documentation and report files
     ├── results                 # Not versioned, written by the methods: <method>/<DATASET>/<N>.csv
     ├── src                     # Source files
+    │   ├── allocation          # Gaussian allocation, added after the dissertation, in Python
     │   ├── deep_learning       # UNN method developed in Python
     │   ├── hart_inspired       # Hart-inspired baseline developed in Python
     │   ├── optimization        # EMUPF method developed in C++
@@ -63,8 +65,9 @@ The Python code runs with [uv](https://docs.astral.sh/uv/): `uv run` creates the
 2. Preprocess: `uv run src/preprocessing/imdeld.py` (add `--equipment 1,2,3,4,5,6,7,8` for the 8-machine set) and `uv run src/preprocessing/hipe.py`.
 3. EMUPF (CMake >= 3.20, C++20 compiler, GCC 13 tested, OpenMP optional): `cmake -S src/optimization -B build && cmake --build build -j && ctest --test-dir build`; then run `estimate` / `validate` as described in [src/optimization/README.md](src/optimization/README.md).
 4. UNN: `uv run src/deep_learning/main.py --dataset {hipe,imdeld} --mode {plain,state,fourier} --machines N [--runs R] [--epochs E] [--seed S]`. Output: `results/deep_learning/<mode>/<DATASET>/<N>.csv`.
-5. Hart-inspired baseline: `uv run src/hart_inspired/hart_inspired.py --dataset hipe --machines 9`. It runs on the unsplit tables and uses the true on/off states, so it is an oracle reference, not an unsupervised method. Output: `results/hart_inspired/<DATASET>/<N>.csv`.
-6. Validation: `uv run src/validation/validation.py [--plots DIR]`. It pairs every `results/<method>/<DATASET>/<N>.csv` with `data/processed/<DATASET>/<N>/equipment_validation.csv` (`equipment.csv` for the Hart-inspired baseline).
+5. Gaussian allocation: `uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N`. It trains on every unsplit sample outside the validation split, which needs no per-machine power. Output: `results/allocation/<DATASET>/<N>.csv`.
+6. Hart-inspired baseline: `uv run src/hart_inspired/hart_inspired.py --dataset hipe --machines 9`. It runs on the unsplit tables and uses the true on/off states, so it is an oracle reference, not an unsupervised method. Output: `results/hart_inspired/<DATASET>/<N>.csv`.
+7. Validation: `uv run src/validation/validation.py [--plots DIR]`. It pairs every `results/<method>/<DATASET>/<N>.csv` with `data/processed/<DATASET>/<N>/equipment_validation.csv` (`equipment.csv` for the Hart-inspired baseline).
 
 The preprocessing, baseline and validation were ported from MATLAB; the MATLAB versions used in the dissertation are in the git history.
 
