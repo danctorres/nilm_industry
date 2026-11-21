@@ -51,7 +51,9 @@ struct Stopper {
 };
 
 // Uniform in [0, 1). Several times faster than std::uniform_real_distribution.
-inline double unit01(std::mt19937_64& rng) { return static_cast<double>(rng() >> 11) * 0x1.0p-53; }
+inline double unit01(std::mt19937_64& rng) {
+    return static_cast<double>(rng() >> 11) * 0x1.0p-53;
+}
 
 inline std::vector<double> random_point(std::mt19937_64& rng, std::span<const double> lo, std::span<const double> hi) {
     std::vector<double> x(lo.size());
@@ -96,9 +98,9 @@ std::vector<double> hessian(F& f, std::vector<double> x, std::span<const double>
     for (std::size_t i = 0; i < n; ++i) {
         H[i * n + i] = (at(i, h[i], i, 0.0) - 2 * f0 + at(i, -h[i], i, 0.0)) / (h[i] * h[i]);
         for (std::size_t j = i + 1; j < n; ++j)
-            H[i * n + j] = H[j * n + i] = (at(i, h[i], j, h[j]) - at(i, h[i], j, -h[j]) - at(i, -h[i], j, h[j]) +
-                                           at(i, -h[i], j, -h[j])) /
-                                          (4 * h[i] * h[j]);
+            H[i * n + j] = H[j * n + i] =
+                (at(i, h[i], j, h[j]) - at(i, h[i], j, -h[j]) - at(i, -h[i], j, h[j]) + at(i, -h[i], j, -h[j])) /
+                (4 * h[i] * h[j]);
     }
     return H;
 }

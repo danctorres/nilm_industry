@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -18,15 +19,15 @@
 #include "pso.h"
 #include "sa.h"
 
-#define CHECK(cond)                                                                        \
-    do {                                                                                   \
-        if (!(cond)) {                                                                     \
+#define CHECK(cond)                                                                           \
+    do {                                                                                      \
+        if (const bool ok = (cond); !ok) {                                                    \
             std::cerr << std::format("{}:{}: CHECK failed: {}\n", __FILE__, __LINE__, #cond); \
-            std::exit(1);                                                                  \
-        }                                                                                  \
+            std::exit(1);                                                                     \
+        }                                                                                     \
     } while (0)
 
-int main() {
+int main() try {
     using namespace nilm;
     const auto near = [](double a, double b, double tol = 1e-9) { return std::abs(a - b) <= tol; };
 
@@ -77,21 +78,54 @@ int main() {
         for (double v : r1.position) CHECK(near(v, 1.0, 1e-2));
         CHECK(r1.position == r2.position && r1.iterations == r2.iterations);
     };
-    converges("pso", [&](std::uint64_t seed) { PsoParams p; p.particles = 50; p.max_iter = 300; p.threshold = 1e-8; return pso(sphere, lo, hi, p, seed); });
-    converges("ga", [&](std::uint64_t seed) { GaParams p; p.max_iter = 300; p.threshold = 1e-8; return ga(sphere, lo, hi, p, seed); });
-    converges("sa", [&](std::uint64_t seed) { SaParams p; p.max_iter = 500; p.threshold = 1e-8; return sa(sphere, lo, hi, p, seed); });
-    converges("aco", [&](std::uint64_t seed) { AcoParams p; p.max_iter = 500; p.threshold = 1e-8; return aco(sphere, lo, hi, p, seed); });
-    converges("gd", [&](std::uint64_t seed) { GdParams p; p.starts = 3; p.threshold = 1e-8; return gd(sphere, lo, hi, p, seed); });
-    converges("newton", [&](std::uint64_t seed) { NewtonParams p; p.starts = 3; p.threshold = 1e-8; return newton(sphere, lo, hi, p, seed); });
+    converges("pso", [&](std::uint64_t seed) {
+        PsoParams p;
+        p.particles = 50;
+        p.max_iter = 300;
+        p.threshold = 1e-8;
+        return pso(sphere, lo, hi, p, seed);
+    });
+    converges("ga", [&](std::uint64_t seed) {
+        GaParams p;
+        p.max_iter = 300;
+        p.threshold = 1e-8;
+        return ga(sphere, lo, hi, p, seed);
+    });
+    converges("sa", [&](std::uint64_t seed) {
+        SaParams p;
+        p.max_iter = 500;
+        p.threshold = 1e-8;
+        return sa(sphere, lo, hi, p, seed);
+    });
+    converges("aco", [&](std::uint64_t seed) {
+        AcoParams p;
+        p.max_iter = 500;
+        p.threshold = 1e-8;
+        return aco(sphere, lo, hi, p, seed);
+    });
+    converges("gd", [&](std::uint64_t seed) {
+        GdParams p;
+        p.starts = 3;
+        p.threshold = 1e-8;
+        return gd(sphere, lo, hi, p, seed);
+    });
+    converges("newton", [&](std::uint64_t seed) {
+        NewtonParams p;
+        p.starts = 3;
+        p.threshold = 1e-8;
+        return newton(sphere, lo, hi, p, seed);
+    });
 
     // solve_spd: Cholesky solve of a small SPD system, and rejection of an indefinite one
-    CHECK((*solve_spd({4, 2, 2, 3}, {2, 1}) == std::vector<double>{0.5, 0.0}));
+    const auto solved = solve_spd({4, 2, 2, 3}, {2, 1});
+    CHECK((solved && *solved == std::vector<double>{0.5, 0.0}));
     CHECK(!solve_spd({1, 2, 2, 1}, {1, 1}));
 
     // csv: header, CRLF, blank trailing lines, spaces around cells, coefficient round trip
     const auto dir = std::filesystem::temp_directory_path() / std::format("nilm_tests_{}", std::random_device{}());
     std::filesystem::create_directories(dir);
-    std::ofstream(dir / "agg.csv") << "Timestamp, Active power\r\n24-Oct-2017 10:34:08, 1.5\r\n24-Oct-2017 10:34:09, 2.5\r\n\r\n";
+    std::ofstream(dir / "agg.csv")
+        << "Timestamp, Active power\r\n24-Oct-2017 10:34:08, 1.5\r\n24-Oct-2017 10:34:09, 2.5\r\n\r\n";
     std::ofstream(dir / "st.csv") << "Timestamp,m0,m1\n24-Oct-2017 10:34:08,1,0\n24-Oct-2017 10:34:09,1,1\n";
     const Dataset d = load_dataset(dir / "agg.csv", dir / "st.csv");
     CHECK(d.size() == 2 && d.machines() == 2);
@@ -101,7 +135,11 @@ int main() {
     CHECK(read_coefs(dir / "coef.csv") == c);
     std::ofstream(dir / "ragged.csv") << "Timestamp,m0,m1\n24-Oct-2017 10:34:08,1,0\n24-Oct-2017 10:34:09,1\n";
     const auto rejects = [](auto&& call) {
-        try { call(); } catch (const std::runtime_error&) { return true; }
+        try {
+            call();
+        } catch (const std::runtime_error&) {
+            return true;
+        }
         return false;
     };
     CHECK(rejects([&] { read_csv(dir / "ragged.csv"); }));
@@ -109,4 +147,8 @@ int main() {
     std::filesystem::remove_all(dir);
 
     std::cout << "all checks passed\n";
+    return 0;
+} catch (const std::exception& e) {
+    std::cerr << "unexpected exception: " << e.what() << '\n';
+    return 1;
 }

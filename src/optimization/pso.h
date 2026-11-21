@@ -9,15 +9,16 @@ struct PsoParams {
     int max_iter = 200;
     double threshold = 1e-5;
     int patience = 10;
-    double c1 = 2.0;          // cognitive weight
-    double c2 = 2.0;          // social weight
-    double w_max = 0.9;       // inertia decreases linearly from w_max to w_min
+    double c1 = 2.0;     // cognitive weight
+    double c2 = 2.0;     // social weight
+    double w_max = 0.9;  // inertia decreases linearly from w_max to w_min
     double w_min = 0.4;
     double v_max_frac = 0.2;  // velocity clamp as a fraction of the search range
 };
 
 template <Objective F>
-[[nodiscard]] Result pso(F&& f, std::span<const double> lo, std::span<const double> hi, const PsoParams& p, std::uint64_t seed) {
+[[nodiscard]] Result pso(F&& f, std::span<const double> lo, std::span<const double> hi, const PsoParams& p,
+                         std::uint64_t seed) {
     const std::size_t dim = lo.size();
     std::mt19937_64 rng(seed);
 

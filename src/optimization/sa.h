@@ -6,7 +6,7 @@
 namespace nilm {
 
 struct SaParams {
-    int chains = 20;           // independent annealing runs
+    int chains = 20;  // independent annealing runs
     int max_iter = 200;
     double threshold = 1e-5;
     int patience = 10;
@@ -17,7 +17,8 @@ struct SaParams {
 };
 
 template <Objective F>
-[[nodiscard]] Result sa(F&& f, std::span<const double> lo, std::span<const double> hi, const SaParams& p, std::uint64_t seed) {
+[[nodiscard]] Result sa(F&& f, std::span<const double> lo, std::span<const double> hi, const SaParams& p,
+                        std::uint64_t seed) {
     const std::size_t dim = lo.size();
     std::mt19937_64 rng(seed);
 
@@ -37,7 +38,8 @@ template <Objective F>
     std::vector<double> step(dim);
     for (std::size_t k = 0; k < dim; ++k) step[k] = p.step_frac * (hi[k] - lo[k]);
     double T = p.temperature > 0 ? p.temperature : std::max(worst - best.fitness, 1e-300);
-    const double cooling = p.cooling > 0 ? p.cooling : std::min(1.0, std::pow(std::max(p.threshold, 1e-300) / T, 1.0 / p.max_iter));
+    const double cooling =
+        p.cooling > 0 ? p.cooling : std::min(1.0, std::pow(std::max(p.threshold, 1e-300) / T, 1.0 / p.max_iter));
 
     double scale = 1.0;  // step multiplier, grown or shrunk from the acceptance rate
     Stopper stop{p.threshold, p.patience};
@@ -45,7 +47,8 @@ template <Objective F>
         int accepted = 0;
         for (auto& c : chains) {
             std::vector<double> y = c.x;
-            for (std::size_t k = 0; k < dim; ++k) y[k] = std::clamp(y[k] + scale * std::lerp(-step[k], step[k], unit01(rng)), lo[k], hi[k]);
+            for (std::size_t k = 0; k < dim; ++k)
+                y[k] = std::clamp(y[k] + scale * std::lerp(-step[k], step[k], unit01(rng)), lo[k], hi[k]);
             const double fy = f(std::span<const double>(y));
             if (fy < c.fit || unit01(rng) < std::exp(-(fy - c.fit) / T)) {
                 c.x = std::move(y);

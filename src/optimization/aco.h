@@ -17,7 +17,8 @@ struct AcoParams {
 };
 
 template <Objective F>
-[[nodiscard]] Result aco(F&& f, std::span<const double> lo, std::span<const double> hi, const AcoParams& p, std::uint64_t seed) {
+[[nodiscard]] Result aco(F&& f, std::span<const double> lo, std::span<const double> hi, const AcoParams& p,
+                         std::uint64_t seed) {
     const std::size_t dim = lo.size();
     const std::size_t k = static_cast<std::size_t>(std::max(p.archive, 2));
     std::mt19937_64 rng(seed);

@@ -19,7 +19,8 @@ struct GaParams {
 };
 
 template <Objective F>
-[[nodiscard]] Result ga(F&& f, std::span<const double> lo, std::span<const double> hi, const GaParams& p, std::uint64_t seed) {
+[[nodiscard]] Result ga(F&& f, std::span<const double> lo, std::span<const double> hi, const GaParams& p,
+                        std::uint64_t seed) {
     const std::size_t dim = lo.size();
     std::mt19937_64 rng(seed);
     std::uniform_int_distribution<std::size_t> pick(0, static_cast<std::size_t>(p.population) - 1);
@@ -46,7 +47,8 @@ template <Objective F>
     };
     const auto pareto = [&]() {  // sample of the double Pareto distribution, median 0, kept finite
         const double u = std::clamp(unit01(rng), 1e-12, 1.0 - 1e-12);
-        return u < 0.5 ? p.beta * (1 - std::pow(2 * u, -1 / p.alpha)) : p.beta * (std::pow(2 * (1 - u), -1 / p.alpha) - 1);
+        return u < 0.5 ? p.beta * (1 - std::pow(2 * u, -1 / p.alpha))
+                       : p.beta * (std::pow(2 * (1 - u), -1 / p.alpha) - 1);
     };
     const auto mutate = [&](std::vector<double>& x) {  // power mutation, keeps x inside [lo, hi]
         for (std::size_t k = 0; k < dim; ++k) {

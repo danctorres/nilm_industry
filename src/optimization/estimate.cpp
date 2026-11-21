@@ -36,7 +36,8 @@
 
 namespace {
 
-using Params = std::variant<nilm::PsoParams, nilm::GaParams, nilm::SaParams, nilm::AcoParams, nilm::GdParams, nilm::NewtonParams>;
+using Params =
+    std::variant<nilm::PsoParams, nilm::GaParams, nilm::SaParams, nilm::AcoParams, nilm::GdParams, nilm::NewtonParams>;
 
 struct Options {
     std::filesystem::path aggregate, states, out;
@@ -90,7 +91,8 @@ Options parse(int argc, char** argv) {
         else if (flag == "--lambda") o.lambda = nilm::to_double(v);
         else if (flag == "--seed") {
             const auto [end, ec] = std::from_chars(v.data(), v.data() + v.size(), o.seed);
-            if (ec != std::errc{} || end != v.data() + v.size()) throw std::runtime_error(std::format("bad seed '{}'", v));
+            if (ec != std::errc{} || end != v.data() + v.size())
+                throw std::runtime_error(std::format("bad seed '{}'", v));
         } else throw std::runtime_error(std::format("unknown flag {}\n{}", flag, kUsage));
     }
     if (!(o.bound > 0)) throw std::runtime_error("--bound must be positive");
@@ -116,36 +118,60 @@ Params make_params(const Options& o) {
 }
 
 using Span = std::span<const double>;
-template <class F> nilm::Result run(F& f, Span lo, Span hi, const nilm::PsoParams& p, std::uint64_t s) { return nilm::pso(f, lo, hi, p, s); }
-template <class F> nilm::Result run(F& f, Span lo, Span hi, const nilm::GaParams& p, std::uint64_t s) { return nilm::ga(f, lo, hi, p, s); }
-template <class F> nilm::Result run(F& f, Span lo, Span hi, const nilm::SaParams& p, std::uint64_t s) { return nilm::sa(f, lo, hi, p, s); }
-template <class F> nilm::Result run(F& f, Span lo, Span hi, const nilm::AcoParams& p, std::uint64_t s) { return nilm::aco(f, lo, hi, p, s); }
-template <class F> nilm::Result run(F& f, Span lo, Span hi, const nilm::GdParams& p, std::uint64_t s) { return nilm::gd(f, lo, hi, p, s); }
-template <class F> nilm::Result run(F& f, Span lo, Span hi, const nilm::NewtonParams& p, std::uint64_t s) { return nilm::newton(f, lo, hi, p, s); }
+template <class F>
+nilm::Result run(F& f, Span lo, Span hi, const nilm::PsoParams& p, std::uint64_t s) {
+    return nilm::pso(f, lo, hi, p, s);
+}
+template <class F>
+nilm::Result run(F& f, Span lo, Span hi, const nilm::GaParams& p, std::uint64_t s) {
+    return nilm::ga(f, lo, hi, p, s);
+}
+template <class F>
+nilm::Result run(F& f, Span lo, Span hi, const nilm::SaParams& p, std::uint64_t s) {
+    return nilm::sa(f, lo, hi, p, s);
+}
+template <class F>
+nilm::Result run(F& f, Span lo, Span hi, const nilm::AcoParams& p, std::uint64_t s) {
+    return nilm::aco(f, lo, hi, p, s);
+}
+template <class F>
+nilm::Result run(F& f, Span lo, Span hi, const nilm::GdParams& p, std::uint64_t s) {
+    return nilm::gd(f, lo, hi, p, s);
+}
+template <class F>
+nilm::Result run(F& f, Span lo, Span hi, const nilm::NewtonParams& p, std::uint64_t s) {
+    return nilm::newton(f, lo, hi, p, s);
+}
 
 std::string describe(const nilm::PsoParams& p) {
-    return std::format("pso: particles {}, max_iter {}, threshold {}, patience {}, c1 {}, c2 {}, w {}->{}, v_max_frac {}", p.particles,
-                       p.max_iter, p.threshold, p.patience, p.c1, p.c2, p.w_max, p.w_min, p.v_max_frac);
+    return std::format(
+        "pso: particles {}, max_iter {}, threshold {}, patience {}, c1 {}, c2 {}, w {}->{}, v_max_frac {}", p.particles,
+        p.max_iter, p.threshold, p.patience, p.c1, p.c2, p.w_max, p.w_min, p.v_max_frac);
 }
 std::string describe(const nilm::GaParams& p) {
-    return std::format("ga: population {}, max_iter {}, threshold {}, patience {}, tournament {}, alpha {}, beta {}, p_mutation {}, mutation_index {}, elite {}",
-                       p.population, p.max_iter, p.threshold, p.patience, p.tournament, p.alpha, p.beta, p.p_mutation, p.mutation_index, p.elite);
+    return std::format(
+        "ga: population {}, max_iter {}, threshold {}, patience {}, tournament {}, alpha {}, beta {}, p_mutation {}, "
+        "mutation_index {}, elite {}",
+        p.population, p.max_iter, p.threshold, p.patience, p.tournament, p.alpha, p.beta, p.p_mutation,
+        p.mutation_index, p.elite);
 }
 std::string describe(const nilm::SaParams& p) {
-    return std::format("sa: chains {}, max_iter {}, threshold {}, patience {}, temperature {} (0 = auto), temp_min {}, cooling {} (0 = auto), step_frac {}",
-                       p.chains, p.max_iter, p.threshold, p.patience, p.temperature, p.temp_min, p.cooling, p.step_frac);
+    return std::format(
+        "sa: chains {}, max_iter {}, threshold {}, patience {}, temperature {} (0 = auto), temp_min {}, cooling {} (0 "
+        "= auto), step_frac {}",
+        p.chains, p.max_iter, p.threshold, p.patience, p.temperature, p.temp_min, p.cooling, p.step_frac);
 }
 std::string describe(const nilm::AcoParams& p) {
-    return std::format("aco: archive {}, ants {}, max_iter {}, threshold {}, patience {}, q {}, xi {}", p.archive, p.ants, p.max_iter,
-                       p.threshold, p.patience, p.q, p.xi);
+    return std::format("aco: archive {}, ants {}, max_iter {}, threshold {}, patience {}, q {}, xi {}", p.archive,
+                       p.ants, p.max_iter, p.threshold, p.patience, p.q, p.xi);
 }
 std::string describe(const nilm::GdParams& p) {
-    return std::format("gd: starts {}, max_iter {}, threshold {}, patience {}, step {}, fd_frac {}", p.starts, p.max_iter, p.threshold,
-                       p.patience, p.step, p.fd_frac);
+    return std::format("gd: starts {}, max_iter {}, threshold {}, patience {}, step {}, fd_frac {}", p.starts,
+                       p.max_iter, p.threshold, p.patience, p.step, p.fd_frac);
 }
 std::string describe(const nilm::NewtonParams& p) {
-    return std::format("newton: starts {}, max_iter {}, threshold {}, patience {}, damping {}, fd_frac {}", p.starts, p.max_iter,
-                       p.threshold, p.patience, p.damping, p.fd_frac);
+    return std::format("newton: starts {}, max_iter {}, threshold {}, patience {}, damping {}, fd_frac {}", p.starts,
+                       p.max_iter, p.threshold, p.patience, p.damping, p.fd_frac);
 }
 
 double reconstruction_mae(const nilm::Dataset& d, std::span<const double> coefs) {
@@ -155,8 +181,8 @@ double reconstruction_mae(const nilm::Dataset& d, std::span<const double> coefs)
 }
 
 struct Fit {
-    std::vector<double> coefs;  // physical units
-    std::size_t optimised = 0;  // samples with at least one machine on
+    std::vector<double> coefs;                                                 // physical units
+    std::size_t optimised = 0;                                                 // samples with at least one machine on
     double mean_fitness = 0.0, mean_iterations = 0.0, mean_evaluations = 0.0;  // over the optimised samples
 };
 
@@ -196,7 +222,7 @@ Fit fit(const nilm::Dataset& d, double scale, const Options& o, const Params& pa
         r.mean_evaluations += static_cast<double>(best[i].evaluations);
         positions[i] = std::move(best[i].position);
     }
-    if (r.optimised) {
+    if (r.optimised > 0) {
         r.mean_fitness /= static_cast<double>(r.optimised);
         r.mean_iterations /= static_cast<double>(r.optimised);
         r.mean_evaluations /= static_cast<double>(r.optimised);
@@ -212,7 +238,8 @@ Fit fit_joint(const nilm::Dataset& d, double scale, const Options& o, const Para
     const std::vector<double> lo(dim, -o.bound), hi(dim, o.bound);
     std::vector<nilm::Sample> samples;
     for (std::size_t i = 0; i < d.size(); ++i)
-        if (std::ranges::any_of(d.states[i], [](int on) { return on != 0; })) samples.push_back({d.aggregate[i] / scale, d.states[i]});
+        if (std::ranges::any_of(d.states[i], [](int on) { return on != 0; }))
+            samples.push_back({d.aggregate[i] / scale, d.states[i]});
 
     Fit r{std::vector<double>(dim, 0.0), samples.size()};
     if (samples.empty()) return r;
@@ -242,9 +269,10 @@ int main(int argc, char** argv) try {
 #ifdef _OPENMP
     threads = omp_get_max_threads();
 #endif
-    std::cout << std::format("{} samples, {} machines, aggregate scale {}, bound {}, lambda {}, {} fit, {} thread(s), seed {}\n{}\n", d.size(),
-                             d.machines(), scale, o.bound, o.lambda, o.joint ? "joint" : "per-sample", o.joint ? 1 : threads, o.seed,
-                             std::visit([](const auto& p) { return describe(p); }, params));
+    std::cout << std::format(
+        "{} samples, {} machines, aggregate scale {}, bound {}, lambda {}, {} fit, {} thread(s), seed {}\n{}\n",
+        d.size(), d.machines(), scale, o.bound, o.lambda, o.joint ? "joint" : "per-sample", o.joint ? 1 : threads,
+        o.seed, std::visit([](const auto& p) { return describe(p); }, params));
     for (std::size_t j = 0; j < d.machines(); ++j)
         if (std::ranges::none_of(d.states, [j](const auto& on) { return on[j] != 0; }))
             std::cerr << std::format("warning: machine {} is never on, its coefficients stay 0\n", j);
@@ -265,9 +293,11 @@ int main(int argc, char** argv) try {
         const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         const double mae = reconstruction_mae(d, r.coefs);
         const bool better = mae < best_mae;
-        std::cout << std::format("cycle {}: MAE {:.6g}  samples used {}  {}fitness {:.3g}  {}iterations {:.1f}  {}evaluations {:.0f}  {:.1f}s{}\n",
-                                 c, mae, r.optimised, o.joint ? "" : "mean ", r.mean_fitness, o.joint ? "" : "mean ", r.mean_iterations,
-                                 o.joint ? "" : "mean ", r.mean_evaluations, seconds, better ? "  -> saved" : "");
+        std::cout << std::format(
+            "cycle {}: MAE {:.6g}  samples used {}  {}fitness {:.3g}  {}iterations {:.1f}  {}evaluations {:.0f}  "
+            "{:.1f}s{}\n",
+            c, mae, r.optimised, o.joint ? "" : "mean ", r.mean_fitness, o.joint ? "" : "mean ", r.mean_iterations,
+            o.joint ? "" : "mean ", r.mean_evaluations, seconds, better ? "  -> saved" : "");
         if (better) {
             nilm::write_coefs(o.out, r.coefs);
             best_mae = mae;

@@ -17,8 +17,8 @@
 namespace nilm {
 
 inline std::string_view trim(std::string_view s) {
-    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.front()))) s.remove_prefix(1);
-    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back()))) s.remove_suffix(1);
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.front())) != 0) s.remove_prefix(1);
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back())) != 0) s.remove_suffix(1);
     return s;
 }
 
@@ -34,13 +34,15 @@ struct Table {
     std::vector<std::string> header;
     std::vector<std::vector<std::string>> rows;
 
-    std::vector<std::string> text_column(std::size_t c) const {
+    [[nodiscard]] std::vector<std::string> text_column(std::size_t c) const {
         std::vector<std::string> out;
+        out.reserve(rows.size());
         for (const auto& r : rows) out.push_back(r.at(c));
         return out;
     }
-    std::vector<double> column(std::size_t c) const {
+    [[nodiscard]] std::vector<double> column(std::size_t c) const {
         std::vector<double> out;
+        out.reserve(rows.size());
         for (const auto& r : rows) out.push_back(to_double(r.at(c)));
         return out;
     }
@@ -64,7 +66,8 @@ inline Table read_csv(const std::filesystem::path& path) {
         }
         if (t.header.empty()) t.header = std::move(cells);
         else if (cells.size() != t.header.size())
-            throw std::runtime_error(std::format("{}:{}: {} cells, header has {}", path.string(), line_no, cells.size(), t.header.size()));
+            throw std::runtime_error(
+                std::format("{}:{}: {} cells, header has {}", path.string(), line_no, cells.size(), t.header.size()));
         else t.rows.push_back(std::move(cells));
     }
     if (t.rows.empty()) throw std::runtime_error("no data rows in " + path.string());
@@ -78,9 +81,9 @@ struct Dataset {
     std::vector<double> aggregate;
     std::vector<std::vector<int>> states;  // [sample][machine]
 
-    std::size_t size() const { return aggregate.size(); }
-    std::size_t machines() const { return states.empty() ? 0 : states.front().size(); }
-    Sample sample(std::size_t i) const { return {aggregate[i], states[i]}; }
+    [[nodiscard]] std::size_t size() const { return aggregate.size(); }
+    [[nodiscard]] std::size_t machines() const { return states.empty() ? 0 : states.front().size(); }
+    [[nodiscard]] Sample sample(std::size_t i) const { return {aggregate[i], states[i]}; }
 };
 
 inline Dataset load_dataset(const std::filesystem::path& aggregate_csv, const std::filesystem::path& states_csv) {
@@ -89,12 +92,14 @@ inline Dataset load_dataset(const std::filesystem::path& aggregate_csv, const st
     if (agg.rows.size() != st.rows.size())
         throw std::runtime_error(std::format("{} has {} rows but {} has {}", aggregate_csv.string(), agg.rows.size(),
                                              states_csv.string(), st.rows.size()));
-    if (agg.header.size() < 2) throw std::runtime_error("expected timestamp and active power columns in " + aggregate_csv.string());
-    if (st.header.size() < 2) throw std::runtime_error("expected timestamp and one column per machine in " + states_csv.string());
+    if (agg.header.size() < 2)
+        throw std::runtime_error("expected timestamp and active power columns in " + aggregate_csv.string());
+    if (st.header.size() < 2)
+        throw std::runtime_error("expected timestamp and one column per machine in " + states_csv.string());
     Dataset d{agg.text_column(0), agg.column(1), {}};
     for (const auto& row : st.rows) {
         std::vector<int> on;
-        for (std::size_t c = 1; c < row.size(); ++c) on.push_back(to_double(row[c]) != 0.0);
+        for (std::size_t c = 1; c < row.size(); ++c) on.push_back(to_double(row[c]) != 0.0 ? 1 : 0);
         d.states.push_back(std::move(on));
     }
     return d;

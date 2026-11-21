@@ -13,8 +13,8 @@ struct GdParams {
     int max_iter = 200;
     double threshold = 1e-5;
     int patience = 10;
-    double step = 1.0;        // length of the first trial move in parameter space, halved until Armijo holds
-    double fd_frac = 1e-6;    // finite-difference step as a fraction of the search range
+    double step = 1.0;      // length of the first trial move in parameter space, halved until Armijo holds
+    double fd_frac = 1e-6;  // finite-difference step as a fraction of the search range
 };
 
 struct NewtonParams {
@@ -22,7 +22,7 @@ struct NewtonParams {
     int max_iter = 200;
     double threshold = 1e-5;
     int patience = 10;
-    double damping = 1e-3;    // initial mu, adapted per start
+    double damping = 1e-3;  // initial mu, adapted per start
     double fd_frac = 1e-4;
 };
 
@@ -33,7 +33,8 @@ struct Start {
     double mu;
 };
 template <Objective F>
-std::vector<Start> starts(F& f, std::mt19937_64& rng, int n, std::span<const double> lo, std::span<const double> hi, double mu, Result& best) {
+std::vector<Start> starts(F& f, std::mt19937_64& rng, int n, std::span<const double> lo, std::span<const double> hi,
+                          double mu, Result& best) {
     std::vector<Start> out(static_cast<std::size_t>(n));
     for (auto& s : out) {
         s.x = random_point(rng, lo, hi);
@@ -51,7 +52,8 @@ inline std::vector<double> fd_steps(std::span<const double> lo, std::span<const 
 }  // namespace detail
 
 template <Objective F>
-[[nodiscard]] Result gd(F&& f, std::span<const double> lo, std::span<const double> hi, const GdParams& p, std::uint64_t seed) {
+[[nodiscard]] Result gd(F&& f, std::span<const double> lo, std::span<const double> hi, const GdParams& p,
+                        std::uint64_t seed) {
     const std::size_t dim = lo.size();
     std::mt19937_64 rng(seed);
     Result best;
@@ -85,7 +87,8 @@ template <Objective F>
 }
 
 template <Objective F>
-[[nodiscard]] Result newton(F&& f, std::span<const double> lo, std::span<const double> hi, const NewtonParams& p, std::uint64_t seed) {
+[[nodiscard]] Result newton(F&& f, std::span<const double> lo, std::span<const double> hi, const NewtonParams& p,
+                            std::uint64_t seed) {
     const std::size_t dim = lo.size();
     std::mt19937_64 rng(seed);
     Result best;
@@ -105,8 +108,9 @@ template <Objective F>
                     pt.mu *= 10;
                     continue;
                 }
+                const std::vector<double>& step = *d;
                 std::vector<double> y(dim);
-                for (std::size_t k = 0; k < dim; ++k) y[k] = std::clamp(pt.x[k] - (*d)[k], lo[k], hi[k]);
+                for (std::size_t k = 0; k < dim; ++k) y[k] = std::clamp(pt.x[k] - step[k], lo[k], hi[k]);
                 const double fy = f(std::span<const double>(y));
                 if (fy < pt.fit) {
                     pt.x = std::move(y);

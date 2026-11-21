@@ -33,7 +33,7 @@ struct Sample {
 
 // Estimated power of machine j for a sample; a machine that is off draws nothing.
 inline double estimate(std::span<const double> coefs, std::size_t j, const Sample& s) {
-    return s.on[j] ? poly(coefs_of(coefs, j), s.agg) : 0.0;
+    return s.on[j] != 0 ? poly(coefs_of(coefs, j), s.agg) : 0.0;
 }
 
 // Sum of all machine estimates for a sample.
@@ -79,13 +79,13 @@ inline std::vector<double> average_on(std::span<const std::vector<double>> posit
     for (std::size_t i = 0; i < positions.size(); ++i) {
         if (positions[i].empty()) continue;
         for (std::size_t j = 0; j < machines; ++j)
-            if (states[i][j]) {
+            if (states[i][j] != 0) {
                 ++count[j];
                 for (std::size_t k = 0; k < kCoefs; ++k) mean[j * kCoefs + k] += positions[i][j * kCoefs + k];
             }
     }
     for (std::size_t j = 0; j < machines; ++j)
-        if (count[j])
+        if (count[j] != 0)
             for (std::size_t k = 0; k < kCoefs; ++k) mean[j * kCoefs + k] /= count[j];
     return mean;
 }
