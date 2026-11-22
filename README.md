@@ -6,7 +6,6 @@ Table of Contents
 * [Datasets](#datasets)
 * [Reproduce](#reproduce)
 * [Methodology notes](#methodology-notes)
-* [Development](#development)
 * [Licensing](#licensing)
 ---
 
@@ -105,13 +104,6 @@ Validation MAE in kW over all machines from `validation.py`, mean ± standard de
 | Baseline: proportional | 0.036 ± 0.012 | 37.4 ± 2.2 | 32.5 ± 3.5 |
 
 The spread is mostly the split: which hours or days are held out. On HIPE, Gaussian allocation beats the best baseline in all 24 pairs of machine count (2 to 9) and split; UNN plain does in 5, UNN state and EMUPF `--joint` in 3, EMUPF per sample in none. On IMDELD, EMUPF `--joint` beats the best baseline in 4 of the 6 pairs, by less than the spread between splits, and the best method changes with the split.
-
-Development
-------
-CI runs the C++ tests, every Python self-check and the linters below; run them locally before pushing.
-* Python: `uv run ruff format` and `uv run ruff check` (settings in `pyproject.toml`).
-* C++: `clang-format -i src/optimization/*.h src/optimization/*.cpp`, and `clang-tidy -p build --extra-arg=-fno-openmp src/optimization/*.cpp` after configuring with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` (settings in `.clang-format` and `.clang-tidy`).
-
 
 Licensing
 ------
