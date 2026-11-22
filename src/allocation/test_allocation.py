@@ -24,9 +24,9 @@ assert collinear(s) == [] and collinear(np.c_[s, s[:, 1]]) == [(1, 3)] and colli
 # the ON estimates add up to the total, OFF machines are 0, and the error is under half that of guessing the means
 est = posterior(a, s, fit_mu, fit_var)[0]
 assert np.allclose(est.sum(axis=1), a, atol=1e-3) and (est[s == 0] == 0).all()
-# exactly, even for a machine at the variance floor
-one = posterior(np.array([0.31]), np.array([[1.0]]), np.array([0.3]), np.array([1e-6]))[0]
-assert np.isclose(one.item(), 0.31, rtol=0, atol=1e-12), one
+# exactly, even beside a machine at the variance floor, which stays at its mean while the other takes the rest
+two = posterior(np.array([1.0]), np.array([[1.0, 1.0]]), np.array([0.3, 0.5]), np.array([1e-6, 0.01]))[0]
+assert np.isclose(two.sum(), 1.0, rtol=0, atol=1e-12) and abs(two[0, 0] - 0.3) < 1e-4, two
 assert np.abs(est - p).mean() < 0.5 * np.abs(s * fit_mu - p).mean()
 
 # one component per machine gives exactly the single-Gaussian fit

@@ -30,8 +30,8 @@ assert np.isclose(pooled["MAE"], 1 / 6) and np.isclose(pooled["MAE_on"], 1 / 5),
 try:
     errors(truth, est.assign(Timestamp=ts[::-1]), False, "shuffled")
     raise AssertionError("timestamps that differ must be rejected")
-except SystemExit:
-    pass
+except SystemExit as e:
+    assert "timestamps" in str(e), e
 
 # end to end: every results/<method>/<DATASET>/<N>.csv, at any depth, is paired with the metered power of N machines.
 # Estimates use ", " separators. hart_inspired estimates the whole recording: only its test rows are scored (the extra

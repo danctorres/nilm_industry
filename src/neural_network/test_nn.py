@@ -75,6 +75,6 @@ with tempfile.TemporaryDirectory() as name:
     try:
         main([*argv, "--data-root", name, "--results-root", name])
         raise AssertionError("timestamps that differ must be rejected")
-    except SystemExit:
-        pass
+    except SystemExit as e:
+        assert "timestamps" in str(e), e
 print("ok")
