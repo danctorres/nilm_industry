@@ -127,7 +127,7 @@ def main(argv=None) -> None:
         truth_path = d / "equipment_validation.csv"
         truth, w_to_kw = read_csv(truth_path), dataset == "IMDELD"  # IMDELD is in W, shown in kW
         found = [f for f in files if (f.parent.name, f.stem) == (dataset, n)]
-        # a generator keeps one estimate file in memory at a time. method: e.g. deep_learning/state
+        # a generator keeps one estimate file in memory at a time. method: e.g. neural_network/state
         results = ((f.parent.parent.relative_to(a.results_root).as_posix(), read_csv(f)) for f in found)
         for method, raw in chain(results, baselines(d)):
             label, est = f"{method} {dataset}, {n} machines", raw

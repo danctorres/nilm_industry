@@ -1,7 +1,7 @@
-"""UNN (unsupervised NILM): a small neural network splits the total active power (`aggregate` in the files) into one
-estimate per machine. It never sees metered machine power: training only makes the ON estimates add up to the total.
+"""Neural network: a small network splits the total active power (`aggregate` in the files) into one estimate per
+machine. It never sees metered machine power: training only makes the ON estimates add up to the total.
 
-Example: python3 src/deep_learning/main.py --dataset hipe --mode state --machines 9
+Example: python3 src/neural_network/main.py --dataset hipe --mode state --machines 9
 """
 
 import argparse
@@ -69,7 +69,7 @@ def main(argv=None) -> None:
     p.add_argument("--epochs", type=int, default=2000)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
-    p.add_argument("--results-root", type=Path, default=REPO / "results" / "deep_learning")
+    p.add_argument("--results-root", type=Path, default=REPO / "results" / "neural_network")
     a = p.parse_args(argv)
     if a.runs < 1:
         p.error("--runs must be at least 1")

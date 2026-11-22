@@ -20,5 +20,5 @@ Checks: >
   -misc-include-cleaner,
   -misc-use-anonymous-namespace
 WarningsAsErrors: "*"
-HeaderFilterRegex: "src/optimization/.*"
+HeaderFilterRegex: "src/polynomial/.*"
 FormatStyle: file

@@ -1,4 +1,4 @@
-// Fits the EMUPF polynomial coefficients from the total power and the on/off states.
+// Fits the polynomial model's coefficients from the total power and the on/off states.
 // - The chosen algorithm solves each sample with a machine on separately, on the total divided by its largest value.
 // - Each machine's coefficients are averaged over the samples where it was on, then converted to physical units.
 // - Repeats for --cycles random restarts. Keeps the set with the lowest reconstruction MAE, also against an

@@ -2,7 +2,8 @@
 // Local search from several random starts, with finite-difference derivatives. Steps are clamped into [lo, hi].
 // - gd: gradient descent, Armijo backtracking (halve the step until the cost drops enough).
 // - newton: damped Newton, Levenberg-Marquardt (adds mu*I to the Hessian).
-// Damping is required: the EMUPF cost is one squared residual, whose rank-one Hessian allows no pure Newton step.
+// Damping is required: the polynomial model's cost is one squared residual, whose rank-one Hessian allows no pure
+// Newton step.
 #include "optimizer.h"
 
 namespace nilm {

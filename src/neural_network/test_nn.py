@@ -1,4 +1,4 @@
-"""Self-check of the network and its loss: python3 src/deep_learning/test_nn.py"""
+"""Self-check of the network and its loss: python3 src/neural_network/test_nn.py"""
 
 import tempfile
 from pathlib import Path

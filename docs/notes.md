@@ -29,23 +29,23 @@
 
 > **In short:** Gaussian allocation wins on every group. Nothing else beats the proportional split on average.
 
-**Setup:** HIPE · trained on November 2017 · scored on December · settings chosen on October · error in W · seeds: preprocessing 1, UNN 0, EMUPF 1.
+**Setup:** HIPE · trained on November 2017 · scored on December · settings chosen on October · error in W · seeds: preprocessing 1, neural network 0, polynomial model 1.
 
 | Method | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | Mean |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Gaussian allocation | 4.0 | 3.3 | 2.1 | 9.2 | 7.2 | 6.3 | 6.0 | 5.9 | 13.7 | 6.4 |
 | Gaussian allocation, 1 level per machine | 3.6 | 3.2 | 2.8 | 9.7 | 8.4 | 7.6 | 6.8 | 6.8 | 15.1 | 7.1 |
-| UNN, total only as input | 7.8 | 10.9 | 11.8 | 21.2 | 16.6 | 18.4 | 18.2 | 18.2 | 44.9 | 18.7 |
-| UNN, total and states as input | 15.2 | 21.0 | 20.7 | 22.6 | 14.8 | 21.7 | 14.1 | 18.8 | 31.9 | 20.1 |
-| EMUPF, fitted sample by sample | 72.9 | 60.2 | 48.1 | 58.0 | 47.8 | 43.7 | 38.9 | 34.9 | 47.7 | 50.2 |
-| EMUPF, fitted to all samples at once | 10.3 | 11.3 | 11.4 | 21.1 | 19.6 | 21.2 | 18.9 | 22.9 | 57.4 | 21.6 |
+| Neural network, total only as input | 7.8 | 10.9 | 11.8 | 21.2 | 16.6 | 18.4 | 18.2 | 18.2 | 44.9 | 18.7 |
+| Neural network, total and states as input | 15.2 | 21.0 | 20.7 | 22.6 | 14.8 | 21.7 | 14.1 | 18.8 | 31.9 | 20.1 |
+| Polynomial model, fitted sample by sample | 72.9 | 60.2 | 48.1 | 58.0 | 47.8 | 43.7 | 38.9 | 34.9 | 47.7 | 50.2 |
+| Polynomial model, fitted to all samples at once | 10.3 | 11.3 | 11.4 | 21.1 | 19.6 | 21.2 | 18.9 | 22.9 | 57.4 | 21.6 |
 | Hart-inspired | 72.7 | 54.9 | 46.5 | 47.7 | 40.2 | 46.4 | 43.2 | 41.2 | 66.5 | 51.0 |
 | Baseline: guess 0 W | 73.2 | 55.3 | 47.4 | 48.4 | 40.7 | 46.6 | 43.4 | 41.3 | 66.7 | 51.4 |
 | Baseline: equal split | 20.6 | 24.8 | 27.5 | 30.9 | 25.9 | 30.4 | 27.3 | 26.1 | 42.1 | 28.4 |
 | Baseline: proportional split | 11.6 | 11.7 | 14.9 | 18.7 | 14.2 | 20.4 | 17.3 | 15.7 | 33.3 | 17.5 |
 
 * **Gaussian allocation** is best on every group. With 1 level per machine it is slightly better on groups 2 and 3.
-* **Beating the proportional split:** EMUPF (all at once) on groups 2–4, UNN (total only) on 2–4 and 7, UNN (with states) on 8 and 10. None of them on average.
+* **Beating the proportional split:** the polynomial model (all at once) on groups 2–4, the neural network (total only) on 2–4 and 7, and with states on 8 and 10. None of them on average.
 * **Group 10 is the hardest.** Its extra machine, the ChipPress, runs only in November and December, so October never shows its big loads.
 
 ### Older: the one-week release
@@ -54,16 +54,16 @@
 
 **Setup:**
 * HIPE's one-week release (23 to 30 Oct 2017), with random hours held out for testing.
-* Older method versions: 1 level per machine in Gaussian allocation, and UNN's original training.
+* Older method versions: 1 level per machine in Gaussian allocation, and the neural network's original training.
 * Error in kW, mean ± spread over 3 splits (preprocessing seeds 1, 2 and 3).
 
 | Method | HIPE, 9 | IMDELD, 6 | IMDELD, 8 |
 |---|---|---|---|
 | Gaussian allocation | 0.021 ± 0.014 | 37.6 ± 1.5 | 31.7 ± 3.2 |
-| UNN, total only | 0.039 ± 0.019 | 20.9 ± 2.9 | 22.8 ± 0.8 |
-| UNN, total and states | 0.055 ± 0.015 | 26.6 ± 1.9 | 24.3 ± 3.4 |
-| EMUPF, sample by sample | 0.047 ± 0.014 | 22.9 ± 0.8 | 18.6 ± 0.4 |
-| EMUPF, all samples at once | 0.043 ± 0.022 | 19.4 ± 1.9 | 17.3 ± 3.5 |
+| Neural network, total only | 0.039 ± 0.019 | 20.9 ± 2.9 | 22.8 ± 0.8 |
+| Neural network, total and states | 0.055 ± 0.015 | 26.6 ± 1.9 | 24.3 ± 3.4 |
+| Polynomial model, sample by sample | 0.047 ± 0.014 | 22.9 ± 0.8 | 18.6 ± 0.4 |
+| Polynomial model, all samples at once | 0.043 ± 0.022 | 19.4 ± 1.9 | 17.3 ± 3.5 |
 | Hart-inspired (estimates only 7–17% of the on-samples) | 0.055 ± 0.016 | 19.9 ± 0.8 | 20.4 ± 0.4 |
 | Baseline: guess 0 W | 0.055 ± 0.016 | 19.9 ± 0.8 | 20.4 ± 0.4 |
 | Baseline: equal split | 0.039 ± 0.016 | 24.1 ± 1.0 | 19.0 ± 0.2 |
@@ -72,10 +72,10 @@
 * **The spread** mostly reflects which hours or days were held out.
 * **HIPE, 24 cases** (groups 2–9 × 3 splits). Cases where each method beats the best baseline:
   * Gaussian allocation: all 24;
-  * UNN (total only): 5;
-  * UNN (with states) and EMUPF (all at once): 3;
-  * EMUPF (sample by sample): none.
-* **IMDELD:** EMUPF (all at once) beats the best baseline in 4 of 6 cases, but by less than the spread, and the best method changes from split to split. [Why.](#why-imdeld-cannot-be-split)
+  * neural network (total only): 5;
+  * neural network (with states) and polynomial model (all at once): 3;
+  * polynomial model (sample by sample): none.
+* **IMDELD:** the polynomial model (all at once) beats the best baseline in 4 of 6 cases, but by less than the spread, and the best method changes from split to split. [Why.](#why-imdeld-cannot-be-split)
 
 ## Get the data
 
@@ -163,7 +163,7 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
 
 * Methods: add `--data-root tuning/data --results-root tuning/results/<method>`.
 * `validation.py`: add `--data-root tuning/data --results-root tuning/results`.
-* EMUPF: use the paths under `tuning/data/HIPE/<N>`.
+* Polynomial model: use the paths under `tuning/data/HIPE/<N>`.
 
 ## Run the methods
 
@@ -180,25 +180,25 @@ uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N [--comp
 * **Slow** when many machines are on at once, since it tries every combination of levels.
 * **Assumes** the machines switch on and off independently, and warns when two don't.
 
-### UNN
+### Neural network
 
 ```sh
-uv run src/deep_learning/main.py --dataset {hipe,imdeld} --mode {plain,state} --machines N [--runs R] [--epochs E] [--seed S]
+uv run src/neural_network/main.py --dataset {hipe,imdeld} --mode {plain,state} --machines N [--runs R] [--epochs E] [--seed S]
 ```
 
 * **`plain`:** the input is the total only. **`state`:** the total and the states.
 * **`--runs`:** trains R networks (5 by default) from different random starts, and averages them.
-* **Output** goes to `results/deep_learning/<mode>/...`.
+* **Output** goes to `results/neural_network/<mode>/...`.
 
-### EMUPF (C++)
+### Polynomial model (C++)
 
 Needs CMake 3.20 or later and a C++20 compiler (GCC 13 tested). OpenMP is optional.
 
 ```sh
-cmake -S src/optimization -B build && cmake --build build -j && ctest --test-dir build
+cmake -S src/polynomial -B build && cmake --build build -j && ctest --test-dir build
 ```
 
-Then run `estimate` and `validate`, as described in [its README](../src/optimization/README.md).
+Then run `estimate` and `validate`, as described in [its README](../src/polynomial/README.md).
 
 ### Hart-inspired
 
@@ -233,7 +233,7 @@ Every Python folder has one, e.g. `uv run src/validation/test_validation.py`. Th
 * **Groups 2 and 3:** 1 level stays slightly better.
 * **`--components auto`:** barely better in October (5.98 W against 6.06 W), worse in December (6.67 W against 6.40 W). Not the default.
 
-### UNN
+### Neural network
 
 | Setting | Now | Before |
 |---|---|---|
@@ -252,16 +252,16 @@ Change against before:
 * **Why weight decay:** with the total as its only input, the network over-fits the ~3,000 training rows. Without decay, its NDE got worse instead of better.
 * **Why average the runs:** with the states as input, many different splits of the total fit the training data equally well, so each run picks its own. Averaging evens this out.
   * Before averaging (one-week tests), results moved with the seed. HIPE group 9: 53 ± 5 W with the states, 36 ± 1 W with the total only. IMDELD group 6, total only: 25 ± 6 kW, against 20.5 kW for guessing 0.
-  * **So compare UNN over several seeds.**
+  * **So compare the neural network over several seeds.**
 
-### EMUPF: fit all samples at once
+### Polynomial model: fit all samples at once
 
-* **Sample by sample** (the dissertation's version) solves one equation with 4 × N unknowns at each sample, then averages the answers. That is badly underdetermined: see [its README](../src/optimization/README.md#limitation-of-the-method).
+* **Sample by sample** (the dissertation's version) solves one equation with 4 × N unknowns at each sample, then averages the answers. That is badly underdetermined: see [its README](../src/polynomial/README.md#limitation-of-the-method).
 * **`estimate --joint`** fits all samples at once. **Compare this one.**
 
 ### Tried and dropped
 
-* **Tuning EMUPF's parameters:** the defaults did as well.
+* **Tuning the polynomial model's optimisers:** the defaults did as well.
 * **Smoothing Gaussian allocation's estimates over time:** only 6% better, not worth the code.
 * **Tracking each machine's power level over time:** worse. Neighbouring seconds don't reveal a machine's level any better than the second itself; they just make wrong guesses more confident.
 

@@ -5,14 +5,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - run: cmake -S src/optimization -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+      - run: cmake -S src/polynomial -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
       - run: cmake --build build -j
       - run: ctest --test-dir build --output-on-failure
   sanitize:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - run: cmake -S src/optimization -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
+      - run: cmake -S src/polynomial -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
       - run: cmake --build build -j
       - run: ctest --test-dir build --output-on-failure
   python:
@@ -28,6 +28,6 @@ jobs:
       - uses: astral-sh/setup-uv@v10.4.0  # setup-uv publishes no moving major tag
       - run: uv run --locked ruff format --check
       - run: uv run --locked ruff check
-      - run: clang-format-18 --dry-run --Werror src/optimization/*.h src/optimization/*.cpp
-      - run: cmake -S src/optimization -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      - run: clang-tidy-18 -p build --quiet --extra-arg=-fno-openmp src/optimization/*.cpp
+      - run: clang-format-18 --dry-run --Werror src/polynomial/*.h src/polynomial/*.cpp
+      - run: cmake -S src/polynomial -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - run: clang-tidy-18 -p build --quiet --extra-arg=-fno-openmp src/polynomial/*.cpp

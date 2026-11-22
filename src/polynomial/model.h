@@ -1,5 +1,5 @@
 #pragma once
-// EMUPF model: a machine's active power is a cubic polynomial of the total power while it is on, and 0 while off.
+// Polynomial model: a machine's active power is a cubic polynomial of the total power while it is on, and 0 while off.
 // - All coefficients sit in one flat vector, kCoefs consecutive values per machine.
 // - Fitting uses the total divided by its largest value (`scale_of`), so bounds, thresholds and fitness have no units.
 // - `unscale` turns the fitted coefficients back into physical units for the coefficient file.

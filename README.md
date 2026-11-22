@@ -36,11 +36,11 @@ Every Python folder has a self-check: `uv run src/<folder>/test_<name>.py`.
 | Method | Code | How it works |
 |---|---|---|
 | **Gaussian allocation** | [`src/allocation`](src/allocation) | Learns each machine's typical power levels (idle, heating, ...), then splits the total among the running machines in the most likely way. |
-| UNN | [`src/deep_learning`](src/deep_learning) | A small neural network, trained to make the running machines' estimates add up to the total. |
-| EMUPF | [`src/optimization`](src/optimization) | Each machine's power is a polynomial of the total, fitted by optimisation algorithms. C++: needs CMake and a C++20 compiler. |
+| Neural network | [`src/neural_network`](src/neural_network) | A small neural network, trained to make the running machines' estimates add up to the total. |
+| Polynomial model | [`src/polynomial`](src/polynomial) | Each machine's power is a polynomial of the total, fitted by optimisation algorithms. C++: needs CMake and a C++20 compiler. |
 | Hart-inspired | [`src/hart_inspired`](src/hart_inspired) | Reads each machine's power from the drop in the total when it switches off. |
 
-UNN and EMUPF come from my [MSc dissertation](docs/Dissertation_NILM.pdf) (University of Coimbra). Gaussian allocation was added later.
+The neural network and the polynomial model come from my [MSc dissertation](docs/Dissertation_NILM.pdf) (University of Coimbra). Gaussian allocation was added later.
 
 ## Results
 
@@ -59,8 +59,8 @@ UNN and EMUPF come from my [MSc dissertation](docs/Dissertation_NILM.pdf) (Unive
 |---|---|
 | **Gaussian allocation** | **6.4** |
 | Simple split: in proportion to each machine's average power | 17.5 |
-| UNN | 18.7 |
-| EMUPF | 21.6 |
+| Neural network | 18.7 |
+| Polynomial model | 21.6 |
 | Simple split: equally among the running machines | 28.4 |
 | Hart-inspired | 51.0 |
 | Guess 0 W (= the machines' average power) | 51.4 |
@@ -75,7 +75,7 @@ On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-m
 ## More
 
 * [docs/notes.md](docs/notes.md): every number, option and design choice, with a table to jump to what you need.
-* [src/optimization/README.md](src/optimization/README.md): building and running EMUPF.
+* [src/polynomial/README.md](src/polynomial/README.md): building and running the polynomial model.
 
 ## License
 

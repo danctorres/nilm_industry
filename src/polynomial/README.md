@@ -1,4 +1,4 @@
-# EMUPF estimation
+# Polynomial model
 
 > **In short:** each machine's power is a **cubic polynomial of the total**, fitted by **six optimisers** so they can be compared. For the best fit, use **`estimate --joint`**.
 
@@ -30,7 +30,7 @@ All share one interface ([`optimizer.h`](optimizer.h)), picked with `--algorithm
 ## Build and test
 
 ```sh
-cmake -S src/optimization -B build && cmake --build build -j && ctest --test-dir build
+cmake -S src/polynomial -B build && cmake --build build -j && ctest --test-dir build
 ```
 
 The first configure downloads [doctest](https://github.com/doctest/doctest) for `tests.cpp`.
@@ -43,19 +43,19 @@ IMDELD, 6 machines. `OMP_NUM_THREADS` controls parallelism.
 OMP_NUM_THREADS=8 build/estimate \
     data/processed/IMDELD/6/aggregate_training.csv \
     data/processed/IMDELD/6/states_training.csv \
-    results/optimization/IMDELD/coef_6.csv
+    results/polynomial/IMDELD/coef_6.csv
 ```
 
 ```sh
 build/validate \
     data/processed/IMDELD/6/aggregate_validation.csv \
     data/processed/IMDELD/6/states_validation.csv \
-    results/optimization/IMDELD/coef_6.csv \
-    results/optimization/IMDELD/6.csv
+    results/polynomial/IMDELD/coef_6.csv \
+    results/polynomial/IMDELD/6.csv
 ```
 
 * **HIPE:** same commands, with `HIPE/<N>` in place of `IMDELD/6`.
-* **Keep the estimates at `results/optimization/<DATASET>/<N>.csv`** so [`validation.py`](../validation/validation.py) finds them.
+* **Keep the estimates at `results/polynomial/<DATASET>/<N>.csv`** so [`validation.py`](../validation/validation.py) finds them.
 
 ### `estimate` options
 
