@@ -48,10 +48,7 @@ def split_train_validation(t, agg, block: float, gap: float, rng: np.random.Gene
     """Time-block split. The recording (t in seconds) is cut into blocks of `block` seconds, and VALIDATION_SHARE of
     them, drawn at random, are validation: every row in them is scored, so validation follows the recording's own
     distribution. Rows within `gap` seconds of a block edge belong to neither side, so every training row is at least
-    2 * gap away from every validation row. Training draws the same number of rows (at most TRAINING_PER_BIN) from
-    every aggregate bin of the other blocks (adaptive binning, MATLAB split_train_validation): six bins of one
-    standard deviation around the mean, those with more than 100 rows. The two outer bins are open-ended (MATLAB's
-    stopped at 3 standard deviations), so training sees the peaks that validation scores. Returns 0-based row
+    2 * gap away from every validation row. Training is draw_training from the other blocks. Returns 0-based row
     indices, training shuffled and validation in time order."""
     t, agg = np.asarray(t, dtype=float), np.asarray(agg, dtype=float)
     block_of = np.floor(t / block)
@@ -59,18 +56,24 @@ def split_train_validation(t, agg, block: float, gap: float, rng: np.random.Gene
     blocks = np.unique(block_of[usable])
     chosen = rng.choice(blocks, max(1, round(VALIDATION_SHARE * len(blocks))), replace=False)
     in_validation = np.isin(block_of, chosen)
+    return draw_training(np.flatnonzero(usable & ~in_validation), agg, rng), np.flatnonzero(usable & in_validation)
 
-    candidates = np.flatnonzero(usable & ~in_validation)
-    a = agg[candidates]
+
+def draw_training(candidates: np.ndarray, agg, rng: np.random.Generator) -> np.ndarray:
+    """The same number of rows (at most TRAINING_PER_BIN) from every aggregate bin of the candidate rows (adaptive
+    binning, MATLAB split_train_validation): six bins of one standard deviation around the mean, those with more than
+    100 rows. The two outer bins are open-ended (MATLAB's stopped at 3 standard deviations), so training sees the peaks
+    that validation scores. Returns the rows shuffled."""
+    a = np.asarray(agg, dtype=float)[candidates]
     edges = a.mean() + np.arange(-2, 3) * a.std(ddof=1)  # inner edges; MATLAB std divides by n - 1
     bin_of = np.searchsorted(edges, a, side="right")  # [a, b) bins, the first and last open-ended
     counts = np.bincount(bin_of, minlength=len(edges) + 1)
     bins = np.flatnonzero(counts > 100)
     if bins.size == 0:
-        raise ValueError("split_train_validation: no aggregate bin of the training blocks has more than 100 rows")
+        raise ValueError("draw_training: no aggregate bin of the training rows has more than 100 rows")
     n = min(TRAINING_PER_BIN, counts[bins].min())
     training = np.concatenate([rng.choice(candidates[bin_of == b], n, replace=False) for b in bins])
-    return rng.permutation(training), np.flatnonzero(usable & in_validation)
+    return rng.permutation(training)
 
 
 def time_strings(t) -> np.ndarray:

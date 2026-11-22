@@ -3,6 +3,7 @@
 import tempfile
 from pathlib import Path
 
+import hipe
 import numpy as np
 import pandas as pd
 from common import TIME_FORMAT, matlab_round
@@ -76,7 +77,8 @@ def files(out):
 with tempfile.TemporaryDirectory() as name:
     tmp = Path(name)
     machines = write_raw(tmp / "raw" / "Equipment")
-    main(["--raw", str(tmp / "raw"), "--out", str(tmp / "out")])
+    hipe.TUNING_END, hipe.REPORT_START = np.datetime64("2017-10-22T22:30"), np.datetime64("2017-10-22T23:00")
+    main(["--raw", str(tmp / "raw"), "--out", str(tmp / "out"), "--tuning-out", str(tmp / "tune")])
     out = tmp / "out"
 
     # timestamps: UTC, cut before the drop, negative power clipped, and no cut where summer time ends
@@ -131,25 +133,37 @@ with tempfile.TemporaryDirectory() as name:
     assert np.array_equal(states[st_cols].to_numpy(), (values > 0).astype(int))
     assert np.allclose(aggregate.active_power, values.sum(axis=1), rtol=0, atol=1e-9)
 
-    # splits: one of the two whole hours minus 300 s at each end for validation, training 600 s away, rows aligned
-    row = {t: i for i, t in enumerate(equipment.timestamp)}
+    # splits in time, cut here at 22:30 and 23:00 UTC (1 Nov and 1 Dec in the real data), 300 s left out next to each
+    # cut: before tunes, between trains, after reports; the tuning copy validates on its own rows and links the rest
+    since = (
+        pd.to_datetime(equipment.timestamp, format=TIME_FORMAT) - pd.Timestamp("2017-10-22 22:00")
+    ).dt.total_seconds()
+    since, row = since.to_numpy(), {t: i for i, t in enumerate(equipment.timestamp)}
     for n in range(2, 11):
         assert np.allclose(read[f"{n}/aggregate.csv"].active_power, values[:, :n].sum(axis=1), rtol=0, atol=1e-9)
-        tr, val = (read[f"{n}/aggregate_{s}.csv"] for s in ["training", "validation"])
-        assert len(val) == 3000 and len(tr)
-        t_tr, t_val = (pd.to_datetime(x.timestamp, format=TIME_FORMAT).to_numpy() for x in (tr, val))
-        assert np.abs(t_tr[:, None] - t_val[None, :]).min() >= np.timedelta64(600, "s")
-        for s, agg in (("training", tr), ("validation", val)):
+        tune = tmp / "tune" / str(n)
+        for folder, s, expected_rows in (
+            (out / str(n), "training", None),
+            (out / str(n), "validation", np.flatnonzero(since >= 3900)),
+            (tune, "validation", np.flatnonzero(since < 1500)),
+        ):
+            agg = pd.read_csv(folder / f"aggregate_{s}.csv")
             rows = [row[t] for t in agg.timestamp]
-            eq_split, st_split = read[f"{n}/equipment_{s}.csv"], read[f"{n}/states_{s}.csv"]
+            if expected_rows is None:
+                assert rows and all(2100 <= since[r] < 3300 for r in rows)
+            else:
+                assert rows == list(expected_rows)
+            eq_split, st_split = (pd.read_csv(folder / f"{name}_{s}.csv") for name in ("equipment", "states"))
             assert (eq_split.timestamp == agg.timestamp).all() and (st_split.timestamp == agg.timestamp).all()
             assert np.array_equal(eq_split[eq_cols[:n]], values[rows, :n])
             assert np.array_equal(st_split[st_cols[:n]], states[st_cols[:n]].to_numpy()[rows])
             assert np.allclose(agg.active_power, values[rows, :n].sum(axis=1), rtol=0, atol=1e-9)
+        for f in ("aggregate.csv", "equipment.csv", "states.csv", "aggregate_training.csv", "states_training.csv"):
+            assert (tune / f).is_symlink() and (tune / f).resolve() == (out / str(n) / f).resolve(), f
 
     # determinism: same seed, same files; another seed, other splits
-    main(["--raw", str(tmp / "raw"), "--out", str(tmp / "same")])
-    main(["--raw", str(tmp / "raw"), "--out", str(tmp / "other"), "--seed", "2"])
+    main(["--raw", str(tmp / "raw"), "--out", str(tmp / "same"), "--tuning-out", str(tmp / "same_tune")])
+    main(["--raw", str(tmp / "raw"), "--out", str(tmp / "other"), "--tuning-out", str(tmp / "o"), "--seed", "2"])
     assert files(tmp / "same") == written
     other = files(tmp / "other")
     assert other["9/equipment.csv"] == written["9/equipment.csv"]

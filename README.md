@@ -37,6 +37,7 @@ Directory Structure
     │   ├── optimization        # EMUPF method developed in C++
     │   ├── preprocessing       # Python code for the preprocessing of the datasets
     │   └── validation          # Python code for the validation of the methods' results
+    ├── tuning                  # Not versioned: data/ and results/ of the HIPE tuning copy (see Reproduce)
     ├── LICENSE
     ├── README.md
     ├── pyproject.toml          # Python dependencies, locked in uv.lock
@@ -66,12 +67,14 @@ Reproduce
 The Python code runs with [uv](https://docs.astral.sh/uv/): `uv run` creates the environment from `uv.lock` on first use. Every Python folder has a self-check, e.g. `uv run src/validation/test_validation.py`.
 
 1. Get the raw data: `uv run src/preprocessing/fetch_hipe.py` for HIPE, IMDELD by hand (see Datasets).
-2. Preprocess: `uv run src/preprocessing/imdeld.py` (add `--equipment 1,2,3,4,5,6,7,8` for the 8-machine set) and `uv run src/preprocessing/hipe.py`.
+2. Preprocess: `uv run src/preprocessing/imdeld.py` (add `--equipment 1,2,3,4,5,6,7,8` for the 8-machine set) and `uv run src/preprocessing/hipe.py` (about 30 min, 8 GB of output).
 3. EMUPF (CMake >= 3.20, C++20 compiler, GCC 13 tested, OpenMP optional): `cmake -S src/optimization -B build && cmake --build build -j && ctest --test-dir build`; then run `estimate` / `validate` as described in [src/optimization/README.md](src/optimization/README.md).
 4. UNN: `uv run src/deep_learning/main.py --dataset {hipe,imdeld} --mode {plain,state} --machines N [--runs R] [--epochs E] [--seed S]`. Output: `results/deep_learning/<mode>/<DATASET>/<N>.csv`.
 5. Gaussian allocation: `uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N`. It trains on the training split, the same rows as EMUPF and UNN. It assumes the machines switch independently and warns when two switch together, as on IMDELD, where no method can tell their power apart. Output: `results/allocation/<DATASET>/<N>.csv`.
 6. Hart-inspired baseline: `uv run src/hart_inspired/hart_inspired.py --dataset hipe --machines 9`. It runs on the unsplit tables and uses the true on/off states, so it is an oracle reference, not an unsupervised method. Output: `results/hart_inspired/<DATASET>/<N>.csv`.
 7. Validation: `uv run src/validation/validation.py [--plots DIR]`. It pairs every `results/<method>/<DATASET>/<N>.csv` with `data/processed/<DATASET>/<N>/equipment_validation.csv`; the Hart-inspired baseline is scored on the same validation rows of its whole-recording estimates, with the share of ON samples it could estimate. Three baselines that see only the aggregate and the states are scored next to every set: zero, the aggregate split equally among the ON machines, and split in proportion to each machine's mean power fitted to the training split. The output ends with one line per method: MAE over all machines and the pooled NDE.
+
+To tune a method on HIPE, run steps 3 to 7 on the tuning copy `hipe.py` writes, which validates on October instead of December: add `--data-root tuning/data` and `--results-root tuning/results/<method>` to a method (`tuning/results` for `validation.py`; for EMUPF, the paths under `tuning/data/HIPE/<N>`). Report on December only what was chosen on October.
 
 The preprocessing, baseline and validation were ported from MATLAB; the MATLAB versions used in the dissertation are in the git history.
 
@@ -80,10 +83,10 @@ Methodology notes
 ------
 * IMDELD signals are smoothed with a 25-minute moving mean that restarts after gaps between kept days; HIPE is not smoothed.
 * HIPE timestamps are in UTC, so the recording runs on through the end of summer time on 29 Oct 2017. Rows inside a gap of more than 300 s between two raw samples of any machine are dropped from every machine and set: 8.5 min in every machine on 10 Nov 2017 and 21 h in the VacuumOven on 14 and 15 Dec.
-* The HIPE training/validation aggregate is the synthetic sum of the selected machines, not the main meter.
+* The HIPE training/validation aggregate is the synthetic sum of the selected machines, not the main meter: the ten machines draw only 4% of the main meter's energy (0.58 kW against 14.0 kW on average), and the rest, plant load that follows the working day from about 8 kW at night to 20 kW at midday, would go to whichever machines are ON.
 * On/off thresholds: flat 5 W for IMDELD; > 0 after spline fitting for HIPE.
-* The train/validation split holds out whole blocks of time, 30% of them drawn with a fixed seed: hours for HIPE, days for IMDELD. Validation scores every row of its blocks; training draws the same number of rows (at most 490) from each aggregate bin of the other blocks, six bins of one standard deviation, the outer two open-ended so training includes the peaks. Rows near a block edge are left out (300 s for HIPE, the longest gap between raw samples it keeps; 750 s for IMDELD, half the smoothing window), so the two sides share no raw samples.
-* The numbers in the notes below and in the table were measured on the one-week HIPE release (23 to 30 Oct 2017), before `fetch_hipe.py` moved to the three-month one.
+* HIPE is split by month, in UTC: October tunes (`tuning/data`), November trains and December reports (`data/processed`); the seed only changes which November rows training draws. IMDELD holds out whole days, 30% of them drawn with a fixed seed. Validation scores every row of its month or days; training draws the same number of rows (at most 490) from each aggregate bin of the other blocks, six bins of one standard deviation, the outer two open-ended so training includes the peaks. Rows near a cut are left out (300 s for HIPE, the longest gap between raw samples it keeps; 750 s for IMDELD, half the smoothing window), so no two splits share raw samples.
+* The numbers in the notes below and in the table were measured on the one-week HIPE release (23 to 30 Oct 2017), split into random hours, before `fetch_hipe.py` moved to the three-month one.
 * UNN with `--mode state` is not identifiable: with the states as input, any split of the aggregate among the ON machines minimises its loss, so its estimates change with the seed. On HIPE/9, seeds 0 to 2 give MAE 0.053 ± 0.005 kW in state mode and 0.036 ± 0.001 kW in plain mode. On IMDELD/6 both modes change with the seed (plain: 25 ± 6 kW, against 20.5 kW for the zero baseline), so report UNN over several seeds.
 * EMUPF fitted sample by sample solves one equation in `4 x machines` unknowns per sample and averages the solutions (see [src/optimization/README.md](src/optimization/README.md#limitation-of-the-method)); `estimate --joint` fits one well-posed objective and is the version to compare.
 * On IMDELD the machines switch on and off together (state correlations 0.93 to 1.00), and 96% of the samples have every machine ON or every machine OFF, so no method that relies on the states can tell their power apart, and grouping the machines that switch together leaves one group; compare against the baselines before reading anything into the IMDELD numbers.

@@ -1,6 +1,7 @@
 # inputs and generated outputs, see README
 /data/
 /results/
+/tuning/
 
 # MATLAB autosave
 *.asv

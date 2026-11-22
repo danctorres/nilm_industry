@@ -1,7 +1,11 @@
 """HIPE preprocessing, port of src/preprocessing/HIPE/main.m: turns the raw HIPE machine files into
 data/processed/HIPE/<N>, N the number of machines summed into the aggregate.
 
-Example: python3 src/preprocessing/hipe.py [--raw DIR] [--out DIR] [--seed 1]
+The recording is split in time: October tunes, November trains and December reports. data/processed/HIPE/<N>
+validates on December. A copy in --tuning-out validates on October and links every other file to the first, so a
+method tuned with --data-root tuning/data never sees December.
+
+Example: python3 src/preprocessing/hipe.py [--raw DIR] [--out DIR] [--tuning-out DIR] [--seed 1]
 """
 
 import argparse
@@ -9,14 +13,15 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from common import REPO, matlab_round, read_equipment_csv, seconds, split_train_validation, write_csv
+from common import REPO, draw_training, matlab_round, read_equipment_csv, write_csv
 
-# Methodology choices (values as used in the dissertation)
+# Methodology choices: the ON threshold is the dissertation's, the split is not (it held out random hours of one week)
 # a machine is ON when its power is > 0 kW, after clipping negatives, linear resampling to 1 s,
 # spline synchronisation and rounding to 4 decimals
 ON_THRESHOLD_KW = 0
-BLOCK_S = 3600  # validation holds out whole hours
-# left out at every block edge; rows inside a longer gap between two raw samples of a machine are dropped, so every
+# UTC: before TUNING_END tunes, from there to REPORT_START trains, after it reports
+TUNING_END, REPORT_START = np.datetime64("2017-11-01"), np.datetime64("2017-12-01")
+# left out next to each cut; rows inside a longer gap between two raw samples of a machine are dropped, so every
 # kept row is interpolated from samples at most GAP_S apart (the others are at most 219 s)
 GAP_S = 300
 
@@ -71,26 +76,36 @@ def process(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--raw", type=Path, default=REPO / "data" / "raw" / "HIPE")
     parser.add_argument("--out", type=Path, default=REPO / "data" / "processed" / "HIPE")
+    parser.add_argument("--tuning-out", type=Path, default=REPO / "tuning" / "data" / "HIPE")
     parser.add_argument("--seed", type=int, default=1)
     a = parser.parse_args(argv)
-    rng = np.random.default_rng(a.seed)  # one stream for every split, as rng(1) in main.m
+    rng = np.random.default_rng(a.seed)  # one stream for every training draw, as rng(1) in main.m
 
     eq, st = process(a.raw / "Equipment")
-    t = seconds(eq.timestamp)
+    t, gap = eq.timestamp.to_numpy(), GAP_S * SECOND
+    tuning = np.flatnonzero(TUNING_END - t > gap)  # rows within GAP_S of a cut belong to no split
+    pool = np.flatnonzero((t - TUNING_END >= gap) & (REPORT_START - t > gap))
+    report = np.flatnonzero(t - REPORT_START >= gap)
     sums = np.cumsum(eq.iloc[:, 1:].to_numpy(), axis=1)  # column n - 1: sum of the first n machines, added in order
     for n in range(2, sums.shape[1] + 1):
-        agg = pd.DataFrame({"timestamp": eq.timestamp, "active_power": sums[:, n - 1]})
-        write_csv(agg, a.out / str(n) / "aggregate.csv")
-        write_csv(eq.iloc[:, : n + 1], a.out / str(n) / "equipment.csv")
-        write_csv(st.iloc[:, : n + 1], a.out / str(n) / "states.csv")
-        training, validation = split_train_validation(t, agg.active_power, BLOCK_S, GAP_S, rng)
-        for split, rows in (("training", training), ("validation", validation)):
-            write_csv(agg.iloc[rows], a.out / str(n) / f"aggregate_{split}.csv")
-            write_csv(eq.iloc[rows, : n + 1], a.out / str(n) / f"equipment_{split}.csv")
-            write_csv(st.iloc[rows, : n + 1], a.out / str(n) / f"states_{split}.csv")
+        out, tune = a.out / str(n), a.tuning_out / str(n)
+        tables = {
+            "aggregate": pd.DataFrame({"timestamp": eq.timestamp, "active_power": sums[:, n - 1]}),
+            "equipment": eq.iloc[:, : n + 1],
+            "states": st.iloc[:, : n + 1],
+        }
+        training = draw_training(pool, tables["aggregate"].active_power, rng)
+        for name, df in tables.items():
+            write_csv(df, out / f"{name}.csv")
+            write_csv(df.iloc[training], out / f"{name}_training.csv")
+            write_csv(df.iloc[report], out / f"{name}_validation.csv")
+            write_csv(df.iloc[tuning], tune / f"{name}_validation.csv")
+            for f in (f"{name}.csv", f"{name}_training.csv"):
+                (tune / f).unlink(missing_ok=True)
+                (tune / f).symlink_to((out / f).resolve())
 
 
 if __name__ == "__main__":
