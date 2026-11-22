@@ -6,6 +6,7 @@
 - EM (expectation-maximisation: alternately estimate each machine's share and refit) fits the components from the
   total and the states alone.
 - Each estimate is the machine's posterior mean (expected power given the total), so ON estimates add up to the total.
+  A Gaussian allows negative power: those are set to 0 and the others scaled down so they still add up to it.
 - --components 1: one Gaussian per machine. --components auto: each machine's own number, by BIC (a fit score that
   penalises extra parameters).
 - Trains on the same training rows as the other methods.
@@ -231,7 +232,12 @@ def main(argv=None) -> None:
             if w > 0
         )
         print(f"machine {j} while ON: {', '.join(parts)}")
-    est = np.maximum(estimate(val.iloc[:, 1].to_numpy() / scale, val_states, mu, var, pi), 0.0) * scale
+    a_val = val.iloc[:, 1].to_numpy()[:, None]
+    est = np.maximum(estimate(a_val[:, 0] / scale, val_states, mu, var, pi), 0.0)
+    total = est.sum(axis=1, keepdims=True)
+    with np.errstate(divide="ignore", invalid="ignore"):  # no machine ON: 0 / 0 = NaN, set to 0
+        shares = np.where(total > 0, est / total, val_states / val_states.sum(axis=1, keepdims=True))
+    est = np.nan_to_num(shares * a_val)
 
     out = a.results_root / a.dataset.upper() / f"{a.machines}.csv"
     out.parent.mkdir(parents=True, exist_ok=True)

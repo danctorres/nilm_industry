@@ -72,5 +72,6 @@ with tempfile.TemporaryDirectory() as name:
     out = pd.read_csv(Path(name) / "HIPE" / "3.csv")
     assert list(out.columns) == ["timestamp", "active_power", "Estimate_0", "Estimate_1", "Estimate_2"]
     assert list(out.timestamp) == list(ts[:100]) and np.abs(out.iloc[:, 2:].to_numpy() - p[:100]).mean() < 0.02
+    assert np.allclose(out.iloc[:, 2:].sum(axis=1), out.active_power) and (out.iloc[:, 2:] >= 0).all().all()
 
 print("ok")
