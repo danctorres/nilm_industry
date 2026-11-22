@@ -79,4 +79,11 @@ inline std::vector<double> average_on(std::span<const std::vector<double>> posit
     return mean;
 }
 
+// A machine never on adds nothing to the cost, so a joint fit leaves its coefficients wherever the search stopped.
+inline void zero_never_on(std::vector<double>& coefs, std::span<const std::vector<int>> states) {
+    for (std::size_t j = 0; j < coefs.size() / kCoefs; ++j)
+        if (std::ranges::none_of(states, [j](const auto& on) { return on[j] != 0; }))
+            std::fill_n(coefs.begin() + static_cast<std::ptrdiff_t>(j * kCoefs), kCoefs, 0.0);
+}
+
 }  // namespace nilm

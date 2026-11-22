@@ -60,6 +60,13 @@ TEST_CASE("average_on") {
     CHECK(average_on(positions, states, 2) == std::vector<double>{2, 3, 4, 5, 1, 1, 1, 1});
 }
 
+// a machine never on gets zeros, the others keep theirs
+TEST_CASE("zero_never_on") {
+    std::vector<double> coefs = {1, 2, 3, 4, 5, 6, 7, 8};
+    zero_never_on(coefs, std::vector<std::vector<int>>{{1, 0}, {1, 0}});
+    CHECK(coefs == std::vector<double>{1, 2, 3, 4, 0, 0, 0, 0});
+}
+
 // every optimizer finds the minimum of sum (x - 1)^2, and the same seed gives the same result
 TEST_CASE("optimizers") {
     const std::vector<double> lo(3, -5.0), hi(3, 5.0);

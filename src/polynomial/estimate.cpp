@@ -249,7 +249,9 @@ Fit fit_joint(const nilm::Dataset& d, double scale, const Options& o, const Para
     r.mean_fitness = best.fitness;
     r.mean_iterations = best.iterations;
     r.mean_evaluations = static_cast<double>(evaluations);
-    r.coefs = nilm::unscale(best.position, scale);
+    r.coefs = best.position;
+    nilm::zero_never_on(r.coefs, d.states);
+    r.coefs = nilm::unscale(std::move(r.coefs), scale);
     return r;
 }
 
