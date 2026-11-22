@@ -3,9 +3,6 @@
 /results/
 /tuning/
 
-# MATLAB autosave
-*.asv
-
 # editors / IDEs
 .vscode
 .idea

@@ -1,5 +1,5 @@
-"""Helpers shared by hipe.py and imdeld.py, ported from the MATLAB originals.
-Each one reproduces the MATLAB function named in its docstring, including its edge behaviour."""
+"""Helpers shared by hipe.py and imdeld.py. Each one reproduces the MATLAB function named in its docstring, edge
+behaviour included, so the processed data match those used in the dissertation."""
 
 from pathlib import Path
 
@@ -61,9 +61,9 @@ def split_train_validation(t, agg, block: float, gap: float, rng: np.random.Gene
 
 def draw_training(candidates: np.ndarray, agg, rng: np.random.Generator) -> np.ndarray:
     """The same number of rows (at most TRAINING_PER_BIN) from every aggregate bin of the candidate rows (adaptive
-    binning, MATLAB split_train_validation): six bins of one standard deviation around the mean, those with more than
-    100 rows. The two outer bins are open-ended (MATLAB's stopped at 3 standard deviations), so training sees the peaks
-    that validation scores. Returns the rows shuffled."""
+    binning): six bins of one standard deviation around the mean, those with more than 100 rows. The two outer bins are
+    open-ended (the dissertation's stopped at 3 standard deviations), so training sees the peaks that validation scores.
+    Returns the rows shuffled."""
     a = np.asarray(agg, dtype=float)[candidates]
     edges = a.mean() + np.arange(-2, 3) * a.std(ddof=1)  # inner edges; MATLAB std divides by n - 1
     bin_of = np.searchsorted(edges, a, side="right")  # [a, b) bins, the first and last open-ended

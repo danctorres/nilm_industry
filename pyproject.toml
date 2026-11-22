@@ -18,5 +18,5 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "NPY", "C4", "SIM", "RUF", "PERF", "PIE", "RET", "PTH", "N", "PL", "ARG"]
-# hand-computed expected values in the self-checks and documented thresholds from the MATLAB port
+# hand-computed expected values in the self-checks and documented thresholds
 ignore = ["PLR2004"]

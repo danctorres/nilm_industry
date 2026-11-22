@@ -1,6 +1,6 @@
-"""Hart-inspired oracle-state baseline, port of src/hart_inspired/hart_inspired.m: estimates each machine's power from
-the step in the aggregate at its OFF event. It reads the TRUE on/off states, so it is an oracle-state reference, not an
-unsupervised NILM method. It runs on the unsplit tables.
+"""Hart-inspired oracle-state baseline: estimates each machine's power from the step in the aggregate at its OFF event.
+It reads the TRUE on/off states, so it is an oracle-state reference, not an unsupervised NILM method. It runs on the
+unsplit tables.
 Output: timestamp, active_power (the aggregate), then one estimate per machine, NaN where none was made.
 
 Example: python3 src/hart_inspired/hart_inspired.py --dataset hipe --machines 9
@@ -16,8 +16,8 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def events(states: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Events of hart_inspired.m: per machine the sample after each state change (find(diff ~= 0) + 1) and its sign
-    (+1 ON, -1 OFF), machine after machine, then stably sorted by sample like MATLAB's sort. 0-based sample, machine."""
+    """Every state change: per machine the sample after it and its sign (+1 ON, -1 OFF), machine after machine, then
+    stably sorted by sample. 0-based sample, machine."""
     d = np.diff(states.astype(int), axis=0)
     machine, sample = np.nonzero(d.T)  # row-major over d.T: machine by machine, samples ascending
     order = np.argsort(sample, kind="stable")
@@ -25,10 +25,10 @@ def events(states: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 
 def estimate(states: np.ndarray, agg: np.ndarray, sample, machine, change) -> np.ndarray:
-    """estimation_using_2_samples_OFF_event.m: for each ON event whose next event of the same machine is OFF, if the
-    other machines' states are equal at the ON and OFF samples and at the OFF sample and the one before it, the machine
-    gets |agg[OFF] - agg[OFF - 1]| from the ON sample to the OFF sample, both included. Elsewhere 0 when OFF and NaN
-    when ON. As in the MATLAB while loop, the last event is never visited."""
+    """For each ON event whose next event of the same machine is OFF, if the other machines' states are equal at the ON
+    and OFF samples and at the OFF sample and the one before it, the machine gets |agg[OFF] - agg[OFF - 1]| from the ON
+    sample to the OFF sample, both included. Elsewhere 0 when OFF and NaN when ON. The last event is never visited, as
+    in the dissertation's version."""
     est = np.where(states == 1, np.nan, 0.0)
     for i in range(len(sample) - 1):
         if change[i] != 1:

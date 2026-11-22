@@ -1,4 +1,4 @@
-"""Compares the per-machine estimates in results/ with the ground truth in data/processed (port of validation.m).
+"""Compares the per-machine estimates in results/ with the ground truth in data/processed.
 
     python3 src/validation/validation.py [--data-root DIR] [--results-root DIR] [--plots DIR]
 
@@ -28,7 +28,7 @@ def read_csv(path: Path) -> pd.DataFrame:
 
 
 def metrics(true_vals, est_vals, w_to_kw: bool) -> pd.DataFrame:
-    """calculate_error.m, one row per column: MAE, MSE, RMSE (kW), R2, NDE and SAE (unitless), no rounding.
+    """One row per column: MAE, MSE, RMSE (kW), R2, NDE and SAE (unitless), no rounding.
     NDE = sum((est - true)^2) / sum(true^2), SAE = |sum(est) - sum(true)| / sum(true)."""
     t, e = np.asarray(true_vals, dtype=float), np.asarray(est_vals, dtype=float)
     if t.ndim == 1:
@@ -52,9 +52,8 @@ def metrics(true_vals, est_vals, w_to_kw: bool) -> pd.DataFrame:
 def errors(
     truth: pd.DataFrame, est: pd.DataFrame, w_to_kw: bool, name: str
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
-    """calculate_all_errors.m for one pair. truth: timestamp, machine 1..M; est: timestamp, measured aggregate,
-    estimate 1..M. Returns the per-machine errors, the aggregate-reconstruction errors and the errors over every
-    machine's samples pooled."""
+    """Errors of one pair. truth: timestamp, machine 1..M; est: timestamp, measured aggregate, estimate 1..M. Returns
+    the per-machine errors, the aggregate-reconstruction errors and the errors over every machine's samples pooled."""
     if not truth.iloc[:, 0].astype(str).tolist() == est.iloc[:, 0].astype(str).tolist():
         raise SystemExit(f"{name}: the timestamps of the estimates and the ground truth differ")
     true_vals, est_vals = truth.iloc[:, 1:], est.iloc[:, 2:].clip(lower=0)  # every method scored without negatives

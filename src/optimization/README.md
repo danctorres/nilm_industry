@@ -10,9 +10,8 @@ coefficient file.
 
 Fitting runs on the aggregate divided by its largest value, so `--bound`,
 `--threshold` and the reported fitness are unit-free and the same for HIPE (kW)
-and IMDELD (W). The coefficient file is written in physical units, so
-`validate` and the MATLAB scripts are unaffected. All algorithms confine the
-coefficients to `[-bound, bound]`.
+and IMDELD (W). The coefficient file is written in physical units, so `validate`
+is unaffected. All algorithms confine the coefficients to `[-bound, bound]`.
 
 The point of the module is to compare optimisation algorithms on this problem.
 All six share one interface (`optimizer.h`) and are selected with `--algorithm`:
