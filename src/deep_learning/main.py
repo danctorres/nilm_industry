@@ -9,11 +9,14 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from nn import NN, ActivationLayer, ConnectedLayer, pick, relu, relu_d, stack, tanh_d
+from nn import NN, ActivationLayer, ConnectedLayer, relu, relu_d, stack, tanh_d
 
 REPO = Path(__file__).resolve().parents[2]
 HIDDEN = 64  # units in the hidden layer, chosen on October: 16 and 128 score about the same, two layers of 32 worse
-CHUNK = 100_000  # validation rows estimated at once: every layer keeps its input, HIDDEN floats per row
+CHUNK = 20_000  # validation rows estimated at once: every layer keeps its input, runs x HIDDEN floats per row
+# chosen on October: in plain mode the estimate is a function of the aggregate alone, which overfits the training rows
+# without it; state mode does best with less
+DECAY = {"plain": 0.1, "state": 0.01}
 
 
 def load(root: Path, dataset: str, n: int, split: str):
@@ -42,7 +45,8 @@ def build(mode: str, n: int, rng: np.random.Generator) -> NN:
             ActivationLayer(relu, relu_d),
             ConnectedLayer(HIDDEN, n, rng),
             ActivationLayer(np.tanh, tanh_d),
-        ]
+        ],
+        weight_decay=DECAY[mode],
     )
 
 
@@ -60,7 +64,7 @@ def main(argv=None) -> None:
     p.add_argument("--mode", choices=["plain", "state"], required=True)
     p.add_argument("--machines", type=int, required=True)
     p.add_argument(
-        "--runs", type=int, default=5, help="networks trained from different initial weights, the lowest loss wins"
+        "--runs", type=int, default=5, help="networks trained from different initial weights, their estimates averaged"
     )
     p.add_argument("--epochs", type=int, default=2000)
     p.add_argument("--seed", type=int, default=0)
@@ -83,9 +87,13 @@ def main(argv=None) -> None:
     losses = net.train(x_tr, agg_tr / hi, st_tr, a.epochs, rng)
     for run, run_loss in enumerate(losses):
         print(f"run {run}: mean epoch loss {run_loss:.6g}")
-    best = pick(net, int(np.nanargmin(losses)))
-
-    est = np.vstack([best.estimate(c) for c in np.array_split(x_val, max(1, -(-len(x_val) // CHUNK)))])
+    # averaging keeps the sum constraint and, with the states as input, evens out which split of the aggregate a run
+    # settles on (see the README); a run whose loss blew up is left out
+    ok = np.isfinite(losses)
+    if not ok.any():
+        raise SystemExit("every run diverged")
+    chunks = np.array_split(x_val, max(1, -(-len(x_val) // CHUNK)))
+    est = np.vstack([net.estimate(c)[ok].mean(axis=0) for c in chunks])
     est = est * st_val * hi + 0.0  # OFF machines are zero (+ 0.0 turns -0.0 into 0.0)
     err = est - eq_val
     for j in range(a.machines):

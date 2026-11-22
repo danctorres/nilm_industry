@@ -45,7 +45,16 @@ for run, n in enumerate(alone):
         if isinstance(a, ConnectedLayer):
             assert np.array_equal(a.weights, b.weights) and np.array_equal(a.bias, b.bias), run
 
-# end to end: reads the split files, writes one estimate per machine for every validation row, OFF machines 0
+# Weight decay pulls the weights toward 0: the same network trained with more of it ends with smaller weights.
+nets = [build("state", 3, np.random.default_rng(3)) for _ in range(2)]
+nets[1].weight_decay = 1.0
+for n in nets:
+    n.train(x, t, s, 20, np.random.default_rng(0))
+size = [sum(np.sum(layer.weights**2) for layer in n.layers if isinstance(layer, ConnectedLayer)) for n in nets]
+assert size[1] < size[0], size
+
+# end to end, averaging two runs: reads the split files, writes one estimate per machine for every validation row,
+# OFF machines 0
 with tempfile.TemporaryDirectory() as name:
     d = Path(name) / "HIPE" / "3"
     d.mkdir(parents=True)
@@ -56,7 +65,7 @@ with tempfile.TemporaryDirectory() as name:
         pd.DataFrame({"timestamp": ts, **dict(enumerate((s * [0.2, 0.3, 0.4]).T))})[rows].to_csv(
             d / f"equipment_{split}.csv", index=False
         )
-    argv = ["--dataset", "hipe", "--mode", "plain", "--machines", "3", "--runs", "1", "--epochs", "2"]
+    argv = ["--dataset", "hipe", "--mode", "plain", "--machines", "3", "--runs", "2", "--epochs", "2"]
     main([*argv, "--data-root", name, "--results-root", name])
     out = pd.read_csv(Path(name) / "plain" / "HIPE" / "3.csv")
     assert list(out.columns) == ["Timestamp", "Aggregate_Active_Power", "Estimate_0", "Estimate_1", "Estimate_2"]

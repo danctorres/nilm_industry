@@ -1,5 +1,5 @@
-"""Fully connected network trained with mini-batch Adam on the sum-constraint loss: the estimates of the machines
-that are ON must add up to the aggregate, and a negative estimate of an ON machine is penalised.
+"""Fully connected network trained with mini-batch Adam and weight decay on the sum-constraint loss: the estimates of
+the machines that are ON must add up to the aggregate, and a negative estimate of an ON machine is penalised.
     L = (t - sum_j s_j p_j)^2 + sum_j s_j 27 max(-p_j, 0)^3
 p: (n, N) estimates, t: (n, 1) aggregate, s: (n, N) 0/1 states.
 `stack` trains several networks at once: their weights get a leading run axis, and so does p.
@@ -68,9 +68,10 @@ class ConnectedLayer:
 
 
 class NN:
-    def __init__(self, layers: list, learning_rate: float = 0.01) -> None:
+    def __init__(self, layers: list, learning_rate: float = 0.01, weight_decay: float = 0.0) -> None:
         self.layers = layers
         self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
 
     def estimate(self, x: np.ndarray) -> np.ndarray:
         """Forward pass, (n, inputs) -> (n, machines)."""
@@ -80,8 +81,9 @@ class NN:
 
     def train(self, x: np.ndarray, t: np.ndarray, s: np.ndarray, epochs: int, rng: np.random.Generator) -> np.ndarray:
         """Adam on the mean loss of each batch, the batches drawn anew every epoch, the learning rate falling linearly
-        to 0 (at a constant rate Adam can leave a minimum late). Returns the mean training loss after the last epoch,
-        one per run if stacked."""
+        to 0 (at a constant rate Adam can leave a minimum late). Every step also shrinks the weights and biases by
+        learning rate x weight_decay of their size, apart from Adam's scaling (AdamW). Returns the mean training loss
+        after the last epoch, one per run if stacked."""
         dense = [layer for layer in self.layers if isinstance(layer, ConnectedLayer)]
         params = [p for layer in dense for p in (layer.weights, layer.bias)]
         m, v = [np.zeros_like(p) for p in params], [np.zeros_like(p) for p in params]
@@ -98,7 +100,8 @@ class NN:
                 for k, g in enumerate(g for layer in dense for g in layer.grads):
                     m[k] += (1 - BETA1) * (g - m[k])
                     v[k] += (1 - BETA2) * (g**2 - v[k])
-                    params[k] -= rate * m[k] / (1 - BETA1**step) / (np.sqrt(v[k] / (1 - BETA2**step)) + 1e-8)
+                    adam = m[k] / (1 - BETA1**step) / (np.sqrt(v[k] / (1 - BETA2**step)) + 1e-8)
+                    params[k] -= rate * (adam + self.weight_decay * params[k])
         return np.mean(loss(self.estimate(x), t, s), axis=-1)
 
 
@@ -110,7 +113,7 @@ def stack(nets: list[NN]) -> NN:
         if isinstance(layer, ConnectedLayer):
             layer.weights = np.stack([net.layers[i].weights for net in nets])
             layer.bias = np.stack([net.layers[i].bias for net in nets])
-    return NN(layers, nets[0].learning_rate)
+    return NN(layers, nets[0].learning_rate, nets[0].weight_decay)
 
 
 def pick(net: NN, run: int) -> NN:
@@ -119,4 +122,4 @@ def pick(net: NN, run: int) -> NN:
     for layer in layers:
         if isinstance(layer, ConnectedLayer):
             layer.weights, layer.bias = layer.weights[run], layer.bias[run]
-    return NN(layers, net.learning_rate)
+    return NN(layers, net.learning_rate, net.weight_decay)
