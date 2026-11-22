@@ -234,7 +234,7 @@ Every Python folder has one, e.g. `uv run src/validation/test_validation.py`. Th
 
 * **Against 1 level:** error −7 to −32% on groups 4 to 10 in October, and −5 to −24% in December.
 * **Groups 2 and 3:** 1 level stays slightly better.
-* **`--components auto`:** barely better in October (5.98 W against 6.06 W). 3 was kept as the default after also looking at December (6.40 W against 6.67 W for `auto`), so this one choice was not made on October alone.
+* **`--components auto`:** barely better in October (5.98 W against 6.06 W). 3 was kept as the default after also looking at December (6.39 W against 6.65 W for `auto`), so this one choice was not made on October alone.
 
 ### Neural network
 
