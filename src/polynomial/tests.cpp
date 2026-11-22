@@ -98,6 +98,16 @@ TEST_CASE("optimizers") {
         converges(
             [&](std::uint64_t seed) { return gd(sphere, lo, hi, GdParams{.starts = 3, .threshold = 1e-8}, seed); });
     }
+    SUBCASE("gd keeps going along a bound") {
+        // x0's optimum (3) is outside [-1, 1]: gd must stop at the bound there and still find x1 = 0.5
+        const std::vector<double> lo2(2, -1.0), hi2(2, 1.0);
+        const auto f = [](std::span<const double> x) {
+            return (x[0] - 3) * (x[0] - 3) + 1e-4 * (x[1] - 0.5) * (x[1] - 0.5);
+        };
+        const Result r = gd(f, lo2, hi2, GdParams{.starts = 1, .max_iter = 500, .threshold = 0}, 1);
+        CHECK(r.position[0] == 1.0);
+        CHECK(std::abs(r.position[1] - 0.5) <= 1e-2);
+    }
     SUBCASE("newton") {
         converges([&](std::uint64_t seed) {
             return newton(sphere, lo, hi, NewtonParams{.starts = 3, .threshold = 1e-8}, seed);

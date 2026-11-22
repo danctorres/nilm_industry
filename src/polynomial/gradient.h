@@ -63,7 +63,11 @@ template <Objective F>
     Stopper stop{p.threshold, p.patience};
     for (int it = 0; it < p.max_iter; ++it) {
         for (auto& pt : pts) {
-            const auto g = gradient(f, pt.x, h);
+            auto g = gradient(f, pt.x, h);
+            // at a bound, a component pushing outward can't move: drop it, or it shrinks the step and the decrease
+            // Armijo expects never comes, freezing the start
+            for (std::size_t k = 0; k < dim; ++k)
+                if ((pt.x[k] <= lo[k] && g[k] > 0) || (pt.x[k] >= hi[k] && g[k] < 0)) g[k] = 0.0;
             double gg = 0.0;
             for (double v : g) gg += v * v;
             if (gg == 0.0) continue;
