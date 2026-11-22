@@ -9,55 +9,22 @@ import pandas as pd
 from hart_inspired import events, main
 
 N = np.nan
-# samples 0..15 (rows) of machines A..E (columns)
+# written one line per machine A..E over samples 0..15; .T makes rows samples
 states = np.array(
     [
-        [
-            0,
-            1,
-            1,
-            1,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            1,
-            0,
-            1,
-        ],  # A: clean 1..4 (B toggles inside and returns), 12..13 disturbed by E, ON again at the last event
-        [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # B: clean 2..3
+        # A: 1..4 estimated (B switches ON and OFF inside), 12..13 not (E switches OFF), ON again at the last event
+        [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
+        [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # B: 2..3 estimated
         [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],  # C: 6..10, D turns OFF at the same sample 11
-        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],  # D: 8..10, C turns OFF in between
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],  # D: 8..10, C is ON at D's ON but OFF at D's OFF
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],  # E: ON from the start, never estimated
     ]
 ).T
 agg = np.array([5, 15, 18, 18.5, 15.5, 5.25, 9, 12, 14, 13, 11.5, 2, 6, 3, 1, 7])
 expected = np.array(
     [
-        [
-            0,
-            10.25,
-            10.25,
-            10.25,
-            10.25,
-            10.25,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            N,
-            N,
-            0,
-            N,
-        ],  # |agg[5] - agg[4]|, the OFF sample 5 included
-        [0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # |agg[4] - agg[3]|
+        [0, 10.25, 10.25, 10.25, 10.25, 0, 0, 0, 0, 0, 0, 0, N, N, 0, N],  # |agg[5] - agg[4]| while ON, 0 from sample 5
+        [0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # |agg[4] - agg[3]| while ON
         [0, 0, 0, 0, 0, 0, N, N, N, N, N, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, N, N, N, 0, 0, 0, 0, 0],
         [N, N, N, N, N, N, N, N, N, N, N, N, N, 0, 0, 0],

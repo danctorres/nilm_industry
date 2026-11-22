@@ -1,7 +1,8 @@
-"""Hart-inspired oracle-state baseline: estimates each machine's power from the step in the aggregate at its OFF event.
-It reads the TRUE on/off states, so it is an oracle-state reference, not an unsupervised NILM method. It runs on the
-unsplit tables.
-Output: timestamp, active_power (the aggregate), then one estimate per machine, NaN where none was made.
+"""Hart-inspired reference: reads each machine's power from the step in the total when it switches OFF.
+
+It is given the TRUE on/off states, so it is a reference, not unsupervised NILM (which must find the states itself).
+It runs on the whole recording (the unsplit tables).
+Output: timestamp, active_power (the total), then one estimate per machine; NaN where it made none.
 
 Example: python3 src/hart_inspired/hart_inspired.py --dataset hipe --machines 9
 """
@@ -16,18 +17,19 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def events(states: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Every state change: per machine the sample after it and its sign (+1 ON, -1 OFF), machine after machine, then
-    stably sorted by sample. 0-based sample, machine."""
+    """Every state change, sorted by sample; changes at the same sample stay in machine order.
+    Returns (sample, machine, change): 0-based first sample in the new state, 0-based machine, +1 ON / -1 OFF."""
     d = np.diff(states.astype(int), axis=0)
-    machine, sample = np.nonzero(d.T)  # row-major over d.T: machine by machine, samples ascending
+    machine, sample = np.nonzero(d.T)  # machine by machine, so the stable sort keeps ties in machine order
     order = np.argsort(sample, kind="stable")
     return sample[order] + 1, machine[order], d[sample, machine][order]
 
 
 def estimate(states: np.ndarray, agg: np.ndarray, sample, machine, change) -> np.ndarray:
-    """For each ON event whose next event of the same machine is OFF, if the other machines' states are equal at the ON
-    and OFF samples and at the OFF sample and the one before it, the machine gets |agg[OFF] - agg[OFF - 1]| from the ON
-    sample to the OFF sample, both included. Elsewhere 0 when OFF and NaN when ON."""
+    """Power estimates, one column per machine: 0 when OFF and NaN (no estimate) when ON, except below.
+    An ON event whose machine's next event is OFF gets |agg[OFF] - agg[OFF - 1]| on every sample it is ON: from the ON
+    sample up to, not including, the OFF sample. Only if the other machines are in the same states at ON as at OFF,
+    and at OFF - 1 as at OFF."""
     est = np.where(states == 1, np.nan, 0.0)
     for i in range(len(sample) - 1):
         if change[i] != 1:
@@ -41,7 +43,7 @@ def estimate(states: np.ndarray, agg: np.ndarray, sample, machine, change) -> np
         if np.array_equal(states[on, others], states[off, others]) and np.array_equal(
             states[off - 1, others], states[off, others]
         ):
-            est[on : off + 1, m] = abs(agg[off] - agg[off - 1])
+            est[on:off, m] = abs(agg[off] - agg[off - 1])
     return est
 
 
