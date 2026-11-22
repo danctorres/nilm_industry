@@ -8,7 +8,9 @@
   machines, and the total split in proportion to each machine's mean power (fitted on the training rows).
 - Negative estimates are scored as 0, for every method.
 - Prints per file: the errors per machine, then of the rebuilt total (sum of the estimates vs. the metered total).
-- Ends with a summary: MAE and NDE per method and group, pooled over the group's machines."""
+- Ends with a summary per method and group, pooled over the group's machines: MAE over every test sample, MAE_on
+  over the samples where the machine draws power, and NDE. Every method is exact (0) where a machine is OFF, and
+  machines are mostly OFF, so MAE is much smaller than MAE_on."""
 
 import argparse
 from itertools import chain
@@ -54,7 +56,8 @@ def errors(
     truth: pd.DataFrame, est: pd.DataFrame, w_to_kw: bool, name: str
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
     """Scores one estimate file. truth: timestamp, machine 1..M. est: timestamp, metered total, estimate 1..M.
-    Returns the errors per machine, of the rebuilt total, and over all machines' samples pooled."""
+    Returns the errors per machine, of the rebuilt total, and over all machines' samples pooled (plus MAE_on: the MAE
+    over the samples where the machine draws power)."""
     if not truth.iloc[:, 0].astype(str).tolist() == est.iloc[:, 0].astype(str).tolist():
         raise SystemExit(f"{name}: the timestamps of the estimates and the ground truth differ")
     true_vals, est_vals = truth.iloc[:, 1:], est.iloc[:, 2:].clip(lower=0)
@@ -63,19 +66,23 @@ def errors(
     per_machine = metrics(true_vals, est_vals, w_to_kw)
     per_machine.insert(0, "machine", list(true_vals.columns))
     aggregate = metrics(est.iloc[:, 1], est_vals.sum(axis=1), w_to_kw)
-    pooled = metrics(true_vals.to_numpy().ravel(), est_vals.to_numpy().ravel(), w_to_kw).iloc[0]
+    t, e = true_vals.to_numpy().ravel(), est_vals.to_numpy().ravel()
+    pooled = metrics(t, e, w_to_kw).iloc[0]
+    pooled["MAE_on"] = metrics(t[t > 0], e[t > 0], w_to_kw).iloc[0]["MAE"]
     return per_machine, aggregate, pooled
 
 
 def baselines(d: Path) -> list[tuple[str, pd.DataFrame]]:
     """The three baselines' estimates for the test rows in folder d, in the methods' layout, as (name, table) pairs.
     Like every method, they see only the total and the states: zero; the total split equally among the ON machines;
-    or split in proportion to each machine's mean power, fitted to the training rows by non-negative least squares."""
+    or split in proportion to each machine's mean power, fitted to the training rows by non-negative least squares.
+    The fit can put a machine at 0 W: where only such machines are ON, the total is split equally among them."""
     a_tr = pd.read_csv(d / "aggregate_training.csv").iloc[:, 1].to_numpy()
     s_tr = pd.read_csv(d / "states_training.csv").iloc[:, 1:].to_numpy(float)
     val = pd.read_csv(d / "aggregate_validation.csv").iloc[:, :2]
     s = pd.read_csv(d / "states_validation.csv").iloc[:, 1:].to_numpy(float)
     w = s * nnls(s_tr, a_tr)[0]
+    w = np.where(w.sum(axis=1, keepdims=True) > 0, w, s)
     with np.errstate(divide="ignore", invalid="ignore"):  # no machine ON: 0 / 0 = NaN, scored as 0 below
         shares = {
             "zero": 0 * s,
@@ -139,7 +146,9 @@ def main(argv=None) -> None:
             per_machine, aggregate, pooled = errors(truth, est, w_to_kw, f"{label} against {truth_path}")
             print(f"\n{label}, per machine (MAE and RMSE in kW, MSE in kW²):\n{per_machine.to_string(index=False)}")
             print(f"{label}, aggregate reconstruction:\n{aggregate.to_string(index=False)}")
-            summary.append({"dataset": dataset, "machines": int(n), "method": method, **pooled[["MAE", "NDE"]]})
+            summary.append(
+                {"dataset": dataset, "machines": int(n), "method": method, **pooled[["MAE", "MAE_on", "NDE"]]}
+            )
             if a.plots:
                 plot(
                     a.plots / f"{method.replace('/', '_')}_{dataset}_{n}.png",
@@ -150,7 +159,7 @@ def main(argv=None) -> None:
                 )
     if summary:
         table = pd.DataFrame(summary).sort_values(["dataset", "machines", "MAE"])
-        print(f"\nSummary over all machines (MAE in kW, NDE pooled):\n{table.to_string(index=False)}")
+        print(f"\nSummary over all machines (MAE and MAE_on in kW, NDE pooled):\n{table.to_string(index=False)}")
 
 
 if __name__ == "__main__":

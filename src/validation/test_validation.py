@@ -24,6 +24,9 @@ est = pd.DataFrame({"Timestamp": ts, "Aggregate": [1.0, 3.0, 4.0], "E0": [1.0, 2
 per_machine, aggregate, pooled = errors(truth, est, False, "exact")
 assert list(per_machine["machine"]) == ["Eq2_P_kW", "Eq3_P_kW"] and np.allclose(per_machine["MAE"], 0)
 assert np.allclose(aggregate["MAE"], 0) and pooled["MAE"] == 0
+# one miss of 1: MAE over all 6 samples, MAE_on over the 5 where a machine draws power
+pooled = errors(truth, est.assign(E1=[0.0, 0.0, 1.0]), False, "one miss")[2]
+assert np.isclose(pooled["MAE"], 1 / 6) and np.isclose(pooled["MAE_on"], 1 / 5), pooled
 try:
     errors(truth, est.assign(Timestamp=ts[::-1]), False, "shuffled")
     raise AssertionError("timestamps that differ must be rejected")
@@ -71,6 +74,16 @@ with tempfile.TemporaryDirectory() as name:
     assert (base["baseline/zero"].iloc[:, 2:] == 0).all().all()
     assert np.allclose(base["baseline/equal"].iloc[:, 2:], [[1, 0], [1.5, 1.5], [2, 2]])
     assert np.allclose(base["baseline/proportional"].iloc[:, 2:], [[1, 0], [3 / 3.5, 7.5 / 3.5], [4 / 3.5, 10 / 3.5]])
+    # the fit puts Eq3 at 0 W: it gets nothing beside Eq2, but the whole total when ON alone, and no machine ON gets 0
+    z = d / "zero"
+    z.mkdir()
+    for split, power, s2, s3 in (
+        ("training", [1, 1, 1], 1, [0, 1, 1]),
+        ("validation", [3, 2, 0], [1, 0, 0], [1, 1, 0]),
+    ):
+        pd.DataFrame({"Time": ts, "active_power": power}).to_csv(z / f"aggregate_{split}.csv", index=False)
+        pd.DataFrame({"Time": ts, "Eq2_State": s2, "Eq3_State": s3}).to_csv(z / f"states_{split}.csv", index=False)
+    assert np.allclose(dict(baselines(z))["baseline/proportional"].iloc[:, 2:], [[3, 0], [0, 2], [0, 0]])
     assert (d / "plots/neural_network_plain_HIPE_2.png").stat().st_size > 0
     assert (d / "plots/polynomial_HIPE_2.png").stat().st_size > 0
 
