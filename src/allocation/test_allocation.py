@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from allocation import collinear, fit, main, posterior
+from allocation import collinear, estimate, fit, fit_mixture, main, posterior
 
 # three machines with known means and spreads: EM recovers them from the aggregate and states alone
 rng = np.random.default_rng(0)
@@ -28,6 +28,31 @@ assert np.allclose(est.sum(axis=1), a, atol=1e-3) and (est[s == 0] == 0).all()
 one = posterior(np.array([0.31]), np.array([[1.0]]), np.array([0.3]), np.array([1e-6]))[0]
 assert np.isclose(one.item(), 0.31, rtol=0, atol=1e-12), one
 assert np.abs(est - p).mean() < 0.5 * np.abs(s * fit_mu - p).mean()
+
+# one component is the single Gaussian
+mix_mu, mix_var, mix_pi = fit_mixture(a, s, 1)
+assert np.array_equal(mix_mu[:, 0], fit_mu) and np.array_equal(mix_var[:, 0], fit_var) and (mix_pi == 1).all()
+assert np.allclose(estimate(a, s, mix_mu, mix_var, mix_pi), est, rtol=0, atol=1e-12)
+
+# a machine that idles at 0.1 or heats at 4, next to two steady ones: EM finds both levels from the aggregate alone,
+# and the mixture splits the aggregate far better than one Gaussian
+heat = rng.random(len(a)) < 0.3
+p2 = (
+    s
+    * np.c_[
+        np.where(heat, rng.normal(4, 0.2, len(a)), rng.normal(0.1, 0.01, len(a))),
+        rng.normal(mu[1:], sd[1:], (len(a), 2)),
+    ]
+)
+a2 = p2.sum(axis=1)
+mix_mu, mix_var, mix_pi = fit_mixture(a2, s, 2)
+levels = np.sort(mix_mu[0])
+assert np.allclose(levels, [0.1, 4], rtol=0.05) and np.isclose(mix_pi[0, np.argmax(mix_mu[0])], 0.3, atol=0.02), mix_mu
+est2 = estimate(a2, s, mix_mu, mix_var, mix_pi)
+assert np.allclose(est2.sum(axis=1), a2, atol=1e-3) and (est2[s == 0] == 0).all()
+mixed = np.abs(est2 - p2).mean()
+single = np.abs(posterior(a2, s, *fit(a2, s))[0] - p2).mean()
+assert mixed < 0.5 * single, (mixed, single)
 
 # end to end: trains on the training split, estimates the validation rows
 with tempfile.TemporaryDirectory() as name:
