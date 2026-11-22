@@ -22,7 +22,8 @@ def load(root: Path, dataset: str, n: int, split: str):
         raise SystemExit(f"expected {len(agg)} rows and {n} machine columns in {paths[1]} and {paths[2]}")
     if not (agg.iloc[:, 0].equals(states.iloc[:, 0]) and agg.iloc[:, 0].equals(eq.iloc[:, 0])):
         raise SystemExit(f"the timestamps of {', '.join(map(str, paths))} differ")
-    power, states = agg.iloc[:, 1:2].to_numpy(float), states.iloc[:, 1:].to_numpy(float)
+    # copy: for some files pandas hands back a read-only array, and the next line writes to it
+    power, states = agg.iloc[:, 1:2].to_numpy(float), states.iloc[:, 1:].to_numpy(float, copy=True)
     states[power[:, 0] == 0] = 0  # a zero aggregate means every machine is off
     return agg.iloc[:, 0], power, states, eq.iloc[:, 1:].to_numpy(float)
 
