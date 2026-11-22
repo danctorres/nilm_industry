@@ -27,7 +27,7 @@ doctest::Approx approx(double v) {
 }
 }  // namespace
 
-// Horner form equals the explicit cubic; coefs_of picks the right machine
+// poly's nested form equals the explicit cubic; coefs_of picks the right machine
 TEST_CASE("poly and coefs_of") {
     const std::vector<double> c = {1.0, 2.0, 3.0, 4.0, 0.5, 0.0, 0.0, 0.0};
     CHECK(poly(coefs_of(c, 0), 2.0) == approx(1 + 2 * 2 + 3 * 4 + 4 * 8));
@@ -37,7 +37,7 @@ TEST_CASE("poly and coefs_of") {
 // exact reconstruction scores 0, an off machine drops out, negative power is penalised
 TEST_CASE("objective") {
     const std::vector<int> both{1, 1}, first{1, 0};
-    const std::vector<double> half = {0, 0.5, 0, 0, 0, 0.5, 0, 0};  // each machine draws half the aggregate
+    const std::vector<double> half = {0, 0.5, 0, 0, 0, 0.5, 0, 0};  // each machine draws half the total
     CHECK(objective(half, {10.0, both}, 1.0) == approx(0.0));
     CHECK(objective(half, {10.0, first}, 1.0) == approx(25.0));  // residual 10 - 5
     const std::vector<double> neg = {-1.0, 0, 0, 0, 0, 0, 0, 0};
@@ -60,7 +60,7 @@ TEST_CASE("average_on") {
     CHECK(average_on(positions, states, 2) == std::vector<double>{2, 3, 4, 5, 1, 1, 1, 1});
 }
 
-// every optimizer finds the minimum of a shifted sphere and is deterministic for a fixed seed
+// every optimizer finds the minimum of sum (x - 1)^2, and the same seed gives the same result
 TEST_CASE("optimizers") {
     const std::vector<double> lo(3, -5.0), hi(3, 5.0);
     const auto sphere = [](std::span<const double> x) {
@@ -105,7 +105,7 @@ TEST_CASE("optimizers") {
     }
 }
 
-// Cholesky solve of a small SPD system, and rejection of an indefinite one
+// solve_spd solves a small SPD system and rejects one that is not SPD
 TEST_CASE("solve_spd") {
     CHECK(solve_spd({4, 2, 2, 3}, {2, 1}).value_or(std::vector<double>{}) == std::vector<double>{0.5, 0.0});
     CHECK_FALSE(solve_spd({1, 2, 2, 1}, {1, 1}).has_value());

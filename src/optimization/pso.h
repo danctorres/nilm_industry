@@ -1,5 +1,5 @@
 #pragma once
-// Particle swarm optimisation with linearly decreasing inertia weight.
+// Particle swarm optimisation with linearly decreasing inertia (the share of its velocity a particle keeps).
 #include "optimizer.h"
 
 namespace nilm {
@@ -9,9 +9,9 @@ struct PsoParams {
     int max_iter = 200;
     double threshold = 1e-5;
     int patience = 10;
-    double c1 = 2.0;     // cognitive weight
-    double c2 = 2.0;     // social weight
-    double w_max = 0.9;  // inertia decreases linearly from w_max to w_min
+    double c1 = 2.0;     // pull toward own best (cognitive weight)
+    double c2 = 2.0;     // pull toward swarm's best (social weight)
+    double w_max = 0.9;  // inertia, from w_max down to w_min
     double w_min = 0.4;
     double v_max_frac = 0.2;  // velocity clamp as a fraction of the search range
 };

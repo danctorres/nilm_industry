@@ -1,6 +1,8 @@
-"""Downloads the HIPE three-month release (KIT, CC BY 4.0, https://www.energystatusdata.kit.edu/hipe.php, archived at
-https://doi.org/10.5281/zenodo.14054902) and unpacks its machine files into data/raw/HIPE/Equipment and its
-MainTerminal, the main meter, into data/raw/HIPE.
+"""Download the HIPE three-month release and unpack it.
+
+- Machine files go to data/raw/HIPE/Equipment; the MainTerminal (main meter) goes to data/raw/HIPE.
+- Source: KIT, CC BY 4.0, https://www.energystatusdata.kit.edu/hipe.php, archived at
+  https://doi.org/10.5281/zenodo.14054902
 
 Example: python3 src/preprocessing/fetch_hipe.py [--raw DIR]
 """
@@ -39,7 +41,7 @@ def main(argv=None) -> None:
     with zipfile.ZipFile(archive) as z:
         files = [n for n in z.namelist() if n.endswith(".csv")]
         machines = [n for n in files if not n.startswith("MainTerminal")]
-        # hipe.py reads every file in Equipment: files of another release would be taken for more machines
+        # hipe.py reads every file in Equipment, so files from another release would count as extra machines
         if stale := {f.name for f in (a.raw / "Equipment").glob("*.csv")} - set(machines):
             raise SystemExit(f"{a.raw / 'Equipment'} holds files of another release, remove them: {sorted(stale)}")
         print(f"unpacking {len(files)} files (30.6 GB)")

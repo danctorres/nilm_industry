@@ -1,4 +1,4 @@
-"""Self-check of hipe.py on a synthetic raw folder: python3 src/preprocessing/test_hipe.py"""
+"""Self-check of hipe.py on a made-up raw folder: python3 src/preprocessing/test_hipe.py"""
 
 import tempfile
 from pathlib import Path
@@ -14,20 +14,20 @@ rng = np.random.default_rng(0)
 
 
 def stamps(seconds, whole):
-    """HIPE SensorDateTime strings in local summer time: 7-digit fraction, or whole seconds."""
+    """HIPE SensorDateTime strings for T0 + seconds, in summer time (+02:00): 7-digit fraction or whole seconds."""
     t = T0 + pd.to_timedelta(seconds, unit="s")
     return np.where(whole, t.strftime("%Y-%m-%dT%H:%M:%S+02:00"), t.strftime("%Y-%m-%dT%H:%M:%S.%f0+02:00"))
 
 
 def random_times(a, b, whole):
-    """Irregular increasing times in [a, b): gaps of 1 to 6 s when whole, 0.3 to 6 s otherwise."""
+    """Irregular increasing times in [a, b): gaps of 1 to 6 s when whole, else 0.3 to 6 s."""
     gaps = rng.integers(1, 7, 5000) if whole else rng.uniform(0.3, 6, 5000)
     t = a + np.cumsum(gaps)
     return t[t < b]
 
 
 def random_power(n):
-    """OFF (0, or small negative noise) about 40 % of the time, else 0.5 to 5 kW."""
+    """Power in kW: off (0, or small negative noise) about 40% of the time, else 0.5 to 5."""
     p = np.where(rng.random(n) < 0.4, rng.choice([0, -0.01], n), rng.uniform(0.5, 5, n))
     return p.round(5)
 
@@ -35,20 +35,20 @@ def random_power(n):
 def write_raw(folder):
     folder.mkdir(parents=True)
     machines = {}
-    # machine 1: always 0 but sets start_time (0 s) and end_time (7300 s); written last
+    # machine 1: always 0 but sets the grid's start (0 s) and end (7300 s); its column comes last
     t = np.concatenate([[0], random_times(0, 7300, True), [7300]])
     machines[1] = t, np.zeros(len(t)), True
-    # machine 3: fixed first and last two samples for the extrapolation check, negative powers in between
+    # machine 3: fixed first two and last two samples for the extrapolation check, negative powers in between
     t = np.concatenate([[5.25, 7.75], random_times(8, 7000, False), [7000.5, 7001.5]])
     p = rng.uniform(-0.5, 5, len(t))
     p[[0, 1, -2, -1]] = [1.0, 2.0, 3.0, 2.5]
     machines[3] = t, p, False
-    # machine 4: whole seconds, one timestamp going back 20 samples before the end
+    # machine 4: whole seconds; the 20th sample from the end steps back in time
     t = random_times(3, 7200, True)
     t[-20] = t[-21] - 1
     machines[4] = t, random_power(len(t)), True
-    # machine 5: 4e-05 kW from 8 to 11 s, on grid points (8 s after a sample of another value): the
-    # interpolation must return it exactly, and rounding to 4 decimals makes it 0, so the machine is OFF there
+    # machine 5: 4e-05 kW at 8 to 11 s, grid points after a sample of another value. Interpolation must return it
+    # exactly; rounding to 4 decimals makes it 0, so the machine is off
     t = np.concatenate([random_times(3, 7.5, False), [8, 9, 10, 11], random_times(11.5, 7150, False)])
     p = random_power(len(t))
     p[np.isin(t, [8, 9, 10, 11])] = 4e-05
@@ -56,7 +56,7 @@ def write_raw(folder):
     for k in [2, 6, 7, 8, 9, 10]:
         whole = k in (2, 7, 9)
         t = random_times(rng.uniform(3, 60), rng.uniform(7000, 7200), whole)
-        if k == 6:  # a gap of more than GAP_S across the end of the first hour, where neither hour is usable
+        if k == 6:  # gap of more than GAP_S across 3600 s, inside the rows left out at that cut
             t = t[(t <= 3350) | (t >= 3850)]
         machines[k] = (
             t,
@@ -107,8 +107,8 @@ with tempfile.TemporaryDirectory() as name:
     for f, cols in expected.items():
         assert list(read[f].columns) == cols, f
 
-    # 1 s grid from start_time (machine 1, 0 s) to end_time (machine 1, 7300 s) in UTC, without the rows strictly
-    # inside machine 6's gap, written in TIME_FORMAT
+    # 1 s grid in UTC from machine 1's first sample (0 s) to its last (7300 s), minus the rows strictly inside
+    # machine 6's gap, written in TIME_FORMAT
     eq, st = process(tmp / "raw" / "Equipment")
     assert eq.timestamp.iloc[0] == pd.Timestamp("2017-10-22 22:00:00")
     t6, grid = machines[6][0], np.arange(7301)
@@ -120,21 +120,21 @@ with tempfile.TemporaryDirectory() as name:
     assert (states.timestamp == equipment.timestamp).all() and (aggregate.timestamp == equipment.timestamp).all()
     assert np.array_equal(equipment[eq_cols], eq[eq_cols])
 
-    # machine 3 is extrapolated linearly (not clamped) from its first two samples (5.25 s, 1 kW), (7.75 s, 2 kW):
-    # 1 + (k - 5.25) * 0.4 for k = 0..5, and from its last two (7000.5 s, 3 kW), (7001.5 s, 2.5 kW) to 7300 s
+    # machine 3 is extrapolated linearly (not held flat) from its first two samples (5.25 s, 1 kW), (7.75 s, 2 kW):
+    # 1 + (k - 5.25) * 0.4 for k = 0..5, and from its last two (7000.5 s, 3 kW), (7001.5 s, 2.5 kW) out to 7300 s
     assert list(equipment.Eq3_P_kW[:6]) == [-1.1, -0.7, -0.3, 0.1, 0.5, 0.9]
     assert equipment.Eq3_P_kW.iloc[-1] == -146.75  # 2.5 - 0.5 * (7300 - 7001.5)
     assert list(states.Eq3_State[:6]) == [0, 0, 0, 1, 1, 1]
 
-    # rounding to 4 decimals, states are power > 0 on the rounded values
+    # values rounded to 4 decimals; state = power > 0 on the rounded values
     assert list(equipment.Eq5_P_kW[8:12]) == [0.0] * 4 and list(states.Eq5_State[8:12]) == [0] * 4
     values = equipment[eq_cols].to_numpy()
     assert np.array_equal(np.round(values, 4), values)
     assert np.array_equal(states[st_cols].to_numpy(), (values > 0).astype(int))
     assert np.allclose(aggregate.active_power, values.sum(axis=1), rtol=0, atol=1e-9)
 
-    # splits in time, cut here at 22:30 and 23:00 UTC (1 Nov and 1 Dec in the real data), 300 s left out next to each
-    # cut: before tunes, between trains, after reports; the tuning copy validates on its own rows and links the rest
+    # splits by time, cut here at 22:30 and 23:00 UTC (1 Nov and 1 Dec in the real data), 300 s left out next to each
+    # cut: before tunes, between trains, after reports. The tuning copy has its own test rows and links the rest.
     since = (
         pd.to_datetime(equipment.timestamp, format=TIME_FORMAT) - pd.Timestamp("2017-10-22 22:00")
     ).dt.total_seconds()

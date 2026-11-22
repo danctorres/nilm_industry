@@ -24,9 +24,11 @@ UNITS = ["active_power", "reactive_power", "apparent_power", "current", "voltage
 
 
 def make_raw(raw: Path, days: list[str], seed: int = 0) -> None:
-    """Raw IMDELD-like csv files at about 1 Hz, one entry of days per day: "good", "short" (2000 samples, fails the
-    sample-count rule) or "idle" (full day with a median under 10 W but a mean above, fails the median rule).
-    Each file drops the first and its own random seconds, and has duplicated seconds and NaNs."""
+    """Write raw IMDELD-like files at about 1 Hz (8 machines, 2 subcircuit meters). days gives each day's kind:
+    - "good";
+    - "short": 2000 samples, fails the sample-count rule;
+    - "idle": full day with a median under 10 W but a mean above, fails the median rule.
+    Each file misses its first second and its own random seconds, and has repeated seconds and NaNs."""
     rng = np.random.default_rng(seed)
     n = 86400 * len(days)
     iso = np.datetime_as_string(np.datetime64(START, "s") + np.arange(n), "s")
@@ -62,8 +64,10 @@ def header(path: Path) -> list[str]:
 
 
 def check_split(out: Path) -> None:
-    """Same rows in the three tables; validation is every row of whole days but their first and last 750 s, training is
-    at least 1500 s away and draws the same number of rows from every bin over 100 rows of the other days."""
+    """Check the split in out.
+    - The three tables have the same rows.
+    - Test: whole days minus each day's first and last 750 s.
+    - Training: at least 1500 s from test; the same count from every bin over 100 rows of the other days."""
     tables = {}
     for split in ["training", "validation"]:
         tables[split] = [pd.read_csv(out / f"{name}_{split}.csv") for name in ["aggregate", "states", "equipment"]]
@@ -86,7 +90,7 @@ def check_split(out: Path) -> None:
 
 
 def check_hand_computed(raw: Path, equipment: pd.DataFrame, t: np.ndarray, machines: list[int]) -> None:
-    """Hand check against a direct computation: machines' mean per second, common, without NaN, on the kept days."""
+    """Check machine 1 against a direct computation: mean per second, common seconds, no NaN, kept days."""
     raw_tables = read_equipment_csv(raw / "Equipment")
     per_second = pd.concat(
         [
@@ -107,7 +111,8 @@ def check_hand_computed(raw: Path, equipment: pd.DataFrame, t: np.ndarray, machi
     assert np.isclose(smoothed[j], y[j - 750 : j + 1].mean())
     missing = np.setdiff1d(t, x)
     assert missing[0] == t[0]
-    interpolated = make_interp_spline(x, smoothed)  # not-a-knot cubic, as the preprocessing
+    # the same cubic spline as imdeld.py's CubicSpline
+    interpolated = make_interp_spline(x, smoothed)
     for m in [missing[0], missing[len(missing) // 2]]:  # second 0 (extrapolated) and one inside
         assert np.isclose(equipment.active_power_1[t == m].item(), max(interpolated(m), 0), rtol=1e-9)
 
@@ -148,14 +153,14 @@ def main() -> None:
         assert (pd.read_csv(six / "aggregate_training.csv").active_power >= 0).all()
         assert np.array_equal(on_off.iloc[:, 1:].to_numpy(), (equipment.iloc[:, 1:].to_numpy() > 5).astype(int))
 
-        # split: whole days, edges left out, per-bin budget, rows in the order drawn by a fresh default_rng(seed)
+        # split: whole days, edges left out, same count per bin, rows in the order a fresh default_rng(seed) draws
         check_split(six)
         check_split(eight)
         training = split_train_validation(seconds(when), a6.active_power, 86400, 750, np.random.default_rng(1))[0]
         drawn = a6.timestamp.iloc[training].reset_index(drop=True)
         assert pd.read_csv(six / "aggregate_training.csv").timestamp.equals(drawn)
 
-        # all eight machines: LVDB-3 added to LVDB-2, unit by unit
+        # all eight machines: the total is LVDB-2 plus LVDB-3 (milling-machine subcircuit)
         assert pd.read_csv(eight / "states.csv").columns[-4:-2].tolist() == ["State MI", "State MII"]
         t = seconds(when)
         lvdb3 = imdeld.read_lvdb_csv(raw / "millingmachine-subcircuit.csv", t)

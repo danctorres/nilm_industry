@@ -1,10 +1,8 @@
-// Fits the EMUPF polynomial coefficients from aggregate power and on/off states.
-// Every sample with at least one machine on is an independent optimisation
-// problem, solved by the chosen algorithm on the aggregate divided by its
-// largest value; the coefficients of the machines that were on are averaged
-// over all samples and converted back to physical units. This repeats for
-// --cycles random restarts and keeps the coefficient set with the lowest
-// reconstruction MAE, also against a coefficient file that already exists.
+// Fits the EMUPF polynomial coefficients from the total power and the on/off states.
+// - The chosen algorithm solves each sample with a machine on separately, on the total divided by its largest value.
+// - Each machine's coefficients are averaged over the samples where it was on, then converted to physical units.
+// - Repeats for --cycles random restarts. Keeps the set with the lowest reconstruction MAE, also against an
+//   existing coefficient file.
 #include <algorithm>
 #include <charconv>
 #include <chrono>
@@ -75,7 +73,7 @@ Options parse(int argc, char** argv) {
     for (std::size_t i = 3; i < args.size(); i += 2) {
         if (args[i] == "--joint") {
             o.joint = true;
-            --i;
+            --i;  // no value: step by 1, not 2
             continue;
         }
         if (i + 1 >= args.size()) throw std::runtime_error(std::format("missing value for {}\n{}", args[i], kUsage));
@@ -116,6 +114,7 @@ Params make_params(const Options& o) {
     throw std::runtime_error(std::format("unknown algorithm {}\n{}", o.algorithm, kUsage));
 }
 
+// One overload per Params type, for std::visit.
 using Span = std::span<const double>;
 template <class F>
 nilm::Result run(F& f, Span lo, Span hi, const nilm::PsoParams& p, std::uint64_t s) {
@@ -227,8 +226,8 @@ Fit fit(const nilm::Dataset& d, double scale, const Options& o, const Params& pa
     return r;
 }
 
-// One optimisation of the mean per-sample objective over all samples with at
-// least one machine on; the result is the coefficient set itself.
+// --joint: one optimisation of the mean per-sample cost over all samples with a machine on.
+// No averaging: the result is the coefficient set.
 Fit fit_joint(const nilm::Dataset& d, double scale, const Options& o, const Params& params, std::uint64_t seed) {
     const std::size_t dim = d.machines() * nilm::kCoefs;
     const std::vector<double> lo(dim, -o.bound), hi(dim, o.bound);

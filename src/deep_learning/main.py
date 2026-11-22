@@ -1,5 +1,5 @@
-"""Unsupervised NILM: a neural network splits the aggregate active power into one estimate per machine,
-trained only to make the estimates of the ON machines add up to the aggregate.
+"""UNN (unsupervised NILM): a small neural network splits the total active power (`aggregate` in the files) into one
+estimate per machine. It never sees metered machine power: training only makes the ON estimates add up to the total.
 
 Example: python3 src/deep_learning/main.py --dataset hipe --mode state --machines 9
 """
@@ -12,24 +12,24 @@ import pandas as pd
 from nn import NN, ActivationLayer, ConnectedLayer, relu, relu_d, stack, tanh_d
 
 REPO = Path(__file__).resolve().parents[2]
-HIDDEN = 64  # units in the hidden layer, chosen on October: 16 and 128 score about the same, two layers of 32 worse
-CHUNK = 20_000  # validation rows estimated at once: every layer keeps its input, runs x HIDDEN floats per row
-# chosen on October: in plain mode the estimate is a function of the aggregate alone, which overfits the training rows
-# without it; state mode does best with less
+HIDDEN = 64  # hidden-layer width, tuned on October: 16 and 128 score about the same, two layers of 32 worse
+CHUNK = 20_000  # validation rows per pass, to cap memory: each layer keeps its input, runs x HIDDEN floats per row
+# weight decay (shrinks the weights toward 0 every step), tuned on October. Plain mode sees only the total and
+# overfits the training rows without it. State mode does best with less.
 DECAY = {"plain": 0.1, "state": 0.01}
 
 
 def load(root: Path, dataset: str, n: int, split: str):
-    """Timestamps, aggregate (rows, 1), states (rows, n), equipment power (rows, n)."""
+    """Read one split: timestamps, total (rows, 1), states (rows, n), metered machine power (rows, n)."""
     paths = [root / dataset.upper() / str(n) / f"{name}_{split}.csv" for name in ("aggregate", "states", "equipment")]
     agg, states, eq = (pd.read_csv(path) for path in paths)
     if states.shape != (len(agg), n + 1) or eq.shape != (len(agg), n + 1):
         raise SystemExit(f"expected {len(agg)} rows and {n} machine columns in {paths[1]} and {paths[2]}")
     if not (agg.iloc[:, 0].equals(states.iloc[:, 0]) and agg.iloc[:, 0].equals(eq.iloc[:, 0])):
         raise SystemExit(f"the timestamps of {', '.join(map(str, paths))} differ")
-    # copy: for some files pandas hands back a read-only array, and the next line writes to it
+    # copy: pandas returns a read-only array for some files, and the next line writes to it
     power, states = agg.iloc[:, 1:2].to_numpy(float), states.iloc[:, 1:].to_numpy(float, copy=True)
-    states[power[:, 0] == 0] = 0  # a zero aggregate means every machine is off
+    states[power[:, 0] == 0] = 0  # a zero total means every machine is off
     return agg.iloc[:, 0], power, states, eq.iloc[:, 1:].to_numpy(float)
 
 
@@ -77,8 +77,8 @@ def main(argv=None) -> None:
     _, agg_tr, st_tr, _ = load(a.data_root, a.dataset, a.machines, "training")
     ts, agg_val, st_val, eq_val = load(a.data_root, a.dataset, a.machines, "validation")
 
-    # Scales come from the training split only. The input is min-max normalised; the target and the
-    # estimates share one pure scale, so estimates adding up to agg / hi add up to agg in physical units.
+    # Scales come from the training rows only. The input is min-max normalised. The target and estimates are only
+    # divided by hi (no offset), so estimates adding up to agg / hi add up to agg once multiplied back.
     lo, hi = agg_tr.min(), agg_tr.max()
     x_tr, x_val = inputs(a.mode, (agg_tr - lo) / (hi - lo), st_tr), inputs(a.mode, (agg_val - lo) / (hi - lo), st_val)
 
@@ -87,8 +87,8 @@ def main(argv=None) -> None:
     losses = net.train(x_tr, agg_tr / hi, st_tr, a.epochs, rng)
     for run, run_loss in enumerate(losses):
         print(f"run {run}: mean epoch loss {run_loss:.6g}")
-    # averaging keeps the sum constraint and, with the states as input, evens out which split of the aggregate a run
-    # settles on (see docs/notes.md); a run whose loss blew up is left out
+    # Averaging keeps the sum constraint. With the states as input, it also evens out which split of the total each
+    # run settles on (see docs/notes.md). A run whose loss blew up is left out.
     ok = np.isfinite(losses)
     if not ok.any():
         raise SystemExit("every run diverged")

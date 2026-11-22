@@ -1,6 +1,8 @@
 #pragma once
-// Simulated annealing: independent chains with Metropolis acceptance, geometric
-// cooling and a proposal step that adapts to keep the acceptance rate near 50%.
+// Simulated annealing: independent chains of random steps.
+// - Metropolis acceptance: a worse step still passes with probability exp(-worsening / T).
+// - Geometric cooling: the temperature T is multiplied by a fixed factor each iteration.
+// - The step adapts to keep the acceptance rate near 50%.
 #include "optimizer.h"
 
 namespace nilm {
@@ -10,10 +12,10 @@ struct SaParams {
     int max_iter = 200;
     double threshold = 1e-5;
     int patience = 10;
-    double temperature = 0.0;  // initial; 0 = spread of the initial chains' fitness
-    double temp_min = 0.0;     // stop when the temperature falls below this
-    double cooling = 0.0;      // temperature multiplier per iteration; 0 = reach `threshold` at max_iter
-    double step_frac = 0.1;    // initial proposal step as a fraction of the search range
+    double temperature = 0.0;  // initial T; 0 = worst minus best initial fitness
+    double temp_min = 0.0;     // stop once T falls below this
+    double cooling = 0.0;      // T multiplier per iteration; 0 = reach `threshold` at max_iter
+    double step_frac = 0.1;    // initial step as a fraction of the search range
 };
 
 template <Objective F>

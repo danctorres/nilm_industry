@@ -1,5 +1,5 @@
-// Applies fitted coefficients to a validation set and writes the per-machine
-// estimates; src/validation/validation.py scores them.
+// Applies fitted coefficients to a validation set and writes each machine's estimated power.
+// src/validation/validation.py scores them.
 #include <format>
 #include <iostream>
 #include <stdexcept>

@@ -1,4 +1,4 @@
-"""Self-check of the validation: python3 src/validation/test_validation.py"""
+"""Self-check of validation.py and corrupt_states.py: python3 src/validation/test_validation.py"""
 
 import contextlib
 import io
@@ -12,7 +12,7 @@ from corrupt_states import main as corrupt_main
 
 from validation import baselines, errors, main, metrics
 
-# metrics: hand-computed errors -1, 0, 1 against true 1, 2, 3
+# metrics, hand-computed: estimates 2, 2, 2 against true 1, 2, 3
 m = metrics([1, 2, 3], [2, 2, 2], False).iloc[0]
 assert np.allclose(m[["MAE", "MSE", "RMSE", "R2", "NDE", "SAE"]], [2 / 3, 2 / 3, np.sqrt(2 / 3), 0, 2 / 14, 0])
 assert np.isclose(metrics([1000, 3000], [2000, 2000], True).iloc[0]["MAE"], 1.0)  # W shown in kW
@@ -30,9 +30,9 @@ try:
 except SystemExit:
     pass
 
-# end to end: every results/<method>/<DATASET>/<N>.csv, at any depth, is paired with the ground truth for N machines;
-# estimates written with ", " separators; the oracle-state baseline scored on the validation rows of its whole-recording
-# estimates (the extra row of 99s is left out), NaN scored as 0
+# end to end: every results/<method>/<DATASET>/<N>.csv, at any depth, is paired with the metered power of N machines.
+# Estimates use ", " separators. hart_inspired estimates the whole recording: only its test rows are scored (the extra
+# row of 99s is left out), and NaN is scored as 0.
 with tempfile.TemporaryDirectory() as name:
     d = Path(name)
     (d / "data/HIPE/2").mkdir(parents=True)
@@ -62,11 +62,11 @@ with tempfile.TemporaryDirectory() as name:
         assert f"{label}, per machine" in text, text
     assert "hart_inspired HIPE, 2 machines, per machine" in text and "coef" not in text, text
     hart = text.split("hart_inspired HIPE, 2 machines, per machine")[1].split("\n\n")[0]
-    assert "NaN" not in hart and "0.333333" in hart, text  # Eq3: 0, 1 (from NaN), 1 against 0, 1, 1
+    assert "NaN" not in hart and "0.333333" in hart, text  # Eq3: 0, 0 (from NaN), 1 against 0, 1, 1
     assert "hart_inspired HIPE, 2 machines: an estimate for 80% of the ON samples" in text, text  # 4 of 5
     assert "Summary over all machines" in text and "baseline/proportional" in text.split("Summary")[1], text
 
-    # baselines from the aggregate and the states: zero, equal split, proportional to the NNLS means (1, 2.5)
+    # baselines from the total and the states: zero, equal split, proportional to the fitted means (1, 2.5)
     base = dict(baselines(d / "data/HIPE/2"))
     assert (base["baseline/zero"].iloc[:, 2:] == 0).all().all()
     assert np.allclose(base["baseline/equal"].iloc[:, 2:], [[1, 0], [1.5, 1.5], [2, 2]])
@@ -74,7 +74,7 @@ with tempfile.TemporaryDirectory() as name:
     assert (d / "plots/deep_learning_plain_HIPE_2.png").stat().st_size > 0
     assert (d / "plots/optimization_HIPE_2.png").stat().st_size > 0
 
-    # corrupted states: a 1 s lag reads each state one sample earlier (the first keeps its own), the rest linked
+    # corrupt_states: a 1 s lag reads each state from one sample earlier (the first keeps its own); other files linked
     states_split.to_csv(d / "data/HIPE/2/states.csv", index=False)
     corrupt_main(
         ["--dataset", "hipe", "--machines", "2", "--lag", "1", "--data-root", str(d / "data"), "--out", str(d / "lag")]
@@ -83,7 +83,7 @@ with tempfile.TemporaryDirectory() as name:
     assert lagged.iloc[:, 1:].to_numpy().tolist() == [[1, 0], [1, 0], [1, 1]] and list(lagged.Time) == ts
     assert (d / "lag/HIPE/2/aggregate_training.csv").is_symlink()
 
-# flips change about that share of the entries
+# --flip 0.1 flips about 10% of the entries
 many = pd.DataFrame(
     {"Time": pd.date_range("2017-10-23", periods=20000, freq="s").strftime("%d-%b-%Y %H:%M:%S"), "s": 0}
 )

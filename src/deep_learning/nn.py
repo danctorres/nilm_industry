@@ -1,16 +1,18 @@
-"""Fully connected network trained with mini-batch Adam and weight decay on the sum-constraint loss: the estimates of
-the machines that are ON must add up to the aggregate, and a negative estimate of an ON machine is penalised.
+"""Fully connected network, trained so the ON machines' estimates add up to the total.
+
+Uses mini-batch Adam (gradient descent with a per-weight step size) and weight decay (shrinks the weights toward 0
+every step). The loss also penalises a negative estimate of an ON machine:
     L = (t - sum_j s_j p_j)^2 + sum_j s_j 27 max(-p_j, 0)^3
-p: (n, N) estimates, t: (n, 1) aggregate, s: (n, N) 0/1 states.
-`stack` trains several networks at once: their weights get a leading run axis, and so does p.
-OFF machines are zeroed at estimation time, so they neither count in the sum nor get penalised."""
+- p: (n, N) estimates, t: (n, 1) total, s: (n, N) 0/1 states. n samples, N machines.
+- OFF machines (s_j = 0) count in neither term. main.py zeroes their estimates.
+- `stack` trains several networks at once: their weights get a leading run axis, and so does p."""
 
 import copy
 
 import numpy as np
 
 BATCH = 64  # samples per Adam step
-BETA1, BETA2 = 0.9, 0.999  # Adam's decay rates of the mean and the mean square of the gradient
+BETA1, BETA2 = 0.9, 0.999  # Adam's decay rates for its running mean and mean square of the gradient
 
 
 def loss(p: np.ndarray, t: np.ndarray, s: np.ndarray) -> np.ndarray:
@@ -53,7 +55,7 @@ class ActivationLayer:
 
 class ConnectedLayer:
     def __init__(self, size_in: int, size_out: int, rng: np.random.Generator) -> None:
-        bound = 1 / np.sqrt(size_in)  # wider bounds saturate the tanh of a wide layer from the start
+        bound = 1 / np.sqrt(size_in)  # wider bounds would saturate the tanh after a wide layer from the start
         self.weights = rng.uniform(-bound, bound, (size_in, size_out))
         self.bias = rng.uniform(-bound, bound, (1, size_out))
 
@@ -62,7 +64,7 @@ class ConnectedLayer:
         return x @ self.weights + self.bias
 
     def back_prop(self, grad: np.ndarray) -> np.ndarray:
-        """Keeps dLoss/dweights and dLoss/dbias summed over the batch, returns dLoss/dinput."""
+        """Store dLoss/dweights and dLoss/dbias (summed over the batch) in self.grads. Returns dLoss/dinput."""
         self.grads = self.input.swapaxes(-1, -2) @ grad, grad.sum(axis=-2, keepdims=True)
         return grad @ self.weights.swapaxes(-1, -2)
 
@@ -80,10 +82,12 @@ class NN:
         return x
 
     def train(self, x: np.ndarray, t: np.ndarray, s: np.ndarray, epochs: int, rng: np.random.Generator) -> np.ndarray:
-        """Adam on the mean loss of each batch, the batches drawn anew every epoch, the learning rate falling linearly
-        to 0 (at a constant rate Adam can leave a minimum late). Every step also shrinks the weights and biases by
-        learning rate x weight_decay of their size, apart from Adam's scaling (AdamW). Returns the mean training loss
-        after the last epoch, one per run if stacked."""
+        """Train with Adam. Returns the mean training loss after the last epoch, one per run if stacked.
+
+        - Each step uses the mean loss of one batch. Batches are reshuffled every epoch.
+        - The learning rate falls linearly to 0, since at a constant rate Adam can leave a minimum late on.
+        - Each step also shrinks the weights and biases by learning rate x weight_decay x their value, outside Adam's
+          scaling (AdamW)."""
         dense = [layer for layer in self.layers if isinstance(layer, ConnectedLayer)]
         params = [p for layer in dense for p in (layer.weights, layer.bias)]
         m, v = [np.zeros_like(p) for p in params], [np.zeros_like(p) for p in params]
@@ -106,8 +110,8 @@ class NN:
 
 
 def stack(nets: list[NN]) -> NN:
-    """The networks as one whose weights have a leading run axis, so each step trains all of them on the same batch.
-    Numpy's overhead, not arithmetic, dominates a step on a small batch, so R runs cost little more than one."""
+    """Merge the networks into one whose weights have a leading run axis, so each step trains them all on one batch.
+    On a small batch numpy's call overhead, not arithmetic, dominates a step, so R runs cost little more than one."""
     layers = [copy.copy(layer) for layer in nets[0].layers]
     for i, layer in enumerate(layers):
         if isinstance(layer, ConnectedLayer):
@@ -117,7 +121,7 @@ def stack(nets: list[NN]) -> NN:
 
 
 def pick(net: NN, run: int) -> NN:
-    """Run `run` of a stacked network as a network of its own."""
+    """Run number `run` of a stacked network, as a standalone network."""
     layers = [copy.copy(layer) for layer in net.layers]
     for layer in layers:
         if isinstance(layer, ConnectedLayer):

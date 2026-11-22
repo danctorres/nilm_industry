@@ -1,4 +1,4 @@
-"""Self-check of the preprocessing: python3 src/preprocessing/test_preprocessing.py"""
+"""Self-check of common.py's seconds and split: python3 src/preprocessing/test_preprocessing.py"""
 
 import numpy as np
 import pandas as pd
@@ -6,8 +6,8 @@ from common import seconds, split_train_validation
 
 assert list(seconds(pd.Series(pd.to_datetime(["1970-01-01 00:00:01", "2018-02-21 00:00:00"])))) == [1, 1519171200]
 
-# split: whole blocks minus their edges for validation, training at least 2 * gap away from them, the same number of
-# rows from every kept bin of the other blocks, reproducible
+# split: test = whole blocks minus their edges; training = at least 2 * gap away, the same number from every kept
+# bin of the other blocks; reproducible
 t = np.arange(20000.0)
 agg = np.random.default_rng(5).normal(100, 10, len(t))
 tr, val = split_train_validation(t, agg, 1000, 50, np.random.default_rng(1))

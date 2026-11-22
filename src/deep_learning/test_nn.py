@@ -11,7 +11,7 @@ from nn import ConnectedLayer, loss, loss_d, pick, stack
 
 rng = np.random.default_rng(0)
 
-# The gradient is the exact derivative of the loss (penalty active too) and zero for OFF machines.
+# loss_d matches the loss's numeric derivative (penalty active too) and is zero for OFF machines.
 p = rng.uniform(-0.5, 0.5, (4, 3))
 t = rng.uniform(0.0, 1.0, (4, 1))
 s = np.array([[1, 0, 1], [0, 0, 1], [1, 1, 1], [0, 1, 0]], dtype=float)
@@ -24,7 +24,7 @@ for i, j in np.ndindex(p.shape):
     numeric = (loss(p + step, t, s)[i] - loss(p - step, t, s)[i]) / (2 * h)
     assert abs(numeric - g[i, j]) < 1e-5, (i, j, numeric, g[i, j])
 
-# Three machines drawing 0.2, 0.3 and 0.4 when ON: after training, the ON estimates sum to the aggregate.
+# Three machines drawing 0.2, 0.3 and 0.4 when ON: after training, the ON estimates sum to the total.
 s = rng.integers(0, 2, (40, 3)).astype(float)
 t = s @ np.array([[0.2], [0.3], [0.4]])
 x = inputs("state", t / t.max(), s)
@@ -34,8 +34,8 @@ gap = np.abs(np.sum(net.estimate(x) * s, axis=1, keepdims=True) - t).max()
 assert gap < 0.02, gap
 print(f"largest |sum of estimates - aggregate| = {gap:.4f}")
 
-# Networks trained stacked, on the same batches, end with the same weights and losses as trained one by one.
-nn.BATCH = 16  # several batches per epoch
+# Trained stacked or one by one, on the same batches, the networks end with the same weights and losses.
+nn.BATCH = 16  # so each epoch has several batches
 alone = [build("state", 3, np.random.default_rng(r)) for r in (1, 2)]
 alone_losses = [n.train(x, t, s, 2, np.random.default_rng(0)) for n in alone]
 stacked = stack([build("state", 3, np.random.default_rng(r)) for r in (1, 2)])
@@ -53,8 +53,8 @@ for n in nets:
 size = [sum(np.sum(layer.weights**2) for layer in n.layers if isinstance(layer, ConnectedLayer)) for n in nets]
 assert size[1] < size[0], size
 
-# end to end, averaging two runs: reads the split files, writes one estimate per machine for every validation row,
-# OFF machines 0
+# end to end, averaging two runs: reads the split files and writes one estimate per machine per validation row,
+# with OFF machines at 0
 with tempfile.TemporaryDirectory() as name:
     d = Path(name) / "HIPE" / "3"
     d.mkdir(parents=True)

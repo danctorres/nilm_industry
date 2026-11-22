@@ -1,6 +1,9 @@
 #pragma once
-// Real-coded genetic algorithm after Thakur (2014): tournament selection,
-// double Pareto crossover, power mutation (Deep & Thakur 2007) and elitism.
+// Real-coded genetic algorithm (Thakur 2014). Each generation:
+// - tournament selection: each parent is the best of `tournament` random picks;
+// - double Pareto crossover: children around the parents' midpoint;
+// - power mutation (Deep & Thakur 2007): a jump toward a bound;
+// - elitism: the best `elite` pass unchanged.
 #include "optimizer.h"
 
 namespace nilm {
@@ -10,12 +13,12 @@ struct GaParams {
     int max_iter = 200;
     double threshold = 1e-5;
     int patience = 10;
-    int tournament = 2;           // candidates per tournament
+    int tournament = 2;
     double alpha = 2.0;           // double Pareto shape: smaller means heavier tails
     double beta = 0.5;            // double Pareto scale
     double p_mutation = 0.005;    // per-variable mutation probability (Deep & Thakur)
     double mutation_index = 0.5;  // power mutation index: smaller means smaller moves
-    int elite = 1;                // best individuals copied unchanged
+    int elite = 1;
 };
 
 template <Objective F>
@@ -50,7 +53,7 @@ template <Objective F>
         return u < 0.5 ? p.beta * (1 - std::pow(2 * u, -1 / p.alpha))
                        : p.beta * (std::pow(2 * (1 - u), -1 / p.alpha) - 1);
     };
-    const auto mutate = [&](std::vector<double>& x) {  // power mutation, keeps x inside [lo, hi]
+    const auto mutate = [&](std::vector<double>& x) {  // keeps x inside [lo, hi]
         for (std::size_t k = 0; k < dim; ++k) {
             if (unit01(rng) >= p.p_mutation || x[k] <= lo[k] || x[k] >= hi[k]) continue;  // boundary points stay put
             const double s = std::pow(unit01(rng), 1 / p.mutation_index);

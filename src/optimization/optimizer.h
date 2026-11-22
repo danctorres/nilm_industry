@@ -1,8 +1,7 @@
 #pragma once
-// Every optimizer has the signature
+// Shared parts of the optimizers. Each one has the signature
 //     Result algo(F&& f, std::span<const double> lo, std::span<const double> hi, const Params& p, std::uint64_t seed)
-// where f is a callable taking std::span<const double>. Positions stay inside
-// the box [lo, hi], and the result is deterministic for a given seed.
+// f takes std::span<const double>. Positions stay inside the box [lo, hi]. Same seed, same result.
 #include <algorithm>
 #include <cmath>
 #include <concepts>
@@ -32,8 +31,9 @@ struct Result {
     }
 };
 
-// Stop once the best fitness is below `threshold`, or after `patience`
-// iterations without improvement while below 10x threshold.
+// Stop once the best fitness is:
+// - below `threshold`, or
+// - below 10x threshold and not improved for `patience` iterations.
 struct Stopper {
     double threshold;
     int patience = 10;
@@ -78,7 +78,7 @@ std::vector<double> gradient(F& f, std::vector<double> x, std::span<const double
     return g;
 }
 
-// Central-difference Hessian, row-major n x n, symmetric.
+// Hessian (second derivatives) by central differences: row-major n x n, symmetric.
 template <Objective F>
 std::vector<double> hessian(F& f, std::vector<double> x, std::span<const double> h) {
     const std::size_t n = x.size();
@@ -102,7 +102,7 @@ std::vector<double> hessian(F& f, std::vector<double> x, std::span<const double>
     return H;
 }
 
-// Solves A d = g for a symmetric positive definite A (row-major) by Cholesky. Empty if A is not SPD.
+// Solves A d = g by Cholesky (A = L L^T), for a row-major symmetric positive definite (SPD) A. Empty if not SPD.
 [[nodiscard]] inline std::optional<std::vector<double>> solve_spd(std::vector<double> A, std::vector<double> g) {
     const std::size_t n = g.size();
     for (std::size_t j = 0; j < n; ++j) {

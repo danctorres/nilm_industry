@@ -1,9 +1,14 @@
-"""Gaussian allocation: while ON, each machine draws its power from its own mixture of Gaussians (an oven idling or
-heating, say), independently of the others, and the aggregate is the sum over the ON machines. The components are
-fitted by EM from the aggregate and the on/off states alone, and each machine's estimate is its posterior mean given the
-aggregate, so the estimates of the ON machines add up to it. --components 1 is a single Gaussian per machine, the method
-as first added; --components auto picks each machine's own number by BIC. Trains on the training split, the same rows as
-the other methods.
+"""Gaussian allocation: splits the total power among the ON machines.
+
+- While ON, each machine's power comes from its own mixture of Gaussians ("components"), one per power level, e.g. an
+  oven idling or heating. Machines are independent.
+- The total (`aggregate` in the files) is the sum over the ON machines.
+- EM (expectation-maximisation: alternately estimate each machine's share and refit) fits the components from the
+  total and the states alone.
+- Each estimate is the machine's posterior mean (expected power given the total), so ON estimates add up to the total.
+- --components 1: one Gaussian per machine. --components auto: each machine's own number, by BIC (a fit score that
+  penalises extra parameters).
+- Trains on the same training rows as the other methods.
 
 Example: python3 src/allocation/allocation.py --dataset hipe --machines 9
 """
@@ -17,19 +22,20 @@ import pandas as pd
 from scipy.optimize import nnls
 
 REPO = Path(__file__).resolve().parents[2]
-FLOOR = 1e-6  # variance floor on the aggregate scaled to [0, 1], so the posterior exists when only steady machines run
-CHUNK = 2_000_000  # rows x assignments x machines held at once by `estimate`
+FLOOR = 1e-6  # minimum variance (total scaled to [0, 1]): keeps the posterior defined when only steady machines run
+CHUNK = 2_000_000  # cap on rows x assignments x machines that `estimate` holds at once
 
 
 def posterior(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Mean and variance of every machine's power given the aggregate a (T,) and the 0/1 states s (T, n); 0 when OFF."""
-    total = np.maximum(s @ var, FLOOR)  # var is floored already: this only guards the rows with every machine OFF
+    """Each machine's power mean and variance, given the total a (T,) and 0/1 states s (T, n). Both 0 when OFF."""
+    total = np.maximum(s @ var, FLOOR)  # var is already floored; this only guards rows where every machine is OFF
     shift = (a - s @ mu) / total
     return s * (mu + var * shift[:, None]), s * (var - var**2 / total[:, None])
 
 
 def fit(a: np.ndarray, s: np.ndarray, iters: int = 500) -> tuple[np.ndarray, np.ndarray]:
-    """EM for the per-machine means and variances, started from least-squares moments. A machine never ON keeps 0."""
+    """Fit one Gaussian per machine by EM: means and variances (n,). Starts from a non-negative least-squares fit. A
+    machine never ON keeps mean 0."""
     on = s.any(axis=1)
     a, s = a[on], s[on]
     count = np.maximum(s.sum(axis=0), 1)
@@ -47,17 +53,18 @@ def fit(a: np.ndarray, s: np.ndarray, iters: int = 500) -> tuple[np.ndarray, np.
 
 
 def patterns(s: np.ndarray) -> list[tuple[np.ndarray, np.ndarray]]:
-    """Every pattern of ON machines with at least one ON, and its rows."""
+    """Each set of ON machines that occurs (at least one ON), with its rows."""
     keys, inverse, counts = np.unique(s > 0, axis=0, return_inverse=True, return_counts=True)
     groups = np.split(np.argsort(inverse.ravel(), kind="stable"), np.cumsum(counts)[:-1])
     return [(on, rows) for on, rows in zip(keys, groups, strict=True) if on.any()]
 
 
 def assignments(on: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray):
-    """Every way to draw each ON machine from one of its components. Returns the ON machines (m,), the one-hot
-    components (C, m, k), the component means and variances (C, m), and per assignment the variance of the sum and the
-    log prior (C,)."""
-    # ponytail: the product of the ON machines' components, fine up to about 3 ** 8; prune or sample them beyond that
+    """Every way to pick one component per ON machine (C "assignments").
+
+    Returns the ON machines (m,), the picks one-hot (C, m, k), their means and variances (C, m), and per assignment the
+    variance of the sum and the log prior, i.e. the log of the picked weights' product (C,)."""
+    # ponytail: tries every combination of the ON machines' components; fine up to about 3 ** 8, prune or sample beyond
     idx = np.flatnonzero(on)
     z = np.array(list(itertools.product(*(range(np.count_nonzero(pi[i])) for i in idx))))
     mj, vj = mu[idx, z], var[idx, z]
@@ -72,8 +79,10 @@ def assignments(on: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray)
 
 
 def conditional(a: np.ndarray, mj, vj, v, lp) -> tuple[np.ndarray, np.ndarray]:
-    """For rows of one pattern with aggregate a (r,): the posterior weight of every assignment (r, C), each ON
-    machine's mean given the assignment (r, C, m), and the log-likelihood of each row's aggregate (r,)."""
+    """For the rows of one pattern, with total a (r,), return:
+    - each assignment's posterior weight (r, C)
+    - each ON machine's mean under each assignment (r, C, m)
+    - the log-likelihood of each row's total (r,)"""
     r = a[:, None] - mj.sum(axis=1)
     ll = lp - 0.5 * np.log(2 * np.pi * v) - 0.5 * r**2 / v
     top = ll.max(axis=1, keepdims=True)
@@ -85,9 +94,11 @@ def conditional(a: np.ndarray, mj, vj, v, lp) -> tuple[np.ndarray, np.ndarray]:
 def fit_mixture(
     a: np.ndarray, s: np.ndarray, k=1, iters: int = 300, start=None
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """EM for k components per machine, an int or one per machine: means, variances and weights, (n, max k) each, the
-    components a machine does not use at weight 0. Starts from `start`, a fit to refine, or else from the single
-    Gaussian of `fit`, each machine's components spread from one sd below its mean to one above; k = 1 is `fit`."""
+    """Fit k components per machine (an int, or one per machine) by EM.
+
+    Returns means, variances and weights, each (n, max k); unused components get weight 0. Refines `start` if given,
+    else starts from `fit`'s single Gaussian, spreading each machine's components evenly from one sd below its mean to
+    one above. k = 1 is just `fit`."""
     if start is None:
         mu1, var1 = fit(a, s)
         k = np.broadcast_to(k, mu1.shape)
@@ -109,9 +120,10 @@ def fit_mixture(
             weight[idx] += np.einsum("rc,cmk->mk", w, onehot)
             first[idx] += np.einsum("rc,rcm,cmk->mk", w, mean, onehot)
             second[idx] += np.einsum("rc,rcm,cmk->mk", w, mean**2 + vj - vj**2 / v[:, None], onehot)
-        seen = weight > 0  # a machine never ON keeps its start
+        seen = weight > 0  # zero weight (unused, or machine never ON): keep the start
         new_mu = np.where(seen, np.maximum(first / np.where(seen, weight, 1), 0.0), mu)
         var = np.where(seen, np.maximum(second / np.where(seen, weight, 1) - new_mu**2, FLOOR), var)
+        # floored: `assignments` counts components by nonzero weight
         pi = np.where(used, np.maximum(weight / np.maximum(weight.sum(axis=1, keepdims=True), 1e-300), 1e-6), 0.0)
         pi /= pi.sum(axis=1, keepdims=True)
         converged = np.abs(new_mu - mu).max() < 1e-9
@@ -122,13 +134,13 @@ def fit_mixture(
 
 
 def loglik(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray) -> float:
-    """Log-likelihood of the aggregate a (T,) given the 0/1 states s (T, n), over the rows with a machine ON."""
+    """Log-likelihood of the total a (T,) given the 0/1 states s (T, n), over the rows with a machine ON."""
     return sum(conditional(a[rows], *assignments(on, mu, var, pi)[2:])[2].sum() for on, rows in patterns(s))
 
 
 def split(fitted, j: int):
-    """The fit with machine j's widest component split in two, half a sd either side of its mean, keeping its weight
-    and variance: a start for one more component."""
+    """The fit with machine j's widest component split in two, as a start for one more component. The halves sit half an
+    sd either side of its mean and together keep its weight and variance."""
     mu, var, pi = (np.pad(x, ((0, 0), (0, 1))) for x in fitted)
     c, new = np.argmax(np.where(pi[j] > 0, var[j], -1.0)), np.count_nonzero(pi[j])
     sd = np.sqrt(var[j, c])
@@ -139,9 +151,12 @@ def split(fitted, j: int):
 
 
 def select(a: np.ndarray, s: np.ndarray, most: int = 5, screen: int = 50):
-    """Components per machine by BIC: splits a component of the machine where that lowers it most, until none does or
-    every machine has `most`. Each try runs `screen` EM iterations from the current fit; the chosen one is then run to
-    convergence. Returns the components (n,) and the fit."""
+    """Pick each machine's number of components by BIC = -2 log-likelihood + a penalty per parameter (lower is better).
+    Returns the counts (n,) and the fit.
+
+    Each round tries splitting each machine's widest component (`screen` EM iterations from the current fit) and keeps
+    the best. Stops when no split lowers BIC or every machine ever ON has `most`. The final fit then runs to
+    convergence."""
     penalty = 3 * np.log(s.any(axis=1).sum())  # a mean, a variance and a weight per component
 
     def score(fitted):
@@ -158,7 +173,7 @@ def select(a: np.ndarray, s: np.ndarray, most: int = 5, screen: int = 50):
 
 
 def estimate(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray) -> np.ndarray:
-    """Posterior mean of every machine's power given the aggregate a (T,) and the 0/1 states s (T, n); 0 when OFF."""
+    """Posterior mean of each machine's power, given the total a (T,) and the 0/1 states s (T, n). 0 when OFF."""
     est = np.zeros(s.shape)
     for on, rows in patterns(s):
         idx, _, mj, vj, v, lp = assignments(on, mu, var, pi)
@@ -169,9 +184,9 @@ def estimate(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: 
 
 
 def collinear(s: np.ndarray, threshold: float = 0.9) -> list[tuple[int, int]]:
-    """Pairs of machines whose on/off states correlate above threshold: the aggregate cannot tell their power apart."""
-    with np.errstate(divide="ignore", invalid="ignore"):  # a machine always ON or always OFF has no correlation
-        corr = np.atleast_2d(np.corrcoef(s.T))  # a 0-d array for one machine
+    """Pairs of machines whose on/off states correlate above `threshold`: the total can't tell their power apart."""
+    with np.errstate(divide="ignore", invalid="ignore"):  # a machine always ON or always OFF has no correlation (NaN)
+        corr = np.atleast_2d(np.corrcoef(s.T))  # np.corrcoef gives a 0-d array for one machine
     return [(int(i), int(j)) for i, j in zip(*np.nonzero(np.triu(corr > threshold, 1)), strict=True)]
 
 

@@ -1,7 +1,7 @@
 #pragma once
-// Ant colony optimisation for continuous domains (ACOR, Socha & Dorigo 2008):
-// a sorted archive of solutions defines a Gaussian kernel per dimension; each
-// ant picks one archive solution by rank weight and samples around it.
+// Ant colony optimisation for continuous domains (ACOR, Socha & Dorigo 2008).
+// Keeps a sorted archive of good solutions. Each ant picks one, favouring the top ranks,
+// and samples a Gaussian around it, one width per dimension.
 #include "optimizer.h"
 
 namespace nilm {
@@ -12,7 +12,7 @@ struct AcoParams {
     int max_iter = 200;
     double threshold = 1e-5;
     int patience = 10;
-    double q = 1e-4;   // locality of search: small favours the best solutions
+    double q = 1e-4;   // locality: this small, every ant samples around the best solution only
     double xi = 0.85;  // width multiplier, the analogue of pheromone evaporation
 };
 

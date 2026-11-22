@@ -47,7 +47,7 @@ struct Table {
     }
 };
 
-// Comma separated, first row is the header, cells are trimmed, blank lines are skipped.
+// Reads a comma-separated file. First row = header. Cells are trimmed; blank lines are skipped.
 inline Table read_csv(const std::filesystem::path& path) {
     std::ifstream in(path);
     if (!in) throw std::runtime_error("cannot open " + path.string());
@@ -107,7 +107,7 @@ inline Dataset load_dataset(const std::filesystem::path& aggregate_csv, const st
     return d;
 }
 
-// Coefficient file: header, then one row of kCoefs values per machine.
+// Reads a coefficient file: header, then one row of kCoefs values per machine.
 inline std::vector<double> read_coefs(const std::filesystem::path& path) {
     std::vector<double> coefs;
     for (const auto& row : read_csv(path).rows) {

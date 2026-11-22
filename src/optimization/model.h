@@ -1,11 +1,8 @@
 #pragma once
-// EMUPF model: each machine's active power is a cubic polynomial of the aggregate
-// power, switched by its on/off state. All coefficients live in one flat vector,
-// kCoefs consecutive values per machine.
-//
-// Fitting works on the aggregate divided by its largest value (`scale_of`), so
-// bounds, thresholds and fitness are unit-free; `unscale` converts the fitted
-// coefficients back to physical units for the coefficient file.
+// EMUPF model: a machine's active power is a cubic polynomial of the total power while it is on, and 0 while off.
+// - All coefficients sit in one flat vector, kCoefs consecutive values per machine.
+// - Fitting uses the total divided by its largest value (`scale_of`), so bounds, thresholds and fitness have no units.
+// - `unscale` turns the fitted coefficients back into physical units for the coefficient file.
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -39,8 +36,7 @@ inline double reconstruct(std::span<const double> coefs, const Sample& s) {
     return sum;
 }
 
-// Squared reconstruction error plus a quadratic penalty, weighted by lambda,
-// for every machine whose estimated power is negative.
+// Cost of one sample: (total - sum of estimates)^2, plus lambda times a quadratic penalty per negative estimate.
 inline double objective(std::span<const double> coefs, const Sample& s, double lambda) {
     double sum = 0.0, penalty = 0.0;
     for (std::size_t j = 0; j < s.on.size(); ++j) {
@@ -58,7 +54,7 @@ inline double scale_of(std::span<const double> aggregate) {
     return s > 0.0 ? s : 1.0;
 }
 
-// Coefficients fitted on agg/scale, converted to physical units:
+// Converts coefficients fitted on agg/scale to physical units:
 // scale * q(agg/scale) = sum_k (c_k * scale^(1-k)) agg^k.
 inline std::vector<double> unscale(std::vector<double> coefs, double scale) {
     for (std::size_t i = 0; i < coefs.size(); ++i) coefs[i] *= std::pow(scale, 1.0 - static_cast<double>(i % kCoefs));

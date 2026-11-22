@@ -1,9 +1,9 @@
-"""HIPE preprocessing: turns the raw HIPE machine files into data/processed/HIPE/<N>, N the number of machines summed
-into the aggregate.
+"""Turn the raw HIPE machine files into data/processed/HIPE/<N>, N being the number of machines summed into the total.
 
-The recording is split in time: October tunes, November trains and December reports. data/processed/HIPE/<N>
-validates on December. A copy in --tuning-out validates on October and links every other file to the first, so a
-method tuned with --data-root tuning/data never sees December.
+The recording is split by month: October tunes, November trains, December is reported.
+- data/processed/HIPE/<N>: test rows are December.
+- --tuning-out: test rows are October, and every other file links to data/processed/HIPE/<N>. So a method tuned
+  with --data-root tuning/data trains and is scored without December. Only the whole-recording files include it.
 
 Example: python3 src/preprocessing/hipe.py [--raw DIR] [--out DIR] [--tuning-out DIR] [--seed 1]
 """
@@ -15,23 +15,27 @@ import numpy as np
 import pandas as pd
 from common import REPO, draw_training, read_equipment_csv, write_csv
 
-# Methodology choices: the ON threshold is the dissertation's, the split is not (it held out random hours of one week)
-# a machine is ON when its power is > 0 kW, after clipping negatives, linear resampling to 1 s and rounding to
-# 4 decimals (0.1 W)
+# A machine is on when its power is > 0 kW, after clipping negatives to 0, linear resampling to 1 s and rounding to
+# 4 decimals (0.1 W).
 ON_THRESHOLD_KW = 0
-# UTC: before TUNING_END tunes, from there to REPORT_START trains, after it reports
+# Cuts in UTC: tuning before TUNING_END, training up to REPORT_START, the reported test after it.
 TUNING_END, REPORT_START = np.datetime64("2017-11-01"), np.datetime64("2017-12-01")
-# left out next to each cut; rows inside a longer gap between two raw samples of a machine are dropped, so every
-# kept row is interpolated from samples at most GAP_S apart (the others are at most 219 s)
+# Rows within GAP_S of a cut go to no split. Rows inside a longer gap between two raw samples of a machine are
+# dropped, so every kept row inside a machine's own time range is interpolated from samples at most GAP_S apart.
+# In the data, every other gap is at most 219 s.
 GAP_S = 300
 
 SECOND = np.timedelta64(1, "s")
 
 
 def read_machine(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
-    """Time in UTC and power of one machine. The offset is applied, so the week runs on through the switch from
-    +02:00 to +01:00 (the dissertation's version dropped it and cut the week there). The series is cut at its first
-    non-increasing timestamp, the sample before the drop included, and negative power is set to 0."""
+    """Return one machine's times (UTC, no time zone) and power.
+
+    - Each timestamp's UTC offset (its "+02:00" ending) is applied, so the clock does not jump back an hour when
+      summer time ends; that jump would cut the series.
+    - The series stops at the first timestamp not later than the one before: that sample, the one before it and
+      all later ones are dropped.
+    - Negative power is set to 0."""
     time = pd.to_datetime(df.SensorDateTime, utc=True, format="ISO8601").dt.tz_localize(None)
     time, power = time.to_numpy(), df.P_kW.to_numpy(dtype=float)
     stop = np.flatnonzero(np.diff(time) <= 0 * SECOND)
@@ -40,8 +44,10 @@ def read_machine(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
 
 
 def interp1_extrap(x: np.ndarray, xp: np.ndarray, fp: np.ndarray) -> np.ndarray:
-    """Linear interpolation that also extrapolates: np.interp inside, exact at the samples (scipy's interp1d is not,
-    depending on its version), and the lines through the first and last two samples outside."""
+    """Linear interpolation that also extrapolates.
+
+    - Inside the samples: np.interp, exact at the samples (scipy's interp1d is not, in some versions).
+    - Outside: the line through the first two, or the last two, samples."""
     y = np.interp(x, xp, fp)
     lo, hi = x < xp[0], x > xp[-1]
     y[lo] = fp[0] + (x[lo] - xp[0]) * (fp[1] - fp[0]) / (xp[1] - xp[0])
@@ -50,11 +56,15 @@ def interp1_extrap(x: np.ndarray, xp: np.ndarray, fp: np.ndarray) -> np.ndarray:
 
 
 def process(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Equipment power (timestamp, Eq<k>_P_kW) and states (timestamp, Eq<k>_State) on one grid of seconds spanning every
-    machine. Each machine is interpolated linearly onto it, and extrapolated outside its own time range. Machines 2..M
-    come first and machine 1 last: the dissertation's version dropped it as always OFF, which holds for the one-week
-    release only, so the first N machines are the same as there. Rows inside a gap of more than GAP_S between two
-    samples of any machine are dropped from every machine, as interpolation would invent them."""
+    """Put every machine on one grid of seconds.
+
+    Returns power (timestamp, Eq<k>_P_kW) and states (timestamp, Eq<k>_State).
+
+    - The grid spans every machine. Each is interpolated linearly onto it, and extrapolated outside its own range.
+    - Machines 2..M, then machine 1: it was always off in the one-week release, which dropped it, so the first N
+      machines stay the same as there.
+    - Rows inside a gap of more than GAP_S between two samples of any machine are dropped for every machine, since
+      interpolation would invent them."""
     machines = [read_machine(df) for df in read_equipment_csv(folder, ["SensorDateTime", "P_kW"])]
     start, end = min(t[0] for t, _ in machines), max(t[-1] for t, _ in machines)
     grid = start + np.arange((end - start) // SECOND + 1) * SECOND
@@ -85,7 +95,7 @@ def main(argv=None):
     tuning = np.flatnonzero(TUNING_END - t > gap)  # rows within GAP_S of a cut belong to no split
     pool = np.flatnonzero((t - TUNING_END >= gap) & (REPORT_START - t > gap))
     report = np.flatnonzero(t - REPORT_START >= gap)
-    sums = np.cumsum(eq.iloc[:, 1:].to_numpy(), axis=1)  # column n - 1: sum of the first n machines, added in order
+    sums = np.cumsum(eq.iloc[:, 1:].to_numpy(), axis=1)  # column n - 1: total of the first n machines, added in order
     for n in range(2, sums.shape[1] + 1):
         out, tune = a.out / str(n), a.tuning_out / str(n)
         tables = {

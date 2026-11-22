@@ -1,9 +1,8 @@
 #pragma once
-// Gradient-based local methods from several random starts, with finite-difference derivatives:
-// gradient descent with Armijo backtracking, and damped Newton (Levenberg-Marquardt).
-// Steps are projected back into [lo, hi]. A pure Newton step is not defined for
-// the EMUPF objective: one squared residual gives a rank-one Hessian, so a
-// damping term mu*I is required.
+// Local search from several random starts, with finite-difference derivatives. Steps are clamped into [lo, hi].
+// - gd: gradient descent, Armijo backtracking (halve the step until the cost drops enough).
+// - newton: damped Newton, Levenberg-Marquardt (adds mu*I to the Hessian).
+// Damping is required: the EMUPF cost is one squared residual, whose rank-one Hessian allows no pure Newton step.
 #include "optimizer.h"
 
 namespace nilm {

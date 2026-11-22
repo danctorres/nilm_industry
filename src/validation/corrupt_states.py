@@ -1,11 +1,12 @@
-"""A copy of the processed data with corrupted on/off states, to measure how much the methods depend on exact states.
+"""Copies the processed data with late or flipped on/off states, to measure how much the methods need exact states.
 
     python3 src/validation/corrupt_states.py --dataset hipe --machines 9 [--lag S] [--flip P] --out DIR
 
-Writes DIR/<DATASET>/<N>/: the three states files corrupted, every other file a symlink to the original. --lag S:
-each state as it was S seconds earlier, a status signal that reports late. --flip P: each entry flipped with
-probability P. The training and validation rows are taken from the corrupted unsplit table, so both splits see the
-same errors. Then run the methods and validation.py with --data-root DIR."""
+Writes DIR/<DATASET>/<N>/: the three states files, corrupted; every other CSV as a symlink to the original.
+--lag S: each state reported S seconds late, i.e. as it was S seconds earlier.
+--flip P: each entry flipped with probability P.
+Training and test rows are both cut from one corrupted full table, so they share the same errors.
+Then run the methods and validation.py with --data-root DIR."""
 
 import argparse
 from pathlib import Path
@@ -17,7 +18,8 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def corrupt(states: pd.DataFrame, lag: float, flip: float, rng: np.random.Generator) -> pd.DataFrame:
-    """states: timestamp in time order, then one 0/1 column per machine. A lag reaching before the first sample, or
+    """Returns the states reported `lag` seconds late, then each entry flipped with probability `flip`.
+    states: timestamp (in time order), then one 0/1 column per machine. A lag reaching before the first sample, or
     into a gap, reads the first sample after it."""
     t = pd.to_datetime(states.iloc[:, 0], format="%d-%b-%Y %H:%M:%S").to_numpy().astype("datetime64[s]").astype(int)
     v = states.iloc[:, 1:].to_numpy()[np.searchsorted(t, t - lag)]

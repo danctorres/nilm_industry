@@ -1,14 +1,14 @@
-"""Compares the per-machine estimates in results/ with the ground truth in data/processed.
+"""Scores every method's per-machine estimates against the metered power, on the test rows.
 
     python3 src/validation/validation.py [--data-root DIR] [--results-root DIR] [--plots DIR]
 
-Every estimate file results/<method>/<DATASET>/<N>.csv is paired with the ground truth
-data/processed/<DATASET>/<N>/equipment_validation.csv; the oracle-state baseline estimates the whole recording and is
-scored on the same validation rows. Three baselines that see only the aggregate and the states are scored next to
-them: zero, the aggregate split equally among the ON machines, and split in proportion to each machine's mean power
-fitted to the training split. Prints, per file, the errors per machine and of the reconstructed aggregate (the sum of
-the machine estimates against the measured aggregate), then one summary line per method over all machines. Negative
-estimates are scored as 0 for every method."""
+- Pairs each results/<method>/<DATASET>/<N>.csv with data/processed/<DATASET>/<N>/equipment_validation.csv.
+- hart_inspired estimates the whole recording; only its test rows are scored.
+- Also scores three baselines that see only the total and the states: zero, the total split equally among the ON
+  machines, and the total split in proportion to each machine's mean power (fitted on the training rows).
+- Negative estimates are scored as 0, for every method.
+- Prints per file: the errors per machine, then of the rebuilt total (sum of the estimates vs. the metered total).
+- Ends with a summary: MAE and NDE per method and group, pooled over the group's machines."""
 
 import argparse
 from itertools import chain
@@ -24,19 +24,20 @@ DATASETS = ("HIPE", "IMDELD")
 
 
 def read_csv(path: Path) -> pd.DataFrame:
-    return pd.read_csv(path, skipinitialspace=True)  # the estimators write ", " separators
+    return pd.read_csv(path, skipinitialspace=True)  # the methods write ", " separators
 
 
 def metrics(true_vals, est_vals, w_to_kw: bool) -> pd.DataFrame:
-    """One row per column: MAE, MSE, RMSE (kW), R2, NDE and SAE (unitless), no rounding.
-    NDE = sum((est - true)^2) / sum(true^2), SAE = |sum(est) - sum(true)| / sum(true)."""
+    """Error metrics, one row per column of values, not rounded: MAE and RMSE (kW), MSE (kW²), R2, NDE and SAE
+    (unitless). NDE = sum((est - true)^2) / sum(true^2). SAE = |sum(est) - sum(true)| / sum(true), the error in total
+    energy."""
     t, e = np.asarray(true_vals, dtype=float), np.asarray(est_vals, dtype=float)
     if t.ndim == 1:
         t, e = t[:, None], e[:, None]
     if w_to_kw:
         t, e = t / 1000, e / 1000
     sq = ((e - t) ** 2).sum(axis=0)
-    with np.errstate(divide="ignore", invalid="ignore"):  # a machine that is never on gives inf or nan
+    with np.errstate(divide="ignore", invalid="ignore"):  # a machine never on divides by 0: inf or NaN, no warning
         return pd.DataFrame(
             {
                 "MAE": np.abs(e - t).mean(axis=0),
@@ -52,11 +53,11 @@ def metrics(true_vals, est_vals, w_to_kw: bool) -> pd.DataFrame:
 def errors(
     truth: pd.DataFrame, est: pd.DataFrame, w_to_kw: bool, name: str
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
-    """Errors of one pair. truth: timestamp, machine 1..M; est: timestamp, measured aggregate, estimate 1..M. Returns
-    the per-machine errors, the aggregate-reconstruction errors and the errors over every machine's samples pooled."""
+    """Scores one estimate file. truth: timestamp, machine 1..M. est: timestamp, metered total, estimate 1..M.
+    Returns the errors per machine, of the rebuilt total, and over all machines' samples pooled."""
     if not truth.iloc[:, 0].astype(str).tolist() == est.iloc[:, 0].astype(str).tolist():
         raise SystemExit(f"{name}: the timestamps of the estimates and the ground truth differ")
-    true_vals, est_vals = truth.iloc[:, 1:], est.iloc[:, 2:].clip(lower=0)  # every method scored without negatives
+    true_vals, est_vals = truth.iloc[:, 1:], est.iloc[:, 2:].clip(lower=0)
     if est_vals.shape[1] != true_vals.shape[1]:
         raise SystemExit(f"{name}: {est_vals.shape[1]} estimate columns for {true_vals.shape[1]} machines")
     per_machine = metrics(true_vals, est_vals, w_to_kw)
@@ -67,15 +68,15 @@ def errors(
 
 
 def baselines(d: Path) -> list[tuple[str, pd.DataFrame]]:
-    """Estimates in the estimators' layout from the aggregate and the states alone, the information every method
-    gets: zero, the aggregate split equally among the ON machines, and split in proportion to each machine's mean
-    power, fitted by non-negative least squares to the training aggregate and states."""
+    """The three baselines' estimates for the test rows in folder d, in the methods' layout, as (name, table) pairs.
+    Like every method, they see only the total and the states: zero; the total split equally among the ON machines;
+    or split in proportion to each machine's mean power, fitted to the training rows by non-negative least squares."""
     a_tr = pd.read_csv(d / "aggregate_training.csv").iloc[:, 1].to_numpy()
     s_tr = pd.read_csv(d / "states_training.csv").iloc[:, 1:].to_numpy(float)
     val = pd.read_csv(d / "aggregate_validation.csv").iloc[:, :2]
     s = pd.read_csv(d / "states_validation.csv").iloc[:, 1:].to_numpy(float)
     w = s * nnls(s_tr, a_tr)[0]
-    with np.errstate(divide="ignore", invalid="ignore"):  # no machine ON: 0 / 0, scored as 0
+    with np.errstate(divide="ignore", invalid="ignore"):  # no machine ON: 0 / 0 = NaN, scored as 0 below
         shares = {
             "zero": 0 * s,
             "equal": s / s.sum(axis=1, keepdims=True),
@@ -86,7 +87,7 @@ def baselines(d: Path) -> list[tuple[str, pd.DataFrame]]:
 
 
 def plot(path: Path, title: str, truth: pd.DataFrame, est: pd.DataFrame, unit: str) -> None:
-    """True against estimated power of every machine, one subplot each."""
+    """Saves a PNG of metered vs. estimated power, one subplot per machine."""
     n = truth.shape[1] - 1
     cols = int(np.ceil(np.sqrt(n)))
     fig = Figure(figsize=(5 * cols, 3.5 * np.ceil(n / cols)))
@@ -126,17 +127,17 @@ def main(argv=None) -> None:
         truth_path = d / "equipment_validation.csv"
         truth, w_to_kw = read_csv(truth_path), dataset == "IMDELD"  # IMDELD is in W, shown in kW
         found = [f for f in files if (f.parent.name, f.stem) == (dataset, n)]
-        # method e.g. deep_learning/state; a generator, so one estimate file is in memory at a time
+        # a generator keeps one estimate file in memory at a time. method: e.g. deep_learning/state
         results = ((f.parent.parent.relative_to(a.results_root).as_posix(), read_csv(f)) for f in found)
         for method, raw in chain(results, baselines(d)):
             label, est = f"{method} {dataset}, {n} machines", raw
-            if method == "hart_inspired":  # whole recording: its validation rows, NaN (no estimate possible) as 0
+            if method == "hart_inspired":  # whole recording: keep its test rows, score NaN (no estimate) as 0
                 est = raw.set_index(raw.columns[0]).loc[truth.iloc[:, 0]].reset_index()
                 covered = est.iloc[:, 2:].notna().to_numpy()[truth.iloc[:, 1:].to_numpy() > 0].mean()
                 print(f"\n{label}: an estimate for {covered:.0%} of the ON samples")
                 est = est.fillna(0)
             per_machine, aggregate, pooled = errors(truth, est, w_to_kw, f"{label} against {truth_path}")
-            print(f"\n{label}, per machine (MAE, MSE, RMSE in kW):\n{per_machine.to_string(index=False)}")
+            print(f"\n{label}, per machine (MAE and RMSE in kW, MSE in kW²):\n{per_machine.to_string(index=False)}")
             print(f"{label}, aggregate reconstruction:\n{aggregate.to_string(index=False)}")
             summary.append({"dataset": dataset, "machines": int(n), "method": method, **pooled[["MAE", "NDE"]]})
             if a.plots:
