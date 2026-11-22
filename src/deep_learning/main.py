@@ -13,6 +13,7 @@ from nn import NN, ActivationLayer, ConnectedLayer, pick, relu, relu_d, stack, t
 
 REPO = Path(__file__).resolve().parents[2]
 HIDDEN = 64  # units in the hidden layer, chosen on October: 16 and 128 score about the same, two layers of 32 worse
+CHUNK = 100_000  # validation rows estimated at once: every layer keeps its input, HIDDEN floats per row
 
 
 def load(root: Path, dataset: str, n: int, split: str):
@@ -84,7 +85,8 @@ def main(argv=None) -> None:
         print(f"run {run}: mean epoch loss {run_loss:.6g}")
     best = pick(net, int(np.nanargmin(losses)))
 
-    est = best.estimate(x_val) * st_val * hi + 0.0  # OFF machines are zero (+ 0.0 turns -0.0 into 0.0)
+    est = np.vstack([best.estimate(c) for c in np.array_split(x_val, max(1, -(-len(x_val) // CHUNK)))])
+    est = est * st_val * hi + 0.0  # OFF machines are zero (+ 0.0 turns -0.0 into 0.0)
     err = est - eq_val
     for j in range(a.machines):
         print(f"machine {j}: MAE {np.mean(np.abs(err[:, j])):.4g}, RMSE {np.sqrt(np.mean(err[:, j] ** 2)):.4g}")
