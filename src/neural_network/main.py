@@ -1,5 +1,6 @@
 """Neural network: a small network splits the total active power (`aggregate` in the files) into one estimate per
-machine. It never sees metered machine power: training only makes the ON estimates add up to the total.
+machine. It never sees metered machine power: training only makes the ON estimates add up to the total, and rows
+unlike the training rows can miss it by kW, so the estimates are clipped at 0 and scaled to add up to it.
 
 Example: python3 src/neural_network/main.py --dataset hipe --mode state --machines 9
 """
@@ -93,8 +94,11 @@ def main(argv=None) -> None:
     if not ok.any():
         raise SystemExit("every run diverged")
     chunks = np.array_split(x_val, max(1, -(-len(x_val) // CHUNK)))
-    est = np.vstack([net.estimate(c)[ok].mean(axis=0) for c in chunks])
-    est = est * st_val * hi + 0.0  # OFF machines are zero (+ 0.0 turns -0.0 into 0.0)
+    est = np.maximum(np.vstack([net.estimate(c)[ok].mean(axis=0) for c in chunks]) * st_val, 0.0)  # OFF: 0
+    total = est.sum(axis=1, keepdims=True)
+    with np.errstate(divide="ignore", invalid="ignore"):  # no machine ON: 0 / 0 = NaN, set to 0
+        shares = np.where(total > 0, est / total, st_val / st_val.sum(axis=1, keepdims=True))  # all 0: split equally
+    est = np.nan_to_num(shares * agg_val) + 0.0  # + 0.0 turns -0.0 into 0.0
     err = est - eq_val
     for j in range(a.machines):
         print(f"machine {j}: MAE {np.mean(np.abs(err[:, j])):.4g}, RMSE {np.sqrt(np.mean(err[:, j] ** 2)):.4g}")

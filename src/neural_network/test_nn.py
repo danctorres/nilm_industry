@@ -54,7 +54,7 @@ size = [sum(np.sum(layer.weights**2) for layer in n.layers if isinstance(layer, 
 assert size[1] < size[0], size
 
 # end to end, averaging two runs: reads the split files and writes one estimate per machine per validation row,
-# with OFF machines at 0
+# with OFF machines at 0 and the ON ones adding up to the total (barely trained, the network alone doesn't)
 with tempfile.TemporaryDirectory() as name:
     d = Path(name) / "HIPE" / "3"
     d.mkdir(parents=True)
@@ -70,6 +70,7 @@ with tempfile.TemporaryDirectory() as name:
     out = pd.read_csv(Path(name) / "plain" / "HIPE" / "3.csv")
     assert list(out.columns) == ["Timestamp", "Aggregate_Active_Power", "Estimate_0", "Estimate_1", "Estimate_2"]
     assert list(out.Timestamp) == list(ts[:10]) and (out.iloc[:, 2:].to_numpy()[s[:10] == 0] == 0).all()
+    assert np.allclose(out.iloc[:, 2:].sum(axis=1), out.Aggregate_Active_Power) and (out.iloc[:, 2:] >= 0).all().all()
     pd.read_csv(d / "states_validation.csv")[::-1].to_csv(d / "states_validation.csv", index=False)
     try:
         main([*argv, "--data-root", name, "--results-root", name])
