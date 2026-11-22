@@ -18,34 +18,37 @@
 * **Total**: all the machines' power together. Called `aggregate` in the files.
 * **State**: on or off, for each machine at each second.
 * **Group**: N machines whose power is added into one total. HIPE has groups of 2 to 10.
-* **Error (MAE)**: the average gap between estimated and metered power, in W.
+* **Error (MAE)**: the average gap between estimated and metered power, in W, over every test second. That includes the seconds a machine is off, where every method is exactly right (it gives 0 W), and the machines are off most of the time.
+* **Error while running**: the same, over only the seconds a machine draws power. Much larger.
 * **NDE**: squared error ÷ squared metered power. 0 is perfect; 1 is as bad as guessing 0 W.
 * **Baselines**: three simple guesses every method should beat:
   * guess 0 W;
   * split the total equally among the running machines;
-  * split it in proportion to each machine's average power.
+  * split it in proportion to each machine's average power, as estimated from the training totals. Where only machines estimated at 0 W are on, they split it equally.
 
 ## Results per group
 
-> **In short:** Gaussian allocation wins on every group. Nothing else beats the proportional split on average.
+> **In short:** Gaussian allocation wins on every group. The neural network (total only) is second, the only other method to beat the proportional split on average.
 
 **Setup:** HIPE · trained on November 2017 · scored on December · settings chosen on October · error in W · seeds: preprocessing 1, neural network 0, polynomial model 1.
 
-| Method | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | Mean |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Gaussian allocation | 4.0 | 3.3 | 2.1 | 9.2 | 7.2 | 6.3 | 6.0 | 5.9 | 13.7 | 6.4 |
-| Gaussian allocation, 1 level per machine | 3.6 | 3.2 | 2.8 | 9.7 | 8.4 | 7.6 | 6.8 | 6.8 | 15.1 | 7.1 |
-| Neural network, total only as input | 7.8 | 10.9 | 11.8 | 21.2 | 16.6 | 18.4 | 18.2 | 18.2 | 44.9 | 18.7 |
-| Neural network, total and states as input | 15.2 | 21.0 | 20.7 | 22.6 | 14.8 | 21.7 | 14.1 | 18.8 | 31.9 | 20.1 |
-| Polynomial model, fitted sample by sample | 72.9 | 60.2 | 48.1 | 58.0 | 47.8 | 43.7 | 38.9 | 34.9 | 47.7 | 50.2 |
-| Polynomial model, fitted to all samples at once | 10.3 | 11.3 | 11.4 | 21.1 | 19.6 | 21.2 | 18.9 | 22.9 | 57.4 | 21.6 |
-| Hart-inspired | 72.7 | 54.9 | 46.5 | 47.7 | 40.2 | 46.4 | 43.2 | 41.2 | 66.5 | 51.0 |
-| Baseline: guess 0 W | 73.2 | 55.3 | 47.4 | 48.4 | 40.7 | 46.6 | 43.4 | 41.3 | 66.7 | 51.4 |
-| Baseline: equal split | 20.6 | 24.8 | 27.5 | 30.9 | 25.9 | 30.4 | 27.3 | 26.1 | 42.1 | 28.4 |
-| Baseline: proportional split | 11.6 | 11.7 | 14.9 | 18.7 | 14.2 | 20.4 | 17.3 | 15.7 | 33.3 | 17.5 |
+| Method | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | Mean | Mean while running |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Gaussian allocation | 4.0 | 3.3 | 2.1 | 9.1 | 7.2 | 6.3 | 6.0 | 5.9 | 13.7 | 6.4 | 104 |
+| Gaussian allocation, 1 level per machine | 3.5 | 3.2 | 2.7 | 9.6 | 8.3 | 7.6 | 6.8 | 6.8 | 14.2 | 7.0 | 114 |
+| Neural network, total only as input | 5.7 | 7.4 | 9.2 | 15.0 | 11.7 | 13.5 | 13.8 | 13.7 | 28.2 | 13.1 | 213 |
+| Neural network, total and states as input | 15.1 | 20.5 | 20.6 | 22.0 | 14.3 | 21.4 | 13.6 | 18.2 | 27.5 | 19.2 | 305 |
+| Polynomial model, fitted sample by sample | 72.9 | 60.2 | 48.1 | 58.0 | 47.8 | 43.7 | 38.9 | 34.9 | 47.7 | 50.2 | 796 |
+| Polynomial model, fitted to all samples at once | 10.3 | 11.3 | 11.4 | 21.1 | 19.6 | 21.2 | 18.9 | 22.9 | 57.4 | 21.6 | 351 |
+| Hart-inspired | 72.6 | 54.5 | 45.9 | 46.5 | 39.1 | 44.4 | 41.3 | 39.4 | 62.4 | 49.6 | 789 |
+| Baseline: guess 0 W | 73.2 | 55.3 | 47.4 | 48.4 | 40.7 | 46.6 | 43.4 | 41.3 | 66.7 | 51.4 | 820 |
+| Baseline: equal split | 20.6 | 24.8 | 27.5 | 30.9 | 25.9 | 30.4 | 27.3 | 26.1 | 42.1 | 28.4 | 454 |
+| Baseline: proportional split | 9.5 | 11.4 | 14.7 | 18.6 | 14.2 | 20.1 | 17.3 | 15.7 | 32.7 | 17.2 | 276 |
 
 * **Gaussian allocation** is best on every group. With 1 level per machine it is slightly better on groups 2 and 3.
-* **Beating the proportional split:** the polynomial model (all at once) on groups 2–4, the neural network (total only) on 2–4 and 7, and with states on 8 and 10. None of them on average.
+* **Beating the proportional split:** the neural network (total only) on every group and on average. With states, on groups 8 and 10. The polynomial model (all at once) on groups 3 and 4.
+* **Hart-inspired** estimates 97–100% of the on-samples, yet is barely better than guessing 0 W.
+* **Mean while running:** the mean over groups of the error over only the seconds a machine draws power. See [Words](#words).
 * **Group 10 is the hardest.** Its extra machine, the ChipPress, runs only in November and December, so October never shows its big loads.
 
 ### Older: the one-week release
@@ -54,7 +57,7 @@
 
 **Setup:**
 * HIPE's one-week release (23 to 30 Oct 2017), with random hours held out for testing.
-* Older method versions: 1 level per machine in Gaussian allocation, and the neural network's original training.
+* Older method versions: 1 level per machine in Gaussian allocation, and the neural network's original training. Also from before the network's and Gaussian allocation's estimates were scaled to add up to the total, Hart-inspired's looser switch-off check, and the proportional split's fix for machines estimated at 0 W.
 * Error in kW, mean ± spread over 3 splits (preprocessing seeds 1, 2 and 3).
 
 | Method | HIPE, 9 | IMDELD, 6 | IMDELD, 8 |
@@ -154,7 +157,7 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
 * **HIPE** is split by month (UTC): October for tuning, November for training, December for the reported scores.
 * **IMDELD** holds out 30% of its days for testing, picked at random with `--seed` (1 by default).
 * **Test rows:** every row of the test month or days.
-* **Training rows:** about 3,000 rows sampled from the rest, up to 490 from each of 6 power ranges, so the peaks are included. For HIPE, `--seed` only changes which rows are drawn.
+* **Training rows:** sampled from the rest, the same number from each of 6 power ranges (at most 490; ranges with 100 rows or fewer are skipped), so the peaks are included. That gives 1,960 rows for every HIPE group and 1,470 for IMDELD group 6. For HIPE, `--seed` only changes which rows are drawn.
 * **No overlap:** rows near a cut between parts are dropped (300 s for HIPE, 750 s for IMDELD), so no reading is in two parts.
 
 ### The tuning copy
@@ -225,13 +228,13 @@ Every Python folder has one, e.g. `uv run src/validation/test_validation.py`. Th
 
 ## How the settings were chosen
 
-> **In short:** everything was chosen on October. The numbers are means over HIPE groups 2 to 10.
+> **In short:** everything but Gaussian allocation's number of levels was chosen on October. The numbers are means over HIPE groups 2 to 10.
 
 ### Gaussian allocation: 3 levels per machine
 
 * **Against 1 level:** error −7 to −32% on groups 4 to 10 in October, and −5 to −24% in December.
 * **Groups 2 and 3:** 1 level stays slightly better.
-* **`--components auto`:** barely better in October (5.98 W against 6.06 W), worse in December (6.67 W against 6.40 W). Not the default.
+* **`--components auto`:** barely better in October (5.98 W against 6.06 W). 3 was kept as the default after also looking at December (6.40 W against 6.67 W for `auto`), so this one choice was not made on October alone.
 
 ### Neural network
 
@@ -249,7 +252,7 @@ Change against before:
 | Total only | −19% | −8% | −13% | −21% |
 | Total and states | −60% | −29% | −76% | −32% |
 
-* **Why weight decay:** with the total as its only input, the network over-fits the ~3,000 training rows. Without decay, its NDE got worse instead of better.
+* **Why weight decay:** with the total as its only input, the network over-fits the 1,960 training rows. Without decay, its NDE got worse instead of better.
 * **Why average the runs:** with the states as input, many different splits of the total fit the training data equally well, so each run picks its own. Averaging evens this out.
   * Before averaging (one-week tests), results moved with the seed. HIPE group 9: 53 ± 5 W with the states, 36 ± 1 W with the total only. IMDELD group 6, total only: 25 ± 6 kW, against 20.5 kW for guessing 0.
   * **So compare the neural network over several seeds.**
@@ -286,7 +289,7 @@ uv run src/validation/corrupt_states.py --dataset hipe --machines N (--lag S | -
 
 ### What happens
 
-Gaussian allocation on the one-week release, mean over groups 2 to 9:
+Gaussian allocation on the one-week release, with 1 level per machine, mean over groups 2 to 9. Not yet re-measured on the October/November/December split or with 3 levels.
 
 | States | Error (W) |
 |---|---|
@@ -295,6 +298,8 @@ Gaussian allocation on the one-week release, mean over groups 2 to 9:
 | 60 s late | 27.5 |
 | 1% flipped | 20.9 |
 | *Proportional split, exact states* | *31.2* |
+
+* **1% flipped** means each one-second reading flipped on its own, so mostly 1 s glitches, not 1% of the switch events missed.
 
 With states 60 s late, it still beats the best baseline given the same late states on 4 of the 8 groups.
 

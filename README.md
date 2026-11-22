@@ -1,7 +1,7 @@
 # Power per machine from one factory meter
 
 > **In short:** give it a factory's total power and which machines are on. It tells you how much power each machine uses.
-> Best method: **Gaussian allocation**, off by **6.4 W** per machine on average (a simple split is off by 17.5 W).
+> Best method: **Gaussian allocation**, off by **6.4 W** per machine on average, or 104 W while the machine runs (a simple split: 17.2 W, or 276 W while running).
 
 ## What it does
 
@@ -44,7 +44,7 @@ The neural network and the polynomial model come from my [MSc dissertation](docs
 
 ## Results
 
-**Gaussian allocation wins on every test. Nothing else beats the simple proportional split on average.**
+**Gaussian allocation wins on every test. The neural network comes second, the only other method to beat the simple proportional split.**
 
 ![Metered and estimated power of four HIPE machines over six hours of 5 December 2017. The estimate closely follows the vacuum pump, the screen printer and the high-temperature oven's heating cycles. Around 09:30, while both ovens run, part of the soldering oven's power goes to the high-temperature oven.](docs/allocation_example.png)
 
@@ -55,21 +55,24 @@ The neural network and the polynomial model come from my [MSc dissertation](docs
 * **Test:** add the machine meters into a total, let each method split it back, and compare with the real meters. Repeated for nine groups of 2 to 10 machines.
 * **Fair:** tuned on October 2017, trained on November, scored on December, a month no method saw beforehand.
 
-| Method | Average error per machine (W) |
-|---|---|
-| **Gaussian allocation** | **6.4** |
-| Simple split: in proportion to each machine's average power | 17.5 |
-| Neural network | 18.7 |
-| Polynomial model | 21.6 |
-| Simple split: equally among the running machines | 28.4 |
-| Hart-inspired | 51.0 |
-| Guess 0 W (= the machines' average power) | 51.4 |
+| Method | Average error per machine (W) | While it runs (W) |
+|---|---|---|
+| **Gaussian allocation** | **6.4** | **104** |
+| Neural network | 13.1 | 213 |
+| Simple split: in proportion to each machine's average power | 17.2 | 276 |
+| Polynomial model | 21.6 | 351 |
+| Simple split: equally among the running machines | 28.4 | 454 |
+| Hart-inspired | 49.6 | 789 |
+| Guess 0 W (= the machines' average power) | 51.4 | 820 |
+
+* **Average error** counts every second of December. The machines are off most of the time, and there every method is exactly right (0 W), so this number is small.
+* **While it runs** counts only the seconds a machine draws power.
 
 On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation), no method clearly beats guessing 0 W. Its machines almost always switch on and off together, so their power can't be told apart.
 
 ## Limits
 
-* **It needs to know when each machine is on.** A 10 s delay barely matters. A 60 s delay, or 1% of the signals wrong, doubles the error or worse.
+* **It needs to know when each machine is on.** On the older one-week data: a 10 s delay barely mattered. A 60 s delay, or 1% of the one-second on/off readings flipped, doubled the error or worse.
 * **Machines that always run together can't be told apart.**
 
 ## More
