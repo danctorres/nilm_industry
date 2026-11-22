@@ -6,7 +6,7 @@ from pathlib import Path
 import hipe
 import numpy as np
 import pandas as pd
-from common import TIME_FORMAT, matlab_round
+from common import TIME_FORMAT
 from hipe import main, process, read_machine
 
 T0 = pd.Timestamp("2017-10-23")
@@ -47,11 +47,11 @@ def write_raw(folder):
     t = random_times(3, 7200, True)
     t[-20] = t[-21] - 1
     machines[4] = t, random_power(len(t)), True
-    # machine 5: 5e-05 kW from 8 to 11 s, on grid points (8 s after a sample of another value): the
-    # interpolation must return it exactly, and MATLAB rounds it to 1e-04 where numpy's round gives 0
+    # machine 5: 4e-05 kW from 8 to 11 s, on grid points (8 s after a sample of another value): the
+    # interpolation must return it exactly, and rounding to 4 decimals makes it 0, so the machine is OFF there
     t = np.concatenate([random_times(3, 7.5, False), [8, 9, 10, 11], random_times(11.5, 7150, False)])
     p = random_power(len(t))
-    p[np.isin(t, [8, 9, 10, 11])] = 5e-05
+    p[np.isin(t, [8, 9, 10, 11])] = 4e-05
     machines[5] = t, p, False
     for k in [2, 6, 7, 8, 9, 10]:
         whole = k in (2, 7, 9)
@@ -108,7 +108,7 @@ with tempfile.TemporaryDirectory() as name:
         assert list(read[f].columns) == cols, f
 
     # 1 s grid from start_time (machine 1, 0 s) to end_time (machine 1, 7300 s) in UTC, without the rows strictly
-    # inside machine 6's gap, written as MATLAB displays it
+    # inside machine 6's gap, written in TIME_FORMAT
     eq, st = process(tmp / "raw" / "Equipment")
     assert eq.timestamp.iloc[0] == pd.Timestamp("2017-10-22 22:00:00")
     t6, grid = machines[6][0], np.arange(7301)
@@ -126,10 +126,10 @@ with tempfile.TemporaryDirectory() as name:
     assert equipment.Eq3_P_kW.iloc[-1] == -146.75  # 2.5 - 0.5 * (7300 - 7001.5)
     assert list(states.Eq3_State[:6]) == [0, 0, 0, 1, 1, 1]
 
-    # MATLAB rounding to 4 decimals, states are power > 0 on the rounded values
-    assert list(equipment.Eq5_P_kW[8:12]) == [1e-04] * 4 and list(states.Eq5_State[8:12]) == [1] * 4
+    # rounding to 4 decimals, states are power > 0 on the rounded values
+    assert list(equipment.Eq5_P_kW[8:12]) == [0.0] * 4 and list(states.Eq5_State[8:12]) == [0] * 4
     values = equipment[eq_cols].to_numpy()
-    assert np.array_equal(matlab_round(values, 4), values)
+    assert np.array_equal(np.round(values, 4), values)
     assert np.array_equal(states[st_cols].to_numpy(), (values > 0).astype(int))
     assert np.allclose(aggregate.active_power, values.sum(axis=1), rtol=0, atol=1e-9)
 

@@ -1,14 +1,12 @@
-"""Helpers shared by hipe.py and imdeld.py. Each one reproduces the MATLAB function named in its docstring, edge
-behaviour included, so the processed data match those used in the dissertation."""
+"""Helpers shared by hipe.py and imdeld.py."""
 
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.interpolate import CubicSpline
 
 REPO = Path(__file__).resolve().parents[2]
-TIME_FORMAT = "%d-%b-%Y %H:%M:%S"  # MATLAB's default datetime display, used in every processed file
+TIME_FORMAT = "%d-%b-%Y %H:%M:%S"  # "01-Dec-2017 00:05:00", used in every processed file
 VALIDATION_SHARE = 0.3  # share of the time blocks held out for validation
 TRAINING_PER_BIN = 490  # training rows drawn from every aggregate bin, as floor(700 * 0.7) before the block split
 _CLOCK = np.array([f"{s // 3600:02d}:{s // 60 % 60:02d}:{s % 60:02d}" for s in range(86400)])
@@ -22,25 +20,8 @@ def read_equipment_csv(folder: Path, usecols: list[str] | None = None) -> list[p
     return [pd.read_csv(f, usecols=usecols) for f in files]
 
 
-def movmean(x, k: int) -> np.ndarray:
-    """MATLAB movmean(x, k) of data without NaN: mean over k samples centred on each one (k // 2 before,
-    k - k // 2 - 1 after), the window shrinking at both ends."""
-    return pd.Series(x, dtype=float).rolling(k, center=True, min_periods=1).mean().to_numpy()
-
-
-def spline(x, y, xq) -> np.ndarray:
-    """MATLAB spline(x, y, xq): not-a-knot cubic spline, extrapolating beyond the data."""
-    return CubicSpline(np.asarray(x, dtype=float), np.asarray(y, dtype=float))(np.asarray(xq, dtype=float))
-
-
-def matlab_round(x, decimals: int = 0):
-    """MATLAB round: halves go away from zero (numpy rounds them to even)."""
-    scale = 10.0**decimals
-    return np.sign(x) * np.floor(np.abs(x) * scale + 0.5) / scale
-
-
 def seconds(t: pd.Series) -> np.ndarray:
-    """Seconds since 1970 of naive timestamps, as MATLAB posixtime."""
+    """Seconds since 1970 of naive timestamps."""
     return (pd.to_datetime(t) - pd.Timestamp(0)).dt.total_seconds().to_numpy()
 
 
@@ -65,7 +46,7 @@ def draw_training(candidates: np.ndarray, agg, rng: np.random.Generator) -> np.n
     open-ended (the dissertation's stopped at 3 standard deviations), so training sees the peaks that validation scores.
     Returns the rows shuffled."""
     a = np.asarray(agg, dtype=float)[candidates]
-    edges = a.mean() + np.arange(-2, 3) * a.std(ddof=1)  # inner edges; MATLAB std divides by n - 1
+    edges = a.mean() + np.arange(-2, 3) * a.std(ddof=1)  # inner edges, from the sample standard deviation
     bin_of = np.searchsorted(edges, a, side="right")  # [a, b) bins, the first and last open-ended
     counts = np.bincount(bin_of, minlength=len(edges) + 1)
     bins = np.flatnonzero(counts > 100)
@@ -85,7 +66,7 @@ def time_strings(t) -> np.ndarray:
 
 
 def write_csv(df: pd.DataFrame, path: Path) -> None:
-    """Write like MATLAB writetable: no index, timestamps in TIME_FORMAT, 15 significant digits, NaN as "NaN"."""
+    """Write without an index, timestamps in TIME_FORMAT, 15 significant digits, NaN as "NaN"."""
     path.parent.mkdir(parents=True, exist_ok=True)
     times = {c: time_strings(df[c]) for c in df.columns if pd.api.types.is_datetime64_any_dtype(df[c])}
     df.assign(**times).to_csv(path, index=False, float_format="%.15g", na_rep="NaN")

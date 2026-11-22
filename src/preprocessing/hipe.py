@@ -13,11 +13,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from common import REPO, draw_training, matlab_round, read_equipment_csv, write_csv
+from common import REPO, draw_training, read_equipment_csv, write_csv
 
 # Methodology choices: the ON threshold is the dissertation's, the split is not (it held out random hours of one week)
-# a machine is ON when its power is > 0 kW, after clipping negatives, linear resampling to 1 s,
-# spline synchronisation and rounding to 4 decimals
+# a machine is ON when its power is > 0 kW, after clipping negatives, linear resampling to 1 s and rounding to
+# 4 decimals (0.1 W)
 ON_THRESHOLD_KW = 0
 # UTC: before TUNING_END tunes, from there to REPORT_START trains, after it reports
 TUNING_END, REPORT_START = np.datetime64("2017-11-01"), np.datetime64("2017-12-01")
@@ -62,7 +62,7 @@ def process(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     eq, st = pd.DataFrame({"timestamp": grid}), pd.DataFrame({"timestamp": grid})
     for k in [*range(2, len(machines) + 1), 1]:  # columns keep the original equipment numbers
         t, p = machines[k - 1]
-        eq[f"Eq{k}_P_kW"] = matlab_round(interp1_extrap(x, (t - start) / SECOND, p), 4)
+        eq[f"Eq{k}_P_kW"] = np.round(interp1_extrap(x, (t - start) / SECOND, p), 4) + 0.0  # + 0.0: -0.0 becomes 0.0
         st[f"Eq{k}_State"] = (eq[f"Eq{k}_P_kW"] > ON_THRESHOLD_KW).astype(np.uint8)
     keep = np.ones(len(grid), dtype=bool)
     for t, _ in machines:

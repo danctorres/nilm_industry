@@ -107,7 +107,7 @@ def check_hand_computed(raw: Path, equipment: pd.DataFrame, t: np.ndarray, machi
     assert np.isclose(smoothed[j], y[j - 750 : j + 1].mean())
     missing = np.setdiff1d(t, x)
     assert missing[0] == t[0]
-    interpolated = make_interp_spline(x, smoothed)  # not-a-knot cubic, as MATLAB spline
+    interpolated = make_interp_spline(x, smoothed)  # not-a-knot cubic, as the preprocessing
     for m in [missing[0], missing[len(missing) // 2]]:  # second 0 (extrapolated) and one inside
         assert np.isclose(equipment.active_power_1[t == m].item(), max(interpolated(m), 0), rtol=1e-9)
 

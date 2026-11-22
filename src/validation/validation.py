@@ -36,7 +36,7 @@ def metrics(true_vals, est_vals, w_to_kw: bool) -> pd.DataFrame:
     if w_to_kw:
         t, e = t / 1000, e / 1000
     sq = ((e - t) ** 2).sum(axis=0)
-    with np.errstate(divide="ignore", invalid="ignore"):  # a machine that is never on gives inf or nan, as in MATLAB
+    with np.errstate(divide="ignore", invalid="ignore"):  # a machine that is never on gives inf or nan
         return pd.DataFrame(
             {
                 "MAE": np.abs(e - t).mean(axis=0),

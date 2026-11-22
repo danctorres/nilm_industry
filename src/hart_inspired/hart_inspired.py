@@ -27,8 +27,7 @@ def events(states: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 def estimate(states: np.ndarray, agg: np.ndarray, sample, machine, change) -> np.ndarray:
     """For each ON event whose next event of the same machine is OFF, if the other machines' states are equal at the ON
     and OFF samples and at the OFF sample and the one before it, the machine gets |agg[OFF] - agg[OFF - 1]| from the ON
-    sample to the OFF sample, both included. Elsewhere 0 when OFF and NaN when ON. The last event is never visited, as
-    in the dissertation's version."""
+    sample to the OFF sample, both included. Elsewhere 0 when OFF and NaN when ON."""
     est = np.where(states == 1, np.nan, 0.0)
     for i in range(len(sample) - 1):
         if change[i] != 1:

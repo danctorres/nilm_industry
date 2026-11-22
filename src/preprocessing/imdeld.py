@@ -6,11 +6,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from common import REPO, matlab_round, movmean, seconds, spline, split_train_validation, write_csv
+from common import REPO, seconds, split_train_validation, write_csv
+from scipy.interpolate import CubicSpline
 
 # Methodology choices (values as used in the dissertation)
 ON_THRESHOLD_W = 5  # a machine is ON when its active power is > 5 W, one flat threshold for every machine
-# movmean window in samples (1 s each, so 25 minutes) applied to machine and LVDB signals before spline interpolation
+# moving-average window in samples (1 s each, so 25 minutes), applied to machine and LVDB signals before the spline
 SMOOTHING_WINDOW = 1500
 BLOCK_S = 86400  # validation holds out whole days
 GAP_S = SMOOTHING_WINDOW // 2  # left out at every day edge: no smoothing window spans both sides
@@ -59,21 +60,23 @@ def smooth_and_fill(x: np.ndarray, y: np.ndarray, xq: np.ndarray) -> np.ndarray:
     there is a sample, spline elsewhere, negatives set to 0. The smoothing restarts after every gap longer than its
     window, so it never mixes days weeks apart."""
     gaps = np.flatnonzero(np.diff(x) > SMOOTHING_WINDOW) + 1
-    y = np.concatenate([movmean(part, SMOOTHING_WINDOW) for part in np.split(y, gaps)])
+    y = np.concatenate(
+        [pd.Series(part).rolling(SMOOTHING_WINDOW, center=True, min_periods=1).mean() for part in np.split(y, gaps)]
+    )
     present = np.isin(xq, x)
     out = np.empty(len(xq))
     out[present] = y
-    out[~present] = spline(x, y, xq[~present])
+    out[~present] = CubicSpline(x, y)(xq[~present])  # not-a-knot, extrapolating
     out[out < 0] = 0
     return out
 
 
 def interpolate_equipment_data(t: np.ndarray, power: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Drop the days whose MATLAB-rounded daily medians average under 10 W over the machines, then give every machine a
-    value at every second of the kept days. The smoothing runs over the kept samples of consecutive kept days in a row,
-    so its window crosses midnight."""
+    """Drop the days whose daily medians average under 10 W over the machines, then give every machine a value at every
+    second of the kept days. The smoothing runs over the kept samples of consecutive kept days in a row, so its window
+    crosses midnight."""
     day = np.floor(t / 86400)
-    medians = matlab_round(pd.DataFrame(power).groupby(day).median())
+    medians = pd.DataFrame(power).groupby(day).median()
     days = medians.index[medians.mean(axis=1) >= 10].to_numpy()
     keep = np.isin(day, days)
     t, power = t[keep], power[keep]

@@ -140,7 +140,7 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
 
 ### On or off
 
-* **HIPE:** on when the power is above 0 after spline fitting.
+* **HIPE:** on when the power is above 0, after resampling to one value per second and rounding to 0.1 W.
 * **IMDELD:** on when the power is above 5 W.
 
 ### Cleaning
