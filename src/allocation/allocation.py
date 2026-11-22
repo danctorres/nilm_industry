@@ -2,7 +2,8 @@
 heating, say), independently of the others, and the aggregate is the sum over the ON machines. The components are
 fitted by EM from the aggregate and the on/off states alone, and each machine's estimate is its posterior mean given the
 aggregate, so the estimates of the ON machines add up to it. --components 1 is a single Gaussian per machine, the method
-as first added. Trains on the training split, the same rows as the other methods.
+as first added; --components auto picks each machine's own number by BIC. Trains on the training split, the same rows as
+the other methods.
 
 Example: python3 src/allocation/allocation.py --dataset hipe --machines 9
 """
@@ -56,9 +57,9 @@ def assignments(on: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray)
     """Every way to draw each ON machine from one of its components. Returns the ON machines (m,), the one-hot
     components (C, m, k), the component means and variances (C, m), and per assignment the variance of the sum and the
     log prior (C,)."""
-    # ponytail: k ** m assignments, fine up to about 8 machines ON at once; prune or sample them beyond that
+    # ponytail: the product of the ON machines' components, fine up to about 3 ** 8; prune or sample them beyond that
     idx = np.flatnonzero(on)
-    z = np.array(list(itertools.product(range(mu.shape[1]), repeat=len(idx))))
+    z = np.array(list(itertools.product(*(range(np.count_nonzero(pi[i])) for i in idx))))
     mj, vj = mu[idx, z], var[idx, z]
     return (
         idx,
@@ -71,36 +72,47 @@ def assignments(on: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray)
 
 
 def conditional(a: np.ndarray, mj, vj, v, lp) -> tuple[np.ndarray, np.ndarray]:
-    """For rows of one pattern with aggregate a (r,): the posterior weight of every assignment (r, C) and each ON
-    machine's mean given the assignment (r, C, m)."""
+    """For rows of one pattern with aggregate a (r,): the posterior weight of every assignment (r, C), each ON
+    machine's mean given the assignment (r, C, m), and the log-likelihood of each row's aggregate (r,)."""
     r = a[:, None] - mj.sum(axis=1)
-    ll = lp - 0.5 * np.log(v) - 0.5 * r**2 / v
-    w = np.exp(ll - ll.max(axis=1, keepdims=True))
-    return w / w.sum(axis=1, keepdims=True), mj + vj * (r / v)[:, :, None]
+    ll = lp - 0.5 * np.log(2 * np.pi * v) - 0.5 * r**2 / v
+    top = ll.max(axis=1, keepdims=True)
+    w = np.exp(ll - top)
+    total = w.sum(axis=1, keepdims=True)
+    return w / total, mj + vj * (r / v)[:, :, None], (top + np.log(total))[:, 0]
 
 
-def fit_mixture(a: np.ndarray, s: np.ndarray, k: int, iters: int = 300) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """EM for k components per machine: means, variances and weights, (n, k) each. Starts from the single Gaussian of
-    `fit`, the components spread from one sd below its mean to one above; k = 1 is `fit`."""
-    mu1, var1 = fit(a, s)
-    if k == 1:
-        return mu1[:, None], var1[:, None], np.ones((len(mu1), 1))
-    mu = np.maximum(mu1[:, None] + np.sqrt(var1)[:, None] * np.linspace(-1, 1, k), 0.0)
-    var = np.repeat(np.maximum(var1 / k**2, FLOOR)[:, None], k, axis=1)
-    pi = np.full(mu.shape, 1 / k)
+def fit_mixture(
+    a: np.ndarray, s: np.ndarray, k=1, iters: int = 300, start=None
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """EM for k components per machine, an int or one per machine: means, variances and weights, (n, max k) each, the
+    components a machine does not use at weight 0. Starts from `start`, a fit to refine, or else from the single
+    Gaussian of `fit`, each machine's components spread from one sd below its mean to one above; k = 1 is `fit`."""
+    if start is None:
+        mu1, var1 = fit(a, s)
+        k = np.broadcast_to(k, mu1.shape)
+        if (k == 1).all():
+            return mu1[:, None], var1[:, None], np.ones((len(mu1), 1))
+        offset = np.where(k[:, None] > 1, 2 * np.arange(k.max()) / np.maximum(k[:, None] - 1, 1) - 1, 0.0)
+        pi = (np.arange(k.max()) < k[:, None]) / k[:, None]
+        mu = np.where(pi > 0, np.maximum(mu1[:, None] + np.sqrt(var1)[:, None] * offset, 0.0), 0.0)
+        var = np.repeat(np.maximum(var1 / k**2, FLOOR)[:, None], k.max(), axis=1)
+    else:
+        mu, var, pi = start
+    used = pi > 0
     groups = patterns(s)
     for _ in range(iters):
         weight, first, second = np.zeros(mu.shape), np.zeros(mu.shape), np.zeros(mu.shape)
         for on, rows in groups:
             idx, onehot, mj, vj, v, lp = assignments(on, mu, var, pi)
-            w, mean = conditional(a[rows], mj, vj, v, lp)
+            w, mean, _ = conditional(a[rows], mj, vj, v, lp)
             weight[idx] += np.einsum("rc,cmk->mk", w, onehot)
             first[idx] += np.einsum("rc,rcm,cmk->mk", w, mean, onehot)
             second[idx] += np.einsum("rc,rcm,cmk->mk", w, mean**2 + vj - vj**2 / v[:, None], onehot)
         seen = weight > 0  # a machine never ON keeps its start
         new_mu = np.where(seen, np.maximum(first / np.where(seen, weight, 1), 0.0), mu)
         var = np.where(seen, np.maximum(second / np.where(seen, weight, 1) - new_mu**2, FLOOR), var)
-        pi = np.maximum(weight / np.maximum(weight.sum(axis=1, keepdims=True), 1e-300), 1e-6)
+        pi = np.where(used, np.maximum(weight / np.maximum(weight.sum(axis=1, keepdims=True), 1e-300), 1e-6), 0.0)
         pi /= pi.sum(axis=1, keepdims=True)
         converged = np.abs(new_mu - mu).max() < 1e-9
         mu = new_mu
@@ -109,13 +121,49 @@ def fit_mixture(a: np.ndarray, s: np.ndarray, k: int, iters: int = 300) -> tuple
     return mu, var, pi
 
 
+def loglik(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray) -> float:
+    """Log-likelihood of the aggregate a (T,) given the 0/1 states s (T, n), over the rows with a machine ON."""
+    return sum(conditional(a[rows], *assignments(on, mu, var, pi)[2:])[2].sum() for on, rows in patterns(s))
+
+
+def split(fitted, j: int):
+    """The fit with machine j's widest component split in two, half a sd either side of its mean, keeping its weight
+    and variance: a start for one more component."""
+    mu, var, pi = (np.pad(x, ((0, 0), (0, 1))) for x in fitted)
+    c, new = np.argmax(np.where(pi[j] > 0, var[j], -1.0)), np.count_nonzero(pi[j])
+    sd = np.sqrt(var[j, c])
+    mu[j, [c, new]] = np.maximum(mu[j, c] + [-sd / 2, sd / 2], 0.0)
+    var[j, [c, new]] = 0.75 * var[j, c]
+    pi[j, [c, new]] = pi[j, c] / 2
+    return mu, var, pi
+
+
+def select(a: np.ndarray, s: np.ndarray, most: int = 5, screen: int = 50):
+    """Components per machine by BIC: splits a component of the machine where that lowers it most, until none does or
+    every machine has `most`. Each try runs `screen` EM iterations from the current fit; the chosen one is then run to
+    convergence. Returns the components (n,) and the fit."""
+    penalty = 3 * np.log(s.any(axis=1).sum())  # a mean, a variance and a weight per component
+
+    def score(fitted):
+        return -2 * loglik(a, s, *fitted) + penalty * np.count_nonzero(fitted[2]), fitted
+
+    best = score(fit_mixture(a, s))
+    while grow := np.flatnonzero((np.count_nonzero(best[1][2], axis=1) < most) & s.any(axis=0)).tolist():
+        trial = min((score(fit_mixture(a, s, start=split(best[1], j), iters=screen)) for j in grow), key=lambda x: x[0])
+        if trial[0] >= best[0]:
+            break
+        best = trial
+    fitted = fit_mixture(a, s, start=best[1])
+    return np.count_nonzero(fitted[2], axis=1), fitted
+
+
 def estimate(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray) -> np.ndarray:
     """Posterior mean of every machine's power given the aggregate a (T,) and the 0/1 states s (T, n); 0 when OFF."""
     est = np.zeros(s.shape)
     for on, rows in patterns(s):
         idx, _, mj, vj, v, lp = assignments(on, mu, var, pi)
         for chunk in np.array_split(rows, -(-len(rows) * mj.size // CHUNK)):
-            w, mean = conditional(a[chunk], mj, vj, v, lp)
+            w, mean, _ = conditional(a[chunk], mj, vj, v, lp)
             est[np.ix_(chunk, idx)] = np.einsum("rc,rcm->rm", w, mean)
     return est
 
@@ -131,11 +179,16 @@ def main(argv=None) -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--dataset", choices=["hipe", "imdeld"], required=True)
     p.add_argument("--machines", type=int, required=True)
-    p.add_argument("--components", type=int, default=3, help="Gaussian components per machine, chosen on October")
+    p.add_argument(
+        "--components",
+        type=lambda x: x if x == "auto" else int(x),
+        default=3,
+        help="Gaussian components per machine, chosen on October, or auto: each machine's own by BIC, up to 5",
+    )
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
     p.add_argument("--results-root", type=Path, default=REPO / "results" / "allocation")
     a = p.parse_args(argv)
-    if a.components < 1:
+    if a.components != "auto" and a.components < 1:
         p.error("--components must be at least 1")
     d = a.data_root / a.dataset.upper() / str(a.machines)
 
@@ -152,11 +205,15 @@ def main(argv=None) -> None:
 
     if pairs := collinear(states):
         print(f"warning: machine pairs {pairs} switch on and off together, so how their power splits is a guess")
-    mu, var, pi = fit_mixture(power / scale, states, a.components)
+    if a.components == "auto":
+        mu, var, pi = select(power / scale, states)[1]
+    else:
+        mu, var, pi = fit_mixture(power / scale, states, a.components)
     for j in range(a.machines):
         parts = (
             f"{w:.0%} at {m * scale:.4g} (sd {np.sqrt(v) * scale:.4g})"
             for m, v, w in zip(mu[j], var[j], pi[j], strict=True)
+            if w > 0
         )
         print(f"machine {j} while ON: {', '.join(parts)}")
     est = np.maximum(estimate(val.iloc[:, 1].to_numpy() / scale, val_states, mu, var, pi), 0.0) * scale
