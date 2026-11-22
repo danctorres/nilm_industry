@@ -264,6 +264,11 @@ Change against before:
 * **Tuning the polynomial model's optimisers:** the defaults did as well.
 * **Smoothing Gaussian allocation's estimates over time:** only 6% better, not worth the code.
 * **Tracking each machine's power level over time:** worse. Neighbouring seconds don't reveal a machine's level any better than the second itself; they just make wrong guesses more confident.
+* **Penalising the variance of each machine's estimate in the neural network:** worse. Meant to favour the split where each machine's power stays steady, as Gaussian allocation does. Tested in October:
+  * **Group 9, total and states:** 25.2 W without it, 34.5 to 57.7 W with weights 0.001 to 1. **Total only:** 28.1 W without, 29.3 to 35.7 W with.
+  * **Group 3, total and states:** 12.7 W without, 11.3 W at weight 0.001, no change at 0.01.
+  * **Why:** every machine's variance counts the same, so the ovens' swings land on steady machines. One whose power barely varies went from 6.7 to 23 W.
+  * Weighting each machine by its own variance would just rebuild Gaussian allocation.
 
 ## Why the states must be given
 
