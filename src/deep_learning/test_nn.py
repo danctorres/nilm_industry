@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from main import build, inputs, main
-from nn import loss, loss_d
+from nn import ConnectedLayer, loss, loss_d, pick, stack
 
 rng = np.random.default_rng(0)
 
@@ -33,6 +33,16 @@ print(f"loss {net.train(x, t, s, 500):.2e}")
 gap = np.abs(np.sum(net.estimate(x) * s, axis=1, keepdims=True) - t).max()
 assert gap < 0.02, gap
 print(f"largest |sum of estimates - aggregate| = {gap:.4f}")
+
+# Networks trained stacked end with the same weights and losses as trained one by one.
+alone = [build("state", 3, np.random.default_rng(r)) for r in (1, 2)]
+alone_losses = [n.train(x, t, s, 2) for n in alone]
+stacked = stack([build("state", 3, np.random.default_rng(r)) for r in (1, 2)])
+assert np.allclose(stacked.train(x, t, s, 2), alone_losses, rtol=1e-12, atol=0)
+for run, n in enumerate(alone):
+    for a, b in zip(pick(stacked, run).layers, n.layers, strict=True):
+        if isinstance(a, ConnectedLayer):
+            assert np.array_equal(a.weights, b.weights) and np.array_equal(a.bias, b.bias), run
 
 # end to end: reads the split files, writes one estimate per machine for every validation row, OFF machines 0
 with tempfile.TemporaryDirectory() as name:

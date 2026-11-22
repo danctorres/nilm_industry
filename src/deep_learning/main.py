@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from nn import NN, ActivationLayer, ConnectedLayer, relu, relu_d, tanh_d
+from nn import NN, ActivationLayer, ConnectedLayer, pick, relu, relu_d, stack, tanh_d
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -77,13 +77,11 @@ def main(argv=None) -> None:
     x_tr, x_val = inputs(a.mode, (agg_tr - lo) / (hi - lo), st_tr), inputs(a.mode, (agg_val - lo) / (hi - lo), st_val)
 
     rng = np.random.default_rng(a.seed)
-    best, best_loss = None, np.inf
-    for run in range(a.runs):
-        net = build(a.mode, a.machines, rng)
-        run_loss = net.train(x_tr, agg_tr / hi, st_tr, a.epochs)
+    net = stack([build(a.mode, a.machines, rng) for _ in range(a.runs)])
+    losses = net.train(x_tr, agg_tr / hi, st_tr, a.epochs)
+    for run, run_loss in enumerate(losses):
         print(f"run {run}: mean epoch loss {run_loss:.6g}")
-        if best is None or run_loss < best_loss:
-            best, best_loss = net, run_loss
+    best = pick(net, int(np.nanargmin(losses)))
 
     est = best.estimate(x_val) * st_val * hi + 0.0  # OFF machines are zero (+ 0.0 turns -0.0 into 0.0)
     err = est - eq_val
