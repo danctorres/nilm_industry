@@ -1,4 +1,4 @@
-"""HIPE preprocessing, port of src/preprocessing/HIPE/main.m: turns the raw HIPE one-week machine files into
+"""HIPE preprocessing, port of src/preprocessing/HIPE/main.m: turns the raw HIPE machine files into
 data/processed/HIPE/<N>, N the number of machines summed into the aggregate.
 
 Example: python3 src/preprocessing/hipe.py [--raw DIR] [--out DIR] [--seed 1]
@@ -16,7 +16,9 @@ from common import REPO, matlab_round, read_equipment_csv, seconds, split_train_
 # spline synchronisation and rounding to 4 decimals
 ON_THRESHOLD_KW = 0
 BLOCK_S = 3600  # validation holds out whole hours
-GAP_S = 300  # left out at every block edge, longer than the largest gap between raw samples (178 s)
+# left out at every block edge; rows inside a longer gap between two raw samples of a machine are dropped, so every
+# kept row is interpolated from samples at most GAP_S apart (the others are at most 219 s)
+GAP_S = 300
 
 SECOND = np.timedelta64(1, "s")
 
@@ -46,20 +48,26 @@ def interp1_extrap(x: np.ndarray, xp: np.ndarray, fp: np.ndarray) -> np.ndarray:
 
 def process(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     """main.m up to 'Save data before splitting': equipment power (timestamp, Eq<k>_P_kW) and states
-    (timestamp, Eq<k>_State) of machines 2..M on start_time:seconds(1):end_time, the span of every machine, machine 1
-    included. retime(..., 'linear') uses its default EndValues 'extrap', so outside its own time range a machine is
-    linearly extrapolated. Every machine is on the same grid, so synchronize(..., 'union', 'spline') only puts them
-    side by side."""
+    (timestamp, Eq<k>_State) on start_time:seconds(1):end_time, the span of every machine. retime(..., 'linear') uses
+    its default EndValues 'extrap', so outside its own time range a machine is linearly extrapolated. Every machine is
+    on the same grid, so synchronize(..., 'union', 'spline') only puts them side by side. Machines 2..M come first and
+    machine 1 last: main.m dropped it as always OFF, which holds for the one-week release only, so the first N
+    machines are the same as there. Rows inside a gap of more than GAP_S between two samples of any machine are
+    dropped from every machine, as interpolation would invent them."""
     machines = [read_machine(df) for df in read_equipment_csv(folder, ["SensorDateTime", "P_kW"])]
     start, end = min(t[0] for t, _ in machines), max(t[-1] for t, _ in machines)
     grid = start + np.arange((end - start) // SECOND + 1) * SECOND
     x = (grid - start) / SECOND
     eq, st = pd.DataFrame({"timestamp": grid}), pd.DataFrame({"timestamp": grid})
-    for k in range(2, len(machines) + 1):  # machine 1 is always OFF; columns keep the original equipment numbers
+    for k in [*range(2, len(machines) + 1), 1]:  # columns keep the original equipment numbers
         t, p = machines[k - 1]
         eq[f"Eq{k}_P_kW"] = matlab_round(interp1_extrap(x, (t - start) / SECOND, p), 4)
         st[f"Eq{k}_State"] = (eq[f"Eq{k}_P_kW"] > ON_THRESHOLD_KW).astype(np.uint8)
-    return eq, st
+    keep = np.ones(len(grid), dtype=bool)
+    for t, _ in machines:
+        for i in np.flatnonzero(np.diff(t) > GAP_S * SECOND):
+            keep[np.searchsorted(grid, t[i], "right") : np.searchsorted(grid, t[i + 1], "left")] = False
+    return eq[keep].reset_index(drop=True), st[keep].reset_index(drop=True)
 
 
 def main(argv=None):

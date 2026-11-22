@@ -53,12 +53,12 @@ Neither dataset is redistributed here. Obtain the raw data under each dataset's 
   * "Pelletizer SubCircuit", the aggregate meter: save it as `data/raw/IMDELD/pelletizer-subcircuit.csv`;
   * "Milling Machines SubCircuit", only for the 8-machine set: save it as `data/raw/IMDELD/millingmachine-subcircuit.csv`.
 * HIPE, High-resolution Industrial Production Energy dataset (Bischof et al.), KIT: https://www.energystatusdata.kit.edu/hipe.php
-  `uv run src/preprocessing/fetch_hipe.py` downloads the one-week release (109 MB, checksum verified) and unpacks its ten machine files into `data/raw/HIPE/Equipment` (`SensorDateTime`, `P_kW`, ...); the first one alphabetically is always off and is dropped.
+  `uv run src/preprocessing/fetch_hipe.py` downloads the three-month release, 1 Oct 2017 to 1 Jan 2018, from [Zenodo](https://doi.org/10.5281/zenodo.14054902) (1.33 GB, 30.6 GB unpacked, checksum verified) and unpacks its ten machine files into `data/raw/HIPE/Equipment` (`SensorDateTime`, `P_kW`, ...) and the main meter, `MainTerminal`, into `data/raw/HIPE`.
 
 Processed layout, the same for both datasets: `data/processed/<DATASET>/<N>/{aggregate,states,equipment}{,_training,_validation}.csv`, N the number of machines; the files without a suffix are the unsplit tables.
 Every file starts with a `timestamp` column; the aggregate's power column is `active_power`, then one column per machine. HIPE is in kW, IMDELD in W.
 * IMDELD: N = 6 is machines 1, 2, 3, 4, 7 and 8 in alphabetical file order, N = 8 all of them.
-* HIPE: N = 2..9 is the first N machines, the aggregate their synthetic sum.
+* HIPE: N = 2..9 is machines 2 to N + 1 in alphabetical file order, and N = 10 adds machine 1, the ChipPress, which runs in November and December only (always off in the dissertation's one-week release, hence last). The aggregate is the synthetic sum of the N machines.
 
 
 Reproduce
@@ -79,10 +79,11 @@ The preprocessing, baseline and validation were ported from MATLAB; the MATLAB v
 Methodology notes
 ------
 * IMDELD signals are smoothed with a 25-minute moving mean that restarts after gaps between kept days; HIPE is not smoothed.
-* HIPE timestamps are in UTC, so the week runs on through the end of summer time on 29 Oct 2017.
+* HIPE timestamps are in UTC, so the recording runs on through the end of summer time on 29 Oct 2017. Rows inside a gap of more than 300 s between two raw samples of any machine are dropped from every machine and set: 8.5 min in every machine on 10 Nov 2017 and 21 h in the VacuumOven on 14 and 15 Dec.
 * The HIPE training/validation aggregate is the synthetic sum of the selected machines, not the main meter.
 * On/off thresholds: flat 5 W for IMDELD; > 0 after spline fitting for HIPE.
-* The train/validation split holds out whole blocks of time, 30% of them drawn with a fixed seed: hours for HIPE (one week only, idle at the weekend), days for IMDELD. Validation scores every row of its blocks; training draws the same number of rows (at most 490) from each aggregate bin of the other blocks, six bins of one standard deviation, the outer two open-ended so training includes the peaks. Rows near a block edge are left out (300 s for HIPE, longer than its largest gap between raw samples; 750 s for IMDELD, half the smoothing window), so the two sides share no raw samples.
+* The train/validation split holds out whole blocks of time, 30% of them drawn with a fixed seed: hours for HIPE, days for IMDELD. Validation scores every row of its blocks; training draws the same number of rows (at most 490) from each aggregate bin of the other blocks, six bins of one standard deviation, the outer two open-ended so training includes the peaks. Rows near a block edge are left out (300 s for HIPE, the longest gap between raw samples it keeps; 750 s for IMDELD, half the smoothing window), so the two sides share no raw samples.
+* The numbers in the notes below and in the table were measured on the one-week HIPE release (23 to 30 Oct 2017), before `fetch_hipe.py` moved to the three-month one.
 * UNN with `--mode state` is not identifiable: with the states as input, any split of the aggregate among the ON machines minimises its loss, so its estimates change with the seed. On HIPE/9, seeds 0 to 2 give MAE 0.053 ± 0.005 kW in state mode and 0.036 ± 0.001 kW in plain mode. On IMDELD/6 both modes change with the seed (plain: 25 ± 6 kW, against 20.5 kW for the zero baseline), so report UNN over several seeds.
 * EMUPF fitted sample by sample solves one equation in `4 x machines` unknowns per sample and averages the solutions (see [src/optimization/README.md](src/optimization/README.md#limitation-of-the-method)); `estimate --joint` fits one well-posed objective and is the version to compare.
 * On IMDELD the machines switch on and off together (state correlations 0.93 to 1.00), and 96% of the samples have every machine ON or every machine OFF, so no method that relies on the states can tell their power apart, and grouping the machines that switch together leaves one group; compare against the baselines before reading anything into the IMDELD numbers.

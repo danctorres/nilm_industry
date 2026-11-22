@@ -1,5 +1,6 @@
-"""Downloads the HIPE one-week release (KIT, CC BY 4.0, https://www.energystatusdata.kit.edu/hipe.php) and unpacks
-its machine files into data/raw/HIPE/Equipment, leaving out the MainTerminal (the main meter, not a machine).
+"""Downloads the HIPE three-month release (KIT, CC BY 4.0, https://www.energystatusdata.kit.edu/hipe.php, archived at
+https://doi.org/10.5281/zenodo.14054902) and unpacks its machine files into data/raw/HIPE/Equipment and its
+MainTerminal, the main meter, into data/raw/HIPE.
 
 Example: python3 src/preprocessing/fetch_hipe.py [--raw DIR]
 """
@@ -13,21 +14,19 @@ from pathlib import Path
 
 from common import REPO
 
-URL = (
-    "https://bwsyncandshare.kit.edu/s/JacGftzBH85dgGK/download?path=%2F"
-    "&files=hipe_cleaned_v1.0.1_geq_2017-10-23_lt_2017-10-30.zip"
-)
-SHA256 = "a04344f7edf0593d9c35db68e606babfd77d28522ec0dc37ee081516836bbe2b"
+ARCHIVE = "hipe_cleaned_v1.0.1_geq_2017-10-01_lt_2018-01-01.zip"
+URL = f"https://zenodo.org/api/records/14054902/files/{ARCHIVE}/content"
+SHA256 = "37ef3e733ff3de2fb13525421d9524b1e9d81c88ac0e0c22497634a964384716"
 
 
 def main(argv=None) -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--raw", type=Path, default=REPO / "data" / "raw" / "HIPE")
     a = p.parse_args(argv)
-    archive = a.raw / "hipe_cleaned_v1.0.1_geq_2017-10-23_lt_2017-10-30.zip"
+    archive = a.raw / ARCHIVE
 
     if not archive.exists():
-        print(f"downloading {archive.name} (109 MB)")
+        print(f"downloading {archive.name} (1.33 GB)")
         a.raw.mkdir(parents=True, exist_ok=True)
         part = archive.with_suffix(".part")
         with urllib.request.urlopen(URL) as response, part.open("wb") as f:
@@ -38,10 +37,16 @@ def main(argv=None) -> None:
             raise SystemExit(f"{archive} is not the expected release; delete it and run again")
 
     with zipfile.ZipFile(archive) as z:
-        machines = [n for n in z.namelist() if n.endswith(".csv") and not n.startswith("MainTerminal")]
+        files = [n for n in z.namelist() if n.endswith(".csv")]
+        machines = [n for n in files if not n.startswith("MainTerminal")]
+        # hipe.py reads every file in Equipment: files of another release would be taken for more machines
+        if stale := {f.name for f in (a.raw / "Equipment").glob("*.csv")} - set(machines):
+            raise SystemExit(f"{a.raw / 'Equipment'} holds files of another release, remove them: {sorted(stale)}")
+        print(f"unpacking {len(files)} files (30.6 GB)")
         for name in machines:
             z.extract(name, a.raw / "Equipment")
-    print(f"{len(machines)} machine files in {a.raw / 'Equipment'}")
+        z.extractall(a.raw, set(files) - set(machines))
+    print(f"{len(machines)} machine files in {a.raw / 'Equipment'}, the MainTerminal in {a.raw}")
 
 
 if __name__ == "__main__":
