@@ -28,8 +28,7 @@ def events(states: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 def estimate(states: np.ndarray, agg: np.ndarray, sample, machine, change) -> np.ndarray:
     """Power estimates, one column per machine: 0 when OFF and NaN (no estimate) when ON, except below.
     An ON event whose machine's next event is OFF gets |agg[OFF] - agg[OFF - 1]| on every sample it is ON: from the ON
-    sample up to, not including, the OFF sample. Only if the other machines are in the same states at ON as at OFF,
-    and at OFF - 1 as at OFF."""
+    sample up to, not including, the OFF sample. Only if no other machine switches at the OFF sample."""
     est = np.where(states == 1, np.nan, 0.0)
     for i in range(len(sample) - 1):
         if change[i] != 1:
@@ -40,9 +39,7 @@ def estimate(states: np.ndarray, agg: np.ndarray, sample, machine, change) -> np
             continue
         on, off = sample[i], sample[i + 1 + later[0]]
         others = np.arange(states.shape[1]) != m
-        if np.array_equal(states[on, others], states[off, others]) and np.array_equal(
-            states[off - 1, others], states[off, others]
-        ):
+        if np.array_equal(states[off - 1, others], states[off, others]):
             est[on:off, m] = abs(agg[off] - agg[off - 1])
     return est
 
