@@ -88,7 +88,7 @@ def main(argv=None) -> None:
     for run, run_loss in enumerate(losses):
         print(f"run {run}: mean epoch loss {run_loss:.6g}")
     # averaging keeps the sum constraint and, with the states as input, evens out which split of the aggregate a run
-    # settles on (see the README); a run whose loss blew up is left out
+    # settles on (see docs/notes.md); a run whose loss blew up is left out
     ok = np.isfinite(losses)
     if not ok.any():
         raise SystemExit("every run diverged")
