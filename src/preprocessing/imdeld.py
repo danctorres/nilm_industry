@@ -39,12 +39,15 @@ def find_common_timestamps(means: list[pd.Series]) -> np.ndarray:
 
 
 def find_useful_timestamps(t: np.ndarray) -> np.ndarray:
-    """Keep the days with more than 86400 - 7200 common samples (under 2 h missing) and no gap of 5 s or more."""
+    """Keep the days with more than 86400 - 7200 common samples (under 2 h missing) and no gap of 5 s or more,
+    counting from midnight to the first sample and from the last to midnight: the spline would invent those."""
     day = np.floor(t / 86400)
     s = pd.Series(t)
     count = s.groupby(day).size()
     max_diff = s.groupby(day).diff().groupby(day).max()  # NaN (day dropped) when a day has a single sample
-    useful = count.index[(count > 86400 - 7200) & (max_diff < 5)]
+    late_start = s.groupby(day).min() - count.index * 86400
+    early_end = (count.index + 1) * 86400 - 1 - s.groupby(day).max()
+    useful = count.index[(count > 86400 - 7200) & (max_diff < 5) & (late_start < 5) & (early_end < 5)]
     return t[np.isin(day, useful)]
 
 

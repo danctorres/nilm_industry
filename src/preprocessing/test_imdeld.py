@@ -168,6 +168,12 @@ def main() -> None:
         assert np.allclose(pd.read_csv(eight / "aggregate.csv").active_power - a6.active_power, lvdb3)
 
         check_hand_computed(raw, equipment, t, machines)
+
+    # a day whose recording stops or starts 30 min late is dropped, like one with a 30 min hole inside
+    day = np.arange(86400.0)
+    assert imdeld.find_useful_timestamps(day).size == 86400
+    for cut in (day[:-1800], day[1800:], np.r_[day[:40000], day[41800:]]):
+        assert imdeld.find_useful_timestamps(cut).size == 0
     print("ok")
 
 
