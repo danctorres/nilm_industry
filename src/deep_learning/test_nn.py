@@ -3,6 +3,7 @@
 import tempfile
 from pathlib import Path
 
+import nn
 import numpy as np
 import pandas as pd
 from main import build, inputs, main
@@ -28,17 +29,17 @@ s = rng.integers(0, 2, (40, 3)).astype(float)
 t = s @ np.array([[0.2], [0.3], [0.4]])
 x = inputs("state", t / t.max(), s)
 net = build("state", 3, rng)
-net.learning_rate = 0.01
-print(f"loss {net.train(x, t, s, 500):.2e}")
+print(f"loss {net.train(x, t, s, 500, rng):.2e}")
 gap = np.abs(np.sum(net.estimate(x) * s, axis=1, keepdims=True) - t).max()
 assert gap < 0.02, gap
 print(f"largest |sum of estimates - aggregate| = {gap:.4f}")
 
-# Networks trained stacked end with the same weights and losses as trained one by one.
+# Networks trained stacked, on the same batches, end with the same weights and losses as trained one by one.
+nn.BATCH = 16  # several batches per epoch
 alone = [build("state", 3, np.random.default_rng(r)) for r in (1, 2)]
-alone_losses = [n.train(x, t, s, 2) for n in alone]
+alone_losses = [n.train(x, t, s, 2, np.random.default_rng(0)) for n in alone]
 stacked = stack([build("state", 3, np.random.default_rng(r)) for r in (1, 2)])
-assert np.allclose(stacked.train(x, t, s, 2), alone_losses, rtol=1e-12, atol=0)
+assert np.allclose(stacked.train(x, t, s, 2, np.random.default_rng(0)), alone_losses, rtol=1e-12, atol=0)
 for run, n in enumerate(alone):
     for a, b in zip(pick(stacked, run).layers, n.layers, strict=True):
         if isinstance(a, ConnectedLayer):

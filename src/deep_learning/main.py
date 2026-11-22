@@ -12,6 +12,7 @@ import pandas as pd
 from nn import NN, ActivationLayer, ConnectedLayer, pick, relu, relu_d, stack, tanh_d
 
 REPO = Path(__file__).resolve().parents[2]
+HIDDEN = 64  # units in the hidden layer, chosen on October: 16 and 128 score about the same, two layers of 32 worse
 
 
 def load(root: Path, dataset: str, n: int, split: str):
@@ -33,12 +34,12 @@ def inputs(mode: str, x: np.ndarray, states: np.ndarray) -> np.ndarray:
 
 
 def build(mode: str, n: int, rng: np.random.Generator) -> NN:
-    n_in, hidden = {"plain": (1, n + 1), "state": (1 + n, n + 2)}[mode]
+    n_in = {"plain": 1, "state": 1 + n}[mode]
     return NN(
         [
-            ConnectedLayer(n_in, hidden, rng),
+            ConnectedLayer(n_in, HIDDEN, rng),
             ActivationLayer(relu, relu_d),
-            ConnectedLayer(hidden, n, rng),
+            ConnectedLayer(HIDDEN, n, rng),
             ActivationLayer(np.tanh, tanh_d),
         ]
     )
@@ -60,7 +61,7 @@ def main(argv=None) -> None:
     p.add_argument(
         "--runs", type=int, default=5, help="networks trained from different initial weights, the lowest loss wins"
     )
-    p.add_argument("--epochs", type=int, default=1000)
+    p.add_argument("--epochs", type=int, default=2000)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
     p.add_argument("--results-root", type=Path, default=REPO / "results" / "deep_learning")
@@ -78,7 +79,7 @@ def main(argv=None) -> None:
 
     rng = np.random.default_rng(a.seed)
     net = stack([build(a.mode, a.machines, rng) for _ in range(a.runs)])
-    losses = net.train(x_tr, agg_tr / hi, st_tr, a.epochs)
+    losses = net.train(x_tr, agg_tr / hi, st_tr, a.epochs, rng)
     for run, run_loss in enumerate(losses):
         print(f"run {run}: mean epoch loss {run_loss:.6g}")
     best = pick(net, int(np.nanargmin(losses)))
