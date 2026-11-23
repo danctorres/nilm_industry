@@ -24,7 +24,7 @@ from scipy.optimize import nnls
 
 REPO = Path(__file__).resolve().parents[2]
 FLOOR = 1e-6  # minimum variance (total scaled to [0, 1]): keeps the posterior defined when only steady machines run
-CHUNK = 2_000_000  # cap on rows x assignments x machines that `estimate` holds at once
+CHUNK = 2_000_000  # cap on rows x assignments that `conditional` gets at once
 
 
 def posterior(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -79,17 +79,22 @@ def assignments(on: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray)
     )
 
 
-def conditional(a: np.ndarray, mj, vj, v, lp) -> tuple[np.ndarray, np.ndarray]:
+def conditional(a: np.ndarray, mj, v, lp) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """For the rows of one pattern, with total a (r,), return:
     - each assignment's posterior weight (r, C)
-    - each ON machine's mean under each assignment (r, C, m)
+    - q (r, C): ON machine j's mean under an assignment is mj + vj * q, kept apart so no (r, C, m) array is built
     - the log-likelihood of each row's total (r,)"""
     r = a[:, None] - mj.sum(axis=1)
     ll = lp - 0.5 * np.log(2 * np.pi * v) - 0.5 * r**2 / v
     top = ll.max(axis=1, keepdims=True)
     w = np.exp(ll - top)
     total = w.sum(axis=1, keepdims=True)
-    return w / total, mj + vj * (r / v)[:, :, None], (top + np.log(total))[:, 0]
+    return w / total, r / v, (top + np.log(total))[:, 0]
+
+
+def chunks(rows: np.ndarray, c: int) -> list[np.ndarray]:
+    """rows in pieces of at most CHUNK // c, c being the number of assignments."""
+    return np.array_split(rows, -(-len(rows) * c // CHUNK))
 
 
 def fit_mixture(
@@ -117,10 +122,16 @@ def fit_mixture(
         weight, first, second = np.zeros(mu.shape), np.zeros(mu.shape), np.zeros(mu.shape)
         for on, rows in groups:
             idx, onehot, mj, vj, v, lp = assignments(on, mu, var, pi)
-            w, mean, _ = conditional(a[rows], mj, vj, v, lp)
-            weight[idx] += np.einsum("rc,cmk->mk", w, onehot)
-            first[idx] += np.einsum("rc,rcm,cmk->mk", w, mean, onehot)
-            second[idx] += np.einsum("rc,rcm,cmk->mk", w, mean**2 + vj - vj**2 / v[:, None], onehot)
+            s0 = s1 = s2 = 0.0  # per assignment, over the rows: sums of w, w * q and w * q ** 2
+            for chunk in chunks(rows, len(lp)):
+                w, q, _ = conditional(a[chunk], mj, v, lp)
+                s0, s1, s2 = s0 + w.sum(axis=0), s1 + (w * q).sum(axis=0), s2 + (w * q**2).sum(axis=0)
+            s0, s1, s2 = s0[:, None], s1[:, None], s2[:, None]
+            # sums of w * mean and w * (mean ** 2 + its variance), with mean = mj + vj * q
+            weight[idx] += np.einsum("c,cmk->mk", s0[:, 0], onehot)
+            first[idx] += np.einsum("cm,cmk->mk", mj * s0 + vj * s1, onehot)
+            moment = mj**2 * s0 + 2 * mj * vj * s1 + vj**2 * s2 + (vj - vj**2 / v[:, None]) * s0
+            second[idx] += np.einsum("cm,cmk->mk", moment, onehot)
         seen = weight > 0  # zero weight (unused, or machine never ON): keep the start
         new_mu = np.where(seen, np.maximum(first / np.where(seen, weight, 1), 0.0), mu)
         var = np.where(seen, np.maximum(second / np.where(seen, weight, 1) - new_mu**2, FLOOR), var)
@@ -136,7 +147,11 @@ def fit_mixture(
 
 def loglik(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray) -> float:
     """Log-likelihood of the total a (T,) given the 0/1 states s (T, n), over the rows with a machine ON."""
-    return sum(conditional(a[rows], *assignments(on, mu, var, pi)[2:])[2].sum() for on, rows in patterns(s))
+    total = 0.0
+    for on, rows in patterns(s):
+        mj, _, v, lp = assignments(on, mu, var, pi)[2:]
+        total += sum(conditional(a[chunk], mj, v, lp)[2].sum() for chunk in chunks(rows, len(lp)))
+    return total
 
 
 def split(fitted, j: int):
@@ -178,9 +193,9 @@ def estimate(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: 
     est = np.zeros(s.shape)
     for on, rows in patterns(s):
         idx, _, mj, vj, v, lp = assignments(on, mu, var, pi)
-        for chunk in np.array_split(rows, -(-len(rows) * mj.size // CHUNK)):
-            w, mean, _ = conditional(a[chunk], mj, vj, v, lp)
-            est[np.ix_(chunk, idx)] = np.einsum("rc,rcm->rm", w, mean)
+        for chunk in chunks(rows, len(lp)):
+            w, q, _ = conditional(a[chunk], mj, v, lp)
+            est[np.ix_(chunk, idx)] = w @ mj + (w * q) @ vj
     return est
 
 
