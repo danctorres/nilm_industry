@@ -67,7 +67,7 @@ def main(argv=None) -> None:
     p.add_argument(
         "--runs", type=int, default=5, help="networks trained from different initial weights, their estimates averaged"
     )
-    p.add_argument("--epochs", type=int, default=2000)
+    p.add_argument("--epochs", type=int, default=200)  # passes over the training rows, tuned on October
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
     p.add_argument("--results-root", type=Path, default=REPO / "results" / "neural_network")

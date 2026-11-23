@@ -6,7 +6,7 @@ from pathlib import Path
 import imdeld
 import numpy as np
 import pandas as pd
-from common import TIME_FORMAT, read_equipment_csv, seconds, split_train_validation, time_strings
+from common import TIME_FORMAT, TRAINING_ROWS, read_equipment_csv, seconds, split_train_validation, time_strings
 from scipy.interpolate import make_interp_spline
 
 FILES = [
@@ -67,7 +67,7 @@ def check_split(out: Path) -> None:
     """Check the split in out.
     - The three tables have the same rows.
     - Test: whole days minus each day's first and last 750 s.
-    - Training: at least 1500 s from test; the same count from every bin over 100 rows of the other days."""
+    - Training: at least 1500 s from test; TRAINING_ROWS of the other days' rows, minus their edges."""
     tables = {}
     for split in ["training", "validation"]:
         tables[split] = [pd.read_csv(out / f"{name}_{split}.csv") for name in ["aggregate", "states", "equipment"]]
@@ -78,15 +78,9 @@ def check_split(out: Path) -> None:
     i = np.clip(np.searchsorted(t_val, t_tr), 1, len(t_val) - 1)
     assert np.minimum(np.abs(t_tr - t_val[i - 1]), np.abs(t_tr - t_val[i])).min() >= 1500
 
-    agg = pd.read_csv(out / "aggregate.csv")
-    t = seconds(pd.to_datetime(agg.timestamp, format=TIME_FORMAT))
-    a = agg.active_power[~np.isin(t // 86400, days) & (t % 86400 >= 750) & (t % 86400 < 86400 - 750)]
-    edges = a.mean() + np.arange(-2, 3) * a.std(ddof=1)  # the outer bins are open-ended
-    counts, per_bin = (
-        np.bincount(np.searchsorted(edges, x, side="right"), minlength=6)
-        for x in (a, tables["training"][0].active_power)
-    )
-    assert list(per_bin) == [min(490, counts[counts > 100].min()) * (c > 100) for c in counts]
+    t = seconds(pd.to_datetime(pd.read_csv(out / "aggregate.csv").timestamp, format=TIME_FORMAT))
+    others = t[~np.isin(t // 86400, days) & (t % 86400 >= 750) & (t % 86400 < 86400 - 750)]
+    assert len(t_tr) == len(np.unique(t_tr)) == min(TRAINING_ROWS, len(others)) and np.isin(t_tr, others).all()
 
 
 def check_hand_computed(raw: Path, equipment: pd.DataFrame, t: np.ndarray, machines: list[int]) -> None:
@@ -153,10 +147,10 @@ def main() -> None:
         assert (pd.read_csv(six / "aggregate_training.csv").active_power >= 0).all()
         assert np.array_equal(on_off.iloc[:, 1:].to_numpy(), (equipment.iloc[:, 1:].to_numpy() > 5).astype(int))
 
-        # split: whole days, edges left out, same count per bin, rows in the order a fresh default_rng(seed) draws
+        # split: whole days, edges left out, training rows in the order a fresh default_rng(seed) draws
         check_split(six)
         check_split(eight)
-        training = split_train_validation(seconds(when), a6.active_power, 86400, 750, np.random.default_rng(1))[0]
+        training = split_train_validation(seconds(when), 86400, 750, np.random.default_rng(1))[0]
         drawn = a6.timestamp.iloc[training].reset_index(drop=True)
         assert pd.read_csv(six / "aggregate_training.csv").timestamp.equals(drawn)
 

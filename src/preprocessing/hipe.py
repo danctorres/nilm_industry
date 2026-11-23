@@ -103,7 +103,7 @@ def main(argv=None):
             "equipment": eq.iloc[:, : n + 1],
             "states": st.iloc[:, : n + 1],
         }
-        training = draw_training(pool, tables["aggregate"].active_power, rng)
+        training = draw_training(pool, rng)
         for name, df in tables.items():
             write_csv(df, out / f"{name}.csv")
             write_csv(df.iloc[training], out / f"{name}_training.csv")

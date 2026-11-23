@@ -112,10 +112,10 @@ def calculate_aggregate(raw: Path, t: np.ndarray, selected: list[int]) -> np.nda
 def save_final_data(
     aggregate: pd.DataFrame, on_off: pd.DataFrame, equipment: pd.DataFrame, rng: np.random.Generator, out: Path
 ) -> None:
-    """Split the rows by whole days (bins from the total) and write to out: full tables, training rows (shuffled)
+    """Split the rows by whole days and write to out: full tables, training rows (shuffled)
     and test rows (in time order)."""
     t = seconds(aggregate.timestamp)
-    training, validation = split_train_validation(t, aggregate.active_power, BLOCK_S, GAP_S, rng)
+    training, validation = split_train_validation(t, BLOCK_S, GAP_S, rng)
     write_csv(aggregate, out / "aggregate.csv")
     write_csv(on_off, out / "states.csv")
     write_csv(equipment, out / "equipment.csv")

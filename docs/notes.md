@@ -157,7 +157,7 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
 * **HIPE** is split by month (UTC): October for tuning, November for training, December for the reported scores.
 * **IMDELD** holds out 30% of its days for testing, picked at random with `--seed` (1 by default).
 * **Test rows:** every row of the test month or days.
-* **Training rows:** sampled from the rest, the same number from each of 6 power ranges (at most 490; ranges with 100 rows or fewer are skipped), so the peaks are included. That gives 1,960 rows for every HIPE group and 1,470 for IMDELD group 6. For HIPE, `--seed` only changes which rows are drawn.
+* **Training rows:** 19,600 drawn at random from the rest, for every group. For HIPE, `--seed` only changes which rows are drawn.
 * **No overlap:** rows near a cut between parts are dropped (300 s for HIPE, 750 s for IMDELD), so no reading is in two parts.
 
 ### The tuning copy
@@ -230,6 +230,22 @@ Every Python folder has one, e.g. `uv run src/validation/test_validation.py`. Th
 
 > **In short:** everything but Gaussian allocation's number of levels was chosen on October. The numbers are means over HIPE groups 2 to 10.
 
+### Training rows: 19,600, drawn at random
+
+October error (W) of the methods that learn from the training rows. A range is two network seeds (per-range rows) or two draws (random rows). The network always takes the same number of steps: 2000 epochs on 1,960 rows, 200 on 19,600.
+
+| Training rows | Gaussian allocation | Network, total only | Network, total and states | Proportional split |
+|---|---|---|---|---|
+| 490 from each of 4 power ranges (before) | 6.05 | 14.6 | 18.2 | 23.0 |
+| 4,900 from each of 4 power ranges | 6.02 | 14.1 | 15.4–16.2 | 22.5 |
+| 1,960 at random | 6.21 | 14.8 | 18.5 | 21.3 |
+| **19,600 at random** | 6.08–6.14 | 13.3–13.6 | 12.5–13.1 | 19.5–19.6 |
+
+* **Why at random:** the per-range draw gave the rare peaks as many rows as the common low totals, but most test seconds are low totals. It takes both more rows and the random draw for the network to gain.
+* **Gaussian allocation** barely changes either way.
+* **Where the error is left:** in seconds where several of the big ovens run together, which the total alone can't split. On group 10, December seconds whose on/off combination is not among the 1,960 earlier training rows (17%) carried 12 of allocation's 14 W and 22 of the network's 28 W. Many of those combinations never occur in November, so no number of November rows covers them.
+* **Other settings** were chosen with the earlier 1,960 rows, unless noted.
+
 ### Gaussian allocation: 3 levels per machine
 
 * **Against 1 level:** error −7 to −32% on groups 4 to 10 in October, and −5 to −24% in December.
@@ -240,19 +256,19 @@ Every Python folder has one, e.g. `uv run src/validation/test_validation.py`. Th
 
 | Setting | Now | Before |
 |---|---|---|
-| Training | Adam, batches of 64 rows, learning rate 0.01 → 0 over 2000 epochs | plain gradient descent, one row at a time |
+| Training | Adam, batches of 64 rows, learning rate 0.01 → 0 over 200 epochs | plain gradient descent, one row at a time |
 | Hidden units | 64 | N + 1 |
 | Weight decay | 0.1 (total only), 0.01 (with states) | none |
 | Runs | average of 5 | the one with the lowest training loss |
 
-Change against before:
+Change against before, measured with the earlier 1,960 training rows and 2000 epochs:
 
 | Input | October error | December error | October NDE | December NDE |
 |---|---|---|---|---|
 | Total only | −19% | −8% | −13% | −21% |
 | Total and states | −60% | −29% | −76% | −32% |
 
-* **Why weight decay:** with the total as its only input, the network over-fits the 1,960 training rows. Without decay, its NDE got worse instead of better.
+* **Why weight decay:** with the total as its only input, the network over-fitted the earlier 1,960 training rows. Without decay, its NDE got worse instead of better. With 19,600 rows, 10 times less decay was still worse.
 * **Why average the runs:** with the states as input, many different splits of the total fit the training data equally well, so each run picks its own. Averaging evens this out.
   * Before averaging (one-week tests), results moved with the seed. HIPE group 9: 53 ± 5 W with the states, 36 ± 1 W with the total only. IMDELD group 6, total only: 25 ± 6 kW, against 20.5 kW for guessing 0.
   * **So compare the neural network over several seeds.**
