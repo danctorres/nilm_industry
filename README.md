@@ -44,7 +44,7 @@ The neural network and the polynomial model come from my [MSc dissertation](docs
 
 ## Results
 
-**Gaussian allocation wins on every test. The neural network comes second, the only other method to beat the simple proportional split.**
+**Gaussian allocation wins on every HIPE group. The neural network comes second, the only other method to beat the simple proportional split.**
 
 ![Metered and estimated power of four HIPE machines over six hours of 5 December 2017. The estimate closely follows the vacuum pump, the screen printer and the high-temperature oven's heating cycles. Around 09:30, while both ovens run, part of the soldering oven's power goes to the high-temperature oven.](docs/allocation_example.png)
 
@@ -68,7 +68,7 @@ The neural network and the polynomial model come from my [MSc dissertation](docs
 * **Average error** counts every second of December. The machines are off most of the time, and there every method is exactly right (0 W), so this number is small.
 * **While it runs** counts only the seconds a machine draws power.
 
-On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation), no method clearly beats guessing 0 W. Its machines almost always switch on and off together, so their power can't be told apart.
+On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation), no method does much better than a simple guess, and Gaussian allocation does worse. Its machines almost always switch on and off together, so their power can't be told apart.
 
 ## Limits
 

@@ -51,6 +51,32 @@
 * **Mean while running:** the mean over groups of the error over only the seconds a machine draws power. See [Words](#words).
 * **Group 10 is the hardest.** Its extra machine, the ChipPress, runs only in November and December, so October never shows its big loads.
 
+### IMDELD
+
+> **In short:** nothing does much better than a simple guess. Gaussian allocation does much worse.
+
+**Setup:** IMDELD · 30% of its days held out for testing, picked at random · 3 splits (preprocessing seeds 1, 2 and 3) · error in kW, mean over the splits (lowest–highest).
+
+| Method | 6 machines | 8 machines |
+|---|---|---|
+| Gaussian allocation | 33.8 (31.6–35.5) | 29.0 (26.9–31.4) |
+| Neural network, total only as input | 19.9 (19.4–20.4) | 20.1 (15.7–22.6) |
+| Neural network, total and states as input | 21.7 (21.0–22.7) | 17.0 (16.2–18.3) |
+| Polynomial model, fitted sample by sample | 24.2 (23.3–25.1) | 19.2 (19.0–19.4) |
+| Polynomial model, fitted to all samples at once | 17.5 (14.5–22.3) | 20.9 (18.8–23.9) |
+| Hart-inspired | 20.1 (19.4–20.8) | 20.4 (20.0–20.8) |
+| Baseline: guess 0 W | 20.1 (19.4–20.8) | 20.4 (20.0–20.9) |
+| Baseline: equal split | 24.3 (23.5–25.1) | 19.0 (18.8–19.3) |
+| Baseline: proportional split | 38.9 (37.4–40.3) | 32.4 (31.6–33.9) |
+
+* **Against the best baseline** (guess 0 W on 6 machines, the equal split on 8), split by split:
+  * the network with states, on 8 machines, wins all 3: by 3%, 15% and 14%;
+  * the network with the total only, on 6 machines, wins all 3, by 2% or less;
+  * the polynomial model (all at once), on 6 machines, wins 2 by 21–26% and loses the third by 7%.
+* **Gaussian allocation** is 30–70% worse than guessing 0 W, and the proportional split worse still. Both learn each machine's power from the total, which can't work when the machines switch together. [Why.](#why-imdeld-cannot-be-split)
+* **One split can mislead:** the network with the total only scores 15.7 kW on 8 machines with split 1, and 22–23 kW with the other two.
+* **Hart-inspired** gives an estimate for 45–84% of the on-samples, yet is no better than guessing 0 W.
+
 ### Older: the one-week release
 
 > **In short:** the same picture on HIPE. On IMDELD, nothing reliably beats guessing 0 W.
