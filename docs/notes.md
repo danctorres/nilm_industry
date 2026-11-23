@@ -28,25 +28,25 @@
 
 ## Results per group
 
-> **In short:** Gaussian allocation wins on every group. The neural network (total only) is second, the only other method to beat the proportional split on average.
+> **In short:** Gaussian allocation wins on every group. The neural network is second, the only other method to beat the proportional split on average.
 
 **Setup:** HIPE · trained on November 2017 · scored on December · settings chosen on October · error in W · seeds: preprocessing 1, neural network 0, polynomial model 1.
 
 | Method | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | Mean | Mean while running |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| Gaussian allocation | 4.0 | 3.3 | 2.1 | 9.1 | 7.2 | 6.3 | 6.0 | 5.9 | 13.7 | 6.4 | 104 |
-| Gaussian allocation, 1 level per machine | 3.5 | 3.2 | 2.7 | 9.6 | 8.3 | 7.6 | 6.8 | 6.8 | 14.2 | 7.0 | 114 |
-| Neural network, total only as input | 5.7 | 7.4 | 9.2 | 15.0 | 11.7 | 13.5 | 13.8 | 13.7 | 28.2 | 13.1 | 213 |
-| Neural network, total and states as input | 15.1 | 20.5 | 20.6 | 22.0 | 14.3 | 21.4 | 13.6 | 18.2 | 27.5 | 19.2 | 305 |
-| Polynomial model, fitted sample by sample | 72.9 | 60.2 | 48.1 | 58.0 | 47.8 | 43.7 | 38.9 | 34.9 | 47.7 | 50.2 | 796 |
-| Polynomial model, fitted to all samples at once | 10.3 | 11.3 | 11.4 | 21.1 | 19.6 | 21.2 | 18.9 | 22.9 | 57.4 | 21.6 | 351 |
+| Gaussian allocation | 2.7 | 2.8 | 2.2 | 8.7 | 7.4 | 6.5 | 6.0 | 5.9 | 13.4 | 6.2 | 101 |
+| Gaussian allocation, 1 level per machine | 3.6 | 3.7 | 2.9 | 9.7 | 8.2 | 7.5 | 6.7 | 6.5 | 14.5 | 7.0 | 115 |
+| Neural network, total only as input | 5.1 | 6.7 | 5.1 | 13.8 | 11.2 | 12.3 | 11.6 | 12.4 | 24.2 | 11.4 | 185 |
+| Neural network, total and states as input | 12.8 | 12.4 | 19.7 | 17.7 | 12.5 | 13.3 | 11.8 | 10.0 | 23.2 | 14.8 | 234 |
+| Polynomial model, fitted sample by sample | 68.7 | 47.5 | 37.6 | 42.3 | 37.9 | 37.8 | 32.1 | 30.8 | 51.8 | 42.9 | 684 |
+| Polynomial model, fitted to all samples at once | 8.8 | 10.2 | 11.5 | 19.3 | 17.6 | 20.2 | 18.2 | 20.0 | 45.1 | 19.0 | 309 |
 | Hart-inspired | 72.6 | 54.5 | 45.9 | 46.5 | 39.1 | 44.4 | 41.3 | 39.4 | 62.4 | 49.6 | 789 |
 | Baseline: guess 0 W | 73.2 | 55.3 | 47.4 | 48.4 | 40.7 | 46.6 | 43.4 | 41.3 | 66.7 | 51.4 | 820 |
 | Baseline: equal split | 20.6 | 24.8 | 27.5 | 30.9 | 25.9 | 30.4 | 27.3 | 26.1 | 42.1 | 28.4 | 454 |
-| Baseline: proportional split | 9.5 | 11.4 | 14.7 | 18.6 | 14.2 | 20.1 | 17.3 | 15.7 | 32.7 | 17.2 | 276 |
+| Baseline: proportional split | 8.3 | 9.5 | 14.1 | 18.3 | 15.8 | 19.6 | 18.2 | 17.8 | 30.5 | 16.9 | 273 |
 
-* **Gaussian allocation** is best on every group. With 1 level per machine it is slightly better on groups 2 and 3.
-* **Beating the proportional split:** the neural network (total only) on every group and on average. With states, on groups 8 and 10. The polynomial model (all at once) on groups 3 and 4.
+* **Gaussian allocation** is best on every group, and 3 levels per machine beat 1 on every group.
+* **Beating the proportional split:** the neural network (total only) on every group and on average. With states, on groups 5 to 10 and on average. The polynomial model (all at once) on group 4, and on group 8 by 0.03 W.
 * **Hart-inspired** estimates 97–100% of the on-samples, yet is barely better than guessing 0 W.
 * **Mean while running:** the mean over groups of the error over only the seconds a machine draws power. See [Words](#words).
 * **Group 10 is the hardest.** Its extra machine, the ChipPress, runs only in November and December, so October never shows its big loads.
@@ -244,13 +244,13 @@ October error (W) of the methods that learn from the training rows. A range is t
 * **Why at random:** the per-range draw gave the rare peaks as many rows as the common low totals, but most test seconds are low totals. It takes both more rows and the random draw for the network to gain.
 * **Gaussian allocation** barely changes either way.
 * **Where the error is left:** in seconds where several of the big ovens run together, which the total alone can't split. On group 10, December seconds whose on/off combination is not among the 1,960 earlier training rows (17%) carried 12 of allocation's 14 W and 22 of the network's 28 W. Many of those combinations never occur in November, so no number of November rows covers them.
+* **December agrees** (mean over groups, W): Gaussian allocation 6.4 → 6.2, network 13.1 → 11.4 (total only) and 19.2 → 14.8 (with states), polynomial model (all at once) 21.6 → 19.0, proportional split 17.2 → 16.9. With states, the network is better than total only in October but not in December.
 * **Other settings** were chosen with the earlier 1,960 rows, unless noted.
 
 ### Gaussian allocation: 3 levels per machine
 
-* **Against 1 level:** error −7 to −32% on groups 4 to 10 in October, and −5 to −24% in December.
-* **Groups 2 and 3:** 1 level stays slightly better.
-* **`--components auto`:** barely better in October (5.98 W against 6.06 W). 3 was kept as the default after also looking at December (6.39 W against 6.65 W for `auto`), so this one choice was not made on October alone.
+* **Against 1 level:** error −11 to −57% on every group in October, and −7 to −27% in December.
+* **`--components auto`:** barely better in October (6.07 W against 6.14 W). 3 was kept as the default after also looking at December (6.2 W against 8.1 W for `auto`, which misses badly on group 10: 32.0 W against 13.4 W), so this one choice was not made on October alone.
 
 ### Neural network
 

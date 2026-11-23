@@ -1,7 +1,7 @@
 # Power per machine from one factory meter
 
 > **In short:** give it a factory's total power and which machines are on. It tells you how much power each machine uses.
-> Best method: **Gaussian allocation**, off by **6.4 W** per machine on average, or 104 W while the machine runs (a simple split: 17.2 W, or 276 W while running).
+> Best method: **Gaussian allocation**, off by **6.2 W** per machine on average, or 101 W while the machine runs (a simple split: 16.9 W, or 273 W while running).
 
 ## What it does
 
@@ -57,10 +57,10 @@ The neural network and the polynomial model come from my [MSc dissertation](docs
 
 | Method | Average error per machine (W) | While it runs (W) |
 |---|---|---|
-| **Gaussian allocation** | **6.4** | **104** |
-| Neural network | 13.1 | 213 |
-| Simple split: in proportion to each machine's average power | 17.2 | 276 |
-| Polynomial model | 21.6 | 351 |
+| **Gaussian allocation** | **6.2** | **101** |
+| Neural network | 11.4 | 185 |
+| Simple split: in proportion to each machine's average power | 16.9 | 273 |
+| Polynomial model | 19.0 | 309 |
 | Simple split: equally among the running machines | 28.4 | 454 |
 | Hart-inspired | 49.6 | 789 |
 | Guess 0 W (= the machines' average power) | 51.4 | 820 |
