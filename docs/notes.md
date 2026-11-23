@@ -317,7 +317,7 @@ Change against before, measured with the earlier 1,960 training rows and 2000 ep
 
 ## Why the states must be given
 
-> **In short:** the methods need accurate, on-time on/off signals. Guessing them from the total doesn't work.
+> **In short:** the methods need the on/off signals, but small delays and glitches in them cost little. Guessing them from the total doesn't work.
 
 ### Test it yourself
 
@@ -331,19 +331,19 @@ uv run src/validation/corrupt_states.py --dataset hipe --machines N (--lag S | -
 
 ### What happens
 
-Gaussian allocation on the one-week release, with 1 level per machine, mean over groups 2 to 9. Not yet re-measured on the October/November/December split or with 3 levels.
+HIPE, trained on November, scored on December, mean over groups 2 to 10. The training states are wrong in the same way as the test states.
 
-| States | Error (W) |
-|---|---|
-| exact | 10.5 |
-| 10 s late | 11.2 |
-| 60 s late | 27.5 |
-| 1% flipped | 20.9 |
-| *Proportional split, exact states* | *31.2* |
+| States | Gaussian allocation (W) | Proportional split (W) |
+|---|---|---|
+| exact | 6.2 | 16.9 |
+| 10 s late | 6.4 | 16.9 |
+| 60 s late | 7.3 | 17.7 |
+| 1% flipped | 7.9 | 19.2 |
 
 * **1% flipped** means each one-second reading flipped on its own, so mostly 1 s glitches, not 1% of the switch events missed.
-
-With states 60 s late, it still beats the best baseline given the same late states on 4 of the 8 groups.
+* **Gaussian allocation still beats every baseline** given the same states, on all 9 groups, in every row.
+* **A delay only matters around switches,** and December has few: 671 in group 9 over the month.
+* **Milder than on the one-week release** (1 level per machine, random hours held out): there, 60 s late or 1% flipped doubled the error (10.5 W exact, 27.5 W 60 s late, 20.9 W 1% flipped).
 
 ### Why not work out the states from the total?
 

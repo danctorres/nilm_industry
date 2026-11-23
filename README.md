@@ -72,7 +72,7 @@ On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-m
 
 ## Limits
 
-* **It needs to know when each machine is on.** On the older one-week data: a 10 s delay barely mattered. A 60 s delay, or 1% of the one-second on/off readings flipped, doubled the error or worse.
+* **It needs to know when each machine is on,** but copes with small errors there. States 10 s late: 6.4 W instead of 6.2 W. 60 s late: 7.3 W. 1% of the one-second on/off readings flipped: 7.9 W. Still far ahead of the simple split given the same states (17.7 and 19.2 W).
 * **Machines that always run together can't be told apart.**
 
 ## More
