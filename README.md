@@ -40,7 +40,9 @@ Every Python folder has a self-check: `uv run src/<folder>/test_<name>.py`.
 | Polynomial model | [`src/polynomial`](src/polynomial) | Each machine's power is a polynomial of the total, fitted by optimisation algorithms. C++: needs CMake and a C++20 compiler. |
 | Hart-inspired | [`src/hart_inspired`](src/hart_inspired) | Reads each machine's power from the drop in the total when it switches off. |
 
-The neural network and the polynomial model come from my [MSc dissertation](docs/Dissertation_NILM.pdf) (University of Coimbra). Gaussian allocation was added later.
+How each method works, with one worked example: [docs/methods.md](docs/methods.md).
+
+The neural network and the polynomial model come from my MSc dissertation (University of Coimbra, 2023). Gaussian allocation was added later.
 
 ## Results
 
@@ -77,6 +79,7 @@ On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-m
 
 ## More
 
+* [docs/methods.md](docs/methods.md): how each method works, in plain words, with one example.
 * [docs/notes.md](docs/notes.md): every number, option and design choice, with a table to jump to what you need.
 * [src/polynomial/README.md](src/polynomial/README.md): building and running the polynomial model.
 
