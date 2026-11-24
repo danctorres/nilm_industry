@@ -25,6 +25,10 @@
   * **Pump:** about 500 W, and very steady (± 50 W).
 * **The question:** how much of the 3,000 W is the Oven's?
 
+![Each method's split of the 3,000 W total, as stacked bars of Oven then Pump. Gaussian allocation: 2,498 and 502, so the Pump stays at its usual 500 W. Neural network: 2,379 and 621. Proportional split: 2,400 and 600. Polynomial model: 2,450 and 600, which adds up to 3,050 W, more than the total. Equal split: 1,500 and 1,500.](methods_example.png)
+
+*Not shown: guess 0 W (0 and 0), and Hart-inspired, which gives the Pump the drop when it switches off. Redraw with `uv run docs/figures.py`.*
+
 ## What every method gets
 
 > **In short:** the total and the on/off states. Never the machines' own meters.
@@ -86,6 +90,8 @@
 * Typical values: 2,000 + 500 = 2,500 W. Leftover: 3,000 − 2,500 = 500 W.
 * Variances: Oven 800² = 640,000, Pump 50² = 2,500. The Oven gets 640,000 ÷ 642,500 = 99.6% of the leftover.
 * **Oven ≈ 2,498 W, Pump ≈ 502 W.** The steady Pump stays at its usual power.
+
+![Two bell curves on the same power axis. The Oven's is wide, centred on 2,000 W, and its estimate sits at 2,498 W, 498 W above it. The Pump's is narrow, centred on 500 W, and its estimate sits at 502 W, 2 W above it.](allocation_idea.png)
 
 **Example, 3 levels:** say the Oven idles at 300 W and heats at 2,400 W.
 * Oven heating + Pump = 2,900 W. Close to 3,000 W, so likely.
