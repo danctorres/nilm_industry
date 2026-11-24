@@ -320,7 +320,7 @@ Change against before, measured with the earlier 1,960 training rows and 2000 ep
 
 ## Why the states must be given
 
-> **In short:** the methods need the on/off signals, but small delays and glitches in them cost little. Guessing them from the total doesn't work.
+> **In short:** the methods need the on/off signals, but small delays and glitches in them cost little. Guessing them from the total doesn't work. A heating flag for each oven would halve the error.
 
 ### Test it yourself
 
@@ -347,6 +347,24 @@ HIPE, trained on November, scored on December, mean over groups 2 to 10. The tra
 * **Gaussian allocation still beats every baseline** given the same states, on all 9 groups, in every row.
 * **A delay only matters around switches,** and December has few: 671 in group 9 over the month.
 * **Milder than on the one-week release** (1 level per machine, random hours held out): there, 60 s late or 1% flipped doubled the error (10.5 W exact, 27.5 W 60 s late, 20.9 W 1% flipped).
+
+### More than on and off: a heating flag
+
+> **In short:** if the states also said when each oven is heating, Gaussian allocation's error would about halve.
+
+**Setup:** each oven (high-temperature, soldering, vacuum) gets a heating flag: on when its own meter reads above 500 W. Optionally, the washing machine's heater too (above 1,000 W). Each flagged machine becomes two, idle and heating, each with its own 3 levels, and their estimates are added back. A one-off check, not in the code.
+
+| States | October (W) | December (W) |
+|---|---|---|
+| on and off | 6.14 | 6.2 |
+| plus a heating flag for the 3 ovens | 3.21 | 3.4 |
+| plus the washing machine's heater | 3.03 | 3.1 |
+| every machine's true level (ceiling) | 1.6 | |
+
+* **The soldering oven's flag does most of it:** group 5, where it joins, falls from 9.1 to 3.8 W in October.
+* **Groups 2–4** (only the high-temperature oven) barely change. **Group 10** in December: 13.4 → 8.8 → 6.4 W.
+* **Thresholds** were read off November's power histograms, not tuned.
+* **To use it,** give each flagged machine two state columns (idle and heating) and add their estimates back. A control system often has such a flag.
 
 ### Why not work out the states from the total?
 
