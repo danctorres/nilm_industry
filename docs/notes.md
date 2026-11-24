@@ -311,6 +311,7 @@ Change against before, measured with the earlier 1,960 training rows and 2000 ep
 * **Tracking each machine's power level over time:** no better. Re-tested with the 19,600 training rows (exact forward-backward, one chance per second that a machine changes level): 6.19 W at best in October, against 6.14 W. Neighbouring seconds don't reveal a machine's level any better than the second itself; they just make wrong guesses more confident.
   * **What it could gain:** told each machine's true level, Gaussian allocation's October error would fall from 6.14 to 1.6 W.
   * **Why it doesn't:** the ovens' levels are wide (the soldering oven heats at 2,980 ± 1,520 W) and change every 36 s to 5 min, so a level held from one second to the next says little.
+* **Level weights that depend on which other machines are on:** not built. In group 9's training rows, which other machines are on explains only 9–14% of the variation in each big oven's power, so there is little to gain.
 * **Penalising the variance of each machine's estimate in the neural network:** worse. Meant to favour the split where each machine's power stays steady, as Gaussian allocation does. Tested in October:
   * **Group 9, total and states:** 25.2 W without it, 34.5 to 57.7 W with weights 0.001 to 1. **Total only:** 28.1 W without, 29.3 to 35.7 W with.
   * **Group 3, total and states:** 12.7 W without, 11.3 W at weight 0.001, no change at 0.01.
