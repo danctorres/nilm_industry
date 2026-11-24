@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from allocation import collinear, estimate, fit, fit_mixture, main, posterior, select
+from allocation import collinear, estimate, fit, fit_mixture, main, posterior
 
 # three machines with known means and spreads: EM recovers them from the total and states alone
 rng = np.random.default_rng(0)
@@ -53,11 +53,6 @@ assert np.allclose(est2.sum(axis=1), a2, atol=1e-3) and (est2[s == 0] == 0).all(
 mixed = np.abs(est2 - p2).mean()
 single = np.abs(posterior(a2, s, *fit(a2, s))[0] - p2).mean()
 assert mixed < 0.5 * single, (mixed, single)
-
-# BIC picks two levels for the heating machine and one for each steady one
-k, (sel_mu, _, sel_pi) = select(a2[:5000], s[:5000])
-assert list(k) == [2, 1, 1] and (sel_pi[1:, 1:] == 0).all(), k
-assert np.allclose(np.sort(sel_mu[0]), [0.1, 4], rtol=0.05), sel_mu
 
 # end to end: trains on the training rows, estimates the validation rows
 with tempfile.TemporaryDirectory() as name:

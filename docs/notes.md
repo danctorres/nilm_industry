@@ -201,11 +201,10 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
 ### Gaussian allocation
 
 ```sh
-uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N [--components {K,auto}]
+uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N [--components K]
 ```
 
 * **`K`:** power levels per machine (idle, heating, ...). Default 3.
-* **`auto`:** each machine gets its own number of levels, up to 5. Levels are added one at a time while they improve the fit to the training rows by more than BIC's penalty.
 * **Slow** when many machines are on at once, since it tries every combination of levels.
 * **Assumes** the machines switch on and off independently, and warns when two don't.
 
@@ -276,7 +275,7 @@ October error (W) of the methods that learn from the training rows. A range is t
 ### Gaussian allocation: 3 levels per machine
 
 * **Against 1 level:** error −11 to −57% on every group in October, and −7 to −27% in December.
-* **`--components auto`:** barely better in October (6.07 W against 6.14 W). 3 was kept as the default after also looking at December (6.2 W against 8.1 W for `auto`, which misses badly on group 10: 32.0 W against 13.4 W), so this one choice was not made on October alone.
+* **Each machine its own number of levels, picked by BIC** (a fit score that penalises extra parameters, formerly `--components auto`): barely better in October (6.07 W against 6.14 W), but worse in December (8.1 W against 6.2 W; group 10: 32.0 W against 13.4 W). So 3 levels for every machine was kept, and this one choice was not made on October alone. The option was then removed.
 
 ### Neural network
 

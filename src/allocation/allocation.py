@@ -7,8 +7,7 @@
   total and the states alone.
 - Each estimate is the machine's posterior mean (expected power given the total), so ON estimates add up to the total.
   A Gaussian allows negative power: those are set to 0 and the others scaled down so they still add up to it.
-- --components 1: one Gaussian per machine. --components auto: each machine's own number, by BIC (a fit score that
-  penalises extra parameters).
+- --components 1: one Gaussian per machine.
 - Trains on the same training rows as the other methods.
 
 Example: python3 src/allocation/allocation.py --dataset hipe --machines 9
@@ -98,25 +97,18 @@ def chunks(rows: np.ndarray, c: int) -> list[np.ndarray]:
 
 
 def fit_mixture(
-    a: np.ndarray, s: np.ndarray, k=1, iters: int = 300, start=None
+    a: np.ndarray, s: np.ndarray, k: int = 1, iters: int = 300
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Fit k components per machine (an int, or one per machine) by EM.
+    """Fit k components per machine by EM.
 
-    Returns means, variances and weights, each (n, max k); unused components get weight 0. Refines `start` if given,
-    else starts from `fit`'s single Gaussian, spreading each machine's components evenly from one sd below its mean to
-    one above. k = 1 is just `fit`."""
-    if start is None:
-        mu1, var1 = fit(a, s)
-        k = np.broadcast_to(k, mu1.shape)
-        if (k == 1).all():
-            return mu1[:, None], var1[:, None], np.ones((len(mu1), 1))
-        offset = np.where(k[:, None] > 1, 2 * np.arange(k.max()) / np.maximum(k[:, None] - 1, 1) - 1, 0.0)
-        pi = (np.arange(k.max()) < k[:, None]) / k[:, None]
-        mu = np.where(pi > 0, np.maximum(mu1[:, None] + np.sqrt(var1)[:, None] * offset, 0.0), 0.0)
-        var = np.repeat(np.maximum(var1 / k**2, FLOOR)[:, None], k.max(), axis=1)
-    else:
-        mu, var, pi = start
-    used = pi > 0
+    Returns means, variances and weights, each (n, k). Starts from `fit`'s single Gaussian, spreading each machine's
+    components evenly from one sd below its mean to one above. k = 1 is just `fit`."""
+    mu1, var1 = fit(a, s)
+    if k == 1:
+        return mu1[:, None], var1[:, None], np.ones((len(mu1), 1))
+    mu = np.maximum(mu1[:, None] + np.sqrt(var1)[:, None] * (2 * np.arange(k) / (k - 1) - 1), 0.0)
+    var = np.repeat(np.maximum(var1 / k**2, FLOOR)[:, None], k, axis=1)
+    pi = np.full(mu.shape, 1 / k)
     groups = patterns(s)
     for _ in range(iters):
         weight, first, second = np.zeros(mu.shape), np.zeros(mu.shape), np.zeros(mu.shape)
@@ -132,60 +124,17 @@ def fit_mixture(
             first[idx] += np.einsum("cm,cmk->mk", mj * s0 + vj * s1, onehot)
             moment = mj**2 * s0 + 2 * mj * vj * s1 + vj**2 * s2 + (vj - vj**2 / v[:, None]) * s0
             second[idx] += np.einsum("cm,cmk->mk", moment, onehot)
-        seen = weight > 0  # zero weight (unused, or machine never ON): keep the start
+        seen = weight > 0  # zero weight (machine never ON): keep the start
         new_mu = np.where(seen, np.maximum(first / np.where(seen, weight, 1), 0.0), mu)
         var = np.where(seen, np.maximum(second / np.where(seen, weight, 1) - new_mu**2, FLOOR), var)
         # floored: `assignments` counts components by nonzero weight
-        pi = np.where(used, np.maximum(weight / np.maximum(weight.sum(axis=1, keepdims=True), 1e-300), 1e-6), 0.0)
+        pi = np.maximum(weight / np.maximum(weight.sum(axis=1, keepdims=True), 1e-300), 1e-6)
         pi /= pi.sum(axis=1, keepdims=True)
         converged = np.abs(new_mu - mu).max() < 1e-9
         mu = new_mu
         if converged:
             break
     return mu, var, pi
-
-
-def loglik(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray) -> float:
-    """Log-likelihood of the total a (T,) given the 0/1 states s (T, n), over the rows with a machine ON."""
-    total = 0.0
-    for on, rows in patterns(s):
-        mj, _, v, lp = assignments(on, mu, var, pi)[2:]
-        total += sum(conditional(a[chunk], mj, v, lp)[2].sum() for chunk in chunks(rows, len(lp)))
-    return total
-
-
-def split(fitted, j: int):
-    """The fit with machine j's widest component split in two, as a start for one more component. The halves sit half an
-    sd either side of its mean and together keep its weight and variance."""
-    mu, var, pi = (np.pad(x, ((0, 0), (0, 1))) for x in fitted)
-    c, new = np.argmax(np.where(pi[j] > 0, var[j], -1.0)), np.count_nonzero(pi[j])
-    sd = np.sqrt(var[j, c])
-    mu[j, [c, new]] = np.maximum(mu[j, c] + [-sd / 2, sd / 2], 0.0)
-    var[j, [c, new]] = 0.75 * var[j, c]
-    pi[j, [c, new]] = pi[j, c] / 2
-    return mu, var, pi
-
-
-def select(a: np.ndarray, s: np.ndarray, most: int = 5, screen: int = 50):
-    """Pick each machine's number of components by BIC = -2 log-likelihood + a penalty per parameter (lower is better).
-    Returns the counts (n,) and the fit.
-
-    Each round tries splitting each machine's widest component (`screen` EM iterations from the current fit) and keeps
-    the best. Stops when no split lowers BIC or every machine ever ON has `most`. The final fit then runs to
-    convergence."""
-    penalty = 3 * np.log(s.any(axis=1).sum())  # a mean, a variance and a weight per component
-
-    def score(fitted):
-        return -2 * loglik(a, s, *fitted) + penalty * np.count_nonzero(fitted[2]), fitted
-
-    best = score(fit_mixture(a, s))
-    while grow := np.flatnonzero((np.count_nonzero(best[1][2], axis=1) < most) & s.any(axis=0)).tolist():
-        trial = min((score(fit_mixture(a, s, start=split(best[1], j), iters=screen)) for j in grow), key=lambda x: x[0])
-        if trial[0] >= best[0]:
-            break
-        best = trial
-    fitted = fit_mixture(a, s, start=best[1])
-    return np.count_nonzero(fitted[2], axis=1), fitted
 
 
 def estimate(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray) -> np.ndarray:
@@ -212,14 +161,14 @@ def main(argv=None) -> None:
     p.add_argument("--machines", type=int, required=True)
     p.add_argument(
         "--components",
-        type=lambda x: x if x == "auto" else int(x),
+        type=int,
         default=3,
-        help="Gaussian components per machine, chosen on October, or auto: each machine's own by BIC, up to 5",
+        help="Gaussian components per machine, chosen on October",
     )
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
     p.add_argument("--results-root", type=Path, default=REPO / "results" / "allocation")
     a = p.parse_args(argv)
-    if a.components != "auto" and a.components < 1:
+    if a.components < 1:
         p.error("--components must be at least 1")
     d = a.data_root / a.dataset.upper() / str(a.machines)
 
@@ -236,10 +185,7 @@ def main(argv=None) -> None:
 
     if pairs := collinear(states):
         print(f"warning: machine pairs {pairs} switch on and off together, so how their power splits is a guess")
-    if a.components == "auto":
-        mu, var, pi = select(power / scale, states)[1]
-    else:
-        mu, var, pi = fit_mixture(power / scale, states, a.components)
+    mu, var, pi = fit_mixture(power / scale, states, a.components)
     for j in range(a.machines):
         parts = (
             f"{w:.0%} at {m * scale:.4g} (sd {np.sqrt(v) * scale:.4g})"
