@@ -34,7 +34,7 @@
 > **In short:** the total and the on/off states. Never the machines' own meters.
 
 * **The total:** the plant meter's power, every second.
-* **The states:** for each machine, on or off, every second. A plant usually has these from its control system (the PLC). How they are made from the data: [On or off](notes.md#on-or-off).
+* **The states:** for each machine, on or off, every second. A plant's control system (the PLC) may already have these. How they are made from the data: [On or off](notes.md#on-or-off).
 * **Training rows:** 19,600 seconds of November to learn from. Each method then splits every second of December.
 * **The machines' own meters** are only used to score the result, never to train.
 * **An OFF machine gets 0 W** from every method. What's left to decide is how the running machines share the total.

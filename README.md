@@ -14,9 +14,10 @@ flowchart LR
     method --> mn["...<br/>Machine N:<br/>power"]
 ```
 
-* **In:** the total power from the plant's main meter, and each machine's on/off state (a plant usually has this already, from its control system, the PLC).
+* **In:** the total power from the plant's main meter, and each machine's on/off state, which a plant's control system (the PLC) may already have.
 * **Out:** each machine's power, for every sample.
 * **Why it helps:** no meter is needed on each machine. This is called NILM: non-intrusive load monitoring.
+* **Where it's used:** splitting one meter using control-system states is known as virtual submetering. It has been done for the parts of a [machine tool](https://link.springer.com/chapter/10.1007/978-3-030-02203-7_9), from their PLC states, and for [HVAC in buildings](https://arxiv.org/abs/1509.05421). This repo measures how well it works for whole machines, with HIPE's per-machine meters as the answer key.
 
 ## Try it
 
@@ -74,7 +75,8 @@ On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-m
 
 ## Limits
 
-* **It needs to know when each machine is on,** but copes with small errors there. States 10 s late: 6.4 W instead of 6.2 W. 60 s late: 7.3 W. 1% of the one-second on/off readings flipped: 7.9 W. Still far ahead of the simple split given the same states (17.7 and 19.2 W).
+* **The total must hold only the machines' power.** Here it is the sum of their meters. HIPE's real main meter is 96% other load (the machines are 0.58 kW of 14.0 kW), and the methods would give it all to the running machines. A real plant must meter or model that load apart. [How the total is made.](docs/notes.md#how-the-total-is-made)
+* **It needs to know when each machine is on.** Here the states come from each machine's own meter. A control system's would lag and glitch, and the methods cope with small errors there. States 10 s late: 6.4 W instead of 6.2 W. 60 s late: 7.3 W. 1% of the one-second on/off readings flipped: 7.9 W. Still far ahead of the simple split given the same states (17.7 and 19.2 W).
 * **Machines that always run together can't be told apart.**
 * **What's left is missing information, not a weak method.** On HIPE, adding a heating flag for each oven, taken from the oven's own meter (a best case), cut the error from 6.2 W to 3.4 W. How much a real plant gains depends on its machines. [How.](docs/notes.md#more-than-on-and-off-a-heating-flag)
 
