@@ -320,7 +320,7 @@ Change against before, measured with the earlier 1,960 training rows and 2000 ep
 
 ## Why the states must be given
 
-> **In short:** the methods need the on/off signals, but small delays and glitches in them cost little. Guessing them from the total doesn't work. A heating flag for each oven would halve the error.
+> **In short:** the methods need the on/off signals, but small delays and glitches in them cost little. Guessing them from the total doesn't work. On HIPE, a heating flag for each oven halved the error.
 
 ### Test it yourself
 
@@ -350,7 +350,7 @@ HIPE, trained on November, scored on December, mean over groups 2 to 10. The tra
 
 ### More than on and off: a heating flag
 
-> **In short:** if the states also said when each oven is heating, Gaussian allocation's error would about halve.
+> **In short:** on HIPE, if the states also said when each oven is heating, Gaussian allocation's error would about halve.
 
 **Setup:** each oven (high-temperature, soldering, vacuum) gets a heating flag: on when its own meter reads above 500 W. Optionally, the washing machine's heater too (above 1,000 W). Each flagged machine becomes two, idle and heating, each with its own 3 levels, and their estimates are added back. A one-off check, not in the code.
 
@@ -364,6 +364,8 @@ HIPE, trained on November, scored on December, mean over groups 2 to 10. The tra
 * **The soldering oven's flag does most of it:** group 5, where it joins, falls from 9.1 to 3.8 W in October.
 * **Groups 2–4** (only the high-temperature oven) barely change. **Group 10** in December: 13.4 → 8.8 → 6.4 W.
 * **Thresholds** were read off November's power histograms, not tuned.
+* **A best case:** the flag comes from the oven's own meter, so it matches the power exactly. A control system's flag would lag and match less well.
+* **Specific to HIPE:** the gain comes from ovens whose heating spans a wide range that overlaps the other machines. A plant without such machines gains less, and IMDELD, whose machines switch together, nothing.
 * **To use it,** give each flagged machine two state columns (idle and heating) and add their estimates back. A control system often has such a flag.
 
 ### Why not work out the states from the total?

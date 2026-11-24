@@ -76,7 +76,7 @@ On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-m
 
 * **It needs to know when each machine is on,** but copes with small errors there. States 10 s late: 6.4 W instead of 6.2 W. 60 s late: 7.3 W. 1% of the one-second on/off readings flipped: 7.9 W. Still far ahead of the simple split given the same states (17.7 and 19.2 W).
 * **Machines that always run together can't be told apart.**
-* **More detailed states would help most.** Told also when each oven is heating, it would be off by about 3.4 W instead of 6.2 W. [How.](docs/notes.md#more-than-on-and-off-a-heating-flag)
+* **What's left is missing information, not a weak method.** On HIPE, adding a heating flag for each oven, taken from the oven's own meter (a best case), cut the error from 6.2 W to 3.4 W. How much a real plant gains depends on its machines. [How.](docs/notes.md#more-than-on-and-off-a-heating-flag)
 
 ## More
 
