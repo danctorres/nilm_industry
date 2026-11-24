@@ -267,6 +267,7 @@ October error (W) of the methods that learn from the training rows. A range is t
 | **19,600 at random** | 6.08–6.14 | 13.3–13.6 | 12.5–13.1 | 19.5–19.6 |
 
 * **Why at random:** the per-range draw gave the rare peaks as many rows as the common low totals, but most test seconds are low totals. It takes both more rows and the random draw for the network to gain.
+* **More than 19,600 doesn't help the network** (one draw each, same number of steps): 39,200 rows give 13.3 (total only) and 12.9 (with states), 98,000 rows 13.6 and 13.8. Both are inside or above the 19,600 range.
 * **Gaussian allocation** barely changes either way.
 * **Where the error is left:** in seconds where several of the big ovens run together, which the total alone can't split. On group 10, December seconds whose on/off combination is not among the 1,960 earlier training rows (17%) carried 12 of allocation's 14 W and 22 of the network's 28 W. Many of those combinations never occur in November, so no number of November rows covers them.
 * **December agrees** (mean over groups, W): Gaussian allocation 6.4 → 6.2, network 13.1 → 11.4 (total only) and 19.2 → 14.8 (with states), polynomial model (all at once) 21.6 → 19.0, proportional split 17.2 → 16.9. With states, the network is better than total only in October but not in December.
