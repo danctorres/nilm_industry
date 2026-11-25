@@ -30,7 +30,7 @@
 
 > **In short:** Gaussian allocation wins on every group. The neural network is second, the only other method to beat the proportional split on average.
 
-**Setup:** HIPE · trained on November 2017 · scored on December · settings chosen on October · error in W · seeds: preprocessing 1, neural network 0, polynomial model 1.
+**Setup:** HIPE · trained on November 2017 · scored on December · settings chosen on October · error in W · seeds: preprocessing 1, neural network 0.
 
 | Method | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | Mean | Mean while running |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -38,15 +38,13 @@
 | Gaussian allocation, 1 level per machine | 3.6 | 3.7 | 2.9 | 9.7 | 8.2 | 7.5 | 6.7 | 6.5 | 14.5 | 7.0 | 115 |
 | Neural network, total only as input | 5.1 | 6.7 | 5.1 | 13.8 | 11.2 | 12.3 | 11.6 | 12.4 | 24.2 | 11.4 | 185 |
 | Neural network, total and states as input | 12.8 | 12.4 | 19.7 | 17.7 | 12.5 | 13.3 | 11.8 | 10.0 | 23.2 | 14.8 | 234 |
-| Polynomial model, fitted sample by sample | 68.7 | 47.5 | 37.6 | 42.3 | 37.9 | 37.8 | 32.1 | 30.8 | 51.8 | 42.9 | 684 |
-| Polynomial model, fitted to all samples at once | 8.8 | 10.2 | 11.5 | 19.3 | 17.6 | 20.2 | 18.2 | 20.0 | 45.1 | 19.0 | 309 |
 | Hart-inspired | 72.6 | 54.5 | 45.9 | 46.5 | 39.1 | 44.4 | 41.3 | 39.4 | 62.4 | 49.6 | 789 |
 | Baseline: guess 0 W | 73.2 | 55.3 | 47.4 | 48.4 | 40.7 | 46.6 | 43.4 | 41.3 | 66.7 | 51.4 | 820 |
 | Baseline: equal split | 20.6 | 24.8 | 27.5 | 30.9 | 25.9 | 30.4 | 27.3 | 26.1 | 42.1 | 28.4 | 454 |
 | Baseline: proportional split | 8.3 | 9.5 | 14.1 | 18.3 | 15.8 | 19.6 | 18.2 | 17.8 | 30.5 | 16.9 | 273 |
 
 * **Gaussian allocation** is best on every group, and 3 levels per machine beat 1 on every group.
-* **Beating the proportional split:** the neural network (total only) on every group and on average. With states, on groups 5 to 10 and on average. The polynomial model (all at once) on group 4, and on group 8 by 0.03 W.
+* **Beating the proportional split:** the neural network (total only) on every group and on average. With states, on groups 5 to 10 and on average.
 * **Hart-inspired** estimates 97–100% of the on-samples, yet is barely better than guessing 0 W.
 * **Mean while running:** the mean over groups of the error over only the seconds a machine draws power. See [Words](#words).
 * **Group 10 is the hardest.** Its extra machine, the ChipPress, runs only in November and December, so October never shows its big loads.
@@ -62,8 +60,6 @@
 | Gaussian allocation | 33.8 (31.6–35.5) | 29.0 (26.9–31.4) |
 | Neural network, total only as input | 19.9 (19.4–20.4) | 20.1 (15.7–22.6) |
 | Neural network, total and states as input | 21.7 (21.0–22.7) | 17.0 (16.2–18.3) |
-| Polynomial model, fitted sample by sample | 24.2 (23.3–25.1) | 19.2 (19.0–19.4) |
-| Polynomial model, fitted to all samples at once | 17.5 (14.5–22.3) | 20.9 (18.8–23.9) |
 | Hart-inspired | 20.1 (19.4–20.8) | 20.4 (20.0–20.8) |
 | Baseline: guess 0 W | 20.1 (19.4–20.8) | 20.4 (20.0–20.9) |
 | Baseline: equal split | 24.3 (23.5–25.1) | 19.0 (18.8–19.3) |
@@ -72,7 +68,6 @@
 * **Against the best baseline** (guess 0 W on 6 machines, the equal split on 8), split by split:
   * the network with states, on 8 machines, wins all 3: by 3%, 15% and 14%;
   * the network with the total only, on 6 machines, wins all 3, by 2% or less;
-  * the polynomial model (all at once), on 6 machines, wins 2 by 21–26% and loses the third by 7%.
 * **Gaussian allocation** is 30–70% worse than guessing 0 W, and the proportional split worse still. Both learn each machine's power from the total, which can't work when the machines switch together. [Why.](#why-imdeld-cannot-be-split)
 * **One split can mislead:** the network with the total only scores 15.7 kW on 8 machines with split 1, and 22–23 kW with the other two.
 * **Hart-inspired** gives an estimate for 45–84% of the on-samples, yet is no better than guessing 0 W.
@@ -91,8 +86,6 @@
 | Gaussian allocation | 0.021 ± 0.014 | 37.6 ± 1.5 | 31.7 ± 3.2 |
 | Neural network, total only | 0.039 ± 0.019 | 20.9 ± 2.9 | 22.8 ± 0.8 |
 | Neural network, total and states | 0.055 ± 0.015 | 26.6 ± 1.9 | 24.3 ± 3.4 |
-| Polynomial model, sample by sample | 0.047 ± 0.014 | 22.9 ± 0.8 | 18.6 ± 0.4 |
-| Polynomial model, all samples at once | 0.043 ± 0.022 | 19.4 ± 1.9 | 17.3 ± 3.5 |
 | Hart-inspired (estimates only 7–17% of the on-samples) | 0.055 ± 0.016 | 19.9 ± 0.8 | 20.4 ± 0.4 |
 | Baseline: guess 0 W | 0.055 ± 0.016 | 19.9 ± 0.8 | 20.4 ± 0.4 |
 | Baseline: equal split | 0.039 ± 0.016 | 24.1 ± 1.0 | 19.0 ± 0.2 |
@@ -102,9 +95,7 @@
 * **HIPE, 24 cases** (groups 2–9 × 3 splits). Cases where each method beats the best baseline:
   * Gaussian allocation: all 24;
   * neural network (total only): 5;
-  * neural network (with states) and polynomial model (all at once): 3;
-  * polynomial model (sample by sample): none.
-* **IMDELD:** the polynomial model (all at once) beats the best baseline in 4 of 6 cases, but by less than the spread, and the best method changes from split to split. [Why.](#why-imdeld-cannot-be-split)
+  * neural network (with states): 3.
 
 ## Get the data
 
@@ -192,7 +183,6 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
 
 * Methods: add `--data-root tuning/data --results-root tuning/results/<method>`.
 * `validation.py`: add `--data-root tuning/data --results-root tuning/results`.
-* Polynomial model: use the paths under `tuning/data/HIPE/<N>`.
 
 ## Run the methods
 
@@ -217,16 +207,6 @@ uv run src/neural_network/main.py --dataset {hipe,imdeld} --mode {plain,state} -
 * **`plain`:** the input is the total only. **`state`:** the total and the states.
 * **`--runs`:** trains R networks (5 by default) from different random starts, and averages them.
 * **Output** goes to `results/neural_network/<mode>/...`.
-
-### Polynomial model (C++)
-
-Needs CMake 3.20 or later and a C++20 compiler (GCC 13 tested). OpenMP is optional.
-
-```sh
-cmake -S src/polynomial -B build && cmake --build build -j && ctest --test-dir build
-```
-
-Then run `estimate` and `validate`, as described in [its README](../src/polynomial/README.md).
 
 ### Hart-inspired
 
@@ -270,7 +250,7 @@ October error (W) of the methods that learn from the training rows. A range is t
 * **More than 19,600 doesn't help the network** (one draw each, same number of steps): 39,200 rows give 13.3 (total only) and 12.9 (with states), 98,000 rows 13.6 and 13.8. Both are inside or above the 19,600 range.
 * **Gaussian allocation** barely changes either way.
 * **Where the error is left:** in seconds where several of the big ovens run together, which the total alone can't split. On group 10, December seconds whose on/off combination is not among the 1,960 earlier training rows (17%) carried 12 of allocation's 14 W and 22 of the network's 28 W. Many of those combinations never occur in November, so no number of November rows covers them.
-* **December agrees** (mean over groups, W): Gaussian allocation 6.4 → 6.2, network 13.1 → 11.4 (total only) and 19.2 → 14.8 (with states), polynomial model (all at once) 21.6 → 19.0, proportional split 17.2 → 16.9. With states, the network is better than total only in October but not in December.
+* **December agrees** (mean over groups, W): Gaussian allocation 6.4 → 6.2, network 13.1 → 11.4 (total only) and 19.2 → 14.8 (with states), proportional split 17.2 → 16.9. With states, the network is better than total only in October but not in December.
 * **Other settings** were chosen with the earlier 1,960 rows, unless noted.
 
 ### Gaussian allocation: 3 levels per machine
@@ -299,14 +279,14 @@ Change against before, measured with the earlier 1,960 training rows and 2000 ep
   * Before averaging (one-week tests), results moved with the seed. HIPE group 9: 53 ± 5 W with the states, 36 ± 1 W with the total only. IMDELD group 6, total only: 25 ± 6 kW, against 20.5 kW for guessing 0.
   * **So compare the neural network over several seeds.**
 
-### Polynomial model: fit all samples at once
-
-* **Sample by sample** (the dissertation's version) solves one equation with 4 × N unknowns at each sample, then averages the answers. That is badly underdetermined: see [its README](../src/polynomial/README.md#limitation-of-the-method).
-* **`estimate --joint`** fits all samples at once. **Compare this one.**
-
 ### Tried and dropped
 
-* **Tuning the polynomial model's optimisers:** the defaults did as well.
+* **The polynomial model** (from the dissertation): deleted, as it did worse than the proportional split. Each machine's power was a cubic of the total, fitted by six optimisers (particle swarm, genetic algorithm, simulated annealing, ant colony, gradient descent, Newton).
+  * **December, HIPE:** 19.0 W fitted to all samples at once, 42.9 W sample by sample (the dissertation's version), against 16.9 W for the proportional split. It beat the split only on groups 4 and 8, by 0.03 W on 8.
+  * **IMDELD, 6 machines:** 17.5 kW (14.5–22.3) against 20.1 kW for guessing 0 W, a win smaller than the spread between splits.
+  * **Why it can't do better:** it is the neural network with each curve fixed to a cubic, and its estimates don't add up to the total. The network already does better (11.4 W).
+  * **Sample by sample** solved one equation in 4 × N unknowns at each second, then averaged the answers, so the optimiser comparison measured convergence speed, not the model. Tuning the optimisers didn't help.
+  * **Code:** git tag `polynomial-last`; the dissertation's own version is at `thesis-2023`.
 * **Smoothing Gaussian allocation's estimates over time:** only 6% better, not worth the code. Re-tested with the 19,600 training rows as a Kalman smoother (each machine's power drifts around its mean): −6 to −8% against 1 level per machine in October, but still worse than 3 levels second by second (group 9: 9.47 W against 8.71 W).
 * **Tracking each machine's power level over time:** no better. Re-tested with the 19,600 training rows (exact forward-backward, one chance per second that a machine changes level): 6.19 W at best in October, against 6.14 W. Neighbouring seconds don't reveal a machine's level any better than the second itself; they just make wrong guesses more confident.
   * **What it could gain:** told each machine's true level, Gaussian allocation's October error would fall from 6.14 to 1.6 W.

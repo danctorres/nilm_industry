@@ -38,12 +38,11 @@ Every Python folder has a self-check: `uv run src/<folder>/test_<name>.py`.
 |---|---|---|
 | **Gaussian allocation** | [`src/allocation`](src/allocation) | Learns each machine's typical power levels (idle, heating, ...), then splits the total among the running machines in the most likely way. |
 | Neural network | [`src/neural_network`](src/neural_network) | A small neural network, trained to make the running machines' estimates add up to the total. |
-| Polynomial model | [`src/polynomial`](src/polynomial) | Each machine's power is a polynomial of the total, fitted by optimisation algorithms. C++: needs CMake and a C++20 compiler. |
 | Hart-inspired | [`src/hart_inspired`](src/hart_inspired) | Reads each machine's power from the drop in the total when it switches off. |
 
 How each method works, with one worked example: [docs/methods.md](docs/methods.md).
 
-The neural network and the polynomial model come from my MSc dissertation (University of Coimbra, 2023). Gaussian allocation was added later.
+The neural network comes from my MSc dissertation (University of Coimbra, 2023). Gaussian allocation was added later. The dissertation's polynomial model was dropped: [why](docs/notes.md#tried-and-dropped).
 
 ## Results
 
@@ -63,7 +62,6 @@ The neural network and the polynomial model come from my MSc dissertation (Unive
 | **Gaussian allocation** | **6.2** | **101** |
 | Neural network | 11.4 | 185 |
 | Simple split: in proportion to each machine's average power | 16.9 | 273 |
-| Polynomial model | 19.0 | 309 |
 | Simple split: equally among the running machines | 28.4 | 454 |
 | Hart-inspired | 49.6 | 789 |
 | Guess 0 W (= the machines' average power) | 51.4 | 820 |
@@ -84,7 +82,6 @@ On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-m
 
 * [docs/methods.md](docs/methods.md): how each method works, in plain words, with one example.
 * [docs/notes.md](docs/notes.md): every number, option and design choice, with a table to jump to what you need.
-* [src/polynomial/README.md](src/polynomial/README.md): building and running the polynomial model.
 
 ## License
 

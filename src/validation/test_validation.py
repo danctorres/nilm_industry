@@ -49,10 +49,9 @@ with tempfile.TemporaryDirectory() as name:
         f"{t}, {a}, {e0}, {e1}\n"
         for t, a, e0, e1 in zip(ts, [1.0, 3.0, 4.0], [1.5, 2.0, 3.0], [0.0, 1.0, 1.0], strict=True)
     )
-    for method in ["polynomial", "neural_network/plain"]:
+    for method in ["allocation", "neural_network/plain"]:
         (d / "results" / method / "HIPE").mkdir(parents=True)
         (d / "results" / method / "HIPE/2.csv").write_text("Timestamp, Aggregate_Active_Power, E0, E1\n" + rows)
-    (d / "results/polynomial/HIPE/coef_2.csv").write_text("Coef 0, Coef 1, Coef 2, Coef 3\n1, 2, 3, 4\n")
     (d / "results/hart_inspired/HIPE").mkdir(parents=True)
     (d / "results/hart_inspired/HIPE/2.csv").write_text(
         f"timestamp,active_power,E0,E1\n24-Oct-2017 09:59:59,99,99,99\n{ts[0]},1,1,0\n{ts[1]},3,2,NaN\n{ts[2]},4,3,1\n"
@@ -61,9 +60,9 @@ with tempfile.TemporaryDirectory() as name:
     with contextlib.redirect_stdout(printed):
         main(["--data-root", str(d / "data"), "--results-root", str(d / "results"), "--plots", str(d / "plots")])
     text = printed.getvalue()
-    for label in ["polynomial HIPE, 2 machines", "neural_network/plain HIPE, 2 machines"]:
+    for label in ["allocation HIPE, 2 machines", "neural_network/plain HIPE, 2 machines"]:
         assert f"{label}, per machine" in text, text
-    assert "hart_inspired HIPE, 2 machines, per machine" in text and "coef" not in text, text
+    assert "hart_inspired HIPE, 2 machines, per machine" in text, text
     hart = text.split("hart_inspired HIPE, 2 machines, per machine")[1].split("\n\n")[0]
     assert "NaN" not in hart and "0.333333" in hart, text  # Eq3: 0, 0 (from NaN), 1 against 0, 1, 1
     assert "hart_inspired HIPE, 2 machines: an estimate for 80% of the ON samples" in text, text  # 4 of 5
@@ -85,7 +84,7 @@ with tempfile.TemporaryDirectory() as name:
         pd.DataFrame({"Time": ts, "Eq2_State": s2, "Eq3_State": s3}).to_csv(z / f"states_{split}.csv", index=False)
     assert np.allclose(dict(baselines(z))["baseline/proportional"].iloc[:, 2:], [[3, 0], [0, 2], [0, 0]])
     assert (d / "plots/neural_network_plain_HIPE_2.png").stat().st_size > 0
-    assert (d / "plots/polynomial_HIPE_2.png").stat().st_size > 0
+    assert (d / "plots/allocation_HIPE_2.png").stat().st_size > 0
 
     # corrupt_states: a 1 s lag reads each state from one sample earlier (the first keeps its own); other files linked
     states_split.to_csv(d / "data/HIPE/2/states.csv", index=False)

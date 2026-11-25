@@ -23,7 +23,6 @@ SPLITS = {
     "Gaussian allocation": ALLOCATION,
     "Neural network": (2300 * TOTAL / 2900, 600 * TOTAL / 2900),
     "Proportional split": (TOTAL * 0.8, TOTAL * 0.2),
-    "Polynomial model": (2450, 600),
     "Equal split": (TOTAL / 2, TOTAL / 2),
 }
 

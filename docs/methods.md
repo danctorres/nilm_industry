@@ -7,7 +7,6 @@
 | [Gaussian allocation](#gaussian-allocation) | Give the leftover to the machine whose power varies most | **6.2** |
 | [Neural network](#neural-network) | Learn each machine's share of the total | 11.4 |
 | [Proportional split](#baselines) | Split in proportion to each machine's average power | 16.9 |
-| [Polynomial model](#polynomial-model) | Each machine's power is a curve of the total | 19.0 |
 | [Equal split](#baselines) | Split equally among the running machines | 28.4 |
 | [Hart-inspired](#hart-inspired) | Read a machine's power from the drop when it switches off | 49.6 |
 | [Guess 0 W](#baselines) | Say 0 W, always | 51.4 |
@@ -25,7 +24,7 @@
   * **Pump:** about 500 W, and very steady (± 50 W).
 * **The question:** how much of the 3,000 W is the Oven's?
 
-![Each method's split of the 3,000 W total, as stacked bars of Oven then Pump. Gaussian allocation: 2,498 and 502, so the Pump stays at its usual 500 W. Neural network: 2,379 and 621. Proportional split: 2,400 and 600. Polynomial model: 2,450 and 600, which adds up to 3,050 W, more than the total. Equal split: 1,500 and 1,500.](methods_example.png)
+![Each method's split of the 3,000 W total, as stacked bars of Oven then Pump. Gaussian allocation: 2,498 and 502, so the Pump stays at its usual 500 W. Neural network: 2,379 and 621. Proportional split: 2,400 and 600. Equal split: 1,500 and 1,500.](methods_example.png)
 
 *Not shown: guess 0 W (0 and 0), and Hart-inspired, which gives the Pump the drop when it switches off. Redraw with `uv run docs/figures.py`.*
 
@@ -192,27 +191,6 @@
 * **With the states as input** it's worse in December (14.8 W). For each set of running machines, any split fits, so each network picks its own.
 
 **Code:** [main.py](../src/neural_network/main.py) runs it, [nn.py](../src/neural_network/nn.py) is the network. `--mode plain|state`, `--runs R`.
-
-## Polynomial model
-
-> **In short:** each machine's power is a curve of the total, fitted by an optimiser. 19.0 W.
-
-**Idea:** like the neural network, but each machine's curve has a fixed shape: a cubic, a + b·T + c·T² + d·T³, where T is the total.
-
-**Steps:**
-1. **Pick the coefficients**, 4 per machine, so that the running machines' curves add up to the total on the training rows.
-2. **Six optimisers** can do it, so they can be compared: particle swarm (the default), genetic algorithm, simulated annealing, ant colony, gradient descent and Newton. Pick one with `--algorithm`.
-3. **Two ways to fit:**
-   * **Sample by sample** (the dissertation's version, and the default): fit each training second on its own, then average each machine's coefficients. Each second gives one equation for many unknowns, so many answers fit equally well: 42.9 W.
-   * **`--joint`:** one fit over all seconds at once: 19.0 W. **Use this one.**
-4. **Estimate:** each running machine's curve, read at that second's total. The estimates are not scaled to add up to the total.
-
-**Example:** the Oven's curve at 3,000 W might give 2,450 W and the Pump's 600 W. Together that's 3,050 W, 50 W more than the total, and it stays that way.
-
-**Good at:** not much. It beats the proportional split only on groups 4 and 8.
-**Bad at:** its estimates don't have to add up to the total.
-
-**Code:** [src/polynomial](../src/polynomial), C++, needs CMake. Building and running: [its README](../src/polynomial/README.md).
 
 ## Hart-inspired
 
