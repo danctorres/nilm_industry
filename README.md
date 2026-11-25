@@ -1,20 +1,20 @@
 # Power per machine from one factory meter
 
-> **In short:** give it a factory's total power and which machines are on. It tells you how much power each machine uses.
+> **In short:** give it the power on one meter that feeds a factory's machines, and which machines are on. It tells you how much power each machine uses.
 > Best method: **Gaussian allocation**, off by **6.2 W** per machine on average, or 101 W while the machine runs (a simple split: 16.9 W, or 273 W while running). Given the meter's per-phase readings: **2.1 W**, or 33 W while running.
 
 ## What it does
 
 ```mermaid
 flowchart LR
-    total["Plant meter:<br/>total power"] --> method["Method,<br/>e.g. Gaussian allocation"]
+    total["Meter feeding the machines:<br/>power on each phase"] --> method["Method,<br/>e.g. Gaussian allocation"]
     states["Control system:<br/>which machines are on"] --> method
     method --> m1["Machine 1:<br/>power"]
     method --> m2["Machine 2:<br/>power"]
     method --> mn["...<br/>Machine N:<br/>power"]
 ```
 
-* **In:** the total power from the plant's main meter, or better its readings on each phase, and each machine's on/off state, which a plant's control system (the PLC) may already have.
+* **In:** the power on one meter that feeds only these machines, ideally its active and reactive power on each phase, and each machine's on/off state, which a plant's control system (the PLC) may already have.
 * **Out:** each machine's power, for every sample.
 * **Why it helps:** no meter is needed on each machine. This is called NILM: non-intrusive load monitoring.
 * **Where it's used:** splitting one meter using control-system states is known as virtual submetering. It has been done for the parts of a [machine tool](https://link.springer.com/chapter/10.1007/978-3-030-02203-7_9), from their PLC states, and for [HVAC in buildings](https://arxiv.org/abs/1509.05421). This repo measures how well it works for whole machines, with HIPE's per-machine meters as the answer key.
@@ -48,10 +48,9 @@ The neural network comes from my MSc dissertation (University of Coimbra, 2023).
 
 **Gaussian allocation wins on every HIPE group, by far when it gets the meter's per-phase readings. The neural network comes second, the only other method to beat the simple proportional split.**
 
-![Metered and estimated power of four HIPE machines over six hours of 5 December 2017. The estimate closely follows the vacuum pump, the screen printer and the high-temperature oven's heating cycles. Around 09:30, while both ovens run, part of the soldering oven's power goes to the high-temperature oven.](docs/allocation_example.png)
+![Two panels from 08:00 to 11:30 on 5 December 2017: the metered power of the HighTemperatureOven and the SolderingOven, each with Gaussian allocation's estimate from the per-phase readings. The estimate follows both meters closely: off by 54 and 8 W on average.](docs/allocation_example.png)
 
-*Blue: metered power. Orange: Gaussian allocation's estimate from the total alone. Four of the nine machines in HIPE group 9, on a busy December morning (data: KIT, CC BY 4.0).*
-*Mostly a close match. The main miss is around 09:30: both ovens run at once, and part of the SolderingOven's power goes to the HighTemperatureOven.*
+*Two ovens in HIPE group 9, on a busy December morning (data: KIT, CC BY 4.0). Redraw with `uv run docs/figures.py`.*
 
 * **Data:** [HIPE](https://www.energystatusdata.kit.edu/hipe.php), ten machines at an electronics production site in Germany, each with its own meter.
 * **Test:** add the machine meters into a total, let each method split it back, and compare with the real meters. Repeated for nine groups of 2 to 10 machines.

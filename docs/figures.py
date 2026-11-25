@@ -1,4 +1,5 @@
-"""Draws the two figures in docs/methods.md from its made-up example: 3,000 W total, Oven and Pump on.
+"""Draws the two figures in docs/methods.md from its made-up example: 3,000 W total, Oven and Pump on. Also the
+README's example from HIPE group 9, once hipe.py and allocation.py, with and without --phases, have run.
 
 uv run docs/figures.py
 """
@@ -6,9 +7,12 @@ uv run docs/figures.py
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
+from matplotlib.dates import DateFormatter
 from matplotlib.figure import Figure
 
 DOCS = Path(__file__).resolve().parent
+REPO = DOCS.parent
 TOTAL = 3000
 OVEN, PUMP = (2000, 800), (500, 50)  # typical power and spread (W), as in the example
 SURFACE, INK, MUTED = "#fcfcfb", "#0b0b0b", "#52514e"
@@ -114,7 +118,45 @@ def method_splits() -> None:
     fig.savefig(DOCS / "methods_example.png", dpi=120)
 
 
+# README example: HIPE group 9 (machines 2 to 10 in file order), a busy December morning
+GROUP, START, END = 9, "2017-12-05 08:00", "2017-12-05 11:30"
+OVENS = {"HighTemperatureOven": 1, "SolderingOven": 4}  # column in the group
+TRUTH = REPO / "data" / "processed" / "HIPE" / str(GROUP) / "equipment_validation.csv"
+ESTIMATE = REPO / "results" / "allocation_phases" / "HIPE" / f"{GROUP}.csv"  # Gaussian allocation, per-phase readings
+
+
+def hipe_example() -> None:
+    """Metered power and Gaussian allocation's estimate from the per-phase readings, one panel per oven."""
+    truth = pd.read_csv(TRUTH)
+    time = pd.to_datetime(truth.timestamp, format="%d-%b-%Y %H:%M:%S")
+    rows = ((time >= START) & (time < END)).to_numpy()
+    time, truth = time[rows], 1000 * truth.iloc[rows, 1:].to_numpy()
+    est = 1000 * pd.read_csv(ESTIMATE, skipinitialspace=True).iloc[rows, 2:].to_numpy()
+    fig = Figure(figsize=(10, 5), facecolor=SURFACE, layout="constrained")
+    axes = fig.subplots(len(OVENS), 1, sharex=True)
+    for ax, (name, j) in zip(axes, OVENS.items(), strict=True):
+        style(ax)
+        ax.fill_between(time, truth[:, j], color=BLUE, alpha=0.25, linewidth=0, label="Metered")
+        ax.plot(time, est[:, j], color=ORANGE, linewidth=1, label="Estimated from the per-phase readings")
+        off = np.abs(est[:, j] - truth[:, j]).mean()
+        ax.set_title(f"{name}: off by {off:,.0f} W on average", loc="left", color=INK, fontsize=11)
+        ax.set_ylabel("W", color=INK)
+        ax.yaxis.set_major_formatter("{x:,.0f}")
+    fig.legend(*axes[0].get_legend_handles_labels(), loc="outside upper right", ncols=2, frameon=False, labelcolor=INK)
+    axes[-1].xaxis.set_major_formatter(DateFormatter("%H:%M"))
+    axes[-1].set_xlabel("5 December 2017 (UTC)", color=INK)
+    fig.suptitle(
+        "The per-phase readings tell the two ovens apart", x=0.01, ha="left", color=INK, fontsize=13, fontweight="bold"
+    )
+    fig.savefig(DOCS / "allocation_example.png", dpi=100)
+
+
 if __name__ == "__main__":
     bell_curves()
     method_splits()
     print("saved", DOCS / "allocation_idea.png", DOCS / "methods_example.png")
+    if all(f.exists() for f in (TRUTH, ESTIMATE)):
+        hipe_example()
+        print("saved", DOCS / "allocation_example.png")
+    else:
+        print("skipped allocation_example.png: run hipe.py, then allocation.py --dataset hipe --machines 9 --phases")
