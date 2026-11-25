@@ -1,6 +1,8 @@
 """Turn the raw HIPE machine files into data/processed/HIPE/<N>, N being the number of machines summed into the total.
 
 The recording is split by month: October tunes, November trains, December is reported.
+- phases*.csv: the same total as aggregate*.csv, but as active and reactive power on each phase, which any
+  three-phase plant meter reports. Not clipped: a phase can read negative.
 - data/processed/HIPE/<N>: test rows are December.
 - --tuning-out: test rows are October, and every other file links to data/processed/HIPE/<N>. So a method tuned
   with --data-root tuning/data trains and is scored without December. Only the whole-recording files include it.
@@ -26,21 +28,45 @@ TUNING_END, REPORT_START = np.datetime64("2017-11-01"), np.datetime64("2017-12-0
 GAP_S = 300
 
 SECOND = np.timedelta64(1, "s")
+PHASE_COLUMNS = ["P1_kW", "P2_kW", "P3_kW", "Q1_kvar", "Q2_kvar", "Q3_kvar"]
+# Each meter's phases L1, L2, L3 in the HighTemperatureOven meter's labels, found by correlating their phase voltages
+# over October. Every meter not listed is wired L1, L2, L3. The PhaseCount_2 meters are single-phase and have no
+# per-phase columns: their P_kW and Q_kvar go on the one phase listed.
+WIRING = {"ChipPress": (1, 0, 2), "PickAndPlaceUnit": (0,), "ScreenPrinter": (2,), "VacuumPump2": (1,)}
 
 
-def read_machine(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
-    """Return one machine's times (UTC, no time zone) and power.
+def read_times(df: pd.DataFrame) -> np.ndarray:
+    """Return one machine's times (UTC, no time zone).
 
     - Each timestamp's UTC offset (its "+02:00" ending) is applied, so the clock does not jump back an hour when
       summer time ends; that jump would cut the series.
     - The series stops at the first timestamp not later than the one before: that sample, the one before it and
-      all later ones are dropped.
-    - Negative power is set to 0."""
-    time = pd.to_datetime(df.SensorDateTime, utc=True, format="ISO8601").dt.tz_localize(None)
-    time, power = time.to_numpy(), df.P_kW.to_numpy(dtype=float)
+      all later ones are dropped."""
+    time = pd.to_datetime(df.SensorDateTime, utc=True, format="ISO8601").dt.tz_localize(None).to_numpy()
     stop = np.flatnonzero(np.diff(time) <= 0 * SECOND)
-    n = stop[0] if stop.size else len(time)
-    return time[:n], np.where(power[:n] < 0, 0.0, power[:n])
+    return time[: stop[0] if stop.size else len(time)]
+
+
+def read_machine(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    """Return one machine's times, as read_times, and power, negatives set to 0."""
+    time = read_times(df)
+    power = df.P_kW.to_numpy(dtype=float)[: len(time)]
+    return time, np.where(power < 0, 0.0, power)
+
+
+def read_phases(df: pd.DataFrame, wiring: tuple[int, ...] = (0, 1, 2)) -> tuple[np.ndarray, np.ndarray]:
+    """Return one machine's times, as read_times, and its readings (T, 6) in PHASE_COLUMNS order, on the reference
+    phases: own phase i goes to wiring[i]. A meter without per-phase columns has its P_kW and Q_kvar on own phase 1."""
+    time = read_times(df)
+    own = np.zeros((len(time), 6))
+    if "P1_kW" in df:
+        own[:] = df[PHASE_COLUMNS].to_numpy(dtype=float)[: len(time)]
+    else:
+        own[:, 0], own[:, 3] = df.P_kW.to_numpy(dtype=float)[: len(time)], df.Q_kvar.to_numpy(dtype=float)[: len(time)]
+    out = np.zeros_like(own)
+    for i, ph in enumerate(wiring):
+        out[:, [ph, 3 + ph]] += own[:, [i, 3 + i]]
+    return time, out
 
 
 def interp1_extrap(x: np.ndarray, xp: np.ndarray, fp: np.ndarray) -> np.ndarray:
@@ -53,6 +79,14 @@ def interp1_extrap(x: np.ndarray, xp: np.ndarray, fp: np.ndarray) -> np.ndarray:
     y[lo] = fp[0] + (x[lo] - xp[0]) * (fp[1] - fp[0]) / (xp[1] - xp[0])
     y[hi] = fp[-1] + (x[hi] - xp[-1]) * (fp[-1] - fp[-2]) / (xp[-1] - xp[-2])
     return y
+
+
+def machine_phases(path: Path, grid: np.ndarray) -> np.ndarray:
+    """One machine's readings (T, 6) on the grid's times (process()'s timestamps), interpolated and rounded as there."""
+    df = pd.read_csv(path, usecols=lambda c: c in {"SensorDateTime", "P_kW", "Q_kvar", *PHASE_COLUMNS})
+    t, x = read_phases(df, WIRING.get(path.stem.split("_PhaseCount")[0], (0, 1, 2)))
+    at, xp = (grid - grid[0]) / SECOND, (t - grid[0]) / SECOND  # grid[0] is process()'s start
+    return np.round(np.column_stack([interp1_extrap(at, xp, c) for c in x.T]), 4) + 0.0
 
 
 def process(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -96,12 +130,17 @@ def main(argv=None):
     pool = np.flatnonzero((t - TUNING_END >= gap) & (REPORT_START - t > gap))
     report = np.flatnonzero(t - REPORT_START >= gap)
     sums = np.cumsum(eq.iloc[:, 1:].to_numpy(), axis=1)  # column n - 1: total of the first n machines, added in order
+    files = sorted((a.raw / "Equipment").glob("*.csv"))  # machine k is the k-th, as in read_equipment_csv
+    order, grid = [*range(2, len(files) + 1), 1], eq.timestamp.to_numpy()
+    phases = machine_phases(files[order[0] - 1], grid)
     for n in range(2, sums.shape[1] + 1):
         out, tune = a.out / str(n), a.tuning_out / str(n)
+        phases = phases + machine_phases(files[order[n - 1] - 1], grid)  # one machine at a time: the files are large
         tables = {
             "aggregate": pd.DataFrame({"timestamp": eq.timestamp, "active_power": sums[:, n - 1]}),
             "equipment": eq.iloc[:, : n + 1],
             "states": st.iloc[:, : n + 1],
+            "phases": pd.DataFrame({"timestamp": eq.timestamp, **dict(zip(PHASE_COLUMNS, phases.T, strict=True))}),
         }
         training = draw_training(pool, rng)
         for name, df in tables.items():

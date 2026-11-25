@@ -7,7 +7,7 @@ import hipe
 import numpy as np
 import pandas as pd
 from common import TIME_FORMAT
-from hipe import main, process, read_machine
+from hipe import PHASE_COLUMNS, interp1_extrap, main, process, read_machine, read_phases, read_times
 
 T0 = pd.Timestamp("2017-10-23")
 rng = np.random.default_rng(0)
@@ -64,9 +64,10 @@ def write_raw(folder):
             rng.random(len(t)) < 0.5 if k == 2 else whole,
         )  # machine 2 mixes both forms
     for k, (t, p, whole) in machines.items():
-        pd.DataFrame({"Id": k, "SensorDateTime": stamps(t, whole), "P_kW": p, "Q_kvar": 0.0}).to_csv(
-            folder / f"machine_{k:02d}.csv", index=False
-        )
+        df = pd.DataFrame({"Id": k, "SensorDateTime": stamps(t, whole), "P_kW": p, "Q_kvar": rng.normal(0, 1, len(t))})
+        if k in (3, 6, 7):  # three-phase meters; the rest are single-phase, with no per-phase columns
+            df[PHASE_COLUMNS] = rng.uniform(-0.5, 2, (len(t), 6)).round(5)
+        df.to_csv(folder / f"machine_{k:02d}.csv", index=False)
     return machines
 
 
@@ -78,6 +79,7 @@ with tempfile.TemporaryDirectory() as name:
     tmp = Path(name)
     machines = write_raw(tmp / "raw" / "Equipment")
     hipe.TUNING_END, hipe.REPORT_START = np.datetime64("2017-10-22T22:30"), np.datetime64("2017-10-22T23:00")
+    hipe.WIRING = {"machine_04": (2,), "machine_06": (1, 0, 2)}  # single-phase on L3; L1 and L2 swapped
     main(["--raw", str(tmp / "raw"), "--out", str(tmp / "out"), "--tuning-out", str(tmp / "tune")])
     out = tmp / "out"
 
@@ -91,6 +93,11 @@ with tempfile.TemporaryDirectory() as name:
     t3, p3 = read_machine(raw3)
     assert t3[0] == np.datetime64("2017-10-22T22:00:05.25") and t3[1] == np.datetime64("2017-10-22T22:00:07.75")
     assert (raw3.P_kW < 0).any() and np.array_equal(p3, np.maximum(raw3.P_kW, 0))
+    # per-phase readings follow the wiring and are not clipped; a single-phase meter's go on its one phase
+    one = pd.DataFrame({"SensorDateTime": ["2017-10-29T02:59:59+02:00"], "P_kW": -1.0, "Q_kvar": 2.0})
+    assert read_phases(one, (2,))[1].tolist() == [[0, 0, -1, 0, 0, 2]]
+    three = one.assign(**dict(zip(PHASE_COLUMNS, [1, 2, 3, 4, 5, 6], strict=True)))
+    assert read_phases(three, (1, 0, 2))[1].tolist() == [[2, 1, 3, 5, 4, 6]]
 
     # layout and headers
     eq_cols = [f"Eq{k}_P_kW" for k in [*range(2, 11), 1]]
@@ -101,6 +108,7 @@ with tempfile.TemporaryDirectory() as name:
             expected[f"{n}/aggregate{s}.csv"] = ["timestamp", "active_power"]
             expected[f"{n}/equipment{s}.csv"] = ["timestamp", *eq_cols[:n]]
             expected[f"{n}/states{s}.csv"] = ["timestamp", *st_cols[:n]]
+            expected[f"{n}/phases{s}.csv"] = ["timestamp", *PHASE_COLUMNS]
     written = files(out)
     assert set(written) == set(expected), set(written) ^ set(expected)
     read = {f: pd.read_csv(out / f) for f in expected}
@@ -133,6 +141,24 @@ with tempfile.TemporaryDirectory() as name:
     assert np.array_equal(states[st_cols].to_numpy(), (values > 0).astype(int))
     assert np.allclose(aggregate.active_power, values.sum(axis=1), rtol=0, atol=1e-9)
 
+    # phases: each machine's raw per-phase readings put on the wired phase, interpolated like the power, rounded to 4
+    # decimals, and summed over the group's machines
+    grid = eq.timestamp.to_numpy()
+    own = {}
+    for k in machines:
+        raw = pd.read_csv(tmp / "raw" / "Equipment" / f"machine_{k:02d}.csv")
+        t = read_times(raw)
+        x = raw[PHASE_COLUMNS] if k in (3, 6, 7) else raw[["P_kW"]].assign(a=0, b=0, Q_kvar=raw.Q_kvar, c=0, d=0)
+        x = x.to_numpy()[: len(t)][:, {4: [1, 2, 0, 4, 5, 3], 6: [1, 0, 2, 4, 3, 5]}.get(k, range(6))]
+        at, xp = (grid - grid[0]) / np.timedelta64(1, "s"), (t - grid[0]) / np.timedelta64(1, "s")
+        own[k] = np.round(np.column_stack([interp1_extrap(at, xp, c) for c in x.T]), 4)
+    assert (own[4][:, [0, 1, 3, 4]] == 0).all() and (own[4][:, 2] < 0).any()  # single-phase, on L3, not clipped
+    phases = {n: read[f"{n}/phases.csv"] for n in range(2, 11)}
+    for n in range(2, 11):
+        assert (phases[n].timestamp == equipment.timestamp).all()
+        summed = sum(own[k] for k in [*range(2, 11), 1][:n])
+        assert np.allclose(phases[n][PHASE_COLUMNS], summed, rtol=0, atol=1e-9), n
+
     # splits by time, cut here at 22:30 and 23:00 UTC (1 Nov and 1 Dec in the real data), 300 s left out next to each
     # cut: before tunes, between trains, after reports. The tuning copy has its own test rows and links the rest.
     since = (
@@ -158,7 +184,19 @@ with tempfile.TemporaryDirectory() as name:
             assert np.array_equal(eq_split[eq_cols[:n]], values[rows, :n])
             assert np.array_equal(st_split[st_cols[:n]], states[st_cols[:n]].to_numpy()[rows])
             assert np.allclose(agg.active_power, values[rows, :n].sum(axis=1), rtol=0, atol=1e-9)
-        for f in ("aggregate.csv", "equipment.csv", "states.csv", "aggregate_training.csv", "states_training.csv"):
+            ph_split = pd.read_csv(folder / f"phases_{s}.csv")
+            assert (ph_split.timestamp == agg.timestamp).all()
+            assert np.array_equal(ph_split[PHASE_COLUMNS], phases[n][PHASE_COLUMNS].to_numpy()[rows])
+        linked = (
+            "aggregate",
+            "equipment",
+            "states",
+            "phases",
+            "aggregate_training",
+            "states_training",
+            "phases_training",
+        )
+        for f in (f"{stem}.csv" for stem in linked):
             assert (tune / f).is_symlink() and (tune / f).resolve() == (out / str(n) / f).resolve(), f
 
     # determinism: same seed, same files; another seed, other splits
