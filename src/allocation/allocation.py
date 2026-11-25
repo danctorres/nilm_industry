@@ -3,14 +3,17 @@
 - While ON, each machine's power comes from its own mixture of Gaussians ("components"), one per power level, e.g. an
   oven idling or heating. Machines are independent.
 - The total (`aggregate` in the files) is the sum over the ON machines.
+- --phases (HIPE): the total is instead the meter's 6 per-phase readings, active and reactive power on each phase
+  (`phases` in the files), and each component is a Gaussian over those 6. Machines on other phases, or with other
+  reactive power, then look different in the total.
 - EM (expectation-maximisation: alternately estimate each machine's share and refit) fits the components from the
   total and the states alone.
-- Each estimate is the machine's posterior mean (expected power given the total), so ON estimates add up to the total.
-  A Gaussian allows negative power: those are set to 0 and the others scaled down so they still add up to it.
+- Each estimate is the machine's posterior mean active power (expected power given the total), so ON estimates add up
+  to the total. A Gaussian allows negative power: those are set to 0 and the others scaled so they add up to it.
 - --components 1: one Gaussian per machine.
 - Trains on the same training rows as the other methods.
 
-Example: python3 src/allocation/allocation.py --dataset hipe --machines 9
+Example: python3 src/allocation/allocation.py --dataset hipe --machines 9 --phases
 """
 
 import argparse
@@ -22,34 +25,17 @@ import pandas as pd
 from scipy.optimize import nnls
 
 REPO = Path(__file__).resolve().parents[2]
-FLOOR = 1e-6  # minimum variance (total scaled to [0, 1]): keeps the posterior defined when only steady machines run
-CHUNK = 2_000_000  # cap on rows x assignments that `conditional` gets at once
+FLOOR = (
+    1e-6  # minimum variance (each reading scaled to [-1, 1]): keeps the posterior defined when only steady machines run
+)
+CHUNK = 2_000_000  # cap on rows x assignments x readings that `conditional` gets at once
+PHASES = ["P1_kW", "P2_kW", "P3_kW", "Q1_kvar", "Q2_kvar", "Q3_kvar"]  # columns of the phases files
 
 
-def posterior(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Each machine's power mean and variance, given the total a (T,) and 0/1 states s (T, n). Both 0 when OFF."""
-    total = np.maximum(s @ var, FLOOR)  # var is already floored; this only guards rows where every machine is OFF
-    shift = (a - s @ mu) / total
-    return s * (mu + var * shift[:, None]), s * (var - var**2 / total[:, None])
-
-
-def fit(a: np.ndarray, s: np.ndarray, iters: int = 500) -> tuple[np.ndarray, np.ndarray]:
-    """Fit one Gaussian per machine by EM: means and variances (n,). Starts from a non-negative least-squares fit. A
-    machine never ON keeps mean 0."""
-    on = s.any(axis=1)
-    a, s = a[on], s[on]
-    count = np.maximum(s.sum(axis=0), 1)
-    mu = nnls(s, a)[0]
-    var = nnls(s, (a - s @ mu) ** 2)[0] + FLOOR
-    for _ in range(iters):
-        mean, spread = posterior(a, s, mu, var)
-        new_mu = np.maximum(mean.sum(axis=0) / count, 0.0)
-        var = np.maximum((s * (spread + (mean - new_mu) ** 2)).sum(axis=0) / count, FLOOR)
-        converged = np.abs(new_mu - mu).max() < 1e-9
-        mu = new_mu
-        if converged:
-            break
-    return mu, var
+def floor_cov(c: np.ndarray) -> np.ndarray:
+    """Covariances (..., d, d), made symmetric with every eigenvalue at least FLOOR."""
+    lam, v = np.linalg.eigh((c + np.swapaxes(c, -1, -2)) / 2)
+    return (v * np.maximum(lam, FLOOR)[..., None, :]) @ np.swapaxes(v, -1, -2)
 
 
 def patterns(s: np.ndarray) -> list[tuple[np.ndarray, np.ndarray]]:
@@ -59,74 +45,83 @@ def patterns(s: np.ndarray) -> list[tuple[np.ndarray, np.ndarray]]:
     return [(on, rows) for on, rows in zip(keys, groups, strict=True) if on.any()]
 
 
-def assignments(on: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray):
+def assignments(on: np.ndarray, mu: np.ndarray, cov: np.ndarray, pi: np.ndarray):
     """Every way to pick one component per ON machine (C "assignments").
 
-    Returns the ON machines (m,), the picks one-hot (C, m, k), their means and variances (C, m), and per assignment the
-    variance of the sum and the log prior, i.e. the log of the picked weights' product (C,)."""
-    # ponytail: tries every combination of the ON machines' components; fine up to about 3 ** 8, prune or sample beyond
+    mu (n, k, d), cov (n, k, d, d), pi (n, k). Returns the ON machines (m,), the picks one-hot (C, m, k), their means
+    (C, m, d) and covariances (C, m, d, d), and per assignment the total's mean (C, d), the inverse of its covariance
+    (C, d, d), the log of that covariance's determinant and the log prior, i.e. the log of the picked weights' product
+    (C,)."""
+    # ponytail: tries every combination of the ON machines' components; fine up to about 3 ** 10, prune or sample beyond
     idx = np.flatnonzero(on)
     z = np.array(list(itertools.product(*(range(np.count_nonzero(pi[i])) for i in idx))))
-    mj, vj = mu[idx, z], var[idx, z]
+    mj, cj = mu[idx, z], cov[idx, z]
+    total = cj.sum(axis=1)
     return (
         idx,
         z[:, :, None] == np.arange(mu.shape[1]),
         mj,
-        vj,
-        np.maximum(vj.sum(axis=1), FLOOR),
+        cj,
+        mj.sum(axis=1),
+        np.linalg.inv(total),
+        np.linalg.slogdet(total)[1],
         np.log(pi[idx, z]).sum(axis=1),
     )
 
 
-def conditional(a: np.ndarray, mj, v, lp) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """For the rows of one pattern, with total a (r,), return:
+def conditional(y: np.ndarray, m, g, logdet, lp) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """For the rows of one pattern, with totals y (r, d), return:
     - each assignment's posterior weight (r, C)
-    - q (r, C): ON machine j's mean under an assignment is mj + vj * q, kept apart so no (r, C, m) array is built
+    - q (r, C, d): ON machine j's mean under an assignment is mj + cj q, kept apart so no (r, C, m, d) array is built
     - the log-likelihood of each row's total (r,)"""
-    r = a[:, None] - mj.sum(axis=1)
-    ll = lp - 0.5 * np.log(2 * np.pi * v) - 0.5 * r**2 / v
+    r = y[:, None, :] - m
+    q = np.einsum("cde,rce->rcd", g, r)
+    ll = lp - 0.5 * (y.shape[1] * np.log(2 * np.pi) + logdet) - 0.5 * (r * q).sum(axis=2)
     top = ll.max(axis=1, keepdims=True)
     w = np.exp(ll - top)
     total = w.sum(axis=1, keepdims=True)
-    return w / total, r / v, (top + np.log(total))[:, 0]
+    return w / total, q, (top + np.log(total))[:, 0]
 
 
 def chunks(rows: np.ndarray, c: int) -> list[np.ndarray]:
-    """rows in pieces of at most CHUNK // c, c being the number of assignments."""
+    """rows in pieces of at most CHUNK // c, c being the number of assignments times readings."""
     return np.array_split(rows, -(-len(rows) * c // CHUNK))
 
 
-def fit_mixture(
-    a: np.ndarray, s: np.ndarray, k: int = 1, iters: int = 300
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Fit k components per machine by EM.
-
-    Returns means, variances and weights, each (n, k). Starts from `fit`'s single Gaussian, spreading each machine's
-    components evenly from one sd below its mean to one above. k = 1 is just `fit`."""
-    mu1, var1 = fit(a, s)
-    if k == 1:
-        return mu1[:, None], var1[:, None], np.ones((len(mu1), 1))
-    mu = np.maximum(mu1[:, None] + np.sqrt(var1)[:, None] * (2 * np.arange(k) / (k - 1) - 1), 0.0)
-    var = np.repeat(np.maximum(var1 / k**2, FLOOR)[:, None], k, axis=1)
-    pi = np.full(mu.shape, 1 / k)
+def em(y, s, model, nonneg, iters):
+    """EM from the given start, model = means (n, k, d), covariances (n, k, d, d) and weights (n, k). A machine never ON
+    keeps its start."""
+    mu, cov, pi = model
     groups = patterns(s)
     for _ in range(iters):
-        weight, first, second = np.zeros(mu.shape), np.zeros(mu.shape), np.zeros(mu.shape)
+        weight, first, second = np.zeros(pi.shape), np.zeros(mu.shape), np.zeros(cov.shape)
         for on, rows in groups:
-            idx, onehot, mj, vj, v, lp = assignments(on, mu, var, pi)
-            s0 = s1 = s2 = 0.0  # per assignment, over the rows: sums of w, w * q and w * q ** 2
-            for chunk in chunks(rows, len(lp)):
-                w, q, _ = conditional(a[chunk], mj, v, lp)
-                s0, s1, s2 = s0 + w.sum(axis=0), s1 + (w * q).sum(axis=0), s2 + (w * q**2).sum(axis=0)
-            s0, s1, s2 = s0[:, None], s1[:, None], s2[:, None]
-            # sums of w * mean and w * (mean ** 2 + its variance), with mean = mj + vj * q
-            weight[idx] += np.einsum("c,cmk->mk", s0[:, 0], onehot)
-            first[idx] += np.einsum("cm,cmk->mk", mj * s0 + vj * s1, onehot)
-            moment = mj**2 * s0 + 2 * mj * vj * s1 + vj**2 * s2 + (vj - vj**2 / v[:, None]) * s0
-            second[idx] += np.einsum("cm,cmk->mk", moment, onehot)
+            idx, onehot, mj, cj, m, g, logdet, lp = assignments(on, mu, cov, pi)
+            s0 = s1 = s2 = 0.0  # per assignment, over the rows: sums of w, w * q and w * q q'
+            for chunk in chunks(rows, len(lp) * y.shape[1]):
+                w, q, _ = conditional(y[chunk], m, g, logdet, lp)
+                s0 = s0 + w.sum(axis=0)
+                s1 = s1 + np.einsum("rc,rcd->cd", w, q)
+                s2 = s2 + np.einsum("rc,rcd,rce->cde", w, q, q)
+            # sums of w * mean and w * (mean mean' + its covariance), with mean = mj + cj q
+            cs1 = np.einsum("cmde,ce->cmd", cj, s1)
+            cg = np.einsum("cmde,cef->cmdf", cj, g)
+            outer = mj[..., :, None] * mj[..., None, :] + cj - np.einsum("cmde,cmfe->cmdf", cg, cj)
+            moment = (
+                s0[:, None, None, None] * outer
+                + mj[..., :, None] * cs1[..., None, :]
+                + cs1[..., :, None] * mj[..., None, :]
+                + np.einsum("cmde,cef,cmgf->cmdg", cj, s2, cj)
+            )
+            weight[idx] += np.einsum("c,cmk->mk", s0, onehot)
+            first[idx] += np.einsum("cmd,cmk->mkd", mj * s0[:, None, None] + cs1, onehot)
+            second[idx] += np.einsum("cmde,cmk->mkde", moment, onehot)
         seen = weight > 0  # zero weight (machine never ON): keep the start
-        new_mu = np.where(seen, np.maximum(first / np.where(seen, weight, 1), 0.0), mu)
-        var = np.where(seen, np.maximum(second / np.where(seen, weight, 1) - new_mu**2, FLOOR), var)
+        w = np.where(seen, weight, 1)
+        new_mu = np.where(seen[..., None], first / w[..., None], mu)
+        new_mu[..., nonneg] = np.maximum(new_mu[..., nonneg], 0.0)
+        c = second / w[..., None, None] - new_mu[..., :, None] * new_mu[..., None, :]
+        cov = np.where(seen[..., None, None], floor_cov(c), cov)
         # floored: `assignments` counts components by nonzero weight
         pi = np.maximum(weight / np.maximum(weight.sum(axis=1, keepdims=True), 1e-300), 1e-6)
         pi /= pi.sum(axis=1, keepdims=True)
@@ -134,17 +129,47 @@ def fit_mixture(
         mu = new_mu
         if converged:
             break
-    return mu, var, pi
+    return mu, cov, pi
 
 
-def estimate(a: np.ndarray, s: np.ndarray, mu: np.ndarray, var: np.ndarray, pi: np.ndarray) -> np.ndarray:
-    """Posterior mean of each machine's power, given the total a (T,) and the 0/1 states s (T, n). 0 when OFF."""
+def fit_mixture(
+    y: np.ndarray, s: np.ndarray, k: int, e: np.ndarray, nonneg: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Fit k components per machine by EM, from the totals y (T, d) and the 0/1 states s (T, n).
+
+    e (d,): weights that turn the readings into active power. nonneg (d,): readings that can't be negative, whose means
+    are kept at 0 or above. Returns means (n, k, d), covariances (n, k, d, d) and weights (n, k).
+
+    First one Gaussian per machine, from a least-squares start. Then each machine's k components are spread evenly
+    along active power, from one sd below its mean to one above."""
+    on = s.any(axis=1)
+    y, s = y[on], s[on]
+    n, d = s.shape[1], y.shape[1]
+    mu, cov = np.zeros((n, 1, d)), np.zeros((n, 1, d, d))
+    for i in range(d):
+        m = nnls(s, y[:, i])[0] if nonneg[i] else np.linalg.lstsq(s, y[:, i], rcond=None)[0]
+        mu[:, 0, i], cov[:, 0, i, i] = m, nnls(s, (y[:, i] - s @ m) ** 2)[0] + FLOOR
+    mu, cov, pi = em(y, s, (mu, cov, np.ones((n, 1))), nonneg, 500)
+    if k == 1:
+        return mu, cov, pi
+    step = cov[:, 0] @ e / np.sqrt(e @ cov[:, 0] @ e)[:, None]  # 1 sd along active power, per machine (n, d)
+    mu = mu + (2 * np.arange(k) / (k - 1) - 1)[None, :, None] * step[:, None, :]
+    mu[..., nonneg] = np.maximum(mu[..., nonneg], 0.0)
+    cov = np.repeat(floor_cov(cov[:, 0] / k**2)[:, None], k, axis=1)
+    return em(y, s, (mu, cov, np.full((n, k), 1 / k)), nonneg, 300)
+
+
+def estimate(y: np.ndarray, s: np.ndarray, model, e: np.ndarray) -> np.ndarray:
+    """Posterior mean active power (e . readings) of each machine, given the totals y (T, d), the 0/1 states s (T, n)
+    and the fitted model (means, covariances, weights). 0 when OFF."""
+    mu, cov, pi = model
     est = np.zeros(s.shape)
     for on, rows in patterns(s):
-        idx, _, mj, vj, v, lp = assignments(on, mu, var, pi)
-        for chunk in chunks(rows, len(lp)):
-            w, q, _ = conditional(a[chunk], mj, v, lp)
-            est[np.ix_(chunk, idx)] = w @ mj + (w * q) @ vj
+        idx, _, mj, cj, m, g, logdet, lp = assignments(on, mu, cov, pi)
+        ce = np.einsum("cmde,d->cem", cj, e)
+        for chunk in chunks(rows, len(lp) * y.shape[1]):
+            w, q, _ = conditional(y[chunk], m, g, logdet, lp)
+            est[np.ix_(chunk, idx)] = w @ (mj @ e) + np.einsum("rc,rcd,cdm->rm", w, q, ce)
     return est
 
 
@@ -165,6 +190,7 @@ def main(argv=None) -> None:
         default=3,
         help="Gaussian components per machine, chosen on October",
     )
+    p.add_argument("--phases", action="store_true", help="split the per-phase readings (HIPE only)")
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
     p.add_argument("--results-root", type=Path, default=REPO / "results" / "allocation")
     a = p.parse_args(argv)
@@ -180,21 +206,33 @@ def main(argv=None) -> None:
         if y.shape[1] - 1 != a.machines or not x.iloc[:, 0].equals(y.iloc[:, 0]):
             raise SystemExit(f"expected {a.machines} machine columns and the aggregate's timestamps in {d}")
     states, val_states = states.iloc[:, 1:].to_numpy(float), val_states.iloc[:, 1:].to_numpy(float)
-    power = agg.iloc[:, 1].to_numpy()
-    scale = np.abs(power).max() or 1.0
+    if a.phases:
+        if not (d / "phases_training.csv").exists():
+            raise SystemExit(f"no phases_training.csv in {d}: --phases needs HIPE, made by hipe.py")
+        readings = [pd.read_csv(d / f"phases_{split}.csv") for split in ("training", "validation")]
+        if not all(r.iloc[:, 0].equals(x.iloc[:, 0]) for r, x in zip(readings, (agg, val), strict=True)):
+            raise SystemExit(f"the phases files' timestamps differ from the aggregate's in {d}")
+        y, y_val = (r[PHASES].to_numpy() for r in readings)
+        e, nonneg = np.array([1.0, 1, 1, 0, 0, 0]), np.zeros(6, bool)  # per-phase power can be negative
+    else:
+        y, y_val = agg.iloc[:, 1:2].to_numpy(), val.iloc[:, 1:2].to_numpy()
+        e, nonneg = np.ones(1), np.ones(1, bool)
+    scale = np.abs(y).max(axis=0)
+    scale[scale == 0] = 1.0
+    e = e * scale  # active power from the scaled readings
 
     if pairs := collinear(states):
         print(f"warning: machine pairs {pairs} switch on and off together, so how their power splits is a guess")
-    mu, var, pi = fit_mixture(power / scale, states, a.components)
+    model = mu, cov, pi = fit_mixture(y / scale, states, a.components, e, nonneg)
     for j in range(a.machines):
         parts = (
-            f"{w:.0%} at {m * scale:.4g} (sd {np.sqrt(v) * scale:.4g})"
-            for m, v, w in zip(mu[j], var[j], pi[j], strict=True)
+            f"{w:.0%} at {m @ e:.4g} (sd {np.sqrt(e @ c @ e):.4g})"
+            for m, c, w in zip(mu[j], cov[j], pi[j], strict=True)
             if w > 0
         )
         print(f"machine {j} while ON: {', '.join(parts)}")
     a_val = val.iloc[:, 1].to_numpy()[:, None]
-    est = np.maximum(estimate(a_val[:, 0] / scale, val_states, mu, var, pi), 0.0)
+    est = np.maximum(estimate(y_val / scale, val_states, model, e), 0.0)
     total = est.sum(axis=1, keepdims=True)
     with np.errstate(divide="ignore", invalid="ignore"):  # no machine ON: 0 / 0 = NaN, set to 0
         shares = np.where(total > 0, est / total, val_states / val_states.sum(axis=1, keepdims=True))
