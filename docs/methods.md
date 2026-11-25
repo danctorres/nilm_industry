@@ -1,10 +1,11 @@
 # How the methods work
 
-> **In short:** every method gets the same two inputs: the total power and which machines are on. Each one splits the total among the running machines, and they differ only in how they pick the split. Every section uses the same example, so you can compare them.
+> **In short:** every method gets the same two inputs: the total power and which machines are on. Gaussian allocation can also take the total on each phase. Each one splits the total among the running machines, and they differ only in how they pick the split. Every section uses the same example, so you can compare them.
 
 | Method | Idea in one line | December error (W) |
 |---|---|---|
-| [Gaussian allocation](#gaussian-allocation) | Give the leftover to the machine whose power varies most | **6.2** |
+| [Gaussian allocation, per-phase readings](#with-per-phase-readings) | Give the leftover to the machine whose power varies most, on each phase's active and reactive power | **2.1** |
+| [Gaussian allocation](#gaussian-allocation) | Give the leftover to the machine whose power varies most | 6.2 |
 | [Neural network](#neural-network) | Learn each machine's share of the total | 11.4 |
 | [Proportional split](#baselines) | Split in proportion to each machine's average power | 16.9 |
 | [Equal split](#baselines) | Split equally among the running machines | 28.4 |
@@ -32,7 +33,7 @@
 
 > **In short:** the total and the on/off states. Never the machines' own meters.
 
-* **The total:** the plant meter's power, every second.
+* **The total:** the plant meter's power, every second. Gaussian allocation can also take the meter's readings on each phase: [With per-phase readings](#with-per-phase-readings).
 * **The states:** for each machine, on or off, every second. A plant's control system (the PLC) may already have these. How they are made from the data: [On or off](notes.md#on-or-off).
 * **Training rows:** 19,600 seconds of November to learn from. Each method then splits every second of December.
 * **The machines' own meters** are only used to score the result, never to train.
@@ -73,7 +74,7 @@
 
 ## Gaussian allocation
 
-> **In short:** learn how much each machine's power varies, then give most of any leftover to the machine that varies most. The best method: 6.2 W.
+> **In short:** learn how much each machine's power varies, then give most of any leftover to the machine that varies most. The best method: 6.2 W, or 2.1 W with the per-phase readings.
 
 **Idea:** a steady machine is probably at its usual power, so whatever the total adds on top belongs to the machine that swings.
 
@@ -96,11 +97,11 @@
 
 **Good at:** HIPE. It's best on every group, and still 7.0 W with only 1 level per machine.
 **Bad at:** big machines with wide levels running at the same time.
-* If it knew each machine's true level, its October error would fall from 6.14 to 1.6 W.
+* If it knew each machine's true level, its October error would fall from 6.14 to 1.6 W. The per-phase readings get it to 1.37 W.
 * Looking at neighbouring seconds didn't help: [Tried and dropped](notes.md#tried-and-dropped).
 * **Slow** when many machines are on at once, since it tries every combination of levels.
 
-**Code:** [allocation.py](../src/allocation/allocation.py). `--components K`: levels per machine, 3 by default.
+**Code:** [allocation.py](../src/allocation/allocation.py). `--components K`: levels per machine, 3 by default. `--phases`: use the [per-phase readings](#with-per-phase-readings).
 
 ### How it learns the curves
 
@@ -161,6 +162,26 @@
 **Where it can go wrong:**
 * **The start matters.** Each round only improves on the last one, so EM can get stuck on a worse answer depending on where it starts. On the four rows above, the code's own least-squares start gives both machines the same spread (± 153 W). So every leftover is split half and half, the spreads stay equal, and it stops after 2 rounds at Oven 2,030 ± 151 W, Pump 640 ± 151 W. That ignores row A, where the Pump ran alone at 510 W.
 * **Machines that always switch on and off together** give it nothing to tell them apart. It prints a warning when two machines' states have a correlation above 0.9.
+
+### With per-phase readings
+
+> **In short:** a three-phase meter gives 6 readings, not 1: active and reactive power on each phase. Machines that look alike in the total often differ in these. The error falls from 6.2 to 2.1 W.
+
+**Idea:** the same method, but each level is a bell curve over the 6 readings instead of over the total alone. A machine wired to phase 1 only adds to phase 1, and an oven's heater draws reactive power that a pump's motor doesn't. So the readings say which machine moved.
+
+**Steps:** as above, with three changes.
+1. **Each level** has a typical value for each of the 6 readings, and a spread that says how they vary together.
+2. **The leftover** is a gap in each of the 6 readings, and is shared by how well each machine's curves explain all of them at once.
+3. **The estimate** is each machine's active power, summed over its phases, then scaled so the machines add up to the total.
+
+**Example:** two ovens, both 2,000 ± 800 W, both on, and a total of 5,000 W.
+* **From the total alone,** they look the same, so each gets 2,500 W.
+* **Per phase:** say Oven A is on phase 1 and Oven B on phases 2 and 3. Phase 1 reads 2,900 W, phases 2 and 3 read 2,100 W. **A ≈ 2,900 W, B ≈ 2,100 W.**
+
+**Good at:** HIPE, where it beats knowing each machine's true level from the total alone (October: 1.37 W against 1.6 W).
+**Bad at:** machines with the same phases and the same mix of active and reactive power. Then it does no better than the total alone.
+* **Needs** a meter that reports each phase, but not which phases each machine is on: it learns that from the training rows.
+* **Slower:** 4 times as long as the total alone on group 9 (5 min).
 
 ## Neural network
 

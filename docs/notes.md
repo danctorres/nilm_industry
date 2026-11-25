@@ -28,12 +28,13 @@
 
 ## Results per group
 
-> **In short:** Gaussian allocation wins on every group. The neural network is second, the only other method to beat the proportional split on average.
+> **In short:** Gaussian allocation wins on every group, and the per-phase readings cut its error by 1.7 to 5.5 times. The neural network is second, the only other method to beat the proportional split on average.
 
 **Setup:** HIPE · trained on November 2017 · scored on December · settings chosen on October · error in W · seeds: preprocessing 1, neural network 0.
 
 | Method | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | Mean | Mean while running |
 |---|---|---|---|---|---|---|---|---|---|---|---|
+| Gaussian allocation, per-phase readings | 1.0 | 1.6 | 1.1 | 1.6 | 1.4 | 1.5 | 1.4 | 1.3 | 7.7 | 2.1 | 33 |
 | Gaussian allocation | 2.7 | 2.8 | 2.2 | 8.7 | 7.4 | 6.5 | 6.0 | 5.9 | 13.4 | 6.2 | 101 |
 | Gaussian allocation, 1 level per machine | 3.6 | 3.7 | 2.9 | 9.7 | 8.2 | 7.5 | 6.7 | 6.5 | 14.5 | 7.0 | 115 |
 | Neural network, total only as input | 5.1 | 6.7 | 5.1 | 13.8 | 11.2 | 12.3 | 11.6 | 12.4 | 24.2 | 11.4 | 185 |
@@ -44,10 +45,11 @@
 | Baseline: proportional split | 8.3 | 9.5 | 14.1 | 18.3 | 15.8 | 19.6 | 18.2 | 17.8 | 30.5 | 16.9 | 273 |
 
 * **Gaussian allocation** is best on every group, and 3 levels per machine beat 1 on every group.
+* **Per-phase readings** (`--phases`, [what they are](#per-phase-readings)): only Gaussian allocation uses them, and it does better with them on every group. Every other row uses the total alone.
 * **Beating the proportional split:** the neural network (total only) on every group and on average. With states, on groups 5 to 10 and on average.
 * **Hart-inspired** estimates 97–100% of the on-samples, yet is barely better than guessing 0 W.
 * **Mean while running:** the mean over groups of the error over only the seconds a machine draws power. See [Words](#words).
-* **Group 10 is the hardest.** Its extra machine, the ChipPress, runs only in November and December, so October never shows its big loads.
+* **Group 10 is the hardest.** Its extra machine, the ChipPress, runs only in November and December, so October never shows its big loads. With the per-phase readings, the ChipPress is still off by 31 W, and the HighTemperatureOven by 15 W. Without group 10, the mean is 1.4 W.
 
 ### IMDELD
 
@@ -127,7 +129,7 @@ From Martins et al., [IEEE DataPort](https://ieee-dataport.org/open-access/indus
 > **In short:** two commands turn the raw files into training and test sets for each group.
 
 ```sh
-uv run src/preprocessing/hipe.py     # about 30 min, 8 GB of output
+uv run src/preprocessing/hipe.py     # under an hour, 11 GB of output
 uv run src/preprocessing/imdeld.py   # add --equipment 1,2,3,4,5,6,7,8 for the 8-machine group
 ```
 
@@ -140,6 +142,7 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
 | `aggregate*.csv` | `timestamp`, then the total in `active_power` |
 | `states*.csv` | `timestamp`, then one 0/1 column per machine |
 | `equipment*.csv` | `timestamp`, then each machine's metered power (for scoring only) |
+| `phases*.csv` | HIPE only: `timestamp`, then the same total as active and reactive power on each phase (`P1_kW`–`P3_kW`, `Q1_kvar`–`Q3_kvar`). See [Per-phase readings](#per-phase-readings) |
 
 * **Three versions of each:** `_training` (training rows), `_validation` (test rows), and no suffix (the whole recording).
 * **Units:** HIPE in kW, IMDELD in W. Both have one row per second.
@@ -156,7 +159,15 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
   * The 10 machines are only 4% of the main meter's energy (0.58 kW against 14.0 kW on average).
   * The rest is other plant load, about 8 kW at night and 20 kW at midday.
   * The methods would wrongly give that load to the running machines.
+  * **Tested on groups 9 and 10:** Gaussian allocation splitting the main meter, with the other load as one more machine, always on, with 3 levels (or 5, or with level weights by hour of day). In October it is off by 396–471 W, against 53–59 W for guessing 0 W. In December it is off by 212–247 W, against 41–67 W. The per-phase readings cut that by only 5–15%.
+  * **Why:** the machines run when the plant is busy, so being on stands in for the rest of the plant's load. A least-squares fit of the main meter on the states gives each machine 3.0–7.8 kW while on, against 0.17–1.8 kW on its own meter.
 * **IMDELD: a real meter.** 2–3% of it comes from equipment without its own meter, which the methods have to give to some machine.
+
+### Per-phase readings
+
+* **What:** HIPE's meters also report active (P) and reactive (Q) power on each of the 3 phases. `phases*.csv` adds them up per phase over the group's machines, as `aggregate*.csv` does for the total.
+* **Wiring:** the meters don't all label their phases the same way. Matching their phase voltages against the HighTemperatureOven's over October shows the ChipPress has L1 and L2 swapped. The 3 single-phase meters (`PhaseCount_2`) report one P and one Q, placed on L1 (PickAndPlaceUnit), L2 (VacuumPump2) and L3 (ScreenPrinter). On a real plant, the wiring diagram says this. The map is `WIRING` in `hipe.py`.
+* **Not clipped:** a phase can read negative (VacuumPump1 draws −68 W on L3). So P1 + P2 + P3 is the total before negatives are set to 0: from group 3 on, about 10 W below `active_power` on average, and up to 150 W.
 
 ### On or off
 
@@ -191,10 +202,11 @@ In `data/processed/<DATASET>/<N>/`, where N is the number of machines in the gro
 ### Gaussian allocation
 
 ```sh
-uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N [--components K]
+uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N [--components K] [--phases]
 ```
 
 * **`K`:** power levels per machine (idle, heating, ...). Default 3.
+* **`--phases`:** split the 6 per-phase readings instead of the total active power. HIPE only. [Why.](#gaussian-allocation-per-phase-readings)
 * **Slow** when many machines are on at once, since it tries every combination of levels.
 * **Assumes** the machines switch on and off independently, and warns when two don't.
 
@@ -258,6 +270,28 @@ October error (W) of the methods that learn from the training rows. A range is t
 * **Against 1 level:** error −11 to −57% on every group in October, and −7 to −27% in December.
 * **Each machine its own number of levels, picked by BIC** (a fit score that penalises extra parameters, formerly `--components auto`): barely better in October (6.07 W against 6.14 W), but worse in December (8.1 W against 6.2 W; group 10: 32.0 W against 13.4 W). So 3 levels for every machine was kept, and this one choice was not made on October alone. The option was then removed.
 
+### Gaussian allocation: per-phase readings
+
+October error (W) with each set of readings. In brackets: each level's spread kept per reading, ignoring how the readings move together.
+
+| Readings | Group 3 | Group 6 | Group 9 |
+|---|---|---|---|
+| Total active power (without `--phases`) | 2.53 | 8.68 | 8.71 |
+| Total active and reactive power | 2.99 (2.54) | 4.34 (4.64) | 4.93 |
+| Active power per phase | 1.11 (1.31) | 2.41 (2.95) | 2.92 |
+| Active power per phase, total reactive power | 1.18 (1.68) | 2.02 (2.80) | 2.61 |
+| **Active and reactive power per phase** (`--phases`) | **0.97** (1.43) | **1.54** (2.59) | **1.77** (4.03) |
+
+* **Why it works** (from each machine's own meter, November): the ovens heat on different phases, with different reactive power.
+  * **HighTemperatureOven:** reactive power that grows with its heating, of opposite sign on L1 and L3 (+4.8 and −4.2 kvar).
+  * **SolderingOven:** draws only on L2 and L3, with flat reactive power (about −400 var).
+  * **VacuumOven:** heats on L2 and L3, with reactive power about −1.4 × its active power.
+  * **The steady machines** have their own signatures. VacuumPump1 draws 422, 515 and −68 W on the three phases.
+  * **In group 9,** the two big ovens' errors fall from 22.9 and 23.5 W to 2.7 and 2.9 W.
+* **Negative readings must stay:** with each level's per-phase power clipped at 0, group 9 got worse (10.9 W).
+* **Every group gains.** October, groups 2 to 10: 0.34, 0.97, 0.91, 1.44, 1.54, 1.81, 1.84, 1.77 and 1.74 W, a mean of 1.37 W against 6.14 W. December: [Results per group](#results-per-group).
+* **Slower:** 5 min to fit and estimate group 9 or 10, 4 times as long as the total alone, and 2.3 GB of memory.
+
 ### Neural network
 
 | Setting | Now | Before |
@@ -298,6 +332,10 @@ Change against before, measured with the earlier 1,960 training rows and 2000 ep
 * **Following each machine's power from second to second:** much worse. A jump in the total goes to the machine that moved and the others stay put, with 3 levels and drift within a level, filtered forward or both ways. October: 2.58 W against 2.53 W on group 3, 13–15 W against 8.7 W on groups 6 and 9.
   * **What it could gain:** in 94–97% of the seconds where the total moves more than 20 W, one machine makes over 90% of the move.
   * **Why it doesn't:** the change in the total says how the split changed, not what it is, so errors add up. Started from the true powers and following only the changes, group 9's error grows to 4.25 W after 5 min and 11.9 W after a day. Small, slow ramps go to the wrong machine and stay there. With the drift fitted on the meters it is still 14.5–15.8 W.
+* **Level weights that depend on how long the machine has been on:** not built, since the per-phase readings do the same job better. Each machine had its own level weights for each band of time since it switched on (10 s, 30 s, 100 s, ... 30,000 s), pulled towards its overall weights where a band has few rows.
+  * **With the total alone,** it helps: October 6.14 → 4.10 W, December 6.2 → 4.7 W. The SolderingOven draws 7.5 kW in its first minutes and about 1 kW after an hour.
+  * **With the per-phase readings,** which already pin down the level: October 1.37 → 1.25 W, December 2.07 → 2.00 W, and group 10 gets worse (7.70 → 7.91 W). It doubles the time to fit.
+  * **Worth building** for a meter that only reports total active power.
 * **Level weights that depend on which other machines are on:** not built. In group 9's training rows, which other machines are on explains only 9–14% of the variation in each big oven's power, so there is little to gain.
 * **Penalising the variance of each machine's estimate in the neural network:** worse. Meant to favour the split where each machine's power stays steady, as Gaussian allocation does. Tested in October:
   * **Group 9, total and states:** 25.2 W without it, 34.5 to 57.7 W with weights 0.001 to 1. **Total only:** 28.1 W without, 29.3 to 35.7 W with.
@@ -354,6 +392,7 @@ HIPE, trained on November, scored on December, mean over groups 2 to 10. The tra
 * **A best case:** the flag comes from the oven's own meter, so it matches the power exactly. A control system's flag would lag and match less well.
 * **Specific to HIPE:** the gain comes from ovens whose heating spans a wide range that overlaps the other machines. A plant without such machines gains less, and IMDELD, whose machines switch together, nothing.
 * **To use it,** give each flagged machine two state columns (idle and heating) and add their estimates back. A control system often has such a flag.
+* **The per-phase readings do better with no flag:** 2.1 W in December. [Per-phase readings.](#gaussian-allocation-per-phase-readings)
 
 ### Why not work out the states from the total?
 
