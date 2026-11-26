@@ -49,7 +49,7 @@ Every Python folder has a self-check: `uv run src/<folder>/test_<name>.py`.
 | Method | Code | How it works |
 |---|---|---|
 | **Gaussian allocation** | [`src/allocation`](src/allocation) | Learns each machine's typical power levels (idle, heating, ...), then splits the total among the running machines in the most likely way. With `--phases`, it splits the active and reactive power on each phase instead. |
-| Neural network | [`src/neural_network`](src/neural_network) | A small neural network, trained to make the running machines' estimates add up to the total. |
+| Neural network | [`src/neural_network`](src/neural_network) | A small neural network, trained to make the running machines' estimates add up to the total. With `--phases`, it reads the per-phase readings instead of the total. |
 | Hart-inspired | [`src/hart_inspired`](src/hart_inspired) | Reads each machine's power from the drop in the total when it switches off, an idea from [Hart's 1992 NILM method](docs/methods.md#hart-inspired). |
 
 How each method works, with one worked example: [docs/methods.md](docs/methods.md).
@@ -72,7 +72,8 @@ The neural network comes from my MSc dissertation (University of Coimbra, 2023).
 |---|---|---|
 | **Gaussian allocation, per-phase readings** | **2.1** | **33** |
 | Gaussian allocation, total only | 6.2 | 101 |
-| Neural network | 11.4 | 185 |
+| Neural network, per-phase readings | 8.4 | 136 |
+| Neural network, total only | 11.4 | 185 |
 | Simple split: in proportion to each machine's average power | 16.9 | 273 |
 | Hart-inspired | 49.6 | 789 |
 | Guess 0 W for every machine | 51.4 | 820 |
@@ -80,7 +81,7 @@ The neural network comes from my MSc dissertation (University of Coimbra, 2023).
 * **Average error** counts every second of December. The machines are off most of the time, and there every method is exactly right (0 W), so this number is small.
 * **While it runs** counts only the seconds a machine draws power.
 * **Guess 0 W** says every machine draws nothing, all the time. So its error is the machines' average power: what knowing nothing costs. A method that doesn't clearly beat it is of no use, and Hart-inspired barely does.
-* **Per-phase readings:** the 6 readings [above](#per-phase-readings), which only Gaussian allocation uses. The other methods use the total only. [How.](docs/methods.md#with-per-phase-readings)
+* **Per-phase readings:** the 6 readings [above](#per-phase-readings), which Gaussian allocation and the neural network can use. The other methods use the total only. [How.](docs/methods.md#with-per-phase-readings)
 
 On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation), no method does much better than a simple guess, and Gaussian allocation does worse. Its machines almost always switch on and off together, so their power can't be told apart.
 

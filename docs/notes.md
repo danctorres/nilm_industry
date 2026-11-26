@@ -28,7 +28,7 @@
 
 ## Results per group
 
-> **In short:** Gaussian allocation wins on every group, and the per-phase readings cut its error by 1.7 to 5.5 times. The neural network is second, the only other method to beat the proportional split on average.
+> **In short:** Gaussian allocation wins on every group, and the per-phase readings cut its error by 1.7 to 5.5 times. The neural network is second, the only other method to beat the proportional split on average. The per-phase readings help it too, less: 11.4 → 8.4 W.
 
 **Setup:** HIPE · trained on November 2017 · scored on December · settings chosen on October · error in W · seeds: preprocessing 1, neural network 0.
 
@@ -37,6 +37,7 @@
 | Gaussian allocation, per-phase readings | 1.0 | 1.6 | 1.1 | 1.6 | 1.4 | 1.5 | 1.4 | 1.3 | 7.7 | 2.1 | 33 |
 | Gaussian allocation | 2.7 | 2.8 | 2.2 | 8.7 | 7.4 | 6.5 | 6.0 | 5.9 | 13.4 | 6.2 | 101 |
 | Gaussian allocation, 1 level per machine | 3.6 | 3.7 | 2.9 | 9.7 | 8.2 | 7.5 | 6.7 | 6.5 | 14.5 | 7.0 | 115 |
+| Neural network, per-phase readings as input | 4.9 | 6.0 | 5.7 | 8.0 | 7.0 | 8.6 | 8.4 | 7.7 | 19.5 | 8.4 | 136 |
 | Neural network, total only as input | 5.1 | 6.7 | 5.1 | 13.8 | 11.2 | 12.3 | 11.6 | 12.4 | 24.2 | 11.4 | 185 |
 | Neural network, total and states as input | 12.8 | 12.4 | 19.7 | 17.7 | 12.5 | 13.3 | 11.8 | 10.0 | 23.2 | 14.8 | 234 |
 | Hart-inspired | 72.6 | 54.5 | 45.9 | 46.5 | 39.1 | 44.4 | 41.3 | 39.4 | 62.4 | 49.6 | 789 |
@@ -45,7 +46,7 @@
 | Baseline: proportional split | 8.3 | 9.5 | 14.1 | 18.3 | 15.8 | 19.6 | 18.2 | 17.8 | 30.5 | 16.9 | 273 |
 
 * **Gaussian allocation** is best on every group, and 3 levels per machine beat 1 on every group.
-* **Per-phase readings** (`--phases`, [what they are](#per-phase-readings)): only Gaussian allocation uses them, and it does better with them on every group. Every other row uses the total alone.
+* **Per-phase readings** (`--phases`, [what they are](#per-phase-readings)): Gaussian allocation does better with them on every group, the neural network on every group but 4 (5.1 → 5.7 W). Every other row uses the total alone.
 * **Beating the proportional split:** the neural network (total only) on every group and on average. With states, on groups 5 to 10 and on average.
 * **Hart-inspired** estimates 97–100% of the on-samples, yet is barely better than guessing 0 W.
 * **Mean while running:** the mean over groups of the error over only the seconds a machine draws power. See [Words](#words).
@@ -213,12 +214,13 @@ uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N [--comp
 ### Neural network
 
 ```sh
-uv run src/neural_network/main.py --dataset {hipe,imdeld} --mode {plain,state} --machines N [--runs R] [--epochs E] [--seed S]
+uv run src/neural_network/main.py --dataset {hipe,imdeld} --mode {plain,state} --machines N [--runs R] [--epochs E] [--seed S] [--phases]
 ```
 
 * **`plain`:** the input is the total only. **`state`:** the total and the states.
 * **`--runs`:** trains R networks (5 by default) from different random starts, and averages them.
-* **Output** goes to `results/neural_network/<mode>/...`.
+* **`--phases`:** the 6 per-phase readings as input instead of the total, which stays the target. HIPE only. [Why.](#neural-network-per-phase-readings)
+* **Output** goes to `results/neural_network/<mode>/...`, or `results/neural_network_phases/<mode>/...` with `--phases`.
 
 ### Hart-inspired
 
@@ -312,6 +314,22 @@ Change against before, measured with the earlier 1,960 training rows and 2000 ep
 * **Why average the runs:** with the states as input, many different splits of the total fit the training data equally well, so each run picks its own. Averaging evens this out.
   * Before averaging (one-week tests), results moved with the seed. HIPE group 9: 53 ± 5 W with the states, 36 ± 1 W with the total only. IMDELD group 6, total only: 25 ± 6 kW, against 20.5 kW for guessing 0.
   * **So compare the neural network over several seeds.**
+
+### Neural network: per-phase readings
+
+October error (W), mean over seeds 0, 1 and 2 (lowest–highest).
+
+| Input | Group 3 | Group 6 | Group 9 | Mean |
+|---|---|---|---|---|
+| Total (`--mode plain`) | 5.65 (5.39–5.98) | 14.27 (14.12–14.52) | 22.24 (22.06–22.55) | 14.1 |
+| **Per-phase readings** (`--mode plain --phases`) | **4.22** (3.95–4.71) | **7.76** (7.70–7.87) | **13.26** (13.10–13.42) | **8.4** |
+| Total and states (`--mode state`) | 9.17 (7.96–10.42) | 13.79 (13.43–14.46) | 15.05 (14.36–16.20) | 12.7 |
+| Per-phase readings and states (`--mode state --phases`) | 6.97 (6.60–7.44) | 13.21 (12.00–14.32) | 17.88 (15.19–21.67) | 12.7 |
+
+* **Without the states, the readings help** on every group and every seed. In December, 11.4 → 8.4 W, better on 8 of 9 groups (group 4: 5.1 → 5.7 W).
+* **Why:** without the states, the network must read from its input alone which machines draw what. The 6 readings say more about that than the total.
+* **With the states, no gain** on average, and group 9 gets worse on two of the three seeds.
+* **Still behind Gaussian allocation from the total alone** (6.2 W in December). The target is still the total active power: only the input changed.
 
 ### Tried and dropped
 

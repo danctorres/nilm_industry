@@ -1,11 +1,12 @@
 # How the methods work
 
-> **In short:** every method gets the same two inputs: the total power and which machines are on. Gaussian allocation can also take the total on each phase. Each one splits the total among the running machines, and they differ only in how they pick the split. Every section uses the same example, so you can compare them.
+> **In short:** every method gets the same two inputs: the total power and which machines are on. Gaussian allocation and the neural network can also take the readings on each phase. Each one splits the total among the running machines, and they differ only in how they pick the split. Every section uses the same example, so you can compare them.
 
 | Method | Idea in one line | December error (W) |
 |---|---|---|
 | [Gaussian allocation, per-phase readings](#with-per-phase-readings) | Give the leftover to the machine whose power varies most, on each phase's active and reactive power | **2.1** |
 | [Gaussian allocation](#gaussian-allocation) | Give the leftover to the machine whose power varies most | 6.2 |
+| [Neural network, per-phase readings](#neural-network) | Learn each machine's share from the readings on each phase | 8.4 |
 | [Neural network](#neural-network) | Learn each machine's share of the total | 11.4 |
 | [Proportional split](#baselines) | Split in proportion to each machine's average power | 16.9 |
 | [Equal split](#baselines) | Split equally among the running machines | 28.4 |
@@ -185,12 +186,12 @@
 
 ## Neural network
 
-> **In short:** a small neural network learns each machine's power from the total. Second best: 11.4 W.
+> **In short:** a small neural network learns each machine's power from the total. 11.4 W, or 8.4 W from the per-phase readings.
 
 **Idea:** learn, for each value of the total, how much each machine usually draws.
 
 **Steps:**
-1. **Input:** the total (`--mode plain`), or the total and the states (`--mode state`).
+1. **Input:** the total (`--mode plain`), or the total and the states (`--mode state`). With `--phases`, the 6 [per-phase readings](#with-per-phase-readings) replace the total.
 2. **Output:** one estimate per machine.
 3. **Training:** it never sees a machine's own power. Its only target: the running machines' estimates must add up to the total. The same total turns up with different machines on, and only some splits work for all of those rows.
 4. **Afterwards:** OFF machines and negative estimates are set to 0. The rest are scaled to add up to exactly the total.
@@ -208,10 +209,11 @@
 * Why each setting: [Neural network settings](notes.md#neural-network-1).
 
 **Good at:** with the total alone, it beats the proportional split on every group.
+* **With the per-phase readings** (`--phases`) it does better still: 8.4 W. Without the states, it must read from its input alone which machines draw what, and the 6 readings say more about that than the total. Gaussian allocation gains more from them (2.1 W).
 **Bad at:** it shares any gap by size, not by how much each machine varies, as in the example. That's likely why it trails Gaussian allocation, which reaches 7.0 W with just a typical value and a spread per machine.
 * **With the states as input** it's worse in December (14.8 W). For each set of running machines, any split fits, so each network picks its own.
 
-**Code:** [main.py](../src/neural_network/main.py) runs it, [nn.py](../src/neural_network/nn.py) is the network. `--mode plain|state`, `--runs R`.
+**Code:** [main.py](../src/neural_network/main.py) runs it, [nn.py](../src/neural_network/nn.py) is the network. `--mode plain|state`, `--runs R`, `--phases`.
 
 ## Hart-inspired
 
