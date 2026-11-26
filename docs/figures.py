@@ -1,5 +1,6 @@
 """Draws the two figures in docs/methods.md from its made-up example: 3,000 W total, Oven and Pump on. Also the
-README's example from HIPE group 9, once hipe.py and allocation.py, with and without --phases, have run.
+README's two examples from HIPE group 9: the per-phase readings once hipe.py has run, the estimates once
+allocation.py has too, with and without --phases.
 
 uv run docs/figures.py
 """
@@ -151,10 +152,58 @@ def hipe_example() -> None:
     fig.savefig(DOCS / "allocation_example.png", dpi=100)
 
 
+# README per-phase readings: group 9's meter while the HighTemperatureOven heats, then the SolderingOven
+READINGS = REPO / "data" / "processed" / "HIPE" / str(GROUP) / "phases_validation.csv"
+HEATING = {"HighTemperatureOven heats": ("08:40", "09:23"), "SolderingOven heats": ("09:17", "09:44")}  # own meters
+AQUA = "#1baf7a"  # L3
+
+
+def phases_example() -> None:
+    """The total, then active and reactive power on each phase: each oven moves its own phases."""
+    raw = pd.read_csv(READINGS)
+    time = pd.to_datetime(raw.timestamp, format="%d-%b-%Y %H:%M:%S")
+    rows = ((time >= "2017-12-05 08:30") & (time < "2017-12-05 09:50")).to_numpy()
+    r = raw.iloc[rows, 1:].set_axis(time[rows]).rolling("10s").mean()  # 10 s means, to calm the 1 s jitter
+    fig = Figure(figsize=(10, 7.5), facecolor=SURFACE, layout="constrained")
+    axes = fig.subplots(3, 1, sharex=True)
+    panels = (
+        ("Total active power (kW): one reading", [r.iloc[:, :3].sum(axis=1)], [INK]),
+        ("Active power on each phase (kW)", [r[f"P{k}_kW"] for k in (1, 2, 3)], [BLUE, ORANGE, AQUA]),
+        ("Reactive power on each phase (kvar)", [r[f"Q{k}_kvar"] for k in (1, 2, 3)], [BLUE, ORANGE, AQUA]),
+    )
+    for ax, (title, lines, colors) in zip(axes, panels, strict=True):
+        style(ax)
+        for k, (y, color) in enumerate(zip(lines, colors, strict=True), 1):
+            ax.plot(y.index, y, color=color, linewidth=1.4, label=f"L{k}")
+        ax.set_title(title, loc="left", color=INK, fontsize=11)
+        ax.axhline(0, color=MUTED, linewidth=0.8)
+    top = axes[0].get_ylim()[1]
+    for i, (label, span) in enumerate(HEATING.items()):  # one level each, as they overlap
+        (a, b), y = (pd.Timestamp(f"2017-12-05 {t}") for t in span), top * (1 + 0.2 * i)
+        axes[0].plot([a, b], [y, y], color=MUTED, linewidth=1)
+        axes[0].text(a + (b - a) / 2, y, label, ha="center", va="bottom", color=INK, fontsize=10)
+    axes[0].set_ylim(0, top * 1.4)
+    axes[1].legend(loc="upper right", ncols=3, frameon=False, labelcolor=INK)
+    axes[-1].xaxis.set_major_formatter(DateFormatter("%H:%M"))
+    axes[-1].set_xlabel("5 December 2017 (UTC)", color=INK)
+    fig.suptitle(
+        "Each oven heats on its own phases, with its own reactive power",
+        x=0.01,
+        ha="left",
+        color=INK,
+        fontsize=13,
+        fontweight="bold",
+    )
+    fig.savefig(DOCS / "phases_example.png", dpi=100)
+
+
 if __name__ == "__main__":
     bell_curves()
     method_splits()
     print("saved", DOCS / "allocation_idea.png", DOCS / "methods_example.png")
+    if READINGS.exists():
+        phases_example()
+        print("saved", DOCS / "phases_example.png")
     if all(f.exists() for f in (TRUTH, ESTIMATE)):
         hipe_example()
         print("saved", DOCS / "allocation_example.png")

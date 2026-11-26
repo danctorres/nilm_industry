@@ -19,6 +19,18 @@ flowchart LR
 * **Why it helps:** no meter is needed on each machine. This is called NILM: non-intrusive load monitoring.
 * **Where it's used:** splitting one meter using control-system states is known as virtual submetering. It has been done for the parts of a [machine tool](https://link.springer.com/chapter/10.1007/978-3-030-02203-7_9), from their PLC states, and for [HVAC in buildings](https://arxiv.org/abs/1509.05421). This repo measures how well it works for whole machines, with HIPE's per-machine meters as the answer key.
 
+### Per-phase readings
+
+A factory meter reads more than one total:
+
+* **3 wires,** or phases: L1, L2, L3. A machine may use one, two or all three.
+* **2 readings on each:** active power (kW), which does the work, and reactive power (kvar), which flows back and forth without doing any.
+* **So 6 readings.** Each machine moves them its own way, so Gaussian allocation can tell apart machines the total can't.
+
+![Three panels from 08:30 to 09:50 on 5 December 2017: total active power, then active and reactive power on each of the three phases. From 08:40 to 09:23 the HighTemperatureOven heats: the total rises to 5 to 8 kW, and reactive power rises to about +4 kvar on L1 and +3 kvar on L2 and falls to about -3.5 kvar on L3. From 09:17 to 09:44 the SolderingOven heats: the total reaches 12 kW, then cycles, active power rises on L2 and L3 only, and reactive power stays near 0.](docs/phases_example.png)
+
+*HIPE group 9's meter on 5 December 2017, in 10 s means (data: KIT, CC BY 4.0). Redraw with `uv run docs/figures.py`.*
+
 ## Try it
 
 Needs [uv](https://docs.astral.sh/uv/).
@@ -68,14 +80,14 @@ The neural network comes from my MSc dissertation (University of Coimbra, 2023).
 
 * **Average error** counts every second of December. The machines are off most of the time, and there every method is exactly right (0 W), so this number is small.
 * **While it runs** counts only the seconds a machine draws power.
-* **Per-phase readings:** active and reactive power on each of the 3 phases, which a three-phase plant meter reports. The ovens heat on different phases, with different reactive power, so the readings show which one is heating. The other methods use the total only. [How.](docs/methods.md#with-per-phase-readings)
+* **Per-phase readings:** the 6 readings [above](#per-phase-readings), which only Gaussian allocation uses. The other methods use the total only. [How.](docs/methods.md#with-per-phase-readings)
 
 On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation), no method does much better than a simple guess, and Gaussian allocation does worse. Its machines almost always switch on and off together, so their power can't be told apart.
 
 ## Limits
 
 * **The total must hold only the machines' power.** Here it is the sum of their meters. HIPE's real main meter is 96% other load (the machines are 0.58 kW of 14.0 kW). Splitting it with the other load as one more machine, Gaussian allocation is off by 212–247 W in December on groups 9 and 10, far worse than guessing 0 W (41–67 W). The machines run when the plant is busy, so the other load follows them. A real plant must meter the machines' feeder apart. [How the total is made.](docs/notes.md#how-the-total-is-made)
-* **It needs to know when each machine is on.** Here the states come from each machine's own meter. A control system's would lag and glitch, and the methods cope with small errors there. States 10 s late: 6.4 W instead of 6.2 W. 60 s late: 7.3 W. 1% of the one-second on/off readings flipped: 7.9 W. Still far ahead of the simple split given the same states (17.7 and 19.2 W).
+* **It needs to know when each machine is on.** Here the states come from each machine's own meter. A control system's would lag and glitch, and the methods cope with small errors there. For Gaussian allocation from the total alone, states 10 s late: 6.4 W instead of 6.2 W. 60 s late: 7.3 W. 1% of the one-second on/off readings flipped: 7.9 W. Still far ahead of the simple split given the same states (17.7 and 19.2 W). Not yet tested with the per-phase readings.
 * **Machines that always run together can't be told apart.**
 * **What's left is missing information, not a weak method.** On HIPE, the per-phase readings cut the error from 6.2 W to 2.1 W. A heating flag for each oven, taken from the oven's own meter (a best case), cut it to 3.4 W. How much a real plant gains depends on its machines: ovens on the same phases, with the same reactive power, would gain nothing. [How.](docs/notes.md#more-than-on-and-off-a-heating-flag)
 
