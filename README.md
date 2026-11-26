@@ -1,7 +1,7 @@
 # Power per machine from one factory meter
 
 > **In short:** give it the power on one meter that feeds a factory's machines, and which machines are on. It tells you how much power each machine uses.
-> Best method: **Gaussian allocation**, off by **6.2 W** per machine on average, or 101 W while the machine runs (a simple split: 16.9 W, or 273 W while running). Given the meter's per-phase readings: **2.1 W**, or 33 W while running.
+> Best method: **Gaussian allocation** on the meter's [per-phase readings](#per-phase-readings), off by **2.1 W** per machine on average, or 33 W while the machine runs. From the total alone: 6.2 W, against 16.9 W for a simple split.
 
 ## What it does
 
@@ -74,12 +74,12 @@ The neural network comes from my MSc dissertation (University of Coimbra, 2023).
 | Gaussian allocation, total only | 6.2 | 101 |
 | Neural network | 11.4 | 185 |
 | Simple split: in proportion to each machine's average power | 16.9 | 273 |
-| Simple split: equally among the running machines | 28.4 | 454 |
 | Hart-inspired | 49.6 | 789 |
-| Guess 0 W (= the machines' average power) | 51.4 | 820 |
+| Guess 0 W for every machine | 51.4 | 820 |
 
 * **Average error** counts every second of December. The machines are off most of the time, and there every method is exactly right (0 W), so this number is small.
 * **While it runs** counts only the seconds a machine draws power.
+* **Guess 0 W** says every machine draws nothing, all the time. So its error is the machines' average power: what knowing nothing costs. A method that doesn't clearly beat it is of no use, and Hart-inspired barely does.
 * **Per-phase readings:** the 6 readings [above](#per-phase-readings), which only Gaussian allocation uses. The other methods use the total only. [How.](docs/methods.md#with-per-phase-readings)
 
 On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation), no method does much better than a simple guess, and Gaussian allocation does worse. Its machines almost always switch on and off together, so their power can't be told apart.
