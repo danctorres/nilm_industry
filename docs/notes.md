@@ -206,7 +206,7 @@ uv run src/allocation/allocation.py --dataset {hipe,imdeld} --machines N [--comp
 ```
 
 * **`K`:** power levels per machine (idle, heating, ...). Default 3.
-* **`--phases`:** split the 6 per-phase readings instead of the total active power. HIPE only. [Why.](#gaussian-allocation-per-phase-readings)
+* **`--phases`:** split the 6 per-phase readings instead of the total active power. HIPE only. Writes to `results/allocation_phases`, so `validation.py` scores it beside the total-only run. [Why.](#gaussian-allocation-per-phase-readings)
 * **Slow** when many machines are on at once, since it tries every combination of levels.
 * **Assumes** the machines switch on and off independently, and warns when two don't.
 

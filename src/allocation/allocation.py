@@ -5,7 +5,7 @@
 - The total (`aggregate` in the files) is the sum over the ON machines.
 - --phases (HIPE): the total is instead the meter's 6 per-phase readings, active and reactive power on each phase
   (`phases` in the files), and each component is a Gaussian over those 6. Machines on other phases, or with other
-  reactive power, then look different in the total.
+  reactive power, then look different in the total. Writes to results/allocation_phases, beside the total-only run.
 - EM (expectation-maximisation: alternately estimate each machine's share and refit) fits the components from the
   total and the states alone.
 - Each estimate is the machine's posterior mean active power (expected power given the total), so ON estimates add up
@@ -192,7 +192,7 @@ def main(argv=None) -> None:
     )
     p.add_argument("--phases", action="store_true", help="split the per-phase readings (HIPE only)")
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
-    p.add_argument("--results-root", type=Path, default=REPO / "results" / "allocation")
+    p.add_argument("--results-root", type=Path, help="default: results/allocation, or results/allocation_phases")
     a = p.parse_args(argv)
     if a.components < 1:
         p.error("--components must be at least 1")
@@ -238,7 +238,8 @@ def main(argv=None) -> None:
         shares = np.where(total > 0, est / total, val_states / val_states.sum(axis=1, keepdims=True))
     est = np.nan_to_num(shares * a_val)
 
-    out = a.results_root / a.dataset.upper() / f"{a.machines}.csv"
+    root = a.results_root or REPO / "results" / ("allocation_phases" if a.phases else "allocation")
+    out = root / a.dataset.upper() / f"{a.machines}.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     pd.concat([val, pd.DataFrame(est, columns=[f"Estimate_{j}" for j in range(a.machines)])], axis=1).to_csv(
         out, index=False
