@@ -1,6 +1,8 @@
 """Neural network: a small network splits the total active power (`aggregate` in the files) into one estimate per
 machine. It never sees metered machine power: training only makes the ON estimates add up to the total, and rows
 unlike the training rows can miss it by kW, so the estimates are clipped at 0 and scaled to add up to it.
+--phases (HIPE): the input is the meter's 6 per-phase readings (`phases` in the files) instead of the total, which stays
+the target. Writes to results/neural_network_phases.
 
 Example: python3 src/neural_network/main.py --dataset hipe --mode state --machines 9
 """
@@ -38,8 +40,8 @@ def inputs(mode: str, x: np.ndarray, states: np.ndarray) -> np.ndarray:
     return np.hstack([x, states]) if mode == "state" else x
 
 
-def build(mode: str, n: int, rng: np.random.Generator) -> NN:
-    n_in = {"plain": 1, "state": 1 + n}[mode]
+def build(mode: str, n: int, rng: np.random.Generator, readings: int = 1) -> NN:
+    n_in = readings + (n if mode == "state" else 0)
     return NN(
         [
             ConnectedLayer(n_in, HIDDEN, rng),
@@ -69,23 +71,34 @@ def main(argv=None) -> None:
     )
     p.add_argument("--epochs", type=int, default=200)  # passes over the training rows, tuned on October
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--phases", action="store_true", help="read the per-phase readings instead of the total (HIPE only)")
     p.add_argument("--data-root", type=Path, default=REPO / "data" / "processed")
-    p.add_argument("--results-root", type=Path, default=REPO / "results" / "neural_network")
+    p.add_argument("--results-root", type=Path, help="default: results/neural_network(_phases)")
     a = p.parse_args(argv)
     if a.runs < 1:
         p.error("--runs must be at least 1")
 
-    _, agg_tr, st_tr, _ = load(a.data_root, a.dataset, a.machines, "training")
+    ts_tr, agg_tr, st_tr, _ = load(a.data_root, a.dataset, a.machines, "training")
     ts, agg_val, st_val, eq_val = load(a.data_root, a.dataset, a.machines, "validation")
+    x_tr, x_val = agg_tr, agg_val
+    if a.phases:
+        d = a.data_root / a.dataset.upper() / str(a.machines)
+        if not (d / "phases_training.csv").exists():
+            raise SystemExit(f"no phases_training.csv in {d}: --phases needs HIPE, made by hipe.py")
+        readings = [pd.read_csv(d / f"phases_{split}.csv") for split in ("training", "validation")]
+        if not all(r.iloc[:, 0].equals(t) for r, t in zip(readings, (ts_tr, ts), strict=True)):
+            raise SystemExit(f"the phases files' timestamps differ from the aggregate's in {d}")
+        x_tr, x_val = (r.iloc[:, 1:].to_numpy(float) for r in readings)
 
-    # Scales come from the training rows only. The input is min-max normalised. The target and estimates are only
-    # divided by hi (no offset), so estimates adding up to agg / hi add up to agg once multiplied back.
-    lo, hi = agg_tr.min(), agg_tr.max()
-    x_tr, x_val = inputs(a.mode, (agg_tr - lo) / (hi - lo), st_tr), inputs(a.mode, (agg_val - lo) / (hi - lo), st_val)
+    # Scales come from the training rows only. Each input is min-max normalised. The target and estimates are only
+    # divided by the total's maximum (no offset), so estimates adding up to agg / top add up to agg once multiplied.
+    lo, hi, top = x_tr.min(axis=0), x_tr.max(axis=0), agg_tr.max()
+    span = np.where(hi > lo, hi - lo, 1.0)  # a phase no machine uses reads a constant
+    x_tr, x_val = inputs(a.mode, (x_tr - lo) / span, st_tr), inputs(a.mode, (x_val - lo) / span, st_val)
 
     rng = np.random.default_rng(a.seed)
-    net = stack([build(a.mode, a.machines, rng) for _ in range(a.runs)])
-    losses = net.train(x_tr, agg_tr / hi, st_tr, a.epochs, rng)
+    net = stack([build(a.mode, a.machines, rng, len(lo)) for _ in range(a.runs)])
+    losses = net.train(x_tr, agg_tr / top, st_tr, a.epochs, rng)
     for run, run_loss in enumerate(losses):
         print(f"run {run}: mean epoch loss {run_loss:.6g}")
     # Averaging keeps the sum constraint. With the states as input, it also evens out which split of the total each
@@ -103,7 +116,8 @@ def main(argv=None) -> None:
     for j in range(a.machines):
         print(f"machine {j}: MAE {np.mean(np.abs(err[:, j])):.4g}, RMSE {np.sqrt(np.mean(err[:, j] ** 2)):.4g}")
 
-    out = a.results_root / a.mode / a.dataset.upper() / f"{a.machines}.csv"
+    root = a.results_root or REPO / "results" / ("neural_network_phases" if a.phases else "neural_network")
+    out = root / a.mode / a.dataset.upper() / f"{a.machines}.csv"
     save(out, ts, agg_val, est)
     print(f"saved {out}")
 
