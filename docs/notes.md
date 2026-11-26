@@ -379,15 +379,16 @@ uv run src/validation/corrupt_states.py --dataset hipe --machines N (--lag S | -
 
 HIPE, trained on November, scored on December, mean over groups 2 to 10. The training states are wrong in the same way as the test states.
 
-| States | Gaussian allocation (W) | Proportional split (W) |
-|---|---|---|
-| exact | 6.2 | 16.9 |
-| 10 s late | 6.4 | 16.9 |
-| 60 s late | 7.3 | 17.7 |
-| 1% flipped | 7.9 | 19.2 |
+| States | Gaussian allocation, per-phase readings (W) | Gaussian allocation (W) | Proportional split (W) |
+|---|---|---|---|
+| exact | 2.1 | 6.2 | 16.9 |
+| 10 s late | 2.4 | 6.4 | 16.9 |
+| 60 s late | 3.8 | 7.3 | 17.7 |
+| 1% flipped | 4.5 | 7.9 | 19.2 |
 
 * **1% flipped** means each one-second reading flipped on its own, so mostly 1 s glitches, not 1% of the switch events missed.
-* **Gaussian allocation still beats every baseline** given the same states, on all 9 groups, in every row.
+* **Gaussian allocation still beats every baseline** given the same states, on all 9 groups, in every row, with or without the per-phase readings.
+* **The per-phase readings lose a little more to bad states,** but stay ahead: 1% flipped costs them 2.4 W, against 1.7 W from the total alone. On average they still beat the total alone given exact states. Hit hardest: group 10 at 10 s late (7.7 → 10.3 W), group 6 with 1% flipped (1.4 → 6.4 W).
 * **A delay only matters around switches,** and December has few: 671 in group 9 over the month.
 * **Milder than on the one-week release** (1 level per machine, random hours held out): there, 60 s late or 1% flipped doubled the error (10.5 W exact, 27.5 W 60 s late, 20.9 W 1% flipped).
 
