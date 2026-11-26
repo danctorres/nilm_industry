@@ -50,7 +50,7 @@ Every Python folder has a self-check: `uv run src/<folder>/test_<name>.py`.
 |---|---|---|
 | **Gaussian allocation** | [`src/allocation`](src/allocation) | Learns each machine's typical power levels (idle, heating, ...), then splits the total among the running machines in the most likely way. With `--phases`, it splits the active and reactive power on each phase instead. |
 | Neural network | [`src/neural_network`](src/neural_network) | A small neural network, trained to make the running machines' estimates add up to the total. |
-| Hart-inspired | [`src/hart_inspired`](src/hart_inspired) | Reads each machine's power from the drop in the total when it switches off. |
+| Hart-inspired | [`src/hart_inspired`](src/hart_inspired) | Reads each machine's power from the drop in the total when it switches off, an idea from [Hart's 1992 NILM method](docs/methods.md#hart-inspired). |
 
 How each method works, with one worked example: [docs/methods.md](docs/methods.md).
 

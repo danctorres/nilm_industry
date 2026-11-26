@@ -219,6 +219,8 @@
 
 **Idea:** read a machine's power from the drop in the total at the second it switches off.
 
+**Source:** the steps in the total come from the first NILM method, G. W. Hart, ["Nonintrusive appliance load monitoring"](https://doi.org/10.1109/5.192069), *Proceedings of the IEEE* 80(12), 1992. Hart's method also finds the on/off states itself, from the steps alone. Here the states are given, so this is only the easy half.
+
 **Steps:**
 1. **Find each run:** a machine switches on, then later off.
 2. **Measure the drop:** the total just before the off second minus the total at it.
