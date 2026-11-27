@@ -338,7 +338,7 @@ October error (W), mean over seeds 0, 1 and 2 (lowest–highest).
   * **IMDELD, 6 machines:** 17.5 kW (14.5–22.3) against 20.1 kW for guessing 0 W, a win smaller than the spread between splits.
   * **Why it can't do better:** it is the neural network with each curve fixed to a cubic, and its estimates don't add up to the total. The network already does better (11.4 W).
   * **Sample by sample** solved one equation in 4 × N unknowns at each second, then averaged the answers, so the optimiser comparison measured convergence speed, not the model. Tuning the optimisers didn't help.
-  * **Code:** git tag `polynomial-last`; the dissertation's own version is at `thesis-2023`.
+  * **Code:** the last commit with it is [`d98f43a`](https://github.com/danctorres/nilm_industry/tree/d98f43a); the dissertation's own version is at [`09fa8a6`](https://github.com/danctorres/nilm_industry/tree/09fa8a6).
 * **Smoothing Gaussian allocation's estimates over time:** only 6% better, not worth the code. Re-tested with the 19,600 training rows as a Kalman smoother (each machine's power drifts around its mean): −6 to −8% against 1 level per machine in October, but still worse than 3 levels second by second (group 9: 9.47 W against 8.71 W).
 * **Tracking each machine's power level over time:** no better. Re-tested with the 19,600 training rows (exact forward-backward, one chance per second that a machine changes level): 6.19 W at best in October, against 6.14 W. Neighbouring seconds don't reveal a machine's level any better than the second itself; they just make wrong guesses more confident.
   * **What it could gain:** told each machine's true level, Gaussian allocation's October error would fall from 6.14 to 1.6 W.

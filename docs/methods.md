@@ -13,7 +13,7 @@
 | [Hart-inspired](#hart-inspired) | Read a machine's power from the drop when it switches off | 49.6 |
 | [Guess 0 W](#baselines) | Say 0 W, always | 51.4 |
 
-*Error: the average gap per machine over every second of December, on HIPE. See [Words](notes.md#words).*
+*Error: the average gap per machine over every second of December, on HIPE.*
 
 ## The example
 
@@ -26,16 +26,12 @@
   * **Pump:** about 500 W, and very steady (± 50 W).
 * **The question:** how much of the 3,000 W is the Oven's?
 
-![Each method's split of the 3,000 W total, as stacked bars of Oven then Pump. Gaussian allocation: 2,498 and 502, so the Pump stays at its usual 500 W. Neural network: 2,379 and 621. Proportional split: 2,400 and 600. Equal split: 1,500 and 1,500.](methods_example.png)
-
-*Not shown: guess 0 W (0 and 0), and Hart-inspired, which gives the Pump the drop when it switches off. Redraw with `uv run docs/figures.py`.*
-
 ## What every method gets
 
 > **In short:** the total and the on/off states. Never the machines' own meters.
 
-* **The total:** the plant meter's power, every second. Gaussian allocation can also take the meter's readings on each phase: [With per-phase readings](#with-per-phase-readings).
-* **The states:** for each machine, on or off, every second. A plant's control system (the PLC) may already have these. How they are made from the data: [On or off](notes.md#on-or-off).
+* **The total:** the plant meter's power, every second. Gaussian allocation and the neural network can also take its [per-phase readings](#with-per-phase-readings).
+* **The states:** for each machine, on or off, every second, e.g. from the plant's control system. [How they are made here.](notes.md#on-or-off)
 * **Training rows:** 19,600 seconds of November to learn from. Each method then splits every second of December.
 * **The machines' own meters** are only used to score the result, never to train.
 * **An OFF machine gets 0 W** from every method. What's left to decide is how the running machines share the total.
@@ -92,14 +88,14 @@
 
 ![Two bell curves on the same power axis. The Oven's is wide, centred on 2,000 W, and its estimate sits at 2,498 W, 498 W above it. The Pump's is narrow, centred on 500 W, and its estimate sits at 502 W, 2 W above it.](allocation_idea.png)
 
+*A dot's height is how likely that power is for that machine. The wide Oven stays high on its curve 498 W above its typical power. The narrow Pump would fall far down its curve after just 100 W. So the most likely split leaves the Pump alone.*
+
 **Example, 3 levels:** say the Oven idles at 300 W and heats at 2,400 W.
 * Oven heating + Pump = 2,900 W. Close to 3,000 W, so likely.
 * Oven idle + Pump = 800 W. Far from 3,000 W, so it barely counts.
 
-**Good at:** HIPE. It's best on every group, and still 7.0 W with only 1 level per machine.
+**Good at:** HIPE, where it's best on every group.
 **Bad at:** big machines with wide levels running at the same time.
-* If it knew each machine's true level, its October error would fall from 6.14 to 1.6 W. The per-phase readings get it to 1.37 W.
-* Looking at neighbouring seconds didn't help: [Tried and dropped](notes.md#tried-and-dropped).
 * **Slow** when many machines are on at once, since it tries every combination of levels.
 
 **Code:** [allocation.py](../src/allocation/allocation.py). `--components K`: levels per machine, 3 by default. `--phases`: use the [per-phase readings](#with-per-phase-readings).
@@ -151,18 +147,16 @@
 * **What happened:** the Pump ran alone once, at 510 W, and no row says otherwise. So EM pins the Pump at 510 W and gives every leftover to the Oven. The 3 W is the smallest spread the code allows.
 * **Rows where a machine runs alone**, or next to steady machines, are what shape its curve. The curves then decide how to split the mixed rows.
 * **With real data** (19,600 rows), a machine that runs alone at different powers keeps a spread to match.
-* **It stops** when the typical values stop changing (by less than a billionth of the largest total), or after 500 rounds.
 
 **With 3 levels per machine:**
 * **Start:** the 1-level answer. Each machine's three levels start evenly spaced, from one spread below its typical value to one above.
 * **Split step:** also splits each machine's share among its levels, by how well each combination of levels explains the total.
 * **Re-learn step:** learns each level's typical value, its spread, and how often the machine is at that level.
-* **Up to 300 more rounds.**
-* **See what it learned:** `allocation.py` prints each machine's levels, e.g. `machine 0 while ON: 40% at 300 (sd 50), 35% at 1500 (sd 200), 25% at 2400 (sd 300)` (made-up numbers).
+* **See what it learned:** `allocation.py` prints each machine's levels.
 
 **Where it can go wrong:**
-* **The start matters.** Each round only improves on the last one, so EM can get stuck on a worse answer depending on where it starts. On the four rows above, the code's own least-squares start gives both machines the same spread (± 153 W). So every leftover is split half and half, the spreads stay equal, and it stops after 2 rounds at Oven 2,030 ± 151 W, Pump 640 ± 151 W. That ignores row A, where the Pump ran alone at 510 W.
-* **Machines that always switch on and off together** give it nothing to tell them apart. It prints a warning when two machines' states have a correlation above 0.9.
+* **The start matters.** Each round only improves on the last one, so EM can get stuck. On the four rows above, the code's own least-squares start gives both machines the same spread. So every leftover is split half and half, and it settles at Oven 2,030 W, Pump 640 W, ignoring row A, where the Pump ran alone at 510 W.
+* **Machines that always switch on and off together** give it nothing to tell them apart. It warns about such pairs.
 
 ### With per-phase readings
 
@@ -179,7 +173,7 @@
 * **From the total alone,** they look the same, so each gets 2,500 W.
 * **Per phase:** say Oven A is on phase 1 and Oven B on phases 2 and 3. Phase 1 reads 2,900 W, phases 2 and 3 read 2,100 W. **A ≈ 2,900 W, B ≈ 2,100 W.**
 
-**Good at:** HIPE, where it beats knowing each machine's true level from the total alone (October: 1.37 W against 1.6 W).
+**Good at:** HIPE, where the ovens sit on different phases, with different reactive power.
 **Bad at:** machines with the same phases and the same mix of active and reactive power. Then it does no better than the total alone.
 * **Needs** a meter that reports each phase, but not which phases each machine is on: it learns that from the training rows.
 * **Slower:** 4 times as long as the total alone on group 9 (5 min).
@@ -201,16 +195,11 @@
 * Scaled by 3,000 ÷ 2,900: **Oven ≈ 2,379 W, Pump ≈ 621 W.**
 * The missing 100 W went 79 W to the Oven and 21 W to the Pump, by size, even though the Pump barely varies.
 
-**Training details:**
-* **Network:** one hidden layer of 64 units.
-* **Optimiser:** Adam, 64 rows per step, 200 passes over the training rows. The learning rate falls from 0.01 to 0.
-* **Weight decay** (shrinks the weights a little every step) keeps it from memorising the training rows.
-* **5 networks**, each from a different random start, with their estimates averaged.
-* Why each setting: [Neural network settings](notes.md#neural-network-1).
+**Settings:** one hidden layer of 64 units, and the average of 5 networks from different random starts. The rest, and why: [Neural network settings](notes.md#neural-network-1).
 
 **Good at:** with the total alone, it beats the proportional split on every group.
-* **With the per-phase readings** (`--phases`) it does better still: 8.4 W. Without the states, it must read from its input alone which machines draw what, and the 6 readings say more about that than the total. Gaussian allocation gains more from them (2.1 W).
-**Bad at:** it shares any gap by size, not by how much each machine varies, as in the example. That's likely why it trails Gaussian allocation, which reaches 7.0 W with just a typical value and a spread per machine.
+* **With the per-phase readings** (`--phases`) it does better still: 8.4 W.
+**Bad at:** it shares any gap by size, not by how much each machine varies, as in the example. That's likely why it trails Gaussian allocation.
 * **With the states as input** it's worse in December (14.8 W). For each set of running machines, any split fits, so each network picks its own.
 
 **Code:** [main.py](../src/neural_network/main.py) runs it, [nn.py](../src/neural_network/nn.py) is the network. `--mode plain|state`, `--runs R`, `--phases`.
@@ -232,7 +221,7 @@
 **Example:** the Pump switches off and the total falls from 3,000 to 2,520 W. **Pump: 480 W** for its whole run. The Oven gets an estimate only when it switches off.
 
 **Good at:** it needs no training.
-**Bad at:** HIPE machines change their load while on. In group 9 the total jumps by more than 50 W 2,213 times, and only 322 of those jumps come near a switch. So one drop says little about the rest of a run.
+**Bad at:** HIPE machines change their load while on, so one drop says little about the rest of a run.
 
 **Code:** [hart_inspired.py](../src/hart_inspired/hart_inspired.py).
 

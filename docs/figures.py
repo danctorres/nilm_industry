@@ -1,10 +1,11 @@
-"""Draws the two figures in docs/methods.md from its made-up example: 3,000 W total, Oven and Pump on. Also the
-README's two examples from HIPE group 9: the per-phase readings once hipe.py has run, the estimates once
-allocation.py has too, with and without --phases.
+"""Draws the bell curves of the made-up example in docs/methods.md: 3,000 W total, Oven and Pump on. Also the README's
+three examples from HIPE group 9: the per-phase readings and the ovens' learned levels once hipe.py has run (the levels
+take about 30 s to learn), the estimates once allocation.py --phases has too.
 
 uv run docs/figures.py
 """
 
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -23,13 +24,6 @@ BLUE, ORANGE = "#2a78d6", "#eb6834"  # Oven, Pump
 leftover = TOTAL - OVEN[0] - PUMP[0]
 oven_share = OVEN[1] ** 2 / (OVEN[1] ** 2 + PUMP[1] ** 2)
 ALLOCATION = (OVEN[0] + oven_share * leftover, PUMP[0] + (1 - oven_share) * leftover)
-# best first, as in the table at the top of methods.md
-SPLITS = {
-    "Gaussian allocation": ALLOCATION,
-    "Neural network": (2300 * TOTAL / 2900, 600 * TOTAL / 2900),
-    "Proportional split": (TOTAL * 0.8, TOTAL * 0.2),
-    "Equal split": (TOTAL / 2, TOTAL / 2),
-}
 
 
 def style(ax) -> None:
@@ -76,47 +70,7 @@ def bell_curves() -> None:
         ax.set_title(f"{name}: {mu:,} ± {sd} W while on", loc="left", color=INK, fontsize=11)
     axes[1].set_xlabel("Power (W)", color=INK)
     axes[1].xaxis.set_major_formatter("{x:,.0f}")
-    fig.suptitle(
-        f"Of the {leftover} W leftover, the wide Oven takes {oven_share:.1%}",
-        x=0.01,
-        ha="left",
-        color=INK,
-        fontsize=13,
-        fontweight="bold",
-    )
     fig.savefig(DOCS / "allocation_idea.png", dpi=120)
-
-
-def method_splits() -> None:
-    """One stacked bar per method: Oven, then Pump, against the total and the Pump's usual power."""
-    fig = Figure(figsize=(8, 3.6), facecolor=SURFACE, layout="constrained")
-    ax = fig.subplots()
-    style(ax)
-    names = list(SPLITS)[::-1]  # barh draws bottom up
-    oven = np.array([SPLITS[n][0] for n in names])
-    pump = np.array([SPLITS[n][1] for n in names])
-    gap = {"edgecolor": SURFACE, "linewidth": 1.5, "height": 0.6}
-    ax.barh(names, oven, color=BLUE, label="Oven", **gap)
-    ax.barh(names, pump, left=oven, color=ORANGE, label="Pump", **gap)
-    for i, (o, p) in enumerate(zip(oven, pump, strict=True)):
-        ax.text(o / 2, i, f"{o:,.0f}", ha="center", va="center", color="white", fontsize=10)
-        ax.text(o + p / 2, i, f"{p:,.0f}", ha="center", va="center", color=INK, fontsize=10)
-    ax.axvline(TOTAL, color=INK, linewidth=1.5)
-    ax.text(TOTAL, len(names) - 0.45, " total 3,000 W", color=INK, va="bottom", fontsize=9)
-    ax.axvline(TOTAL - PUMP[0], color=MUTED, linewidth=1, linestyle="--")
-    ax.text(
-        TOTAL - PUMP[0], len(names) - 0.45, "Pump at its usual 500 W ", color=MUTED, va="bottom", ha="right", fontsize=9
-    )
-    ax.set_ylim(-0.6, len(names) - 0.1)
-    ax.set_xlim(0, 3300)
-    ax.xaxis.set_major_formatter("{x:,.0f}")
-    ax.set_xlabel("Power (W)", color=INK)
-    ax.tick_params(axis="y", length=0)
-    ax.legend(loc="lower left", bbox_to_anchor=(0, 1.08), ncols=2, frameon=False, labelcolor=INK)
-    fig.suptitle(
-        "Each method's split of the same 3,000 W", x=0.01, ha="left", color=INK, fontsize=13, fontweight="bold"
-    )
-    fig.savefig(DOCS / "methods_example.png", dpi=120)
 
 
 # README example: HIPE group 9 (machines 2 to 10 in file order), a busy December morning
@@ -126,12 +80,17 @@ TRUTH = REPO / "data" / "processed" / "HIPE" / str(GROUP) / "equipment_validatio
 ESTIMATE = REPO / "results" / "allocation_phases" / "HIPE" / f"{GROUP}.csv"  # Gaussian allocation, per-phase readings
 
 
-def hipe_example() -> None:
-    """Metered power and Gaussian allocation's estimate from the per-phase readings, one panel per oven."""
+def morning() -> tuple[np.ndarray, pd.Series, np.ndarray]:
+    """The December morning's rows in the validation files, their times, and each machine's metered power (W)."""
     truth = pd.read_csv(TRUTH)
     time = pd.to_datetime(truth.timestamp, format="%d-%b-%Y %H:%M:%S")
     rows = ((time >= START) & (time < END)).to_numpy()
-    time, truth = time[rows], 1000 * truth.iloc[rows, 1:].to_numpy()
+    return rows, time[rows], 1000 * truth.iloc[rows, 1:].to_numpy()
+
+
+def hipe_example() -> None:
+    """Metered power and Gaussian allocation's estimate from the per-phase readings, one panel per oven."""
+    rows, time, truth = morning()
     est = 1000 * pd.read_csv(ESTIMATE, skipinitialspace=True).iloc[rows, 2:].to_numpy()
     fig = Figure(figsize=(10, 5), facecolor=SURFACE, layout="constrained")
     axes = fig.subplots(len(OVENS), 1, sharex=True)
@@ -146,10 +105,50 @@ def hipe_example() -> None:
     fig.legend(*axes[0].get_legend_handles_labels(), loc="outside upper right", ncols=2, frameon=False, labelcolor=INK)
     axes[-1].xaxis.set_major_formatter(DateFormatter("%H:%M"))
     axes[-1].set_xlabel("5 December 2017 (UTC)", color=INK)
-    fig.suptitle(
-        "The per-phase readings tell the two ovens apart", x=0.01, ha="left", color=INK, fontsize=13, fontweight="bold"
-    )
     fig.savefig(DOCS / "allocation_example.png", dpi=100)
+
+
+def levels_example() -> None:
+    """One row per oven: its metered power on the December morning, and beside it, on the same power axis, the levels
+    Gaussian allocation learns from November's total and states alone, as in allocation.py without --phases."""
+    sys.path.append(str(REPO / "src" / "allocation"))
+    from allocation import fit_mixture  # noqa: PLC0415 (a script folder, put on the path just above)
+
+    total = pd.read_csv(TRUTH.parent / "aggregate_training.csv", usecols=[1]).to_numpy()
+    states = pd.read_csv(TRUTH.parent / "states_training.csv").iloc[:, 1:].to_numpy(float)
+    scale = np.abs(total).max()  # allocation.py fits the total scaled to [0, 1]
+    mu, cov, pi = fit_mixture(total / scale, states, 3, np.array([scale]), np.ones(1, bool))
+    mean, sd = 1000 * scale * mu[..., 0], 1000 * scale * np.sqrt(cov[..., 0, 0])  # W, (machines, levels)
+    _, time, truth = morning()
+    fig = Figure(figsize=(10, 5), facecolor=SURFACE, layout="constrained")
+    axes = fig.subplots(len(OVENS), 2, sharex="col", sharey="row", width_ratios=(3, 1))
+    for (left, right), (name, j) in zip(axes, OVENS.items(), strict=True):
+        style(left)
+        style(right)
+        left.fill_between(time, truth[:, j], color=BLUE, alpha=0.18, linewidth=0)
+        left.plot(time, truth[:, j], color=BLUE, linewidth=1)
+        left.set_title(name, loc="left", color=INK, fontsize=11)
+        left.set_ylabel("W", color=INK)
+        left.yaxis.set_major_formatter("{x:,.0f}")
+        y = np.linspace(0, (mean[j] + 3 * sd[j]).max(), 2000)
+        for m, s, w in zip(mean[j], sd[j], pi[j], strict=True):
+            x = w * np.exp(-0.5 * ((y - m) / s) ** 2)  # peak height: the share of on time at this level
+            right.fill_betweenx(y, x, color=ORANGE, alpha=0.18, linewidth=0)
+            right.plot(x, y, color=ORANGE, linewidth=2)
+    fig.legend(
+        [axes[0, 0].lines[0], axes[0, 1].lines[0]],
+        ["Metered", "Levels learned from November's total and states"],
+        loc="outside upper right",
+        ncols=2,
+        frameon=False,
+        labelcolor=INK,
+    )
+    axes[-1, 0].xaxis.set_major_formatter(DateFormatter("%H:%M"))
+    axes[-1, 0].set_xlabel("5 December 2017 (UTC)", color=INK)
+    axes[-1, 1].set_xlim(0, 1.1 * pi[list(OVENS.values())].max())
+    axes[-1, 1].xaxis.set_major_formatter("{x:.0%}")
+    axes[-1, 1].set_xlabel("Share of on time", color=INK)
+    fig.savefig(DOCS / "levels_example.png", dpi=100)
 
 
 # README per-phase readings: group 9's meter while the HighTemperatureOven heats, then the SolderingOven
@@ -186,24 +185,17 @@ def phases_example() -> None:
     axes[1].legend(loc="upper right", ncols=3, frameon=False, labelcolor=INK)
     axes[-1].xaxis.set_major_formatter(DateFormatter("%H:%M"))
     axes[-1].set_xlabel("5 December 2017 (UTC)", color=INK)
-    fig.suptitle(
-        "Each oven heats on its own phases, with its own reactive power",
-        x=0.01,
-        ha="left",
-        color=INK,
-        fontsize=13,
-        fontweight="bold",
-    )
     fig.savefig(DOCS / "phases_example.png", dpi=100)
 
 
 if __name__ == "__main__":
     bell_curves()
-    method_splits()
-    print("saved", DOCS / "allocation_idea.png", DOCS / "methods_example.png")
-    if READINGS.exists():
+    print("saved", DOCS / "allocation_idea.png")
+    if READINGS.exists():  # hipe.py makes every file but the estimates
         phases_example()
         print("saved", DOCS / "phases_example.png")
+        levels_example()
+        print("saved", DOCS / "levels_example.png")
     if all(f.exists() for f in (TRUTH, ESTIMATE)):
         hipe_example()
         print("saved", DOCS / "allocation_example.png")

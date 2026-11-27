@@ -1,7 +1,7 @@
 # Power per machine from one factory meter
 
 > **In short:** give it the power on one meter that feeds a factory's machines, and which machines are on. It tells you how much power each machine uses.
-> Best method: **Gaussian allocation** on the meter's [per-phase readings](#per-phase-readings), off by **2.1 W** per machine on average, or 33 W while the machine runs. From the total alone: 6.2 W, against 16.9 W for a simple split.
+> Best method: **Gaussian allocation** on the meter's [per-phase readings](#per-phase-readings), off by **2.1 W** per machine on average, against 16.9 W for a simple split.
 
 ## What it does
 
@@ -14,10 +14,10 @@ flowchart LR
     method --> mn["...<br/>Machine N:<br/>power"]
 ```
 
-* **In:** the power on one meter that feeds only these machines, ideally its active and reactive power on each phase, and each machine's on/off state, which a plant's control system (the PLC) may already have.
+* **In:** the power on one meter that feeds only these machines, ideally on each phase, and each machine's on/off state, e.g. from the plant's control system (PLC).
 * **Out:** each machine's power, for every sample.
 * **Why it helps:** no meter is needed on each machine. This is called NILM: non-intrusive load monitoring.
-* **Where it's used:** splitting one meter using control-system states is known as virtual submetering. It has been done for the parts of a [machine tool](https://link.springer.com/chapter/10.1007/978-3-030-02203-7_9), from their PLC states, and for [HVAC in buildings](https://arxiv.org/abs/1509.05421). This repo measures how well it works for whole machines, with HIPE's per-machine meters as the answer key.
+* **Where it's used:** known as virtual submetering, done before for the parts of a [machine tool](https://link.springer.com/chapter/10.1007/978-3-030-02203-7_9) and for [HVAC in buildings](https://arxiv.org/abs/1509.05421). This repo tests it on whole machines.
 
 ### Per-phase readings
 
@@ -29,7 +29,7 @@ A factory meter reads more than one total:
 
 ![Three panels from 08:30 to 09:50 on 5 December 2017: total active power, then active and reactive power on each of the three phases. From 08:40 to 09:23 the HighTemperatureOven heats: the total rises to 5 to 8 kW, and reactive power rises to about +4 kvar on L1 and +3 kvar on L2 and falls to about -3.5 kvar on L3. From 09:17 to 09:44 the SolderingOven heats: the total reaches 12 kW, then cycles, active power rises on L2 and L3 only, and reactive power stays near 0.](docs/phases_example.png)
 
-*HIPE group 9's meter on 5 December 2017, in 10 s means (data: KIT, CC BY 4.0). Redraw with `uv run docs/figures.py`.*
+*Each oven heats on its own phases, with its own reactive power.*
 
 ## Try it
 
@@ -48,55 +48,51 @@ Every Python folder has a self-check: `uv run src/<folder>/test_<name>.py`.
 
 | Method | Code | How it works |
 |---|---|---|
-| **Gaussian allocation** | [`src/allocation`](src/allocation) | Learns each machine's typical power levels (idle, heating, ...), then splits the total among the running machines in the most likely way. With `--phases`, it splits the active and reactive power on each phase instead. |
-| Neural network | [`src/neural_network`](src/neural_network) | A small neural network, trained to make the running machines' estimates add up to the total. With `--phases`, it reads the per-phase readings instead of the total. |
-| Hart-inspired | [`src/hart_inspired`](src/hart_inspired) | Reads each machine's power from the drop in the total when it switches off, an idea from [Hart's 1992 NILM method](docs/methods.md#hart-inspired). |
+| **[Gaussian allocation](docs/methods.md#gaussian-allocation)** | [`src/allocation`](src/allocation) | Learns each machine's typical power levels (idle, heating, ...), then splits the total among the running machines in the most likely way. With `--phases`, it splits the active and reactive power on each phase instead. |
+| [Neural network](docs/methods.md#neural-network) | [`src/neural_network`](src/neural_network) | A small neural network, trained to make the running machines' estimates add up to the total. With `--phases`, it reads the per-phase readings instead of the total. |
+| [Hart-inspired](docs/methods.md#hart-inspired) | [`src/hart_inspired`](src/hart_inspired) | Reads each machine's power from the drop in the total when it switches off, an idea from [Hart's 1992 NILM method](https://doi.org/10.1109/5.192069). |
 
-How each method works, with one worked example: [docs/methods.md](docs/methods.md).
+* **How each method works:** [docs/methods.md](docs/methods.md).
+* **Every number and design choice:** [docs/notes.md](docs/notes.md).
 
-The neural network comes from my MSc dissertation (University of Coimbra, 2023). Gaussian allocation was added later. The dissertation's polynomial model was dropped: [why](docs/notes.md#tried-and-dropped).
+![Two rows, one per oven. Left: its metered power on the morning of 5 December 2017. Right, on the same power axis: the three bell curves Gaussian allocation learned for it, which sit where the meter reads: idle near 100 W, and heating at a few kW.](docs/levels_example.png)
+
+*Gaussian allocation learns each oven's power levels without seeing its meter. They match where the meter reads.*
 
 ## Results
 
-**Gaussian allocation wins on every HIPE group, by far when it gets the meter's per-phase readings. The neural network comes second, the only other method to beat the simple proportional split.**
+**Gaussian allocation wins on every HIPE group, by far with the per-phase readings.**
 
-![Two panels from 08:00 to 11:30 on 5 December 2017: the metered power of the HighTemperatureOven and the SolderingOven, each with Gaussian allocation's estimate from the per-phase readings. The estimate follows both meters closely: off by 54 and 8 W on average.](docs/allocation_example.png)
+![Two panels from the morning of 5 December 2017: the metered power of two ovens, each with Gaussian allocation's estimate from the per-phase readings, which follows both meters closely.](docs/allocation_example.png)
 
-*Two ovens in HIPE group 9, on a busy December morning (data: KIT, CC BY 4.0). Redraw with `uv run docs/figures.py`.*
+*From the per-phase readings, Gaussian allocation follows both ovens' meters.*
 
-* **Data:** [HIPE](https://www.energystatusdata.kit.edu/hipe.php), ten machines at an electronics production site in Germany, each with its own meter.
-* **Test:** add the machine meters into a total, let each method split it back, and compare with the real meters. Repeated for nine groups of 2 to 10 machines.
-* **Fair:** tuned on October 2017, trained on November, scored on December, a month no method saw beforehand.
+* **Data:** [HIPE](https://www.energystatusdata.kit.edu/hipe.php), ten machines at a German electronics factory, each with its own meter.
+* **Test:** add the machine meters into a total, let each method split it back, and compare. Nine groups of 2 to 10 machines.
+* **Fair:** tuned on October 2017, trained on November, scored on December.
 
 | Method | Average error per machine (W) | While it runs (W) |
 |---|---|---|
-| **Gaussian allocation, per-phase readings** | **2.1** | **33** |
-| Gaussian allocation, total only | 6.2 | 101 |
-| Neural network, per-phase readings | 8.4 | 136 |
-| Neural network, total only | 11.4 | 185 |
-| Simple split: in proportion to each machine's average power | 16.9 | 273 |
-| Hart-inspired | 49.6 | 789 |
-| Guess 0 W for every machine | 51.4 | 820 |
+| **[Gaussian allocation, per-phase readings](docs/methods.md#with-per-phase-readings)** | **2.1** | **33** |
+| [Gaussian allocation](docs/methods.md#gaussian-allocation), total only | 6.2 | 101 |
+| [Neural network](docs/methods.md#neural-network), per-phase readings | 8.4 | 136 |
+| [Neural network](docs/methods.md#neural-network), total only | 11.4 | 185 |
+| [Simple split](docs/methods.md#baselines) by each machine's average power | 16.9 | 273 |
+| [Hart-inspired](docs/methods.md#hart-inspired) | 49.6 | 789 |
+| [Guess 0 W](docs/methods.md#baselines) | 51.4 | 820 |
 
-* **Average error** counts every second of December. The machines are off most of the time, and there every method is exactly right (0 W), so this number is small.
-* **While it runs** counts only the seconds a machine draws power.
-* **Guess 0 W** says every machine draws nothing, all the time. So its error is the machines' average power: what knowing nothing costs. A method that doesn't clearly beat it is of no use, and Hart-inspired barely does.
-* **Per-phase readings:** the 6 readings [above](#per-phase-readings), which Gaussian allocation and the neural network can use. The other methods use the total only. [How.](docs/methods.md#with-per-phase-readings)
+* **Average error:** over every second of December. Machines are mostly off, where every method is exact, so it's small.
+* **While it runs:** only the seconds a machine draws power.
+* **Guess 0 W:** what knowing nothing costs. Hart-inspired barely beats it.
 
-On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation), no method does much better than a simple guess, and Gaussian allocation does worse. Its machines almost always switch on and off together, so their power can't be told apart.
+On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-machines-dataset-electrical-load-disaggregation), no method does much better than a simple guess, and Gaussian allocation does worse: its machines almost always switch on and off together.
 
 ## Limits
 
-* **The total must hold only the machines' power.** Here it is the sum of their meters. HIPE's real main meter is 96% other load (the machines are 0.58 kW of 14.0 kW). Splitting it with the other load as one more machine, Gaussian allocation is off by 212–247 W in December on groups 9 and 10, far worse than guessing 0 W (41–67 W). The machines run when the plant is busy, so the other load follows them. A real plant must meter the machines' feeder apart. [How the total is made.](docs/notes.md#how-the-total-is-made)
-* **It needs to know when each machine is on.** Here the states come from each machine's own meter. A control system's would lag and glitch, and the methods cope with small errors there. With the per-phase readings, states 10 s late: 2.4 W instead of 2.1 W. 60 s late: 3.8 W. 1% of the one-second on/off readings flipped: 4.5 W. Still better than the total alone with exact states (6.2 W), and far ahead of the simple split given the same states (17.7 and 19.2 W). [How.](docs/notes.md#why-the-states-must-be-given)
+* **The total must hold only the machines' power.** Meter the machines' feeder on its own. HIPE's main meter is 96% other load, and there it does worse than guessing 0 W. [Why.](docs/notes.md#how-the-total-is-made)
+* **It needs each machine's on/off state,** e.g. from the plant's control system. Small delays and glitches cost little. [How much.](docs/notes.md#why-the-states-must-be-given)
 * **Machines that always run together can't be told apart.**
-* **What's left is missing information, not a weak method.** On HIPE, the per-phase readings cut the error from 6.2 W to 2.1 W. A heating flag for each oven, taken from the oven's own meter (a best case), cut it to 3.4 W. How much a real plant gains depends on its machines: ovens on the same phases, with the same reactive power, would gain nothing. [How.](docs/notes.md#more-than-on-and-off-a-heating-flag)
-
-## More
-
-* [docs/methods.md](docs/methods.md): how each method works, in plain words, with one example.
-* [docs/notes.md](docs/notes.md): every number, option and design choice, with a table to jump to what you need.
 
 ## License
 
-[CC BY-NC-SA 4.0](LICENSE), © 2023 [Daniel Torres](https://github.com/danctorres). The datasets keep their own terms.
+[CC BY-NC-SA 4.0](LICENSE), © 2023 [Daniel Torres](https://github.com/danctorres). The datasets keep their own terms. The figures use HIPE data by KIT, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), processed.
