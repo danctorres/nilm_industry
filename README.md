@@ -95,4 +95,4 @@ On a second dataset, [IMDELD](https://ieee-dataport.org/open-access/industrial-m
 
 ## License
 
-[CC BY-NC-SA 4.0](LICENSE), © 2023 [Daniel Torres](https://github.com/danctorres). The datasets keep their own terms. The figures use HIPE data by KIT, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), processed.
+[MIT](LICENSE), © 2023 [Daniel Torres](https://github.com/danctorres). The datasets keep their own terms. The figures use HIPE data by KIT, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), processed.
